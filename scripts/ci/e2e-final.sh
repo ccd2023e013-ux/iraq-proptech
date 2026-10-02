@@ -165,10 +165,12 @@ api admin POST "/properties/$ID2/moderate" '{"decision":"REJECT","reason_code":"
 code=$(curl -s -o /dev/null -w '%{http_code}' "$WEB/api/v1/properties/$ID2")
 [ "$code" = "404" ] || fail "rejected listing is public ($code)"
 
-echo "12. MockAI analysis (price analysis + summary, labelled mock)"
+echo "12. MockAI analysis (statistical price analysis + mock-generated summary)"
+# Price analysis is deterministic statistics (provider "platform", no LLM);
+# generated text comes from the configured LLM provider: "mock" here.
 price=$(api customer GET "/ai/properties/$ID/price-analysis")
-[ "$(jq -r .provider <<<"$price")" = "mock" ] || fail "AI provider: $price"
-jq -e '.methodology | length > 0' <<<"$price" >/dev/null || fail "AI methodology missing"
+jq -e '.provider == "platform" and (.methodology | length > 0) and (.limitations | type == "array")' <<<"$price" >/dev/null \
+  || fail "price analysis: $price"
 api customer GET "/ai/properties/$ID/summary" | jq -e '.provider == "mock" and (.result | length > 0)' >/dev/null \
   || fail "AI summary"
 
