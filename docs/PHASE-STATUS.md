@@ -8,8 +8,8 @@ smoke tests) is green on `main`.
 | --- | --- | --- | --- |
 | 1 Foundation | ✅ Complete | `c989590` | [36955865842](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/36955865842) |
 | 2 Authentication + RBAC | ✅ Complete | `ec0c09d` | [36959025895](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/36959025895) |
-| 3 Real estate core | ⏳ In progress | | |
-| 4 Search + discovery | Not started | | |
+| 3 Real estate core | ✅ Complete | `ee0b8c8` | [36960780682](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/36960780682) |
+| 4 Search + discovery | ⏳ In progress | | |
 | 5 GIS + maps | Not started | | |
 | 6 CRM + leads | Not started | | |
 | 7 AI | Not started | | |
@@ -19,6 +19,48 @@ smoke tests) is green on `main`.
 | 11 Temporary cloud deployment | Not started | | |
 | 12 Local PC migration | Not started | | |
 | Final audit + E2E | Not started | | |
+
+---
+
+## Phase 3 — Real estate core
+
+**Implemented**
+- Iraqi location hierarchy: 19 governorates, capitals and major cities
+  (approximate centroids, `geometry_source` recorded), districts and
+  neighborhoods with optional PostGIS boundaries.
+- Property types and amenities catalogs (Arabic/English), agencies with
+  members (owner/agent) and invitations, verification flag.
+- Properties: purposes (sale, rent, lease, rahn, musataha, exchange), IQD/USD
+  in original currency (no conversion), rent period, area/land area, rooms,
+  condition, furnishing, declared ownership document, contact consent,
+  location privacy (EXACT / APPROXIMATE / HIDDEN — public coordinates are
+  coarsened server-side), reference codes `{GOV}-{seq}`, demo flag, status
+  machine (DRAFT → PENDING_REVIEW → APPROVED/REJECTED, SUSPENDED, ARCHIVED,
+  SOLD/RENTED), status and price history, verifications.
+- Media: images (magic-byte sniffing, WebP re-encode, EXIF stripped,
+  thumbnails, perceptual hash for duplicate detection), documents (private),
+  videos; ordering/cover; storage abstraction (local disk or any
+  S3-compatible bucket).
+- Policies module for object-level authorization; presenter with batch
+  loading (no N+1).
+- Web: listing form (create/edit), media and document manager, listing
+  actions per status, "my listings", agency panels.
+
+**Tests**: 145 backend tests (90% coverage) incl. IDOR attempts, status
+transitions, privacy coarsening, upload attacks (polyglots, wrong types,
+oversize), reference codes, a fresh-process mapper test and a CLI subprocess
+test; frontend tests for listing form/actions; Docker smoke test creates a
+listing, uploads an image through the proxy, moderates and views it publicly.
+
+**Errors found and fixed**
+- The CLI (`create-superadmin`) created a session without importing the
+  model registry (same class of bug as Phase 2) — `get_sessionmaker()` now
+  imports the registry itself; covered by a subprocess test.
+- An unused `type: ignore` flagged by mypy.
+
+**Known limitations**: governorate/city boundaries are not shipped (no
+openly-licensed, verified dataset bundled); only centroids, marked
+approximate. Video files are stored as uploaded (no transcoding).
 
 ---
 

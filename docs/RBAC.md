@@ -31,12 +31,20 @@ A user may hold several roles; permissions are the union.
 
 | Permission | CUSTOMER | PROPERTY_OWNER / AGENT | AGENCY_OWNER | MODERATOR | ADMIN | SUPER_ADMIN |
 | --- | :-: | :-: | :-: | :-: | :-: | :-: |
-| `inquiries.create`, `favorites.manage`, `saved_searches.manage`, `reports.create`, `ai.use` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `inquiries.create`, `favorites.manage`, `saved_searches.manage`, `reports.create`, `ai.use`, `agencies.create`¹ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `properties.create`, `leads.read_own`, `leads.manage`, `ai.author`, `analytics.own` | | ✓ | ✓ | | ✓ | ✓ |
-| `agencies.create`, `leads.read_agency`, `analytics.agency` | | | ✓ | | ✓ | ✓ |
+| `leads.read_agency`, `analytics.agency` | | | ✓ | | ✓ | ✓ |
 | `users.read`, `properties.moderate`, `properties.verify`, `properties.read_private`, `agencies.verify`, `reports.review`, `audit.read` | | | | ✓ | ✓ | ✓ |
 | `users.suspend`, `roles.assign`, `properties.manage_any`, `agencies.manage_any`, `leads.read_any`, `leads.configure`, `ai.admin`, `analytics.all`, `automation.manage` | | | | | ✓ | ✓ |
 | `settings.manage` | | | | | | ✓ |
+
+¹ Any account may *apply* to open an agency. The creator becomes
+`AGENCY_OWNER` of an **unverified** agency; verification (`agencies.verify`)
+is required before the agency badge is shown.
+
+Object-level rules (who may edit/publish a listing, manage agency members,
+see private data) live in `backend/app/policies.py` and are tested in
+`tests/test_properties.py` and `tests/test_agencies.py`.
 
 ## Hierarchy (privilege-escalation protection)
 
