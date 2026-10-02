@@ -4,21 +4,62 @@ GitHub Actions is the verification authority: a phase is complete only when
 the full CI workflow (backend on PostGIS, frontend build/tests, Docker stack
 smoke tests) is green on `main`.
 
-| Phase | Status | Verified commit | CI run |
-| --- | --- | --- | --- |
-| 1 Foundation | ✅ Complete | `c989590` | [36955865842](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/36955865842) |
-| 2 Authentication + RBAC | ✅ Complete | `ec0c09d` | [36959025895](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/36959025895) |
-| 3 Real estate core | ✅ Complete | `ee0b8c8` | [36960780682](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/36960780682) |
-| 4 Search + discovery | ✅ Complete | `ef5a719` | [36961539892](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/36961539892) |
-| 5 GIS + maps | ⏳ In progress | | |
-| 6 CRM + leads | Not started | | |
-| 7 AI | Not started | | |
-| 8 Admin + moderation | Not started | | |
-| 9 Automation + notifications | Not started | | |
-| 10 Analytics | Not started | | |
-| 11 Temporary cloud deployment | Not started | | |
-| 12 Local PC migration | Not started | | |
-| Final audit + E2E | Not started | | |
+Phase numbers follow this repository's history. The master directive's
+roadmap maps as shown in the last column.
+
+| Phase | Status | Verified commit | CI run | Directive phase |
+| --- | --- | --- | --- | --- |
+| 1 Foundation | ✅ Complete | `c989590` | [36955865842](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/36955865842) | 1 |
+| 2 Authentication + RBAC | ✅ Complete | `ec0c09d` | [36959025895](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/36959025895) | 2 |
+| 3 Real estate core | ✅ Complete | `ee0b8c8` | [36960780682](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/36960780682) | 3 |
+| 4 Search + discovery | ✅ Complete | `ef5a719` | [36961539892](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/36961539892) | 3 |
+| 5 GIS + maps | ✅ Complete | `3fc684f` | [36962496975](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/36962496975) | 4 |
+| 5b Marketplace/GIS gap-fill (saved searches, comparison, POIs/nearby, exchange rates) | ⏳ Next | | | 3, 4 |
+| 6 CRM + leads | ⏳ In progress (WIP not pushed) | | | 5 |
+| 7 AI | Not started | | | 6 |
+| 8 Admin + moderation | Not started | | | 7 |
+| 9 Automation + notifications | Not started | | | 8 |
+| 10 Analytics | Not started | | | 9 |
+| 10b Monetization (demo payments) | Not started | | | 10 |
+| 11 Temporary cloud deployment | Not started | | | 11 |
+| 12 Local PC migration | Not started | | | 12 |
+| Final audit + E2E | Not started | | | — |
+
+---
+
+## Phase 5 — GIS + maps
+
+**Implemented**
+- `GET /map/properties`: GeoJSON for any search filters + viewport; points
+  with popup data or, above 1,500 matches, server-side clusters
+  (`ST_SnapToGrid`) sized by zoom. Public display points only.
+- Boundaries as GeoJSON, children boundaries (simplified), point → place
+  resolution (boundary, else nearest city centroid ≤ 40 km flagged
+  approximate, else none; outside Iraq → 422).
+- Admin API (`locations.manage`) to create cities/districts/neighborhoods and
+  set/clear validated, repaired polygons; audited.
+- DEMO seed CLI: Basra districts with clearly labelled placeholder squares
+  and demo listings (idempotent, reset command, refused in production).
+- Map provider abstraction (OpenFreeMap default, OSM raster, custom style
+  URL for self-hosting), read at runtime.
+- `/map` page: URL-synced list + map, clustering, polygon drawing,
+  hover/click sync, boundary source disclosure; location picker with
+  suggested (never auto-applied) area in the listing form.
+- CI: lockfile reconciliation when a dependency is added; GIS smoke test.
+
+**Tests**: 25 GIS tests (privacy, filters, clustering, Iraqi coordinates —
+Basra, Baghdad, Erbil, Mosul; Kuwait-inside-bbox and Tehran negatives,
+boundary validation and repair, permissions, audit, demo seed); frontend
+tests for provider config and geo helpers; Docker GIS smoke test.
+
+**Errors found and fixed**: GeoJSON types not resolvable as a global
+namespace (explicit imports); a WKT element passed to a generic SQL function
+could not be bound (built in SQL instead); a test assumption that the nearest
+city to the Corniche is Basra (Shatt Al-Arab's centroid is nearer).
+
+**Known limitations**: no official boundary dataset bundled; demo squares
+are placeholders. Basemap tiles come from a free public service in
+development; self-host for production.
 
 ---
 
