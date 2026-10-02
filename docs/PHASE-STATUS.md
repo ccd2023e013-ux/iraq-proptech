@@ -21,9 +21,54 @@ roadmap maps as shown in the last column.
 | 9 Automation + notifications | ✅ Complete | `43a7842` | [37021328715](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37021328715) | 8 |
 | 10 Analytics | ✅ Complete | `c4a6688` | [37057349521](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37057349521) | 9 |
 | 10b Monetization (demo payments) | ✅ Complete | `c4a6688` | [37057349521](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37057349521) | 10 |
-| 11 Temporary cloud deployment | ⏳ In progress | | | 11 |
-| 12 Local PC migration | Not started | | | 12 |
-| Final audit + E2E | Not started | | | — |
+| 11 Temporary cloud deployment (prepared; accounts required to go live) | ✅ Complete | `f1ad8f4` | [37063110216](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37063110216) | 11 |
+| 12 Local PC migration (rehearsed in CI) | ✅ Complete | `f1ad8f4` | [37063110216](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37063110216) | 12 |
+| Final security audit + 16-step E2E | ✅ Complete | `f1ad8f4` | [37063110216](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37063110216) | — |
+
+---
+
+## Phases 11–12 and the final audit (green at `f1ad8f4`, run [37063110216](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37063110216))
+
+CI at this commit: backend 287 tests on PostGIS (91 % coverage), frontend 78
+tests + build, Docker stack smoke (auth, listing, map) **plus the 16-step
+acceptance scenario**, and the **production overlay rehearsal**.
+
+**Phase 11 — temporary cloud deployment (prepared, not live).** Render
+blueprint (`render.yaml`, free plan), Supabase guide (session pooler, private
+storage bucket, transaction-pooler support), Cloudflare decision record.
+Configuration preflight that stops the API on unsafe production settings;
+proxy-aware client IPs (`TRUSTED_PROXY_HOPS`); worker-less operation (inline
+notifications + token-protected jobs trigger called by a GitHub cron);
+S3-compatible media storage tested against an in-process S3; deploy smoke
+test. Going live REQUIRES the owner's Render and Supabase accounts.
+
+**Phase 12 — production PC.** Production Compose overlay (API on 127.0.0.1,
+persistent media volume), backup/restore and cloud→PC export/import scripts,
+verification script, runbook with cut-over and rollback
+([MIGRATE-TO-LOCAL-PC.md](MIGRATE-TO-LOCAL-PC.md)). CI rehearses it on every
+push: production start + preflight + smoke, backup → destroy → restore, and a
+data-only migration from a separate PostGIS server.
+
+**Final audit** ([SECURITY.md](SECURITY.md)): no critical findings; fixed the
+high (shared client IP behind proxies) and medium (missing web CSP,
+unchecked production configuration) findings; low: proxy path hardening,
+36 unindexed foreign keys indexed (migration `0013`, enforced by a new
+schema test). One low race (duplicate open lead under concurrent inquiries)
+is documented and accepted.
+
+**Final E2E** (`scripts/ci/e2e-final.sh`, through the public web origin):
+setup of admin, verified agency, invited agent and an approved agency
+listing, then 1 register customer → 2 mock email verification → 3 login →
+4 search → 5 open property → 6 favorite → 7 inquiry → 8 agent receives lead
+→ 9 agent updates lead → 10 agency owner views lead → 11 admin rejects a
+second listing → 12 statistical price analysis + mock-AI summary →
+13 natural-language search (mock) → 14 map search → 15 notifications →
+16 audit events. All 16 pass.
+
+Errors found and fixed: `pg_restore` without a target database;
+`pg_restore` 17 emitting a setting PostgreSQL 16 does not know; E2E
+assumptions about response fields (agency ownership is under `lister`,
+price analysis is statistics, not LLM output).
 
 ---
 

@@ -2,6 +2,31 @@
 
 All notable changes, newest first. Each entry lists the CI-verified commit.
 
+## Final audit + acceptance scenario (`f1ad8f4`)
+Security audit (see docs/SECURITY.md): web CSP, proxy path hardening, all
+foreign keys indexed (migration 0013) with a schema test; 16-step E2E
+acceptance scenario in CI.
+
+## Phase 12 — Production PC migration (`f1ad8f4`)
+Production overlay, backup/restore, cloud→PC data-only export/import,
+verification and deploy smoke scripts; full runbook rehearsed in CI.
+
+## Phase 11 — Temporary cloud deployment (`f1ad8f4`)
+Render blueprint, Supabase and Cloudflare guides, preflight checks,
+`TRUSTED_PROXY_HOPS`, jobs trigger + scheduled workflow, S3 storage,
+transaction-pooler support.
+
+## Phase 10b — Monetization (`c4a6688`)
+Payment-provider abstraction, DEMO payment mode, plans, promotions,
+subscriptions, refunds.
+
+## Phase 10 — Analytics (`c4a6688`)
+Privacy-conscious listing views, search statistics, scoped dashboards.
+
+## Phase 9 — Notifications + automation (`43a7842`)
+In-app/email/SMS/push notifications with preferences, outbox, signed
+webhooks with SSRF guard, scheduled jobs.
+
 ## Phase 8 — Admin + moderation (`088419e`)
 Listing/user reports, moderation reason codes, review queues, admin console
 (overview, moderation, reports, verification, users, audit, AI usage,

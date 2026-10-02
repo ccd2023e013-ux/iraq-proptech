@@ -7,26 +7,19 @@ Read this first when resuming work in a new session.
   Job logs cannot be downloaded from the development environment; failures
   are republished as check-run annotations by `scripts/ci/annotate.sh`
   (`gh api repos/<repo>/check-runs/<id>/annotations`).
-- **Last green commit**: `c4a6688` (Phases 1–10b CI verified).
+- **Last green commit**: `f1ad8f4` — CI run [37063110216](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37063110216).
 
 ## Completed
 
-See [PHASE-STATUS.md](PHASE-STATUS.md): Foundation through Monetization (10b).
+All phases (1–12), the final security audit and the 16-step E2E scenario —
+see [PHASE-STATUS.md](PHASE-STATUS.md). The build directive is finished.
 
-## In progress
+## Next actions
 
-Phases 11/12 — cloud deployment (Render blueprint, Supabase docs, preflight,
-jobs trigger, proxy-aware client IP, S3 storage) and local PC migration
-(backup/restore/export/import scripts, production overlay rehearsal CI job).
-Pushed in one commit; waiting for CI.
-
-## Next actions (in order)
-
-1. Get the `production` CI job green; record Phase 11/12 checkpoints.
-2. Final security audit (fix critical/high); SECURITY.md, DATA_MODEL.md;
-   README/ARCHITECTURE/ROADMAP/CHANGELOG refresh.
-3. Automated 16-step E2E scenario in CI.
-4. Final report.
+None required by the directive. Owner actions to go live are listed in
+[RENDER.md](RENDER.md), [SUPABASE.md](SUPABASE.md) and
+[MIGRATE-TO-LOCAL-PC.md](MIGRATE-TO-LOCAL-PC.md); future work in
+[ROADMAP.md](ROADMAP.md).
 
 ## Local tooling notes
 
