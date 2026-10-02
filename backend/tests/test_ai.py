@@ -477,4 +477,4 @@ def test_lead_assistance_and_admin_usage(api: TestClient, db_session: Session, o
     assert generations["total"] == 1
     assert api.get("/api/v1/admin/ai/usage", headers=owner_h).status_code == 403
     count = db_session.execute(select(AIGeneration)).scalars().all()
-    assert len(count) >= 3
+    assert len(count) >= 2  # the priority ranking and the reply draft

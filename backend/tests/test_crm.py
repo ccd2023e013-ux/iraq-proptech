@@ -4,6 +4,7 @@ appointments, customers, conversations, dashboard, events."""
 from __future__ import annotations
 
 import uuid
+from collections import Counter
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -615,10 +616,9 @@ def test_lead_list_uses_constant_queries(api: TestClient, db_session: Session, w
     def shape(sql: str) -> str:
         return " ".join(sql.split())[:48]
 
-    assert n_large == n_small, {
-        "small": [shape(q) for q in small_sql],
-        "large": [shape(q) for q in statements],
-    }  # no N+1
+    small_c = Counter(shape(q) for q in small_sql)
+    large_c = Counter(shape(q) for q in statements)
+    assert n_large == n_small, (dict(large_c - small_c), dict(small_c - large_c))  # no N+1
 
 
 def test_failing_event_handler_does_not_break_inquiry(
