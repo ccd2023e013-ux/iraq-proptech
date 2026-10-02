@@ -14,7 +14,7 @@ from app.crm.models import (
     LeadSource,
     Priority,
 )
-from app.users.validation import normalize_phone
+from app.users.validation import normalize_iraqi_phone
 
 Currency = Literal["IQD", "USD"]
 
@@ -22,7 +22,7 @@ Currency = Literal["IQD", "USD"]
 def _phone(value: str | None) -> str | None:
     if value is None or not value.strip():
         return None
-    return normalize_phone(value)
+    return normalize_iraqi_phone(value)
 
 
 # --------------------------------------------------------------------------- inquiries

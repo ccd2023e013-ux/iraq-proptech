@@ -155,7 +155,7 @@ def get_latest(
 
 @router.get("/exchange-rates/convert", response_model=Conversion)
 def get_conversion(
-    amount: Decimal = Query(ge=0, le=Decimal("1e15")),
+    amount: Decimal = Query(ge=0, le=1e15),
     from_: Currency = Query(alias="from"),
     to: Currency = Query(),
     db: Session = Depends(get_db),
