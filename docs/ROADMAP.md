@@ -2,18 +2,31 @@
 
 | # | Phase | Status |
 | --- | --- | --- |
-| 1 | Foundation | Done — see PHASE-STATUS.md |
-| 2 | Authentication + RBAC | Done — see PHASE-STATUS.md |
-| 3 | Properties | Not started |
-| 4 | Search | Not started |
-| 5 | GIS / Maps | Not started |
-| 6 | CRM / Leads | Not started |
-| 7 | AI | Not started |
-| 8 | Admin / Moderation | Not started |
-| 9 | Notifications / Automation | Not started |
-| 10 | Analytics | Not started |
-| 11 | Temporary cloud deployment | Not started |
-| 12 | Production migration documentation | Not started |
+| 1 | Foundation | Done |
+| 2 | Authentication + RBAC | Done |
+| 3 | Properties (real estate core) | Done |
+| 4 | Search + discovery (incl. saved searches, comparison) | Done |
+| 5 | GIS / Maps (incl. POIs, nearby) | Done |
+| 6 | CRM / Leads | Done |
+| 7 | AI (mock default) | Done |
+| 8 | Admin / Moderation | Done |
+| 9 | Notifications / Automation | Done |
+| 10 | Analytics; 10b Monetization (DEMO payments) | Done |
+| 11 | Temporary cloud deployment (prepared: Render blueprint, Supabase guide) | Done — accounts required to go live |
+| 12 | Production PC migration (rehearsed in CI) | Done |
+| — | Final security audit + 16-step E2E | Done |
+
+## Future (not started)
+
+| Item | Needs |
+| --- | --- |
+| Real payment gateway adapter (ZainCash, FIB, Qi Card…) | Merchant account and API credentials; legal review |
+| Real SMS gateway / OTP phone verification | Gateway contract (HTTP adapter exists) |
+| Official administrative boundaries for all governorates | Licensed or open data source (current boundaries are DEMO) |
+| Self-hosted vector tiles (PMTiles) on the PC | Disk space; tile extract for Iraq |
+| Mobile apps (push already via Web Push) | — |
+| Nonce-based CSP, dependency audit in CI | — |
+| Local GPU AI provider | PC hardware |
 
 A phase is only marked done after CI is green on `main`. Current checkpoints: [PHASE-STATUS.md](PHASE-STATUS.md).
 

@@ -24,6 +24,13 @@ Browser ──► Next.js (3000) ──/api/v1/* proxy──► FastAPI (8000) �
                                                                (n8n ◄─► webhooks, optional)
 ```
 
+Deployment variants of the same images (see [DEPLOYMENT.md](DEPLOYMENT.md)):
+
+| Variant | Differences |
+| --- | --- |
+| Compose (dev, production PC) | as drawn; production overlay binds the API to 127.0.0.1, one TLS proxy/tunnel in front of :3000 |
+| Render + Supabase (temporary) | no Redis/worker: notifications delivered inline after commit, scheduled jobs via a token-protected endpoint called by a GitHub cron; media in an S3 bucket |
+
 The browser calls the frontend's own origin; `app/api/[...path]/route.ts`
 forwards `/api/v1/*` to `API_INTERNAL_URL` at runtime. This removes CORS from
 the default setup and works behind Codespaces port forwarding. Setting
@@ -35,10 +42,18 @@ the default setup and works behind Codespaces port forwarding. Setting
 app/
   main.py            app factory: middleware, error handlers, routers
   api.py             /api/v1 router aggregation
-  core/              settings, JSON logging, error envelope, middleware
+  cli.py             operator CLI: create-superadmin, seed-demo, preflight, run-jobs, storage-export/import
+  policies.py        object-level authorization rules
+  storage.py         media storage (local filesystem | S3-compatible)
+  core/              settings, JSON logging, errors, middleware, rate limits, client IP, preflight
   db/                declarative base + mixins, engine/session, model registry
-  system/            health/readiness, system_settings
-  workers/           Celery app and tasks
+  auth/ users/ rbac/ audit/          identity, sessions, roles, audit log
+  agencies/ properties/ geo/ map/    listings, media, locations, PostGIS
+  search/ favorites.py money.py      search, saved searches, exchange rates
+  crm/ notifications/ moderation/    leads, messaging, notifications/webhooks, reports
+  ai/ analytics/ billing/            AI providers, aggregates, plans/payments (DEMO)
+  system/            health/readiness, settings, dev outbox, internal jobs trigger
+  workers/           Celery app, beat schedule, job registry
 alembic/             migrations (plain PostgreSQL/PostGIS DDL)
 tests/               pytest — db tests run against real PostGIS
 ```
@@ -53,8 +68,12 @@ tests/               pytest — db tests run against real PostGIS
   generated, and echoed on every response.
 - **Database:** UUID primary keys (`gen_random_uuid()` server default), tz-aware
   timestamps, deterministic constraint names, soft delete where history matters.
-- **Migrations:** a test fails if models and migrations drift apart, and every
-  migration must downgrade cleanly.
+- **Migrations:** a test fails if models and migrations drift apart, if a
+  foreign key lacks an index, or if a migration does not downgrade cleanly.
+- **Domain events:** services emit events (`app/events.py`); handlers run in
+  the caller's transaction inside a savepoint (a failing handler never breaks
+  the operation), and external side effects (email, SMS, webhooks) go through
+  an outbox delivered after commit.
 
 ## Frontend layout
 

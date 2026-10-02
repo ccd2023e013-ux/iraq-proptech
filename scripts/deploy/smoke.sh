@@ -29,6 +29,7 @@ grep -q 'dir="rtl"' <<<"$page" || fail "home page is not RTL"
 get -f "$WEB/api/v1/health" | jq -e '.status == "ok"' >/dev/null || fail "frontend proxy"
 headers=$(get -sSI "$WEB/")
 grep -qi '^x-frame-options: DENY' <<<"$headers" || fail "frontend X-Frame-Options"
+grep -qi "^content-security-policy: .*frame-ancestors 'none'" <<<"$headers" || fail "frontend Content-Security-Policy"
 grep -qi '^x-content-type-options: nosniff' <<<"$headers" || fail "frontend nosniff"
 
 echo "5. search and map endpoints answer"

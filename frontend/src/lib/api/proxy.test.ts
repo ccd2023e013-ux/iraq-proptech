@@ -50,5 +50,16 @@ describe("API proxy helpers", () => {
     );
     expect(buildUpstreamUrl("http://backend:8000", "/api/internal", "")).toBeNull();
     expect(buildUpstreamUrl("http://backend:8000", "/api/v10/x", "")).toBeNull();
+    for (const p of [
+      "/api/v1/..%2F..%2Fdocs",
+      "/api/v1/%2e%2e/docs",
+      "/api/v1/../docs",
+      "/api/v1/a/./b",
+      "/api/v1/a%5c..%5cb",
+      "/api/v1/a\\b",
+    ]) {
+      expect(buildUpstreamUrl("http://backend:8000", p, "")).toBeNull();
+    }
+    expect(buildUpstreamUrl("http://backend:8000", "/api/v1/media/abc.v2", "")).not.toBeNull();
   });
 });

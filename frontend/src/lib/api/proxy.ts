@@ -45,8 +45,13 @@ export function filterResponseHeaders(source: Headers): Headers {
   return out;
 }
 
+// Encoded slashes/backslashes/dots and dot segments could step outside /api/v1
+// on a server that decodes before routing; no legitimate API path uses them.
+const UNSAFE_PATH = /%2f|%5c|%2e|\\|(^|\/)\.\.?(\/|$)/i;
+
 /** Only the versioned API is proxied; anything else is rejected. */
 export function buildUpstreamUrl(base: string, pathname: string, search: string): string | null {
   if (!pathname.startsWith("/api/v1/") && pathname !== "/api/v1") return null;
+  if (UNSAFE_PATH.test(pathname)) return null;
   return `${base}${pathname}${search}`;
 }

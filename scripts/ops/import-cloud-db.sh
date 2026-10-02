@@ -23,7 +23,7 @@ psql_local -Atc "SELECT string_agg(format('%I.%I', schemaname, tablename), ', ')
   AND tablename NOT IN ('alembic_version','spatial_ref_sys')" > /tmp/tables.txt
 psql_local -c "TRUNCATE $(cat /tmp/tables.txt) RESTART IDENTITY CASCADE"
 echo "Loading data…"
-PG_NET_MOUNT="$(cd "$IN" && pwd)" pg_net pg_restore --data-only --disable-triggers \
+PG_NET_MOUNT="$(cd "$IN" && pwd)" pg_net pg_restore --dbname "${POSTGRES_DB:-proptech}" --data-only --disable-triggers \
   --single-transaction --exit-on-error /in/data.dump
 if [ "${3:-}" != "--no-start" ]; then compose up -d; fi
 echo "Imported. Next: scripts/ops/verify.sh, then copy media (docs/MIGRATE-TO-LOCAL-PC.md)."

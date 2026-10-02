@@ -134,6 +134,8 @@ jobs:
         run: $ANNOTATE "listing smoke" bash scripts/ci/smoke-listing.sh
       - name: GIS end-to-end (demo seed, map GeoJSON, resolve, map page)
         run: $ANNOTATE "map smoke" bash scripts/ci/smoke-map.sh
+      - name: Final acceptance scenario (16 steps, agency/agent/customer/admin, mock AI)
+        run: $ANNOTATE "e2e final" bash scripts/ci/e2e-final.sh
       - name: Worker executes a task via Redis
         run: >
           docker compose exec -T backend python -c
