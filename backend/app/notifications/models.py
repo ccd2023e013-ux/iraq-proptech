@@ -116,7 +116,7 @@ class NotificationDelivery(UUIDPrimaryKeyMixin, Base):
         index=True,
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
     channel: Mapped[str] = mapped_column(String(8), nullable=False)
     subject: Mapped[str | None] = mapped_column(String(200))
@@ -163,7 +163,7 @@ class WebhookEndpoint(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     events: Mapped[list[str]] = mapped_column(JSONB, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_by_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), index=True
     )
     consecutive_failures: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     last_status: Mapped[int | None] = mapped_column(Integer)

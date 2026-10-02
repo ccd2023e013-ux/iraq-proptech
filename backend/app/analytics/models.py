@@ -37,7 +37,10 @@ class PropertyViewVisitor(Base):
 
     day: Mapped[date] = mapped_column(Date, primary_key=True)
     property_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("properties.id", ondelete="CASCADE"), primary_key=True
+        UUID(as_uuid=True),
+        ForeignKey("properties.id", ondelete="CASCADE"),
+        primary_key=True,
+        index=True,
     )
     visitor_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
 

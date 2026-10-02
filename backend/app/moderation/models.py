@@ -68,11 +68,11 @@ class Report(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     status: Mapped[str] = mapped_column(String(10), nullable=False, default=ReportStatus.OPEN)
     assigned_to_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), index=True
     )
     resolution_note: Mapped[str | None] = mapped_column(Text)
     resolved_by_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), index=True
     )
     resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 

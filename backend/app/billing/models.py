@@ -97,10 +97,13 @@ class Payment(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="RESTRICT"), nullable=False, index=True
     )
     plan_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("billing_plans.id", ondelete="RESTRICT"), nullable=False
+        UUID(as_uuid=True),
+        ForeignKey("billing_plans.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
     )
     property_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("properties.id", ondelete="SET NULL")
+        UUID(as_uuid=True), ForeignKey("properties.id", ondelete="SET NULL"), index=True
     )
     amount: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False)
     currency: Mapped[str] = mapped_column(String(3), nullable=False)
@@ -131,7 +134,10 @@ class Subscription(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
     plan_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("billing_plans.id", ondelete="RESTRICT"), nullable=False
+        UUID(as_uuid=True),
+        ForeignKey("billing_plans.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
     )
     status: Mapped[str] = mapped_column(String(10), nullable=False)
     current_period_start: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
@@ -139,7 +145,7 @@ class Subscription(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     cancel_at_period_end: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     credits_remaining: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     last_payment_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("billing_payments.id", ondelete="SET NULL")
+        UUID(as_uuid=True), ForeignKey("billing_payments.id", ondelete="SET NULL"), index=True
     )
     is_demo: Mapped[bool] = mapped_column(Boolean, nullable=False)
 
@@ -160,13 +166,13 @@ class Promotion(UUIDPrimaryKeyMixin, Base):
     starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     ends_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     payment_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("billing_payments.id", ondelete="SET NULL")
+        UUID(as_uuid=True), ForeignKey("billing_payments.id", ondelete="SET NULL"), index=True
     )
     subscription_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("billing_subscriptions.id", ondelete="SET NULL")
+        UUID(as_uuid=True), ForeignKey("billing_subscriptions.id", ondelete="SET NULL"), index=True
     )
     created_by_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), index=True
     )
     canceled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     is_demo: Mapped[bool] = mapped_column(Boolean, nullable=False)

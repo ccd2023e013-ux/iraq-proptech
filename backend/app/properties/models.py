@@ -162,7 +162,10 @@ class Property(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
     description_en: Mapped[str | None] = mapped_column(Text)
 
     property_type_code: Mapped[str] = mapped_column(
-        String(32), ForeignKey("property_types.code", ondelete="RESTRICT"), nullable=False
+        String(32),
+        ForeignKey("property_types.code", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
     )
     purpose: Mapped[str] = mapped_column(String(16), nullable=False)
     rent_period: Mapped[str | None] = mapped_column(String(10))
@@ -186,7 +189,10 @@ class Property(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
 
     # Location
     governorate_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("governorates.id", ondelete="RESTRICT"), nullable=False
+        UUID(as_uuid=True),
+        ForeignKey("governorates.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
     )
     city_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("cities.id", ondelete="RESTRICT"), nullable=False
@@ -293,7 +299,7 @@ class PropertyMedia(UUIDPrimaryKeyMixin, Base):
     perceptual_hash: Mapped[int | None] = mapped_column(BigInteger)
     moderation: Mapped[str] = mapped_column(String(10), nullable=False, default="APPROVED")
     uploaded_by_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), index=True
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
@@ -322,7 +328,7 @@ class PropertyDocument(UUIDPrimaryKeyMixin, Base):
     size_bytes: Mapped[int] = mapped_column(BigInteger, nullable=False)
     sha256: Mapped[str] = mapped_column(String(64), nullable=False)
     uploaded_by_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), index=True
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
@@ -344,7 +350,7 @@ class PropertyPriceHistory(UUIDPrimaryKeyMixin, Base):
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
     changed_by_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), index=True
     )
 
 
@@ -363,7 +369,7 @@ class PropertyStatusHistory(UUIDPrimaryKeyMixin, Base):
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
     changed_by_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), index=True
     )
 
 
@@ -386,10 +392,10 @@ class PropertyVerification(UUIDPrimaryKeyMixin, Base):
     result: Mapped[str] = mapped_column(String(8), nullable=False)
     note: Mapped[str | None] = mapped_column(Text)
     document_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("property_documents.id", ondelete="SET NULL")
+        UUID(as_uuid=True), ForeignKey("property_documents.id", ondelete="SET NULL"), index=True
     )
     verified_by_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), index=True
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

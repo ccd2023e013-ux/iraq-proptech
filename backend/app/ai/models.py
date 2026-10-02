@@ -36,7 +36,7 @@ class AIGeneration(UUIDPrimaryKeyMixin, Base):
         UUID(as_uuid=True), ForeignKey("properties.id", ondelete="SET NULL"), index=True
     )
     lead_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("crm_leads.id", ondelete="SET NULL")
+        UUID(as_uuid=True), ForeignKey("crm_leads.id", ondelete="SET NULL"), index=True
     )
     input_summary: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     output: Mapped[dict[str, Any] | None] = mapped_column(JSONB)

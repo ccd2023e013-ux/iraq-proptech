@@ -71,7 +71,7 @@ class UserRole(Base):
         String(32), ForeignKey("roles.code", ondelete="RESTRICT"), primary_key=True, index=True
     )
     granted_by_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), index=True
     )
     granted_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
