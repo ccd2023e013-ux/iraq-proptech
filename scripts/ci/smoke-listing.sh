@@ -2,7 +2,8 @@
 # Listing end-to-end smoke test against the running Docker stack, through the
 # frontend origin: owner creates a listing, uploads a photo (multipart through
 # the Next.js proxy), submits; an administrator approves; an anonymous visitor
-# sees it with an approximate location and can load the thumbnail.
+# sees it with an approximate location and can load the thumbnail; search,
+# favorites and the public pages find it.
 set -euo pipefail
 
 WEB="${WEB_URL:-http://localhost:3000}"
@@ -88,5 +89,22 @@ ctype=$(curl -fsS -o /dev/null -w '%{content_type}' "$WEB$THUMB")
 
 echo "8. listing page renders server-side for the owner"
 curl -fsS -b "$OWNER_JAR" "$WEB/dashboard/properties" | grep -q "بيت تجريبي في العشار" || fail "dashboard list"
+
+echo "9. search: Arabic keyword with spelling variants + price filter finds it"
+# 'تجريبى' (alef maqsura) must match 'تجريبي' via normalize_ar.
+q=$(py "import urllib.parse;print(urllib.parse.quote('بيت تجريبى'))")
+found=$(curl -fsS "$WEB/api/v1/search/properties?q=$q&currency=IQD&min_price=100000000&max_price=300000000&city_id=$CITY")
+jq -e --arg id "$ID" '[.items[].id] | index($id) != null' <<<"$found" >/dev/null || fail "keyword search: $found"
+none=$(curl -fsS "$WEB/api/v1/search/properties?q=$q&currency=USD&min_price=1")
+jq -e --arg id "$ID" '[.items[].id] | index($id) == null' <<<"$none" >/dev/null || fail "currency filter converted prices"
+
+echo "10. favorite it and see it in /me/favorites"
+curl -fsS -b "$OWNER_JAR" -X PUT "$WEB/api/v1/properties/$ID/favorite" -H "X-CSRF-Token: $(csrf "$OWNER_JAR")" >/dev/null
+curl -fsS -b "$OWNER_JAR" "$WEB/api/v1/me/favorites/ids" | grep -q "$ID" || fail "favorite"
+
+echo "11. public search and detail pages render server-side"
+curl -fsS "$WEB/properties?q=$q" | grep -q "بيت تجريبي في العشار" || fail "search page"
+curl -fsS "$WEB/properties/$ID" | grep -q "بيت تجريبي في العشار" || fail "detail page"
+curl -fsS -b "$OWNER_JAR" "$WEB/favorites" | grep -q "بيت تجريبي في العشار" || fail "favorites page"
 
 echo "LISTING SMOKE OK"

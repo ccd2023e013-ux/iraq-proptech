@@ -33,3 +33,15 @@ def test_production_accepts_strong_secret(monkeypatch: pytest.MonkeyPatch) -> No
     monkeypatch.setenv("APP_ENV", "production")
     monkeypatch.setenv("JWT_SECRET", "x" * 48)
     assert Settings().is_production
+
+
+def test_production_hides_openapi_and_dev_tools(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.main import create_app
+
+    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("JWT_SECRET", "x" * 48)
+    app = create_app(Settings())
+    paths = {getattr(route, "path", "") for route in app.routes}
+    assert "/api/v1/openapi.json" not in paths
+    assert "/docs" not in paths
+    assert not any(p.startswith("/api/v1/dev") for p in paths)

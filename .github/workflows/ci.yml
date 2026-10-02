@@ -124,7 +124,9 @@ jobs:
           curl -fsS http://localhost:3000/ -o /tmp/home.html
           grep -q 'dir="rtl"' /tmp/home.html
           grep -q 'lang="ar"' /tmp/home.html
-          grep -q 'حالة النظام' /tmp/home.html
+          grep -q 'ابحث عن بيتك' /tmp/home.html
+          curl -fsS http://localhost:3000/status -o /tmp/status.html
+          grep -q 'حالة النظام' /tmp/status.html
       - name: Auth end-to-end through the frontend proxy
         run: $ANNOTATE "auth smoke" bash scripts/ci/smoke-auth.sh
       - name: Listing end-to-end (create, upload through proxy, moderate, public view)

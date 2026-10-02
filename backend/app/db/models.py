@@ -4,6 +4,7 @@ from app.agencies.models import Agency, AgencyInvitation, AgencyMember, AgentPro
 from app.audit.models import AuditLog
 from app.auth.models import AuthSession, RefreshToken, VerificationToken
 from app.db.base import Base
+from app.favorites import Favorite
 from app.geo.models import City, District, Governorate, Neighborhood
 from app.properties.models import (
     Amenity,
@@ -31,6 +32,7 @@ __all__ = [
     "Base",
     "City",
     "District",
+    "Favorite",
     "Governorate",
     "Neighborhood",
     "Property",

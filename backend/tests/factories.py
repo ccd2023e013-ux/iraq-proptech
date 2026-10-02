@@ -6,17 +6,19 @@ import io
 import re
 import uuid
 from collections.abc import Iterable
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
+from decimal import Decimal
 
 from fastapi.testclient import TestClient
 from PIL import Image
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
 from app.auth.security import hash_password
 from app.geo.models import City, District, Governorate, Neighborhood
-from app.geo.spatial import make_point
+from app.geo.spatial import coarsen, make_point
 from app.notifications.email import MockEmailProvider
+from app.properties.models import Property, PropertyAmenity
 from app.rbac.catalog import Role
 from app.users.models import User, UserRole, UserStatus
 
@@ -173,3 +175,64 @@ def publish(
     )
     assert approved.status_code == 200, approved.text
     return approved.json()
+
+
+def make_listing(
+    db: Session,
+    lister: User,
+    *,
+    point: tuple[float, float] | None = BASRA_ASHAR,
+    privacy: str = "APPROXIMATE",
+    status: str = "APPROVED",
+    amenities: Iterable[str] = (),
+    governorate_code: str = "BSR",
+    city_slug: str = "basra",
+    **fields: object,
+) -> Property:
+    """Insert a listing directly (fast path for search/GIS tests)."""
+    gov = db.execute(select(Governorate).where(Governorate.code == governorate_code)).scalar_one()
+    city = db.execute(
+        select(City).where(City.governorate_id == gov.id, City.slug == city_slug)
+    ).scalar_one()
+    seq = db.execute(text("SELECT nextval('property_reference_seq')")).scalar_one()
+    display = None
+    if point is not None and privacy == "EXACT":
+        display = make_point(*point)
+    elif point is not None and privacy == "APPROXIMATE":
+        display = make_point(*coarsen(*point))
+    values: dict = {
+        "title_ar": "عقار تجريبي",
+        "description_ar": "وصف تجريبي للعقار لأغراض الاختبار فقط.",
+        "property_type_code": "HOUSE",
+        "purpose": "SALE",
+        "price_amount": Decimal("100000000"),
+        "currency": "IQD",
+        "area_m2": Decimal("150"),
+        "bedrooms": 3,
+        "bathrooms": 2,
+    }
+    values.update(fields)
+    now = datetime.now(UTC)
+    prop = Property(
+        reference_code=f"{gov.code}-{seq:07d}",
+        governorate_id=gov.id,
+        city_id=city.id,
+        location=make_point(*point) if point else None,
+        display_location=display,
+        location_privacy=privacy,
+        status=status,
+        published_at=values.pop("published_at", now) if status == "APPROVED" else None,
+        expires_at=now + timedelta(days=90),
+        lister_id=lister.id,
+        price_on_request=False,
+        negotiable=False,
+        ownership_document="UNKNOWN",
+        needs_review=False,
+        show_phone=False,
+        allow_whatsapp=False,
+        **values,
+    )
+    prop.amenity_links = [PropertyAmenity(amenity_code=c) for c in amenities]
+    db.add(prop)
+    db.commit()
+    return prop

@@ -38,6 +38,19 @@ export function SiteHeader({
           <Link href="/map" className="text-sand-700 hover:text-brand-700">
             {dict.nav.map}
           </Link>
+          {me && (
+            <Link href="/favorites" className="text-sand-700 hover:text-brand-700">
+              {dict.nav.favorites}
+            </Link>
+          )}
+          {me && (
+            <Link
+              href="/dashboard/properties/new"
+              className="rounded-lg border border-brand-300 px-3 py-1 font-medium text-brand-700 hover:bg-brand-50"
+            >
+              {dict.nav.addProperty}
+            </Link>
+          )}
         </nav>
         <div className="flex items-center gap-2">
           <LanguageSwitcher current={locale} label={dict.nav.switchLanguage} />
