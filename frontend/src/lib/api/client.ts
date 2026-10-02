@@ -35,9 +35,27 @@ export async function parseApiError(response: Response): Promise<ApiError> {
   return new ApiError(code, message, response.status, requestId, err?.details);
 }
 
+export const CSRF_COOKIE = "csrf_token";
+export const CSRF_HEADER = "X-CSRF-Token";
+const UNSAFE = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+/** Codes after which a browser session may be renewed with the refresh cookie. */
+const RENEWABLE = new Set(["TOKEN_EXPIRED", "NOT_AUTHENTICATED"]);
+
+/** Read a non-httpOnly cookie in the browser (null on the server). */
+export function readCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  for (const part of document.cookie.split(";")) {
+    const [key, ...rest] = part.trim().split("=");
+    if (key === name) return decodeURIComponent(rest.join("="));
+  }
+  return null;
+}
+
 export interface ApiFetchOptions extends Omit<RequestInit, "body"> {
   body?: unknown;
   locale?: string;
+  /** Internal: prevents infinite refresh loops. */
+  _retried?: boolean;
 }
 
 /** Low-level request: resolves with the Response for any HTTP status. */
@@ -45,27 +63,71 @@ export async function apiRequest(path: string, options: ApiFetchOptions = {}): P
   const base = getApiBaseUrl();
   if (base === null) throw new ApiError("API_NOT_CONFIGURED", "API URL is not configured", 0);
 
-  const { body, locale, headers, ...init } = options;
+  const { body, locale, headers, _retried, ...init } = options;
+  void _retried;
+  const method = (init.method ?? "GET").toUpperCase();
   const finalHeaders = new Headers(headers);
   finalHeaders.set("Accept", "application/json");
   if (locale) finalHeaders.set("Accept-Language", locale);
-  if (body !== undefined) finalHeaders.set("Content-Type", "application/json");
+  if (body !== undefined && !(body instanceof FormData)) {
+    finalHeaders.set("Content-Type", "application/json");
+  }
+  if (UNSAFE.has(method)) {
+    const csrf = readCookie(CSRF_COOKIE);
+    if (csrf && !finalHeaders.has(CSRF_HEADER)) finalHeaders.set(CSRF_HEADER, csrf);
+  }
+
+  let payload: BodyInit | undefined;
+  if (body instanceof FormData) payload = body;
+  else if (body !== undefined) payload = JSON.stringify(body);
 
   try {
     return await fetch(`${base}${path}`, {
+      credentials: "same-origin",
       ...init,
+      method,
       headers: finalHeaders,
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: payload,
     });
   } catch (cause) {
     throw new ApiError("NETWORK_ERROR", String(cause), 0);
   }
 }
 
+let refreshInFlight: Promise<boolean> | null = null;
+
+/**
+ * Renew the browser session using the httpOnly refresh cookie. Concurrent
+ * callers share one request so the single-use refresh token is not replayed.
+ */
+export function refreshSession(): Promise<boolean> {
+  if (!refreshInFlight) {
+    refreshInFlight = apiRequest("/api/v1/auth/refresh", { method: "POST" })
+      .then((r) => r.ok)
+      .catch(() => false)
+      .finally(() => {
+        refreshInFlight = null;
+      });
+  }
+  return refreshInFlight;
+}
+
 /** JSON request that throws ApiError on any non-2xx response. */
 export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise<T> {
   const response = await apiRequest(path, options);
-  if (!response.ok) throw await parseApiError(response);
+  if (!response.ok) {
+    const error = await parseApiError(response);
+    const canRenew =
+      response.status === 401 &&
+      RENEWABLE.has(error.code) &&
+      !options._retried &&
+      readCookie(CSRF_COOKIE) !== null && // a browser session exists
+      !path.startsWith("/api/v1/auth/");
+    if (canRenew && (await refreshSession())) {
+      return apiFetch<T>(path, { ...options, _retried: true });
+    }
+    throw error;
+  }
   if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
 }

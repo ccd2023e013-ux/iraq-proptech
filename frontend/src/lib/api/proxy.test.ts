@@ -32,6 +32,19 @@ describe("API proxy helpers", () => {
     expect(out.get("x-request-id")).toBe("r1");
   });
 
+  it("keeps every Set-Cookie header separate", () => {
+    const upstream = new Headers();
+    upstream.append("set-cookie", "access_token=a; Path=/; HttpOnly; Max-Age=900");
+    upstream.append("set-cookie", "refresh_token=r; Path=/; HttpOnly");
+    upstream.append("set-cookie", "csrf_token=c; Path=/");
+    const out = filterResponseHeaders(upstream);
+    expect(out.getSetCookie()).toEqual([
+      "access_token=a; Path=/; HttpOnly; Max-Age=900",
+      "refresh_token=r; Path=/; HttpOnly",
+      "csrf_token=c; Path=/",
+    ]);
+  });
+
   it("only proxies the versioned API", () => {
     expect(buildUpstreamUrl("http://backend:8000", "/api/v1/health", "?a=1")).toBe(
       "http://backend:8000/api/v1/health?a=1",

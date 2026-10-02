@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { getDictionary } from "@/i18n";
 import { directionOf } from "@/i18n/config";
 import { getRequestLocale } from "@/i18n/server";
+import { getCurrentUser } from "@/lib/auth/session";
 
 import "./globals.css";
 
@@ -37,6 +38,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const locale = await getRequestLocale();
   const dict = getDictionary(locale);
+  const me = await getCurrentUser();
 
   return (
     <html
@@ -45,7 +47,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       className={`${arabic.variable} ${latin.variable}`}
     >
       <body className="min-h-dvh antialiased">
-        <SiteHeader dict={dict} locale={locale} />
+        <SiteHeader dict={dict} locale={locale} me={me} />
         <main>{children}</main>
       </body>
     </html>

@@ -2,10 +2,20 @@ import Link from "next/link";
 
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
+import type { Me } from "@/types/auth";
 
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { UserMenu } from "./UserMenu";
 
-export function SiteHeader({ dict, locale }: { dict: Dictionary; locale: Locale }) {
+export function SiteHeader({
+  dict,
+  locale,
+  me,
+}: {
+  dict: Dictionary;
+  locale: Locale;
+  me: Me | null;
+}) {
   return (
     <header className="sticky top-0 z-30 border-b border-sand-200 bg-sand-50/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
@@ -22,14 +32,34 @@ export function SiteHeader({ dict, locale }: { dict: Dictionary; locale: Locale 
           <Link href="/" className="text-sand-700 hover:text-brand-700">
             {dict.nav.home}
           </Link>
-          <span className="cursor-not-allowed text-sand-500" aria-disabled>
+          <Link href="/properties" className="text-sand-700 hover:text-brand-700">
             {dict.nav.properties}
-          </span>
-          <span className="cursor-not-allowed text-sand-500" aria-disabled>
+          </Link>
+          <Link href="/map" className="text-sand-700 hover:text-brand-700">
             {dict.nav.map}
-          </span>
+          </Link>
         </nav>
-        <LanguageSwitcher current={locale} label={dict.nav.switchLanguage} />
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher current={locale} label={dict.nav.switchLanguage} />
+          {me ? (
+            <UserMenu dict={dict} name={me.user.full_name} />
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="rounded-lg px-3 py-1.5 text-sm font-medium text-sand-700 hover:text-brand-700"
+              >
+                {dict.nav.login}
+              </Link>
+              <Link
+                href="/register"
+                className="hidden rounded-lg bg-brand-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-800 sm:inline-block"
+              >
+                {dict.nav.register}
+              </Link>
+            </>
+          )}
+        </div>
       </div>
     </header>
   );

@@ -54,3 +54,74 @@ describe("apiFetch", () => {
     expect(fetchMock.mock.calls[0]?.[0]).toBe("/api/v1/health");
   });
 });
+
+describe("browser session handling", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+    document.cookie = "csrf_token=; max-age=0; path=/";
+  });
+
+  it("sends the CSRF cookie value on unsafe requests only", async () => {
+    vi.stubEnv("NEXT_PUBLIC_API_URL", "");
+    document.cookie = "csrf_token=tok123; path=/";
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(200, {}));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await apiFetch("/api/v1/x", { method: "POST", body: {} });
+    await apiFetch("/api/v1/x");
+    const postHeaders = fetchMock.mock.calls[0]?.[1]?.headers as Headers;
+    const getHeaders = fetchMock.mock.calls[1]?.[1]?.headers as Headers;
+    expect(postHeaders.get("X-CSRF-Token")).toBe("tok123");
+    expect(getHeaders.get("X-CSRF-Token")).toBeNull();
+  });
+
+  it("renews an expired session once and retries", async () => {
+    vi.stubEnv("NEXT_PUBLIC_API_URL", "");
+    document.cookie = "csrf_token=tok123; path=/";
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(401, { error: { code: "TOKEN_EXPIRED", message: "x" } }))
+      .mockResolvedValueOnce(jsonResponse(200, {})) // refresh
+      .mockResolvedValueOnce(jsonResponse(200, { ok: true }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(apiFetch("/api/v1/favorites")).resolves.toEqual({ ok: true });
+    expect(fetchMock.mock.calls[1]?.[0]).toBe("/api/v1/auth/refresh");
+  });
+
+  it("does not try to renew without a browser session", async () => {
+    vi.stubEnv("NEXT_PUBLIC_API_URL", "");
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(jsonResponse(401, { error: { code: "NOT_AUTHENTICATED", message: "x" } }));
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(apiFetch("/api/v1/favorites")).rejects.toMatchObject({
+      code: "NOT_AUTHENTICATED",
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("shares one refresh between concurrent requests", async () => {
+    vi.stubEnv("NEXT_PUBLIC_API_URL", "");
+    document.cookie = "csrf_token=tok123; path=/";
+    let refreshCalls = 0;
+    const attempts = new Map<string, number>();
+    const fetchMock = vi.fn((url: string) => {
+      if (url === "/api/v1/auth/refresh") {
+        refreshCalls += 1;
+        return Promise.resolve(jsonResponse(200, {}));
+      }
+      const n = (attempts.get(url) ?? 0) + 1;
+      attempts.set(url, n);
+      return Promise.resolve(
+        n === 1
+          ? jsonResponse(401, { error: { code: "TOKEN_EXPIRED", message: "x" } })
+          : jsonResponse(200, { url }),
+      );
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    await Promise.all([apiFetch("/api/v1/a"), apiFetch("/api/v1/b")]);
+    expect(refreshCalls).toBe(1);
+  });
+});

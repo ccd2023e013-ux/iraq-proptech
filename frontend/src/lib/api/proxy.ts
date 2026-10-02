@@ -23,7 +23,7 @@ const STRIP_RESPONSE = new Set([...STRIP_REQUEST, "content-encoding", "content-l
 export function filterRequestHeaders(source: Headers, clientIp?: string | null): Headers {
   const out = new Headers();
   source.forEach((value, key) => {
-    if (!STRIP_REQUEST.has(key.toLowerCase())) out.set(key, value);
+    if (!STRIP_REQUEST.has(key.toLowerCase())) out.append(key, value);
   });
   if (clientIp) {
     const prior = source.get("x-forwarded-for");
@@ -35,8 +35,11 @@ export function filterRequestHeaders(source: Headers, clientIp?: string | null):
 export function filterResponseHeaders(source: Headers): Headers {
   const out = new Headers();
   source.forEach((value, key) => {
-    if (!STRIP_RESPONSE.has(key.toLowerCase())) out.set(key, value);
+    if (key.toLowerCase() === "set-cookie") return; // handled below, one per cookie
+    if (!STRIP_RESPONSE.has(key.toLowerCase())) out.append(key, value);
   });
+  // Each cookie must stay a separate Set-Cookie header (they cannot be comma-joined).
+  for (const cookie of source.getSetCookie()) out.append("set-cookie", cookie);
   return out;
 }
 

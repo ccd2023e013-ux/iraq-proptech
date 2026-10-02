@@ -121,6 +121,8 @@ jobs:
           grep -q 'dir="rtl"' /tmp/home.html
           grep -q 'lang="ar"' /tmp/home.html
           grep -q 'حالة النظام' /tmp/home.html
+      - name: Auth end-to-end through the frontend proxy
+        run: $ANNOTATE "auth smoke" bash scripts/ci/smoke-auth.sh
       - name: Worker executes a task via Redis
         run: >
           docker compose exec -T backend python -c
