@@ -599,15 +599,20 @@ def test_lead_list_uses_constant_queries(api: TestClient, db_session: Session, w
     engine = get_engine()
     sa_event.listen(engine, "before_cursor_execute", count)
     try:
+        # Same session state before each measured request (the test shares one session).
+        db_session.expire_all()
         small = api.get("/api/v1/crm/leads", headers=headers, params={"page_size": 2})
         n_small = len(statements)
+        small_sql = list(statements)
         statements.clear()
+        db_session.expire_all()
         large = api.get("/api/v1/crm/leads", headers=headers, params={"page_size": 6})
         n_large = len(statements)
     finally:
         sa_event.remove(engine, "before_cursor_execute", count)
     assert len(small.json()["items"]) == 2 and len(large.json()["items"]) == 6
-    assert n_large == n_small  # no per-row queries
+    extra = [q[:120] for q in statements if q not in small_sql]
+    assert n_large == n_small, extra  # no per-row queries
 
 
 def test_failing_event_handler_does_not_break_inquiry(
