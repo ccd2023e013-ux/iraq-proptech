@@ -42,6 +42,10 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://proptech:proptech@localhost:5432/proptech"
     db_pool_size: int = Field(default=5, ge=1, le=50)
     db_max_overflow: int = Field(default=5, ge=0, le=50)
+    # Server-side prepared statements break behind PgBouncer-style *transaction*
+    # poolers (e.g. Supabase port 6543). None = auto: disabled when the URL
+    # points at port 6543 or carries `pgbouncer=true`.
+    db_prepared_statements: bool | None = None
 
     redis_url: str = "redis://localhost:6379/0"
 
@@ -62,6 +66,9 @@ class Settings(BaseSettings):
     password_reset_ttl_minutes: int = Field(default=30, ge=5, le=24 * 60)
 
     rate_limit_enabled: bool = True
+    # Reverse proxies in front of the frontend that append to X-Forwarded-For
+    # (TLS proxy / tunnel / platform edge). 0 = never trust the header.
+    trusted_proxy_hops: int = Field(default=0, ge=0, le=5)
 
     # Notifications: "mock" logs messages and keeps them in an in-memory outbox.
     email_provider: Literal["mock", "smtp"] = "mock"
@@ -119,6 +126,10 @@ class Settings(BaseSettings):
     payment_provider: Literal["demo", "none"] = "demo"
     payment_demo_in_production: bool = False
 
+    # External scheduler trigger for worker-less hosts (POST /api/v1/internal/jobs/run
+    # with header X-Jobs-Token). Unset = endpoint disabled (404).
+    jobs_trigger_token: str | None = Field(default=None, min_length=32)
+
     # Development helpers such as the mock outbox endpoint. Forced off in production.
     dev_tools_enabled: bool = True
 
@@ -151,6 +162,13 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.app_env == "production"
+
+    @property
+    def use_prepared_statements(self) -> bool:
+        if self.db_prepared_statements is not None:
+            return self.db_prepared_statements
+        url = self.database_url.lower()
+        return ":6543/" not in url and "pgbouncer=true" not in url
 
     @property
     def secure_cookies(self) -> bool:

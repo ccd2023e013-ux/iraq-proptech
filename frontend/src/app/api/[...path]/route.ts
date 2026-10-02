@@ -25,7 +25,7 @@ async function proxy(request: NextRequest): Promise<Response> {
   try {
     const upstream = await fetch(url, {
       method: request.method,
-      headers: filterRequestHeaders(request.headers, request.headers.get("x-real-ip")),
+      headers: filterRequestHeaders(request.headers),
       body: hasBody ? request.body : undefined,
       redirect: "manual",
       cache: "no-store",

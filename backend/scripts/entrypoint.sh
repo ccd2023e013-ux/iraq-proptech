@@ -7,6 +7,11 @@ role="${1:-api}"
 
 case "$role" in
   api)
+    # Refuse to start with unsafe or incomplete configuration (errors only matter
+    # in production; warnings are printed). PREFLIGHT=0 skips it.
+    if [ "${PREFLIGHT:-1}" = "1" ]; then
+      python -m app.cli preflight
+    fi
     if [ "${RUN_MIGRATIONS:-0}" = "1" ]; then
       alembic upgrade head
     fi

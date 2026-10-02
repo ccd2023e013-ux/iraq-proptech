@@ -23,6 +23,7 @@ from app.rbac.router import router as rbac_router
 from app.search.router import router as search_router
 from app.search.saved import router as saved_search_router
 from app.system.dev_router import router as dev_router
+from app.system.jobs_router import router as jobs_router
 from app.system.router import router as system_router
 from app.users.router import router as users_router
 
@@ -51,6 +52,7 @@ def build_api_router(settings: Settings) -> APIRouter:
     api_router.include_router(moderation_router)
     api_router.include_router(notifications_router)
     api_router.include_router(analytics_router)
+    api_router.include_router(jobs_router)
     if settings.dev_tools:
         api_router.include_router(dev_router)
     return api_router

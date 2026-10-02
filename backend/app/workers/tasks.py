@@ -7,56 +7,47 @@ from typing import Any
 from celery.schedules import crontab
 
 from app.db.session import get_sessionmaker
-from app.notifications import jobs, service
 from app.search.saved import AlertFrequency
+from app.workers import registry
 from app.workers.celery_app import celery_app
 
 
-def _run(name: str, fn: Any) -> dict[str, Any]:
+def _run(name: str) -> dict[str, Any]:
     with get_sessionmaker()() as db:
-        job = service.run_job(db, name, fn)
-        return {"status": job.status, "detail": job.detail}
+        result = registry.run(db, [name])[0]
+        return {"status": result["status"], "detail": result["detail"]}
 
 
 @celery_app.task(name="notifications.deliver")
 def deliver() -> dict[str, Any]:
+    # The outbox is polled every minute; not recorded as a job run (too noisy).
     with get_sessionmaker()() as db:
-        return {
-            "notifications": service.process_deliveries(db),
-            "webhooks": service.process_webhooks(db),
-        }
+        return registry.JOBS["deliver_outbox"](db)
 
 
 @celery_app.task(name="jobs.saved_search_alerts")
 def saved_search_alerts(frequency: str) -> dict[str, Any]:
-    freq = AlertFrequency(frequency)
-    return _run(
-        f"saved_search_alerts.{freq.value.lower()}", lambda db: jobs.saved_search_alerts(db, freq)
-    )
+    return _run(f"saved_search_alerts.{AlertFrequency(frequency).value.lower()}")
 
 
 @celery_app.task(name="jobs.reminders")
 def reminders() -> dict[str, Any]:
-    return _run("reminders", jobs.reminders)
+    return _run("reminders")
 
 
 @celery_app.task(name="jobs.expire_listings")
 def expire_listings() -> dict[str, Any]:
-    return _run("expire_listings", jobs.expire_listings)
+    return _run("expire_listings")
 
 
 @celery_app.task(name="jobs.purge_analytics_visitors")
 def purge_analytics_visitors() -> dict[str, Any]:
-    from app.analytics.service import purge_visitors
-
-    return _run("purge_analytics_visitors", purge_visitors)
+    return _run("purge_analytics_visitors")
 
 
 @celery_app.task(name="jobs.expire_subscriptions")
 def expire_subscriptions() -> dict[str, Any]:
-    from app.billing.service import expire_subscriptions as run
-
-    return _run("expire_subscriptions", run)
+    return _run("expire_subscriptions")
 
 
 celery_app.conf.beat_schedule = {

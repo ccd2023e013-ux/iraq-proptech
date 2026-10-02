@@ -20,15 +20,17 @@ const STRIP_REQUEST = new Set([
 // Node's fetch transparently decompresses, so length/encoding no longer match.
 const STRIP_RESPONSE = new Set([...STRIP_REQUEST, "content-encoding", "content-length"]);
 
-export function filterRequestHeaders(source: Headers, clientIp?: string | null): Headers {
+/**
+ * Headers forwarded to the API. `X-Forwarded-For` is passed through unchanged:
+ * this proxy cannot know the browser's address itself, and the API trusts
+ * exactly `TRUSTED_PROXY_HOPS` entries appended by the edge proxies in front
+ * of the frontend (see backend/app/core/client_ip.py).
+ */
+export function filterRequestHeaders(source: Headers): Headers {
   const out = new Headers();
   source.forEach((value, key) => {
     if (!STRIP_REQUEST.has(key.toLowerCase())) out.append(key, value);
   });
-  if (clientIp) {
-    const prior = source.get("x-forwarded-for");
-    out.set("x-forwarded-for", prior ? `${prior}, ${clientIp}` : clientIp);
-  }
   return out;
 }
 

@@ -18,12 +18,41 @@ roadmap maps as shown in the last column.
 | 6 CRM + leads | ✅ Complete | `088419e` | [37019370137](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37019370137) | 5 |
 | 7 AI | ✅ Complete | `088419e` | [37019370137](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37019370137) | 6 |
 | 8 Admin + moderation | ✅ Complete | `088419e` | [37019370137](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37019370137) | 7 |
-| 9 Automation + notifications | ⏳ In progress | | | 8 |
-| 10 Analytics | Not started | | | 9 |
-| 10b Monetization (demo payments) | Not started | | | 10 |
-| 11 Temporary cloud deployment | Not started | | | 11 |
+| 9 Automation + notifications | ✅ Complete | `43a7842` | [37021328715](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37021328715) | 8 |
+| 10 Analytics | ✅ Complete | `c4a6688` | [37057349521](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37057349521) | 9 |
+| 10b Monetization (demo payments) | ✅ Complete | `c4a6688` | [37057349521](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37057349521) | 10 |
+| 11 Temporary cloud deployment | ⏳ In progress | | | 11 |
 | 12 Local PC migration | Not started | | | 12 |
 | Final audit + E2E | Not started | | | — |
+
+---
+
+## Phases 9–10b — Automation, analytics, monetization
+
+**Phase 9** (green at `43a7842`, run 37021328715): in-app notifications with
+per-category preferences, outbox delivery (email/SMS/push channels, MOCK by
+default), HMAC-signed webhooks with an SSRF guard (n8n-ready, never a hard
+dependency), Celery beat jobs (saved-search alerts, reminders, listing expiry),
+admin webhooks/jobs pages. See [AUTOMATION.md](AUTOMATION.md). Fixed: outbox
+rows were not flushed before delivery (sessions do not autoflush); a typing
+annotation.
+
+**Phase 10 + 10b** (green at `c4a6688`, run 37057349521 — backend 272 tests,
+91 % coverage; frontend 78 tests; Docker stack smoke incl. analytics and
+billing steps): privacy-conscious analytics (unique daily visitors via
+rotating salted hashes, aggregate-only search statistics without query text,
+lister/agency/platform dashboards with date ranges, demo data excluded by
+default) — [ANALYTICS.md](ANALYTICS.md); payment-provider abstraction with
+DEMO payment mode, plans, promotions, subscriptions, refunds, all audited —
+[MONETIZATION.md](MONETIZATION.md).
+
+Errors found and fixed in 10/10b:
+- `dict(Result)` treated a SQLAlchemy result as a mapping (results have
+  `.keys()`), crashing dashboards once data existed — rows are now
+  materialised first.
+- The search-statistics test searched for a word its listing did not contain.
+- The N+1 guard counted the constant search-statistics upsert; it now counts
+  the reads that build a result page.
 
 ---
 

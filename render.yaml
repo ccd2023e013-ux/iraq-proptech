@@ -1,0 +1,72 @@
+# Render Blueprint — TEMPORARY $0 deployment (see docs/RENDER.md).
+# Both services build the same Dockerfiles used on the production PC; nothing
+# here is Render-specific code. Database: Supabase (docs/SUPABASE.md).
+# Free instances sleep when idle; there is no free background worker, so
+# notifications are delivered inline and scheduled jobs are triggered by the
+# GitHub Actions workflow .github/workflows/scheduled-jobs.yml.
+services:
+  - type: web
+    name: proptech-api
+    runtime: docker
+    plan: free
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: LOG_JSON
+        value: "true"
+      - key: RUN_MIGRATIONS          # alembic upgrade head before the API starts
+        value: "1"
+      - key: DATABASE_URL            # Supabase session pooler URL (IPv4), see SUPABASE.md
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL            # https://proptech-web.onrender.com (your web service URL)
+        sync: false
+      - key: CORS_ORIGINS            # same value as FRONTEND_URL
+        sync: false
+      # Client → Render edge (web) → Next.js → Render edge (api): two appending proxies.
+      - key: TRUSTED_PROXY_HOPS
+        value: "2"
+      - key: NOTIFICATIONS_INLINE    # no Celery worker on the free plan
+        value: "true"
+      - key: JOBS_TRIGGER_TOKEN      # copy into the GitHub secret JOBS_TRIGGER_TOKEN
+        generateValue: true
+      # Media must not live on the ephemeral container disk: use Supabase Storage (S3 API).
+      - key: STORAGE_BACKEND
+        value: s3
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_ENDPOINT_URL         # https://<ref>.supabase.co/storage/v1/s3
+        sync: false
+      - key: S3_REGION
+        sync: false
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      - key: AI_PROVIDER             # mock = free and offline; real providers need a key
+        value: mock
+      - key: PAYMENT_PROVIDER
+        value: demo
+      - key: PAYMENT_DEMO_IN_PRODUCTION   # public demo site: simulated checkout, clearly marked DEMO
+        value: "true"
+
+  - type: web
+    name: proptech-web
+    runtime: docker
+    plan: free
+    rootDir: frontend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: API_INTERNAL_URL        # https://proptech-api.onrender.com (read at runtime)
+        sync: false
+      - key: MAP_PROVIDER
+        value: openfreemap
+      - key: MAP_DEFAULT_BBOX
+        value: 47.65,30.40,47.95,30.62

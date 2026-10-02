@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.analytics import service
 from app.auth.deps import Principal, get_optional_principal, get_principal
+from app.core.client_ip import client_ip
 from app.core.errors import AppError, NotFoundError, PermissionDeniedError
 from app.core.rate_limit import rate_limit
 from app.db.session import get_db
@@ -61,7 +62,7 @@ def property_view(
             return None
         key = f"u:{principal.id}"
     else:
-        ip = request.client.host if request.client else "unknown"
+        ip = client_ip(request)
         key = f"a:{ip}:{request.headers.get('user-agent', '')[:200]}"
     service.record_view(db, prop.id, key)
     db.commit()

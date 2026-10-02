@@ -11,17 +11,16 @@ describe("API proxy helpers", () => {
         authorization: "Bearer abc",
         "accept-language": "ar",
       }),
-      "10.0.0.5",
     );
     expect(out.get("host")).toBeNull();
     expect(out.get("connection")).toBeNull();
     expect(out.get("authorization")).toBe("Bearer abc");
-    expect(out.get("x-forwarded-for")).toBe("10.0.0.5");
   });
 
-  it("appends to an existing forwarded-for chain", () => {
-    const out = filterRequestHeaders(new Headers({ "x-forwarded-for": "1.1.1.1" }), "2.2.2.2");
-    expect(out.get("x-forwarded-for")).toBe("1.1.1.1, 2.2.2.2");
+  it("passes the edge proxy's forwarded-for chain through unchanged", () => {
+    const out = filterRequestHeaders(new Headers({ "x-forwarded-for": "6.6.6.6, 203.0.113.7" }));
+    expect(out.get("x-forwarded-for")).toBe("6.6.6.6, 203.0.113.7");
+    expect(filterRequestHeaders(new Headers()).get("x-forwarded-for")).toBeNull();
   });
 
   it("drops encoding headers from upstream responses", () => {

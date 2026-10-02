@@ -45,3 +45,20 @@ def test_production_hides_openapi_and_dev_tools(monkeypatch: pytest.MonkeyPatch)
     assert "/api/v1/openapi.json" not in paths
     assert "/docs" not in paths
     assert not any(p.startswith("/api/v1/dev") for p in paths)
+
+
+@pytest.mark.parametrize(
+    ("url", "expected"),
+    [
+        ("postgresql://u:p@db:5432/d", True),
+        ("postgresql://u:p@aws-0-x.pooler.supabase.com:6543/postgres", False),
+        ("postgresql://u:p@host:5432/d?pgbouncer=true", False),
+    ],
+)
+def test_prepared_statements_auto_detect_transaction_poolers(
+    monkeypatch: pytest.MonkeyPatch, url: str, expected: bool
+) -> None:
+    monkeypatch.setenv("DATABASE_URL", url)
+    assert Settings().use_prepared_statements is expected
+    monkeypatch.setenv("DB_PREPARED_STATEMENTS", "true")
+    assert Settings().use_prepared_statements is True

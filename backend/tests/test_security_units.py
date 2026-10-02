@@ -104,3 +104,16 @@ def test_rate_limiter_falls_back_to_memory_when_redis_is_down() -> None:
         limiter.check(key, limit=3, window=60)
     with pytest.raises(RateLimitedError):
         limiter.check(key, limit=3, window=60)
+
+
+def test_client_ip_trusts_only_configured_proxy_hops() -> None:
+    from app.core.client_ip import resolve_client_ip
+
+    chain = "6.6.6.6, 203.0.113.7"  # client-supplied value, then the edge proxy's entry
+    assert resolve_client_ip("172.18.0.5", chain, 0) == "172.18.0.5"  # header ignored
+    assert resolve_client_ip("172.18.0.5", chain, 1) == "203.0.113.7"
+    assert resolve_client_ip("172.18.0.5", chain, 2) == "6.6.6.6"
+    assert resolve_client_ip("172.18.0.5", "203.0.113.7", 2) == "172.18.0.5"  # too short
+    assert resolve_client_ip("172.18.0.5", "not-an-ip", 1) == "172.18.0.5"
+    assert resolve_client_ip("172.18.0.5", None, 1) == "172.18.0.5"
+    assert resolve_client_ip(None, " 2001:db8::1 ", 1) == "2001:db8::1"

@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import os
 import re
+from collections.abc import Iterator
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Protocol
@@ -42,6 +43,8 @@ class Storage(Protocol):
     def delete(self, key: str) -> None: ...
 
     def exists(self, key: str) -> bool: ...
+
+    def iter_keys(self, prefix: str = "") -> Iterator[str]: ...
 
 
 class LocalStorage:
@@ -75,6 +78,15 @@ class LocalStorage:
     def exists(self, key: str) -> bool:
         return self._path(key).is_file()
 
+    def iter_keys(self, prefix: str = "") -> Iterator[str]:
+        if not self.root.is_dir():
+            return
+        for path in sorted(self.root.rglob("*")):
+            if path.is_file() and not path.name.endswith(".tmp"):
+                key = path.relative_to(self.root).as_posix()
+                if key.startswith(prefix):
+                    yield key
+
 
 class S3Storage:
     name = "s3"
@@ -86,9 +98,13 @@ class S3Storage:
         self.bucket = settings.s3_bucket or ""
         if not self.bucket:
             raise StorageError("S3_BUCKET is not configured")
+        from botocore.config import Config
+
         self.client: Any = boto3.client(
             "s3",
             endpoint_url=settings.s3_endpoint_url,
+            # Path-style URLs work with MinIO, Supabase Storage and R2 as well as AWS.
+            config=Config(s3={"addressing_style": "path"}, signature_version="s3v4"),
             region_name=settings.s3_region,
             aws_access_key_id=settings.s3_access_key_id,
             aws_secret_access_key=settings.s3_secret_access_key,
@@ -116,6 +132,12 @@ class S3Storage:
         except Exception:
             return False
 
+    def iter_keys(self, prefix: str = "") -> Iterator[str]:
+        paginator = self.client.get_paginator("list_objects_v2")
+        for page in paginator.paginate(Bucket=self.bucket, Prefix=prefix):
+            for item in page.get("Contents", []):
+                yield str(item["Key"])
+
 
 @lru_cache
 def get_storage() -> Storage:
@@ -123,3 +145,21 @@ def get_storage() -> Storage:
     if settings.storage_backend == "s3":
         return S3Storage()
     return LocalStorage(settings.storage_local_path)
+
+
+def copy_all(source: Storage, target: Storage, prefix: str = "") -> dict[str, int]:
+    """Copy every object (idempotent: existing keys are skipped). Used for migrations."""
+    copied = skipped = 0
+    for key in source.iter_keys(prefix):
+        if target.exists(key):
+            skipped += 1
+            continue
+        target.put(key, source.get(key), _content_type(key))
+        copied += 1
+    return {"copied": copied, "skipped": skipped}
+
+
+def _content_type(key: str) -> str:
+    import mimetypes
+
+    return mimetypes.guess_type(key)[0] or "application/octet-stream"

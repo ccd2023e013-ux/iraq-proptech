@@ -7,29 +7,26 @@ Read this first when resuming work in a new session.
   Job logs cannot be downloaded from the development environment; failures
   are republished as check-run annotations by `scripts/ci/annotate.sh`
   (`gh api repos/<repo>/check-runs/<id>/annotations`).
-- **Last green commit**: `088419e` — CI run 37019370137 (backend 240 tests,
-  91 % coverage; frontend 74 tests; Docker stack + auth/listing/map smoke).
+- **Last green commit**: `c4a6688` (Phases 1–10b CI verified).
 
 ## Completed
 
-See [PHASE-STATUS.md](PHASE-STATUS.md): Foundation, Auth + RBAC, Real estate
-core, Search + discovery, GIS + maps, discovery gap-fill, CRM, AI,
-Admin + moderation.
+See [PHASE-STATUS.md](PHASE-STATUS.md): Foundation through Monetization (10b).
 
 ## In progress
 
-Phase 9 — Automation + notifications (notifications, preferences, outbox,
-SMS/push mock channels, signed webhooks with SSRF guard, Celery beat jobs,
-admin webhooks/jobs pages). Docs: [AUTOMATION.md](AUTOMATION.md).
+Phases 11/12 — cloud deployment (Render blueprint, Supabase docs, preflight,
+jobs trigger, proxy-aware client IP, S3 storage) and local PC migration
+(backup/restore/export/import scripts, production overlay rehearsal CI job).
+Pushed in one commit; waiting for CI.
 
 ## Next actions (in order)
 
-1. Get Phase 9 CI green; record checkpoint.
-2. Analytics (privacy-conscious events; admin/agency/agent dashboards).
-3. Monetization with payment-provider abstraction and DEMO payment mode.
-4. Cloud deployment docs; local PC migration; DATA_MODEL, SECURITY,
-   DEPLOYMENT docs; README/ARCHITECTURE/ROADMAP refresh.
-5. Final security audit, final E2E, final report.
+1. Get the `production` CI job green; record Phase 11/12 checkpoints.
+2. Final security audit (fix critical/high); SECURITY.md, DATA_MODEL.md;
+   README/ARCHITECTURE/ROADMAP/CHANGELOG refresh.
+3. Automated 16-step E2E scenario in CI.
+4. Final report.
 
 ## Local tooling notes
 

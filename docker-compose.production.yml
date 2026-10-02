@@ -1,6 +1,10 @@
 # Production overrides for the self-hosted PC.
 #   docker compose -f docker-compose.yml -f docker-compose.production.yml --env-file .env up -d
-# Required in .env: POSTGRES_PASSWORD, JWT_SECRET (>= 32 chars). NEXT_PUBLIC_API_URL is optional.
+# Requires Docker Compose >= 2.24 (`!override`).
+# Required in .env: POSTGRES_PASSWORD, JWT_SECRET (>= 32 chars), CORS_ORIGINS and
+# FRONTEND_URL (your https origin). The API only listens on 127.0.0.1 (the
+# frontend proxies /api/v1/*); put a TLS reverse proxy or tunnel in front of :3000.
+# The API refuses to start when `python -m app.cli preflight` reports errors.
 
 services:
   db:
@@ -13,10 +17,14 @@ services:
 
   backend:
     restart: unless-stopped
+    ports: !override
+      - "${BACKEND_BIND:-127.0.0.1}:${BACKEND_PORT:-8000}:8000"
     environment:
       APP_ENV: production
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
       FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:-127.0.0.1}
+      # One TLS reverse proxy / tunnel in front of :3000 (see MIGRATE-TO-LOCAL-PC.md).
+      TRUSTED_PROXY_HOPS: ${TRUSTED_PROXY_HOPS:-1}
 
   worker:
     restart: unless-stopped

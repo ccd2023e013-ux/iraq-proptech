@@ -11,6 +11,7 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.requests import Request
 from starlette.responses import Response
 
+from app.core.client_ip import client_ip
 from app.core.logging import client_ip_var, request_id_var, user_agent_var, user_id_var
 
 logger = logging.getLogger("app.request")
@@ -26,7 +27,7 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
         inbound = request.headers.get(REQUEST_ID_HEADER, "")
         request_id = inbound if _VALID_REQUEST_ID.match(inbound) else uuid.uuid4().hex
         token = request_id_var.set(request_id)
-        ip_token = client_ip_var.set(request.client.host if request.client else None)
+        ip_token = client_ip_var.set(client_ip(request))
         ua_token = user_agent_var.set((request.headers.get("user-agent") or "")[:255] or None)
         uid_token = user_id_var.set(None)
         started = time.perf_counter()

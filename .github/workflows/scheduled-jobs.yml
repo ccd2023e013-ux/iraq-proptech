@@ -1,0 +1,39 @@
+name: Scheduled jobs (worker-less hosts)
+
+# Runs maintenance jobs (outbox delivery, saved-search alerts, reminders,
+# listing/subscription expiry, analytics retention) on hosts without a Celery
+# worker — e.g. the temporary Render free deployment. On the production PC,
+# Celery beat does this and this workflow is unnecessary.
+#
+# Configure repository secrets JOBS_API_URL (https://<api-host>) and
+# JOBS_TRIGGER_TOKEN (same value as the API's JOBS_TRIGGER_TOKEN). Without
+# them the workflow does nothing and succeeds.
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Run jobs
+        env:
+          API: ${{ secrets.JOBS_API_URL }}
+          TOKEN: ${{ secrets.JOBS_TRIGGER_TOKEN }}
+        run: |
+          if [ -z "$API" ] || [ -z "$TOKEN" ]; then
+            echo "JOBS_API_URL / JOBS_TRIGGER_TOKEN not configured — nothing to do."
+            exit 0
+          fi
+          # Free instances may be asleep: the first request wakes them up.
+          curl -sS -o /dev/null --retry 5 --retry-delay 20 --retry-all-errors \
+            --max-time 120 "$API/api/v1/health" || true
+          curl -fsS --max-time 300 -X POST -H "X-Jobs-Token: $TOKEN" \
+            "$API/api/v1/internal/jobs/run" | tee /tmp/jobs.json
+          ! grep -q '"status":"FAILED"' /tmp/jobs.json

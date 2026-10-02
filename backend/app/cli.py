@@ -4,6 +4,11 @@
         (password from SUPERADMIN_PASSWORD or an interactive prompt)
     python -m app.cli seed-demo [--listings 40] [--allow-production]
     python -m app.cli reset-demo
+    python -m app.cli run-jobs [name ...]   (default: every scheduled job once)
+    python -m app.cli storage-export DIR   (configured storage → local directory)
+    python -m app.cli storage-import DIR   (local directory → configured storage)
+    python -m app.cli preflight [--db]
+        (configuration checks; exit 1 on errors in production — run before start)
 
 SUPER_ADMIN can only be created here — never through the API — so a
 compromised admin account cannot mint new super admins.
@@ -69,7 +74,47 @@ def main(argv: list[str] | None = None) -> int:
     demo.add_argument("--listings", type=int, default=40)
     demo.add_argument("--allow-production", action="store_true")
     sub.add_parser("reset-demo", help="Delete DEMO listings created by seed-demo")
+    pf = sub.add_parser("preflight", help="Check configuration (and the database with --db)")
+    pf.add_argument("--db", action="store_true", help="also check PostGIS and migrations")
+    for name, text in (
+        ("storage-export", "Copy every stored object from the configured storage to DIR"),
+        ("storage-import", "Copy every object in DIR into the configured storage"),
+    ):
+        sp = sub.add_parser(name, help=text)
+        sp.add_argument("directory")
+    rj = sub.add_parser("run-jobs", help="Run maintenance jobs once (no worker needed)")
+    rj.add_argument("names", nargs="*")
     args = parser.parse_args(argv)
+
+    if args.command in ("storage-export", "storage-import"):
+        from app.storage import LocalStorage, copy_all, get_storage
+
+        configured, local = get_storage(), LocalStorage(args.directory)
+        if args.command == "storage-export":
+            print(copy_all(configured, local))
+        else:
+            print(copy_all(local, configured))
+        return 0
+
+    if args.command == "run-jobs":
+        from app.workers import registry
+
+        with get_sessionmaker()() as db:
+            for result in registry.run(db, args.names or registry.FREQUENT):
+                print(f"{result['job']}: {result['status']} {result['detail'] or result['error']}")
+        return 0
+
+    if args.command == "preflight":
+        from app.core.config import get_settings
+        from app.core.preflight import config_findings, database_findings
+
+        settings = get_settings()
+        findings = config_findings(settings) + (database_findings() if args.db else [])
+        for f in findings:
+            print(f"{f.level.upper():7} {f.code}: {f.message}")
+        errors = [f for f in findings if f.level == "error"]
+        print(f"preflight: {len(errors)} error(s), {len(findings) - len(errors)} warning(s)")
+        return 1 if errors else 0
 
     if args.command in ("seed-demo", "reset-demo"):
         from app import demo as demo_data

@@ -19,8 +19,16 @@ from app.core.config import get_settings
 @lru_cache
 def get_engine() -> Engine:
     settings = get_settings()
+    connect_args: dict[str, object] = {}
+    url = settings.database_url
+    if not settings.use_prepared_statements:
+        connect_args["prepare_threshold"] = None  # psycopg 3: never prepare
+        # libpq does not understand this PgBouncer hint; it only selects the mode above.
+        url = url.replace("?pgbouncer=true&", "?").replace("&pgbouncer=true", "")
+        url = url.replace("?pgbouncer=true", "")
     return create_engine(
-        settings.database_url,
+        url,
+        connect_args=connect_args,
         pool_size=settings.db_pool_size,
         max_overflow=settings.db_max_overflow,
         pool_pre_ping=True,  # survives idle disconnects from hosted poolers

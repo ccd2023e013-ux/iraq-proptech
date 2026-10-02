@@ -17,6 +17,7 @@ from functools import lru_cache
 import redis
 from fastapi import Request
 
+from app.core.client_ip import client_ip as resolve_client_ip_for
 from app.core.config import get_settings
 from app.core.errors import AppError
 
@@ -77,7 +78,7 @@ def get_rate_limiter() -> RateLimiter:
 
 
 def client_ip(request: Request) -> str:
-    return request.client.host if request.client else "unknown"
+    return resolve_client_ip_for(request)
 
 
 def _digest(value: str) -> str:
