@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Run a CI command; if it fails, publish the tail of its output as a GitHub
-# Actions error annotation so failures are readable from the run summary and
+# Run a CI command; if it fails, publish the tail of its output as GitHub
+# Actions error annotations so failures are readable from the run summary and
 # the REST API (annotations), not only from the raw log.
 #
 # Usage: scripts/ci/annotate.sh "<title>" <command> [args...]
@@ -14,12 +14,20 @@ log="$(mktemp)"
 status=${PIPESTATUS[0]}
 
 if [ "$status" -ne 0 ]; then
-  # Annotation messages must be URL-escaped (%, CR, LF) and stay well under 64 KB.
-  body="$(tail -n 120 "$log" | cut -c1-400)"
-  body="${body//'%'/'%25'}"
-  body="${body//$'\r'/'%0D'}"
-  body="${body//$'\n'/'%0A'}"
-  echo "::error title=${title} (exit ${status})::${body}"
+  # GitHub truncates long annotation messages, so publish the last lines of
+  # output in ordered chunks (max 9 per step), each URL-escaped.
+  chunks="$(mktemp -d)"
+  tail -n 300 "$log" | sed 's/\x1b\[[0-9;]*m//g' | cut -c1-300 | split -C 3500 -d -a 2 - "$chunks/part-"
+  files=("$chunks"/part-*)
+  start=$(( ${#files[@]} > 9 ? ${#files[@]} - 9 : 0 ))
+  for (( i = start; i < ${#files[@]}; i++ )); do
+    body="$(cat "${files[$i]}")"
+    body="${body//'%'/'%25'}"
+    body="${body//$'\r'/'%0D'}"
+    body="${body//$'\n'/'%0A'}"
+    echo "::error title=${title} (exit ${status}) [part $(( i - start + 1 ))]::${body}"
+  done
+  rm -rf "$chunks"
 fi
 
 rm -f "$log"
