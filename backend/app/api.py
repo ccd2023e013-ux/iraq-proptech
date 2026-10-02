@@ -4,7 +4,9 @@ from fastapi import APIRouter
 
 from app.agencies.router import router as agencies_router
 from app.ai.router import router as ai_router
+from app.analytics.router import router as analytics_router
 from app.auth.router import router as auth_router
+from app.billing.router import router as billing_router
 from app.core.config import Settings
 from app.crm.router import router as crm_router
 from app.favorites import router as favorites_router
@@ -36,6 +38,7 @@ def build_api_router(settings: Settings) -> APIRouter:
     api_router.include_router(agencies_router)
     # Before the properties router: '/properties/compare' must not match '/properties/{id}'.
     api_router.include_router(compare_router)
+    api_router.include_router(billing_router)  # before /properties/{id}
     api_router.include_router(properties_router)
     api_router.include_router(search_router)
     api_router.include_router(favorites_router)
@@ -47,6 +50,7 @@ def build_api_router(settings: Settings) -> APIRouter:
     api_router.include_router(ai_router)
     api_router.include_router(moderation_router)
     api_router.include_router(notifications_router)
+    api_router.include_router(analytics_router)
     if settings.dev_tools:
         api_router.include_router(dev_router)
     return api_router

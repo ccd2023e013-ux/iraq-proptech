@@ -45,6 +45,20 @@ def expire_listings() -> dict[str, Any]:
     return _run("expire_listings", jobs.expire_listings)
 
 
+@celery_app.task(name="jobs.purge_analytics_visitors")
+def purge_analytics_visitors() -> dict[str, Any]:
+    from app.analytics.service import purge_visitors
+
+    return _run("purge_analytics_visitors", purge_visitors)
+
+
+@celery_app.task(name="jobs.expire_subscriptions")
+def expire_subscriptions() -> dict[str, Any]:
+    from app.billing.service import expire_subscriptions as run
+
+    return _run("expire_subscriptions", run)
+
+
 celery_app.conf.beat_schedule = {
     "deliver-outbox": {"task": "notifications.deliver", "schedule": 60.0},
     "saved-search-instant": {
@@ -63,5 +77,10 @@ celery_app.conf.beat_schedule = {
         "args": ("WEEKLY",),
     },
     "reminders": {"task": "jobs.reminders", "schedule": 300.0},
+    "purge-analytics-visitors": {
+        "task": "jobs.purge_analytics_visitors",
+        "schedule": crontab(hour=1, minute=5),
+    },
+    "expire-subscriptions": {"task": "jobs.expire_subscriptions", "schedule": crontab(minute=20)},
     "expire-listings": {"task": "jobs.expire_listings", "schedule": crontab(minute=15)},
 }

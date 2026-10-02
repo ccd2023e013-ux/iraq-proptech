@@ -179,4 +179,41 @@ for page in /admin/webhooks /admin/jobs; do
   [ "$code" = "200" ] || fail "admin page $page ($code)"
 done
 
+echo "18. analytics: a visitor view is counted once; dashboards render"
+for _ in 1 2; do
+  code=$(curl -s -o /dev/null -w '%{http_code}' -b "$BUYER_JAR" -X POST "$WEB/api/v1/analytics/property-views/$ID" \
+    -H "X-CSRF-Token: $(csrf "$BUYER_JAR")")
+  [ "$code" = "204" ] || fail "view beacon ($code)"
+done
+curl -fsS -b "$OWNER_JAR" "$WEB/api/v1/analytics/overview" | jq -e '.summary.views == 1 and .summary.inquiries >= 1' >/dev/null \
+  || fail "owner analytics ($(curl -fsS -b "$OWNER_JAR" "$WEB/api/v1/analytics/overview" | jq -c .summary))"
+code=$(curl -s -o /dev/null -w '%{http_code}' -b "$OWNER_JAR" "$WEB/dashboard/analytics")
+[ "$code" = "200" ] || fail "analytics page ($code)"
+curl -fsS -b "$ADMIN_JAR" "$WEB/api/v1/analytics/overview?scope=platform" | jq -e '.platform.searches >= 1' >/dev/null \
+  || fail "platform search statistics"
+code=$(curl -s -o /dev/null -w '%{http_code}' -b "$ADMIN_JAR" "$WEB/admin/analytics")
+[ "$code" = "200" ] || fail "admin analytics page ($code)"
+
+echo "19. demo billing: admin creates a plan, owner promotes the listing via demo checkout"
+curl -fsS -b "$ADMIN_JAR" -X POST "$WEB/api/v1/admin/billing/plans" \
+  -H 'Content-Type: application/json' -H "X-CSRF-Token: $(csrf "$ADMIN_JAR")" \
+  -d "{\"code\":\"smoke-feature-$STAMP\",\"kind\":\"PROMOTION\",\"name_ar\":\"تمييز تجريبي\",\"name_en\":\"Smoke feature\",\"price_amount\":\"1000\",\"currency\":\"IQD\",\"duration_days\":7,\"is_demo\":true}" \
+  | jq -e '.code' >/dev/null || fail "create plan"
+PAY=$(curl -fsS -b "$OWNER_JAR" -X POST "$WEB/api/v1/billing/checkout" \
+  -H 'Content-Type: application/json' -H "X-CSRF-Token: $(csrf "$OWNER_JAR")" \
+  -d "{\"plan_code\":\"smoke-feature-$STAMP\",\"property_id\":\"$ID\"}" | jq -r .payment.id)
+[ -n "$PAY" ] && [ "$PAY" != "null" ] || fail "checkout"
+curl -fsS -b "$OWNER_JAR" "$WEB/billing/demo/$PAY" | grep -q "محاكاة دفع ناجح" || fail "demo checkout page"
+curl -fsS -b "$OWNER_JAR" -X POST "$WEB/api/v1/billing/payments/$PAY/demo-complete" \
+  -H 'Content-Type: application/json' -H "X-CSRF-Token: $(csrf "$OWNER_JAR")" \
+  -d '{"outcome":"SUCCEEDED"}' | jq -e '.status == "SUCCEEDED" and .is_demo == true' >/dev/null || fail "demo payment"
+curl -fsS "$WEB/api/v1/properties/featured" | jq -e --arg id "$ID" 'map(.id) | index($id) != null' >/dev/null \
+  || fail "listing not featured after payment"
+curl -fsS "$WEB/pricing" | grep -q "وضع الدفع التجريبي" || fail "pricing page demo banner"
+for page in /admin/billing /account/billing; do
+  jar="$ADMIN_JAR"; [ "$page" = "/account/billing" ] && jar="$OWNER_JAR"
+  code=$(curl -s -o /dev/null -w '%{http_code}' -b "$jar" "$WEB$page")
+  [ "$code" = "200" ] || fail "page $page ($code)"
+done
+
 echo "LISTING SMOKE OK"

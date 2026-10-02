@@ -42,6 +42,7 @@ WEBHOOK_EVENTS = [
     "report.created",
     "report.resolved",
     "user.registered",
+    "payment.succeeded",
 ]
 
 # Internal domain events → public webhook event names.

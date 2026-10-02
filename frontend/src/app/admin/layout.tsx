@@ -10,6 +10,7 @@ export const dynamic = "force-dynamic";
 
 const ADMIN_SECTIONS = [
   ["/admin", "overview", "analytics.all"],
+  ["/admin/analytics", "analytics", "analytics.all"],
   ["/admin/moderation", "moderation", "properties.moderate"],
   ["/admin/reports", "reports", "reports.review"],
   ["/admin/verification", "verification", "properties.verify"],
@@ -18,6 +19,7 @@ const ADMIN_SECTIONS = [
   ["/admin/ai", "aiUsage", "ai.admin"],
   ["/admin/webhooks", "webhooks", "automation.manage"],
   ["/admin/jobs", "jobs", "automation.manage"],
+  ["/admin/billing", "billing", "billing.manage"],
   ["/admin/settings", "settings", "settings.manage"],
   ["/admin/system", "system", "analytics.all"],
 ] as const;

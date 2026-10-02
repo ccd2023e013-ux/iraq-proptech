@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 
 import { Alert } from "@/components/ui/Alert";
 import { Card } from "@/components/ui/Card";
+import { PromotePanel } from "@/features/billing/PromotePanel";
+import type { BillingConfig, MyBilling, Plan } from "@/features/billing/types";
 import { ListingActions } from "@/features/listings/ListingActions";
 import { ListingForm } from "@/features/listings/ListingForm";
 import { DocumentManager, MediaManager } from "@/features/listings/MediaManager";
@@ -32,9 +34,13 @@ export default async function EditListingPage({ params }: { params: Promise<{ id
   }
   if (!property.can_edit) notFound();
 
-  const [reference, documents] = await Promise.all([
+  const published = property.status === "APPROVED";
+  const [reference, documents, billingConfig, plans, billing] = await Promise.all([
     loadListingReference(),
     serverApiFetch<PropertyDocument[]>(`/api/v1/properties/${property.id}/documents`),
+    published ? serverApiFetch<BillingConfig>("/api/v1/billing/config") : null,
+    published ? serverApiFetch<Plan[]>("/api/v1/billing/plans") : null,
+    published ? serverApiFetch<MyBilling>("/api/v1/me/billing") : null,
   ]);
   const f = dict.listingForm;
 
@@ -67,6 +73,19 @@ export default async function EditListingPage({ params }: { params: Promise<{ id
       <Card title={f.actions}>
         <ListingActions dict={dict} property={property} />
       </Card>
+      {published && billingConfig && plans && billing && (
+        <Card title={dict.billing.promote}>
+          <PromotePanel
+            dict={dict}
+            locale={locale}
+            propertyId={property.id}
+            featuredUntil={property.featured_until}
+            config={billingConfig}
+            plans={plans}
+            credits={billing.subscription?.credits_remaining ?? 0}
+          />
+        </Card>
+      )}
       <Card title={f.media}>
         <MediaManager dict={dict} property={property} />
       </Card>

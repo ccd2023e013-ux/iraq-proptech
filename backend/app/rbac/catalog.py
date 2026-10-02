@@ -102,6 +102,9 @@ class Permission(StrEnum):
     # Automation / integrations
     AUTOMATION_MANAGE = "automation.manage"
 
+    # Billing: plans, prices, refunds (super admins only, like settings)
+    BILLING_MANAGE = "billing.manage"
+
 
 _BUYER = {
     Permission.AGENCIES_CREATE,  # anyone may apply to open an agency (needs verification)
@@ -164,6 +167,7 @@ ROLE_PERMISSIONS: dict[Role, frozenset[Permission]] = {
 
 # Settings changes stay with super admins only.
 assert Permission.SETTINGS_MANAGE not in ROLE_PERMISSIONS[Role.ADMIN]  # noqa: S101
+assert Permission.BILLING_MANAGE not in ROLE_PERMISSIONS[Role.ADMIN]  # noqa: S101
 
 
 def permissions_for(roles: set[Role] | frozenset[Role]) -> frozenset[Permission]:

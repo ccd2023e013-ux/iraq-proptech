@@ -70,6 +70,11 @@ export function PropertyCard({
               ✓ {dict.listing.verified}
             </span>
           )}
+          {card.is_featured && (
+            <span className="rounded-md bg-brand-700 px-2 py-0.5 text-xs font-bold text-white">
+              {dict.listing.promoted}
+            </span>
+          )}
           {card.is_demo && (
             <span className="rounded-md bg-gold-500 px-2 py-0.5 text-xs font-bold text-white">
               {dict.listing.demo}

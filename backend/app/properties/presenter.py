@@ -9,6 +9,7 @@ from __future__ import annotations
 import uuid
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import select
@@ -147,6 +148,7 @@ def to_out(db: Session, prop: Property, principal: Principal | None) -> Property
         db, principal, lister_id=prop.lister_id, agency_id=prop.agency_id, agent_id=prop.agent_id
     )
     out = PropertyOut(
+        featured_until=prop.featured_until,
         id=prop.id,
         reference_code=prop.reference_code,
         title_ar=prop.title_ar,
@@ -208,6 +210,7 @@ def to_out(db: Session, prop: Property, principal: Principal | None) -> Property
 
 def to_cards(db: Session, props: Sequence[Property]) -> list[PropertyCard]:
     ctx = _context(db, props, with_people=False)
+    now = datetime.now(UTC)
     cards = []
     for prop in props:
         agency = ctx.agencies.get(prop.agency_id) if prop.agency_id else None
@@ -241,6 +244,7 @@ def to_cards(db: Session, props: Sequence[Property]) -> list[PropertyCard]:
                 agency_name=agency.name_ar
                 if agency and agency.status == AgencyStatus.VERIFIED
                 else None,
+                is_featured=prop.featured_until is not None and prop.featured_until > now,
             )
         )
     return cards

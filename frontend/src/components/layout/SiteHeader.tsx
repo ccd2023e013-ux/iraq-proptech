@@ -40,6 +40,9 @@ export function SiteHeader({
           <Link href="/map" className="text-sand-700 hover:text-brand-700">
             {dict.nav.map}
           </Link>
+          <Link href="/pricing" className="text-sand-700 hover:text-brand-700">
+            {dict.billing.pricingTitle}
+          </Link>
           {me && (
             <Link href="/favorites" className="text-sand-700 hover:text-brand-700">
               {dict.nav.favorites}

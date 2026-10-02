@@ -309,6 +309,7 @@ class PropertyOut(BaseModel):
     created_at: datetime
     updated_at: datetime
     virtual_tour_url: str | None
+    featured_until: datetime | None = None
     media: list[MediaOut]
     lister: ListerOut
     # Private (owner/agent/agency owner/moderators only)
@@ -349,3 +350,5 @@ class PropertyCard(BaseModel):
     created_at: datetime
     cover_url: str | None
     agency_name: str | None = None
+    # Promoted (paid or plan credit) — always shown with a visible label.
+    is_featured: bool = False

@@ -72,7 +72,7 @@ via `/api/v1/admin/webhooks` (CRUD, `/test`, `/deliveries`, `/events`).
 Events: `listing.created`, `listing.updated`, `listing.published`, `listing.rejected`,
 `listing.suspended`, `listing.expired`, `listing.reported`, `lead.created`, `lead.assigned`,
 `lead.status_changed`, `inquiry.created`, `message.created`, `appointment.scheduled`,
-`report.created`, `report.resolved`, `user.registered`, or `*` for all.
+`report.created`, `report.resolved`, `user.registered`, `payment.succeeded`, or `*` for all.
 
 Request:
 

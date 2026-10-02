@@ -22,6 +22,9 @@ export default async function DashboardPage() {
     )
       ? [{ href: "/dashboard/crm", label: dict.crm.title }]
       : []),
+    ...(["analytics.own", "analytics.agency"].some((p) => hasPermission(me.permissions, p))
+      ? [{ href: "/dashboard/analytics", label: dict.analytics.title }]
+      : []),
     ...([
       "analytics.all",
       "properties.moderate",
@@ -34,6 +37,7 @@ export default async function DashboardPage() {
     { href: "/messages", label: dict.messages.title },
     { href: "/saved-searches", label: dict.savedSearches.title },
     { href: "/dashboard/agency", label: dict.agency.title },
+    { href: "/account/billing", label: dict.billing.myBilling },
     { href: "/account", label: dict.nav.account },
   ];
 

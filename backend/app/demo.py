@@ -159,6 +159,45 @@ def _demo_pois(db: Session, districts: list[tuple[DemoDistrict, District]]) -> i
     return created
 
 
+DEMO_PLANS = [
+    # Example prices for DEMO PAYMENT MODE only — not real offers.
+    dict(
+        code="demo-featured-7d",
+        kind="PROMOTION",
+        name_ar="تمييز إعلان لمدة 7 أيام (تجريبي)",
+        name_en="Feature a listing for 7 days (demo)",
+        price_amount=Decimal("10000"),
+        currency="IQD",
+        duration_days=7,
+        featured_credits=0,
+        sort_order=10,
+    ),
+    dict(
+        code="demo-agency-monthly",
+        kind="SUBSCRIPTION",
+        name_ar="باقة المكاتب الشهرية (تجريبي)",
+        name_en="Agency monthly plan (demo)",
+        price_amount=Decimal("50000"),
+        currency="IQD",
+        duration_days=30,
+        featured_credits=5,
+        sort_order=20,
+    ),
+]
+
+
+def _demo_plans(db: Session) -> int:
+    from app.billing.models import Plan
+
+    created = 0
+    for spec in DEMO_PLANS:
+        if db.execute(select(Plan.id).where(Plan.code == spec["code"])).first() is None:
+            db.add(Plan(**spec, is_active=True, is_demo=True))
+            created += 1
+    db.flush()
+    return created
+
+
 def seed(db: Session, *, listings: int = 40) -> dict[str, int]:
     """Create the demo lister, demo district squares in Basra and demo listings."""
     gov = db.execute(select(Governorate).where(Governorate.code == "BSR")).scalar_one()
@@ -251,6 +290,7 @@ def seed(db: Session, *, listings: int = 40) -> dict[str, int]:
             )
         )
         created += 1
+    plans_created = _demo_plans(db)
     audit.record(
         db,
         "demo.seeded",
@@ -259,7 +299,12 @@ def seed(db: Session, *, listings: int = 40) -> dict[str, int]:
         data={"listings_created": created, "districts": len(districts)},
     )
     db.commit()
-    return {"listings_created": created, "districts": len(districts), "pois_created": pois_created}
+    return {
+        "listings_created": created,
+        "districts": len(districts),
+        "pois_created": pois_created,
+        "plans_created": plans_created,
+    }
 
 
 def reset(db: Session) -> dict[str, int]:

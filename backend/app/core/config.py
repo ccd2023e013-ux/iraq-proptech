@@ -101,6 +101,9 @@ class Settings(BaseSettings):
     # no Celery worker runs, e.g. on a free single-container host).
     notifications_inline: bool = False
 
+    # Analytics day boundaries (minutes from UTC). Iraq is UTC+3 with no DST.
+    analytics_utc_offset_minutes: int = Field(default=180, ge=-720, le=840)
+
     # AI: "mock" is deterministic, offline and free (default). Real providers need a key.
     ai_provider: Literal["mock", "claude", "openai", "gemini"] = "mock"
     ai_model: str | None = None  # provider default when unset
@@ -110,6 +113,11 @@ class Settings(BaseSettings):
     anthropic_api_key: str | None = None
     openai_api_key: str | None = None
     gemini_api_key: str | None = None
+
+    # Payments: "demo" simulates checkout (no money moves, everything flagged DEMO);
+    # "none" disables billing. In production demo payments need an explicit opt-in.
+    payment_provider: Literal["demo", "none"] = "demo"
+    payment_demo_in_production: bool = False
 
     # Development helpers such as the mock outbox endpoint. Forced off in production.
     dev_tools_enabled: bool = True
@@ -152,6 +160,16 @@ class Settings(BaseSettings):
     def dev_tools(self) -> bool:
         """Development-only endpoints (e.g. mock outbox). Never available in production."""
         return self.dev_tools_enabled and not self.is_production
+
+    @property
+    def effective_payment_provider(self) -> str:
+        if (
+            self.payment_provider == "demo"
+            and self.is_production
+            and not self.payment_demo_in_production
+        ):
+            return "none"
+        return self.payment_provider
 
 
 @lru_cache

@@ -2,8 +2,10 @@
 
 from app.agencies.models import Agency, AgencyInvitation, AgencyMember, AgentProfile
 from app.ai.models import AIGeneration
+from app.analytics.models import PropertyViewDaily, PropertyViewVisitor, SearchStatDaily
 from app.audit.models import AuditLog
 from app.auth.models import AuthSession, RefreshToken, VerificationToken
+from app.billing.models import Payment, Plan, Promotion, Subscription
 from app.crm.models import (
     Appointment,
     Conversation,
@@ -76,7 +78,10 @@ __all__ = [
     "Notification",
     "NotificationDelivery",
     "NotificationPreference",
+    "Payment",
+    "Plan",
     "PointOfInterest",
+    "Promotion",
     "Property",
     "PropertyAmenity",
     "PropertyDocument",
@@ -85,11 +90,15 @@ __all__ = [
     "PropertyStatusHistory",
     "PropertyType",
     "PropertyVerification",
+    "PropertyViewDaily",
+    "PropertyViewVisitor",
     "PushSubscription",
     "RefreshToken",
     "Report",
     "RoleRecord",
     "SavedSearch",
+    "SearchStatDaily",
+    "Subscription",
     "SystemSetting",
     "User",
     "UserRole",

@@ -7,7 +7,7 @@ import { getDictionary } from "@/i18n";
 import { getRequestLocale } from "@/i18n/server";
 import { serverApiFetch } from "@/lib/api/server";
 import { getCurrentUser } from "@/lib/auth/session";
-import type { Place, ReferenceItem } from "@/types/property";
+import type { Place, PropertyCard as PropertyCardData, ReferenceItem } from "@/types/property";
 
 // Rendered per request: latest listings and locale come from the live API/cookies.
 export const dynamic = "force-dynamic";
@@ -19,12 +19,15 @@ export default async function HomePage() {
   const locale = await getRequestLocale();
   const dict = getDictionary(locale);
   const l = dict.landing;
-  const [latest, types, governorates, me, favorites] = await Promise.all([
+  const [latest, types, governorates, me, favorites, promoted] = await Promise.all([
     runSearch("sort=newest&page_size=6"),
     serverApiFetch<ReferenceItem[]>("/api/v1/reference/property-types"),
     serverApiFetch<Place[]>("/api/v1/locations/governorates"),
     getCurrentUser(),
     favoriteIds(),
+    serverApiFetch<PropertyCardData[]>("/api/v1/properties/featured?limit=3").catch(
+      () => [] as PropertyCardData[],
+    ),
   ]);
   const name = (p: { name_ar: string; name_en: string }) =>
     locale === "ar" ? p.name_ar : p.name_en;
@@ -84,6 +87,28 @@ export default async function HomePage() {
             ))}
           </ul>
         </section>
+
+        {promoted.length > 0 && (
+          <section aria-labelledby="promoted-heading" className="flex flex-col gap-4">
+            <h2 id="promoted-heading" className="text-xl font-bold text-brand-900">
+              {dict.listing.promoted}
+            </h2>
+            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {promoted.map((card) => (
+                <li key={card.id}>
+                  <PropertyCard
+                    card={card}
+                    dict={dict}
+                    locale={locale}
+                    typeName={typeNames.get(card.property_type_code)}
+                    favorite={favorites.has(card.id)}
+                    signedIn={!!me}
+                  />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         <section aria-labelledby="latest-heading" className="flex flex-col gap-4">
           <div className="flex items-center justify-between">

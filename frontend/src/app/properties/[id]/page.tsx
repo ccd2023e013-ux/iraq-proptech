@@ -6,6 +6,7 @@ import { Alert } from "@/components/ui/Alert";
 import { Card } from "@/components/ui/Card";
 import { Insights } from "@/features/ai/Insights";
 import { ReportButton } from "@/features/admin/ReportButton";
+import { ViewBeacon } from "@/features/analytics/ViewBeacon";
 import { InquiryForm } from "@/features/crm/InquiryForm";
 import { FavoriteButton } from "@/features/properties/FavoriteButton";
 import { Gallery, ShareButton } from "@/features/properties/Gallery";
@@ -131,6 +132,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6">
+      {property.status === "APPROVED" && <ViewBeacon propertyId={property.id} />}
       {property.is_demo && <Alert tone="warning">{p.demoBanner}</Alert>}
       {property.status !== "APPROVED" && (
         <Alert tone="info">{dict.listing.statuses[property.status]}</Alert>

@@ -117,6 +117,7 @@ export interface Property {
   created_at: string;
   updated_at: string;
   virtual_tour_url: string | null;
+  featured_until?: string | null;
   media: Media[];
   lister: Lister;
   exact_location: LatLon | null;
@@ -154,6 +155,7 @@ export interface PropertyCard {
   created_at: string;
   cover_url: string | null;
   agency_name: string | null;
+  is_featured?: boolean;
 }
 
 export interface Page<T> {

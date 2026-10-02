@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, ValidationError
 from sqlalchemy.orm import Session
 
+from app.analytics import service as analytics
 from app.core.errors import AppError
 from app.core.pagination import PageParams, page_params
 from app.db.session import get_db
@@ -66,6 +67,8 @@ def _parse_polygon(value: str | None) -> list[tuple[float, float]] | None:
 
 def _run(db: Session, filters: SearchFilters, params: PageParams) -> SearchResult:
     rows, total = service.search(db, filters, offset=params.offset, limit=params.page_size)
+    if params.page == 1:
+        analytics.record_search(db, filters, total)
     return SearchResult(
         items=to_cards(db, rows),
         total=total,
