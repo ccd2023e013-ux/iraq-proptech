@@ -65,7 +65,8 @@ describe("browser session handling", () => {
   it("sends the CSRF cookie value on unsafe requests only", async () => {
     vi.stubEnv("NEXT_PUBLIC_API_URL", "");
     document.cookie = "csrf_token=tok123; path=/";
-    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(200, {}));
+    // A fresh Response per call: bodies can only be read once.
+    const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(jsonResponse(200, {})));
     vi.stubGlobal("fetch", fetchMock);
 
     await apiFetch("/api/v1/x", { method: "POST", body: {} });
