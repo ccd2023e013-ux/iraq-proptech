@@ -313,6 +313,9 @@ class PropertyOut(BaseModel):
     exact_location: LatLon | None = None
     status_reason: str | None = None
     needs_review: bool | None = None
+    show_phone: bool | None = None
+    allow_whatsapp: bool | None = None
+    agent_id: uuid.UUID | None = None
     can_edit: bool = False
 
 

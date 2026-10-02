@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/Card";
 import { getDictionary } from "@/i18n";
 import { getRequestLocale } from "@/i18n/server";
 import { requireUser } from "@/lib/auth/guard";
+import { hasPermission } from "@/lib/auth/routing";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +13,13 @@ export default async function DashboardPage() {
   const me = await requireUser();
   const dict = getDictionary(await getRequestLocale());
 
-  const links = [{ href: "/account", label: dict.nav.account }];
+  const links = [
+    ...(hasPermission(me.permissions, "properties.create")
+      ? [{ href: "/dashboard/properties", label: dict.myListings.title }]
+      : []),
+    { href: "/dashboard/agency", label: dict.agency.title },
+    { href: "/account", label: dict.nav.account },
+  ];
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6">

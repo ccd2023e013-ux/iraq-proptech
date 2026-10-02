@@ -30,5 +30,11 @@ if [ "$status" -ne 0 ]; then
   rm -rf "$chunks"
 fi
 
+if [ "$status" -eq 0 ] && [ -n "${ANNOTATE_SUMMARY_PATTERN:-}" ]; then
+  # Evidence for reports: publish the result summary line (e.g. "120 passed").
+  summary="$(sed 's/\x1b\[[0-9;]*m//g' "$log" | grep -E "$ANNOTATE_SUMMARY_PATTERN" | tail -n 3 | tr '\n' ' ')"
+  [ -n "$summary" ] && echo "::notice title=${title} summary::${summary}"
+fi
+
 rm -f "$log"
 exit "$status"
