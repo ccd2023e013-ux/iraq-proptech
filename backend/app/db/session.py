@@ -31,6 +31,10 @@ def get_engine() -> Engine:
 
 @lru_cache
 def get_sessionmaker() -> sessionmaker[Session]:
+    # Every entry point that talks to the database (API, worker, CLI, scripts)
+    # gets a session from here, so register all mapped tables first.
+    from app.db import models  # noqa: F401
+
     return sessionmaker(bind=get_engine(), autoflush=False, expire_on_commit=False)
 
 

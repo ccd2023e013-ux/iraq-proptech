@@ -53,3 +53,32 @@ def test_fresh_process_configures_all_mappers() -> None:
         [sys.executable, "-c", code], cwd=BACKEND_DIR, capture_output=True, text=True, check=False
     )
     assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.db
+def test_cli_creates_superadmin_in_a_fresh_process(migrated_db: None) -> None:
+    """Regression: the CLI must register all models too (found by the Docker smoke test)."""
+    import os
+    import uuid
+
+    from sqlalchemy import delete, select
+
+    from app.db.session import get_sessionmaker
+    from app.users.models import User
+
+    email = f"cli-{uuid.uuid4().hex[:8]}@example.com"
+    env = {**os.environ, "SUPERADMIN_PASSWORD": "Cli-Admin-Pass-2026"}
+    result = subprocess.run(  # noqa: S603 - fixed arguments
+        [sys.executable, "-m", "app.cli", "create-superadmin", "--email", email],
+        cwd=BACKEND_DIR,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    with get_sessionmaker()() as db:
+        user = db.execute(select(User).where(User.email == email)).scalar_one()
+        assert "SUPER_ADMIN" in {r.value for r in user.roles}
+        db.execute(delete(User).where(User.id == user.id))  # committed outside the test txn
+        db.commit()
