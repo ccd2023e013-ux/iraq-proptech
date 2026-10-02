@@ -238,7 +238,12 @@ def ai_score(
 ) -> AIEnvelope:
     prop = _visible(db, principal, property_id)
     return service.score_property(
-        db, principal, prop, dict(body.weights), body.wanted_amenities, body.wanted_poi_categories
+        db,
+        principal,
+        prop,
+        {str(k): v for k, v in body.weights.items()},
+        body.wanted_amenities,
+        body.wanted_poi_categories,
     )
 
 

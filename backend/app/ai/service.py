@@ -964,11 +964,11 @@ def similar_properties(
         rows = [(r[0], r[1]) for r in db.execute(stmt.add_columns(distance).limit(200)).all()]
     else:
         rows = [(p, None) for p in db.execute(stmt.limit(200)).scalars()]
-    scored = []
+    scored: list[tuple[float, dict[str, Any]]] = []
     for other, dist in rows:
         score, reasons = _similarity(prop, other, float(dist) if dist is not None else None)
-        scored.append({"property_id": str(other.id), "score": score, "reasons": reasons})
-    scored.sort(key=lambda s: s["score"], reverse=True)
+        scored.append((score, {"property_id": str(other.id), "score": score, "reasons": reasons}))
+    scored.sort(key=lambda pair: pair[0], reverse=True)
     return _analysis(
         db,
         principal,
@@ -976,7 +976,7 @@ def similar_properties(
         kind="ranking",
         methodology="Same type, purpose, currency and city; ranked by price and area ratios, "
         "bedroom difference and distance between public locations.",
-        result={"items": scored[:limit]},
+        result={"items": [item for _, item in scored[:limit]]},
         property_id=prop.id,
         sources=["public listings on this platform"],
     )

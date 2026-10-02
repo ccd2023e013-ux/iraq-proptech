@@ -181,12 +181,12 @@ def parse(query: str, vocabulary: dict[str, Any]) -> dict[str, Any]:
             rf"(?:({_LESS}|{_MORE})\s*)?(\$\s*)?{_NUMBER}\s*{_UNIT}\s*(\$|دولار|دينار|usd|iqd|ورقه)?",
             text,
         ):
-            qualifier, dollar, number, unit, marker = match.groups()
-            if overlaps(match.span()) or not (qualifier or dollar or unit or marker):
+            comparator, dollar, amount_text, unit, marker = match.groups()
+            if overlaps(match.span()) or not (comparator or dollar or unit or marker):
                 continue
             consumed.append(match.span())
-            value = _amount(number, unit)
-            if qualifier and re.fullmatch(_MORE, qualifier):
+            value = _amount(amount_text, unit)
+            if comparator and re.fullmatch(_MORE, comparator):
                 price["min_price"] = value
             else:
                 price["max_price"] = value  # a plain amount reads as a budget ceiling

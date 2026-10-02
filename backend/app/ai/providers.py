@@ -263,14 +263,12 @@ def get_provider(settings: Settings | None = None) -> AIProvider:
     if _override is not None:
         return _override
     settings = settings or get_settings()
-    keys = {
-        "claude": (ClaudeProvider, settings.anthropic_api_key),
-        "openai": (OpenAIProvider, settings.openai_api_key),
-        "gemini": (GeminiProvider, settings.gemini_api_key),
-    }
-    if settings.ai_provider in keys:
-        cls, key = keys[settings.ai_provider]
-        if key:
-            return cls(key, settings.ai_model, settings, None)
-        # Misconfiguration must not take the product down: fall back to mock.
+    # A provider without its key falls back to mock: misconfiguration must not take
+    # the product down.
+    if settings.ai_provider == "claude" and settings.anthropic_api_key:
+        return ClaudeProvider(settings.anthropic_api_key, settings.ai_model, settings, None)
+    if settings.ai_provider == "openai" and settings.openai_api_key:
+        return OpenAIProvider(settings.openai_api_key, settings.ai_model, settings, None)
+    if settings.ai_provider == "gemini" and settings.gemini_api_key:
+        return GeminiProvider(settings.gemini_api_key, settings.ai_model, settings, None)
     return MockAIProvider()
