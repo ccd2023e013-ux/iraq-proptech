@@ -6,7 +6,7 @@
 # GitHub Actions workflow .github/workflows/scheduled-jobs.yml.
 services:
   - type: web
-    name: proptech-api
+    name: iraq-proptech-api
     runtime: docker
     plan: free
     rootDir: backend
@@ -24,10 +24,9 @@ services:
         sync: false
       - key: JWT_SECRET
         generateValue: true
-      - key: FRONTEND_URL            # https://proptech-web.onrender.com (your web service URL)
-        sync: false
-      - key: CORS_ORIGINS            # same value as FRONTEND_URL
-        sync: false
+      # FRONTEND_URL / CORS_ORIGINS are optional here: the browser talks to the
+      # API through the web service's same-origin proxy (no CORS), and email
+      # links need FRONTEND_URL only once a real email provider is configured.
       # Client → Render edge (web) → Next.js → Render edge (api): two appending proxies.
       - key: TRUSTED_PROXY_HOPS
         value: "2"
@@ -38,8 +37,8 @@ services:
       # Media must not live on the ephemeral container disk: use Supabase Storage (S3 API).
       - key: STORAGE_BACKEND
         value: s3
-      - key: S3_BUCKET
-        sync: false
+      - key: S3_BUCKET               # private Supabase Storage bucket
+        value: media
       - key: S3_ENDPOINT_URL         # https://<ref>.supabase.co/storage/v1/s3
         sync: false
       - key: S3_REGION
@@ -54,9 +53,21 @@ services:
         value: demo
       - key: PAYMENT_DEMO_IN_PRODUCTION   # public demo site: simulated checkout, clearly marked DEMO
         value: "true"
+      # Clearly-labelled synthetic Iraqi listings (is_demo) are created/updated in the
+      # background at start-up; idempotent. Set to "off" to stop seeding.
+      - key: DEMO_SEED
+        value: iraq
+      # Password for the seeded demo accounts (admin, agency owner, agent, customer).
+      # Choose a strong one; keep the same value in the GitHub secret DEMO_ACCOUNT_PASSWORD.
+      - key: DEMO_ACCOUNT_PASSWORD
+        sync: false
+      - key: DB_POOL_SIZE            # Supabase free plan: keep connections low
+        value: "3"
+      - key: DB_MAX_OVERFLOW
+        value: "2"
 
   - type: web
-    name: proptech-web
+    name: iraq-proptech-web
     runtime: docker
     plan: free
     rootDir: frontend
@@ -64,7 +75,7 @@ services:
     healthCheckPath: /
     autoDeploy: true
     envVars:
-      - key: API_INTERNAL_URL        # https://proptech-api.onrender.com (read at runtime)
+      - key: API_INTERNAL_URL        # the API service URL, e.g. https://iraq-proptech-api.onrender.com
         sync: false
       - key: MAP_PROVIDER
         value: openfreemap
