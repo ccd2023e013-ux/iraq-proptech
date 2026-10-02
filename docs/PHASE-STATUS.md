@@ -9,8 +9,8 @@ smoke tests) is green on `main`.
 | 1 Foundation | ✅ Complete | `c989590` | [36955865842](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/36955865842) |
 | 2 Authentication + RBAC | ✅ Complete | `ec0c09d` | [36959025895](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/36959025895) |
 | 3 Real estate core | ✅ Complete | `ee0b8c8` | [36960780682](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/36960780682) |
-| 4 Search + discovery | ⏳ In progress | | |
-| 5 GIS + maps | Not started | | |
+| 4 Search + discovery | ✅ Complete | `ef5a719` | [36961539892](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/36961539892) |
+| 5 GIS + maps | ⏳ In progress | | |
 | 6 CRM + leads | Not started | | |
 | 7 AI | Not started | | |
 | 8 Admin + moderation | Not started | | |
@@ -19,6 +19,45 @@ smoke tests) is green on `main`.
 | 11 Temporary cloud deployment | Not started | | |
 | 12 Local PC migration | Not started | | |
 | Final audit + E2E | Not started | | |
+
+---
+
+## Phase 4 — Search + discovery
+
+**Implemented**
+- `normalize_ar()` SQL function (hamza/alef forms, ى→ي, ة→ه, diacritics,
+  tatweel, Arabic-Indic digits) and generated `search_text` /
+  `search_vector` columns with GIN (FTS + trigram) indexes; composite
+  status/price/area indexes.
+- `GET`/`POST /search/properties`: keyword (FTS, typo-tolerant trigram word
+  similarity, location names), location hierarchy, types, purpose, rent
+  period, price range **per currency** (never converted), area, rooms,
+  amenities (all-of), furnishing, condition, verified, demo exclusion,
+  agency/agent, recency, bbox / radius / polygon on the public display point;
+  sorts newest, price, area, relevance, distance; pagination with a deep-page
+  guard; constant query count (no N+1). Unknown filters are rejected.
+- Favorites API (idempotent, public listings only).
+- Web: landing page (hero search, categories, governorates, latest, trust,
+  call to action), results page with filters/sort/pagination, property detail
+  (gallery, declared facts only, privacy-aware location, price history,
+  transparent verification, consented contact, share/save), favorites page,
+  status page.
+
+**Tests**: 18 new backend search tests (Arabic spelling variants, typos,
+location names, every filter, currency isolation, sorting/pagination,
+spatial filters, query-count guard, favorites); frontend tests for URL⇄API
+mapping and hero search; Docker smoke test searches with a spelling variant,
+checks the currency filter, favorites a listing and renders the search,
+detail and favorites pages server-side.
+
+**Errors found and fixed**
+- Price sorting without a currency filter compared IQD and USD amounts
+  directly — now grouped by currency.
+- OpenAPI/docs were exposed in production — now disabled there (tested).
+- A strict-index TypeScript error in a test.
+
+**Known limitations**: relevance ranking is FTS + trigram (no learning to
+rank); saved searches arrive with Phase 9.
 
 ---
 
