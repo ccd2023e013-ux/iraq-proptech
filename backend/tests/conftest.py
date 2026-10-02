@@ -22,10 +22,15 @@ from sqlalchemy.orm import Session
 
 os.environ.setdefault("APP_ENV", "test")
 os.environ.setdefault("LOG_JSON", "false")
+# Tests exercise rate limiting explicitly (tests/test_rate_limit.py); elsewhere
+# it would make results depend on test order.
+os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
+os.environ.setdefault("EMAIL_PROVIDER", "mock")
 
 from app.core.config import get_settings
-from app.db.session import get_engine, get_sessionmaker
+from app.db.session import get_db, get_engine, get_sessionmaker
 from app.main import create_app
+from app.notifications.email import MockEmailProvider, get_email_provider
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 
@@ -73,3 +78,29 @@ def db_session(migrated_db: None) -> Iterator[Session]:
 def client() -> Iterator[TestClient]:
     with TestClient(create_app()) as test_client:
         yield test_client
+
+
+@pytest.fixture
+def api(db_session: Session) -> Iterator[TestClient]:
+    """Test client whose requests share the test's rolled-back DB session."""
+    app = create_app()
+
+    def override() -> Iterator[Session]:
+        try:
+            yield db_session
+        except Exception:
+            db_session.rollback()  # same semantics as the real get_db
+            raise
+
+    app.dependency_overrides[get_db] = override
+    with TestClient(app) as test_client:
+        yield test_client
+
+
+@pytest.fixture(autouse=True)
+def mock_outbox() -> Iterator[MockEmailProvider]:
+    provider = get_email_provider()
+    assert isinstance(provider, MockEmailProvider)
+    provider.clear()
+    yield provider
+    provider.clear()

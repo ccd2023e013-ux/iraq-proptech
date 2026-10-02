@@ -11,7 +11,7 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.requests import Request
 from starlette.responses import Response
 
-from app.core.logging import request_id_var
+from app.core.logging import client_ip_var, request_id_var, user_agent_var, user_id_var
 
 logger = logging.getLogger("app.request")
 
@@ -26,6 +26,9 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
         inbound = request.headers.get(REQUEST_ID_HEADER, "")
         request_id = inbound if _VALID_REQUEST_ID.match(inbound) else uuid.uuid4().hex
         token = request_id_var.set(request_id)
+        ip_token = client_ip_var.set(request.client.host if request.client else None)
+        ua_token = user_agent_var.set((request.headers.get("user-agent") or "")[:255] or None)
+        uid_token = user_id_var.set(None)
         started = time.perf_counter()
         status_code = 500
         try:
@@ -40,10 +43,14 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
                     "method": request.method,
                     "path": request.url.path,  # path only: query strings may hold PII
                     "status": status_code,
+                    "user_id": getattr(request.state, "user_id", None),
                     "duration_ms": round((time.perf_counter() - started) * 1000, 2),
                 },
             )
             request_id_var.reset(token)
+            client_ip_var.reset(ip_token)
+            user_agent_var.reset(ua_token)
+            user_id_var.reset(uid_token)
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):

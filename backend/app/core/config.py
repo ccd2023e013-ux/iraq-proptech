@@ -48,6 +48,32 @@ class Settings(BaseSettings):
     jwt_secret: str = _INSECURE_DEFAULT_SECRET
     jwt_access_ttl_minutes: int = Field(default=15, ge=1, le=24 * 60)
     jwt_refresh_ttl_days: int = Field(default=30, ge=1, le=365)
+    jwt_issuer: str = "iraq-proptech"
+    jwt_audience: str = "iraq-proptech-api"
+
+    # Browser session cookies. None → Secure only in production (HTTPS).
+    cookie_secure: bool | None = None
+    cookie_domain: str | None = None
+
+    # Public URL of the web app, used to build links in emails.
+    frontend_url: str = "http://localhost:3000"
+
+    email_verification_ttl_hours: int = Field(default=48, ge=1, le=24 * 14)
+    password_reset_ttl_minutes: int = Field(default=30, ge=5, le=24 * 60)
+
+    rate_limit_enabled: bool = True
+
+    # Notifications: "mock" logs messages and keeps them in an in-memory outbox.
+    email_provider: Literal["mock", "smtp"] = "mock"
+    email_from: str = "Iraq PropTech <no-reply@iraq-proptech.local>"
+    smtp_host: str | None = None
+    smtp_port: int = 587
+    smtp_username: str | None = None
+    smtp_password: str | None = None
+    smtp_starttls: bool = True
+
+    # Development helpers such as the mock outbox endpoint. Forced off in production.
+    dev_tools_enabled: bool = True
 
     cors_origins: Annotated[list[str], NoDecode] = Field(
         default_factory=lambda: ["http://localhost:3000"]
@@ -78,6 +104,15 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.app_env == "production"
+
+    @property
+    def secure_cookies(self) -> bool:
+        return self.is_production if self.cookie_secure is None else self.cookie_secure
+
+    @property
+    def dev_tools(self) -> bool:
+        """Development-only endpoints (e.g. mock outbox). Never available in production."""
+        return self.dev_tools_enabled and not self.is_production
 
 
 @lru_cache

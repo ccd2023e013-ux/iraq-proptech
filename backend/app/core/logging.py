@@ -15,6 +15,9 @@ from typing import Any
 
 request_id_var: ContextVar[str | None] = ContextVar("request_id", default=None)
 user_id_var: ContextVar[str | None] = ContextVar("user_id", default=None)
+# Used by the audit log; not added to log lines (IP addresses are personal data).
+client_ip_var: ContextVar[str | None] = ContextVar("client_ip", default=None)
+user_agent_var: ContextVar[str | None] = ContextVar("user_agent", default=None)
 
 _REDACT_KEYS = ("password", "token", "secret", "authorization", "api_key", "cookie")
 _STANDARD_ATTRS = set(logging.LogRecord("", 0, "", 0, "", None, None).__dict__.keys()) | {

@@ -35,9 +35,16 @@ def get_sessionmaker() -> sessionmaker[Session]:
 
 
 def get_db() -> Iterator[Session]:
-    """FastAPI dependency: one session per request, always closed."""
+    """FastAPI dependency: one session per request.
+
+    Any exception (including handled API errors) rolls back uncommitted work,
+    so a failed request never leaves partial changes behind.
+    """
     session = get_sessionmaker()()
     try:
         yield session
+    except Exception:
+        session.rollback()
+        raise
     finally:
         session.close()
