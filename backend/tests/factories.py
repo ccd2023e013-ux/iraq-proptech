@@ -29,7 +29,7 @@ def make_user(
     status: UserStatus = UserStatus.ACTIVE,
 ) -> User:
     user = User(
-        email=email or f"user-{uuid.uuid4().hex[:10]}@example.test",
+        email=email or f"user-{uuid.uuid4().hex[:10]}@example.com",
         full_name=name,
         password_hash=hash_password(password),
         preferred_locale="ar",

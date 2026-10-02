@@ -23,7 +23,7 @@ def rate_limits_on() -> Iterator[None]:
 
 
 def test_login_is_rate_limited_per_account(api: TestClient, rate_limits_on: None) -> None:
-    email = f"target-{uuid.uuid4().hex[:8]}@example.test"
+    email = f"target-{uuid.uuid4().hex[:8]}@example.com"
     statuses = [
         api.post(
             "/api/v1/auth/login", json={"email": email, "password": "Wrong-pass-123"}
@@ -35,7 +35,7 @@ def test_login_is_rate_limited_per_account(api: TestClient, rate_limits_on: None
 
 
 def test_forgot_password_is_rate_limited_per_account(api: TestClient, rate_limits_on: None) -> None:
-    email = f"target-{uuid.uuid4().hex[:8]}@example.test"
+    email = f"target-{uuid.uuid4().hex[:8]}@example.com"
     statuses = [
         api.post("/api/v1/auth/password/forgot", json={"email": email}).status_code
         for _ in range(4)

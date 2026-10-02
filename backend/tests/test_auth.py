@@ -25,7 +25,7 @@ BEARER = {"X-Auth-Transport": "bearer"}
 
 def _register(api: TestClient, **overrides: object) -> dict:
     payload = {
-        "email": "Sara.Basri@Example.TEST",
+        "email": "Sara.Basri@Example.COM",
         "password": DEFAULT_PASSWORD,
         "full_name": "  سارة   البصري ",
         "locale": "ar",
@@ -45,13 +45,13 @@ def test_register_creates_customer_and_sends_verification(
     body = response.json()
     assert body["verification_required"] is True
     user = body["user"]
-    assert user["email"] == "sara.basri@example.test"  # normalized
+    assert user["email"] == "sara.basri@example.com"  # normalized
     assert user["full_name"] == "سارة البصري"
     assert user["roles"] == ["CUSTOMER"]
     assert user["email_verified"] is False
     assert "password_hash" not in user
     message = mock_outbox.outbox()[-1]
-    assert message.to == "sara.basri@example.test"
+    assert message.to == "sara.basri@example.com"
     assert "/verify-email?token=" in message.text
 
 
@@ -69,7 +69,7 @@ def test_register_cannot_choose_privileged_role(api: TestClient, role: str) -> N
 
 def test_register_duplicate_email_is_case_insensitive(api: TestClient) -> None:
     assert _register(api)["response"].status_code == 201
-    response = _register(api, email="SARA.BASRI@example.test")["response"]
+    response = _register(api, email="SARA.BASRI@example.com")["response"]
     assert response.status_code == 409
     assert response.json()["error"]["code"] == "EMAIL_TAKEN"
 
@@ -85,7 +85,7 @@ def test_register_rejects_weak_password(api: TestClient) -> None:
 def test_register_normalizes_iraqi_phone_and_rejects_duplicates(api: TestClient) -> None:
     first = _register(api, phone="0770 123 4567")["response"]
     assert first.json()["user"]["phone"] == "+9647701234567"
-    second = _register(api, email="other@example.test", phone="+964 770 123 4567")["response"]
+    second = _register(api, email="other@example.com", phone="+964 770 123 4567")["response"]
     assert second.status_code == 409
     assert second.json()["error"]["code"] == "PHONE_TAKEN"
 
@@ -105,7 +105,7 @@ def test_email_verification_is_single_use(
     ok = api.post("/api/v1/auth/verify-email", json={"token": token})
     assert ok.status_code == 200
     user = db_session.execute(
-        select(User).where(User.email == "sara.basri@example.test")
+        select(User).where(User.email == "sara.basri@example.com")
     ).scalar_one()
     assert user.email_verified_at is not None
 
@@ -153,7 +153,7 @@ def test_login_wrong_password_and_unknown_email_look_identical(
     user = make_user(db_session)
     wrong = api.post("/api/v1/auth/login", json={"email": user.email, "password": "Wrong-pass-123"})
     unknown = api.post(
-        "/api/v1/auth/login", json={"email": "nobody@example.test", "password": "Wrong-pass-123"}
+        "/api/v1/auth/login", json={"email": "nobody@example.com", "password": "Wrong-pass-123"}
     )
     assert wrong.status_code == unknown.status_code == 401
     assert wrong.json()["error"]["code"] == unknown.json()["error"]["code"] == "INVALID_CREDENTIALS"
@@ -331,7 +331,7 @@ def test_cookie_refresh_rotates_cookies(api: TestClient, db_session: Session) ->
 def test_forgot_password_does_not_reveal_accounts(
     api: TestClient, mock_outbox: MockEmailProvider
 ) -> None:
-    response = api.post("/api/v1/auth/password/forgot", json={"email": "ghost@example.test"})
+    response = api.post("/api/v1/auth/password/forgot", json={"email": "ghost@example.com"})
     assert response.status_code == 202
     assert mock_outbox.outbox() == []
 
