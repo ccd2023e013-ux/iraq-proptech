@@ -1,0 +1,104 @@
+# Base stack — shared by every environment.
+#   docker compose up                       → base (production-like images)
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up      → dev (hot reload)
+#   docker compose -f docker-compose.yml -f docker-compose.production.yml up -d → production PC
+#   add `--profile automation` to also start n8n (optional, never required by the app)
+
+name: proptech
+
+x-backend-env: &backend-env
+  APP_ENV: ${APP_ENV:-development}
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  LOG_JSON: ${LOG_JSON:-true}
+  DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-proptech}:${POSTGRES_PASSWORD:-proptech}@db:5432/${POSTGRES_DB:-proptech}
+  REDIS_URL: redis://redis:6379/0
+  JWT_SECRET: ${JWT_SECRET:-change-me-in-every-environment}
+  CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-proptech}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-proptech}
+      POSTGRES_DB: ${POSTGRES_DB:-proptech}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    build: ./backend
+    command: ["migrate"]
+    environment: *backend-env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  backend:
+    build: ./backend
+    command: ["api"]
+    environment: *backend-env
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  worker:
+    build: ./backend
+    command: ["worker"]
+    environment: *backend-env
+    healthcheck:
+      disable: true
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-}
+    environment:
+      API_INTERNAL_URL: http://backend:8000
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      - backend
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    profiles: ["automation"]
+    environment:
+      GENERIC_TIMEZONE: Asia/Baghdad
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_SECURE_COOKIE: ${N8N_SECURE_COOKIE:-false}
+    ports:
+      - "${N8N_PORT:-5678}:5678"
+    volumes:
+      - n8ndata:/home/node/.n8n
+
+volumes:
+  pgdata:
+  redisdata:
+  n8ndata:

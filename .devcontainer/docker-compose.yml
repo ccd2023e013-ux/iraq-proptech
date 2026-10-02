@@ -1,0 +1,34 @@
+# Codespaces / Dev Container stack: a workspace container plus the same
+# PostGIS and Redis images used in production. Nothing paid, nothing external.
+
+services:
+  workspace:
+    image: mcr.microsoft.com/devcontainers/python:1-3.12-bookworm
+    volumes:
+      - ..:/workspaces/${LOCAL_WORKSPACE_FOLDER_BASENAME:-iraq-proptech}:cached
+    command: sleep infinity
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: proptech
+      POSTGRES_PASSWORD: proptech
+      POSTGRES_DB: proptech
+    volumes:
+      - devcontainer-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U proptech -d proptech"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+volumes:
+  devcontainer-pgdata:

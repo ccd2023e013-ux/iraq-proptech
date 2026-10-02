@@ -1,0 +1,35 @@
+# Development overrides: source mounted, auto-reload, database/redis ports exposed.
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  db:
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+
+  redis:
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+
+  backend:
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    environment:
+      LOG_JSON: "false"
+    volumes:
+      - ./backend:/app
+
+  worker:
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build:
+      target: deps
+    command: ["npx", "next", "dev", "--port", "3000", "--hostname", "0.0.0.0"]
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-}
+      API_INTERNAL_URL: http://backend:8000
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
