@@ -108,7 +108,7 @@ jobs:
       - name: Build images
         run: $ANNOTATE "docker build" docker compose build
       - name: Start stack
-        run: docker compose up -d --wait --wait-timeout 180 db redis backend worker frontend
+        run: $ANNOTATE "compose up" bash scripts/ci/wait-for-stack.sh
       - name: API readiness (direct)
         run: |
           curl -fsS http://localhost:8000/api/v1/health/ready | tee /tmp/ready.json
@@ -128,7 +128,7 @@ jobs:
           | grep -q pong
       - name: Logs on failure
         if: failure()
-        run: docker compose logs --no-color --tail=200
+        run: $ANNOTATE "compose logs" bash -c 'docker compose ps -a; docker compose logs --no-color --tail=80; exit 1'
       - name: Tear down
         if: always()
         run: docker compose down -v
