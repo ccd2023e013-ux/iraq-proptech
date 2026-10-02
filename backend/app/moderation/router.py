@@ -358,9 +358,9 @@ def resolve_report(
         r.resolved_by_id = principal.id
         r.resolved_at = now
     if report.target_type == ReportTarget.PROPERTY and body.outcome == "DISMISSED":
-        prop = db.get(Property, report.target_id)
-        if prop is not None and prop.status == "APPROVED":
-            prop.needs_review = False
+        flagged = db.get(Property, report.target_id)
+        if flagged is not None and flagged.status == "APPROVED":
+            flagged.needs_review = False
     audit.record(
         db,
         f"report.{body.outcome.lower()}",

@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Sans, IBM_Plex_Sans_Arabic } from "next/font/google";
 import type { ReactNode } from "react";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -10,21 +9,16 @@ import { getRequestLocale } from "@/i18n/server";
 import { serverApiFetch } from "@/lib/api/server";
 import { getCurrentUser } from "@/lib/auth/session";
 
+// Fonts are self-hosted from npm (@fontsource): builds work offline and no
+// third-party font CDN is contacted at build or run time.
+import "@fontsource/ibm-plex-sans-arabic/400.css";
+import "@fontsource/ibm-plex-sans-arabic/500.css";
+import "@fontsource/ibm-plex-sans-arabic/600.css";
+import "@fontsource/ibm-plex-sans-arabic/700.css";
+import "@fontsource/ibm-plex-sans/400.css";
+import "@fontsource/ibm-plex-sans/600.css";
 import "./globals.css";
 
-const arabic = IBM_Plex_Sans_Arabic({
-  subsets: ["arabic"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-arabic",
-  display: "swap",
-});
-
-const latin = IBM_Plex_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-latin",
-  display: "swap",
-});
 
 export async function generateMetadata(): Promise<Metadata> {
   const dict = getDictionary(await getRequestLocale());
@@ -57,7 +51,6 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     <html
       lang={locale}
       dir={directionOf(locale)}
-      className={`${arabic.variable} ${latin.variable}`}
     >
       <body className="min-h-dvh antialiased">
         {announcement && (
