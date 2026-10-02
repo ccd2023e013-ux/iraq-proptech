@@ -20,7 +20,12 @@ REV="$(cat "$IN/alembic_revision.txt")"
 echo "1/4 recreate database at revision $REV"
 compose stop backend worker frontend >/dev/null 2>&1 || true
 compose up -d db
-until pg_local pg_isready -U "$DB_USER" -d "$DB_NAME" >/dev/null 2>&1; do sleep 2; done
+# TCP check: a fresh volume first runs a temporary socket-only init server.
+for _ in $(seq 1 90); do
+  pg_local pg_isready -h 127.0.0.1 -U "$DB_USER" -d "$DB_NAME" >/dev/null 2>&1 && break
+  sleep 2
+done
+pg_local pg_isready -h 127.0.0.1 -U "$DB_USER" -d "$DB_NAME" >/dev/null || die "database did not become ready"
 pg_local psql -U "$DB_USER" -d postgres -v ON_ERROR_STOP=1 \
   -c "DROP DATABASE IF EXISTS \"$DB_NAME\" WITH (FORCE)" -c "CREATE DATABASE \"$DB_NAME\""
 compose run --rm --no-deps -T --entrypoint alembic migrate upgrade "$REV"

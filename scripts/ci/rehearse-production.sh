@@ -44,7 +44,7 @@ echo "== C. cloud database → PC"
 docker rm -f cloud-db >/dev/null 2>&1 || true
 docker run -d --name cloud-db -p 55432:5432 -e POSTGRES_PASSWORD=cloudpw \
   -e POSTGRES_DB=postgres postgis/postgis:16-3.4 >/dev/null
-until docker exec cloud-db pg_isready -U postgres >/dev/null 2>&1; do sleep 2; done
+until docker exec cloud-db pg_isready -h 127.0.0.1 -U postgres >/dev/null 2>&1; do sleep 2; done
 sleep 3
 CLOUD="postgresql://postgres:cloudpw@localhost:55432/postgres"
 image="proptech-backend"  # built by `docker compose build` (project "proptech")
