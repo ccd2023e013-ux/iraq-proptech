@@ -23,7 +23,13 @@ psql_local -Atc "SELECT string_agg(format('%I.%I', schemaname, tablename), ', ')
   AND tablename NOT IN ('alembic_version','spatial_ref_sys')" > /tmp/tables.txt
 psql_local -c "TRUNCATE $(cat /tmp/tables.txt) RESTART IDENTITY CASCADE"
 echo "Loading data…"
-PG_NET_MOUNT="$(cd "$IN" && pwd)" pg_net pg_restore --dbname "${POSTGRES_DB:-proptech}" --data-only --disable-triggers \
-  --single-transaction --exit-on-error /in/data.dump
+# v17 client tools read archives from any 15–17 server, but pg_restore 17
+# always emits "SET transaction_timeout", which a PostgreSQL 16 server rejects:
+# render the archive as SQL, drop that one setting, and load it in one
+# transaction (any error aborts and leaves the tables empty).
+PG_NET_MOUNT="$(cd "$IN" && pwd)" pg_net sh -c \
+  'set -eo pipefail; pg_restore --data-only --disable-triggers -f - /in/data.dump \
+     | grep -v "^SET transaction_timeout = 0;\$" \
+     | psql -q -v ON_ERROR_STOP=1 --single-transaction >/dev/null'
 if [ "${3:-}" != "--no-start" ]; then compose up -d; fi
 echo "Imported. Next: scripts/ops/verify.sh, then copy media (docs/MIGRATE-TO-LOCAL-PC.md)."

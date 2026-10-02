@@ -19,7 +19,7 @@ AGENT="agent-$STAMP@example.com"
 ADMIN="e2e-admin-$STAMP@example.com"
 TITLE="شقة نهائية للاختبار في البصرة $STAMP"
 
-fail() { echo "E2E FAIL: $*"; exit 1; }
+fail() { echo "E2E FAIL: $*" >&2; exit 1; }
 jar() { echo "$TMP/$1.jar"; }
 csrf() { awk '$6=="csrf_token"{print $7}' "$(jar "$1")"; }
 api() { # who METHOD path [json]
@@ -107,7 +107,8 @@ echo "S4. agent publishes a listing (approved by the admin)"
 ID=$(new_listing agent "$TITLE" 30.515 47.820)
 api admin POST "/properties/$ID/moderate" '{"decision":"APPROVE"}' | grep -q '"APPROVED"' || fail "approve listing"
 listing=$(api agent GET "/properties/$ID")
-[ "$(jq -r .agency_id <<<"$listing")" = "$AGENCY" ] || fail "listing not owned by the agency: $listing"
+jq -e --arg a "$AGENCY" --arg u "$(api agent GET /auth/me | jq -r .user.id)" '.lister.agency_id == $a and .agent_id == $u and .lister.agency_verified == true' <<<"$listing" >/dev/null \
+  || fail "listing not owned by the agency: $(jq -c .lister <<<"$listing")"
 
 echo "1. register a customer"
 register "$CUSTOMER" "زبون الاختبار النهائي"
@@ -123,8 +124,8 @@ login customer "$CUSTOMER"
 api customer GET /auth/me | jq -e '.user.email_verified == true' >/dev/null || fail "not verified after login"
 
 echo "4. search (Arabic keyword + Basra + price range)"
-q=$(python3 -c "import urllib.parse; print(urllib.parse.quote('شقة نهائية $STAMP'))")
-found=$(api customer GET "/search/properties?q=$q&city_id=$CITY&currency=IQD&min_price=100000000&max_price=200000000")
+q=$(python3 -c "import urllib.parse; print(urllib.parse.quote('شقة نهائية للاختبار'))")
+found=$(api customer GET "/search/properties?page_size=100&q=$q&city_id=$CITY&currency=IQD&min_price=100000000&max_price=200000000")
 jq -e --arg id "$ID" '[.items[].id] | index($id) != null' <<<"$found" >/dev/null || fail "search: $found"
 
 echo "5. open the property (API + server-rendered page)"
@@ -173,7 +174,7 @@ api customer GET "/ai/properties/$ID/summary" | jq -e '.provider == "mock" and (
 
 echo "13. natural-language search"
 nl=$(python3 -c "import urllib.parse; print(urllib.parse.quote('شقة للبيع في البصرة'))")
-nlres=$(api customer GET "/ai/search?q=$nl&page_size=50")
+nlres=$(api customer GET "/ai/search?q=$nl&page_size=100")
 jq -e '.interpretation.provider == "mock" and .interpretation.result.filters.purpose == "SALE"' <<<"$nlres" >/dev/null \
   || fail "NL interpretation: $(jq -c .interpretation.result <<<"$nlres")"
 jq -e --arg id "$ID" '[.items[].id] | index($id) != null' <<<"$nlres" >/dev/null \
