@@ -823,7 +823,7 @@ def update_task(db: Session, principal: Principal, task: CrmTask, data: TaskUpda
         lead = db.get(Lead, task.lead_id) if task.lead_id else None
         if lead is None or not policies.can_assign_lead(db, principal, lead):
             raise PermissionDeniedError("You cannot reassign this task")
-        _validate_assignee(db, lead, data.assigned_to_id)  # type: ignore[arg-type]
+        _validate_assignee(db, lead, data.assigned_to_id)
         task.assigned_to_id = data.assigned_to_id
     for field in ("title", "description", "due_at", "priority"):
         if field in fields and (field != "title" or data.title):

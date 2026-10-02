@@ -418,17 +418,16 @@ def _conversation_out(
             .order_by(Message.conversation_id, Message.created_at.desc())
         )
     }
-    unread = dict(
-        db.execute(
-            select(Message.conversation_id, func.count())
-            .where(
-                Message.conversation_id.in_(ids),
-                Message.read_at.is_(None),
-                Message.sender_id != principal.id,
-            )
-            .group_by(Message.conversation_id)
-        ).all()
-    )
+    unread_rows = db.execute(
+        select(Message.conversation_id, func.count())
+        .where(
+            Message.conversation_id.in_(ids),
+            Message.read_at.is_(None),
+            Message.sender_id != principal.id,
+        )
+        .group_by(Message.conversation_id)
+    ).all()
+    unread: dict[uuid.UUID, int] = {row[0]: int(row[1]) for row in unread_rows}
     prop_ids = {c.property_id for c in convs if c.property_id}
     props = (
         {p.id: p for p in db.execute(select(Property).where(Property.id.in_(prop_ids))).scalars()}
