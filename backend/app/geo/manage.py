@@ -282,7 +282,7 @@ def resolve(
     method: Literal["boundary", "nearest_city_centroid", "none"] = "boundary"
     distance_km: float | None = None
     if city is None:
-        geog = func.Geography(pt)
+        geog = func.Geography(func.ST_GeomFromText(f"POINT({lon} {lat})", SRID))
         row = db.execute(
             select(City, func.ST_Distance(func.Geography(City.centroid), geog) / 1000.0)
             .where(City.centroid.is_not(None), City.is_active.is_(True))

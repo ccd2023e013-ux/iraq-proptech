@@ -22,6 +22,7 @@ import { type RawParams, first, toApiQuery, withParam } from "@/lib/search";
 import type { PropertyCard } from "@/types/property";
 
 import { type MapFeatureCollection, PropertyMap } from "./PropertyMap";
+import type { FeatureCollection } from "geojson";
 
 export interface MapSearchProps {
   config: MapConfig;
@@ -30,7 +31,7 @@ export interface MapSearchProps {
   params: RawParams;
   items: PropertyCard[];
   total: number;
-  boundaries: GeoJSON.FeatureCollection | null;
+  boundaries: FeatureCollection | null;
   initialBbox: Bbox;
 }
 

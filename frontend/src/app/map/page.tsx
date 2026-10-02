@@ -11,6 +11,7 @@ import { type Bbox } from "@/lib/map/geo";
 import { resolveMapConfig } from "@/lib/map/provider";
 import { type RawParams, first, toApiQuery } from "@/lib/search";
 import type { Place, ReferenceItem } from "@/types/property";
+import type { Feature, FeatureCollection } from "geojson";
 
 export const dynamic = "force-dynamic";
 
@@ -19,12 +20,12 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: dict.map.title };
 }
 
-async function boundariesFor(params: RawParams): Promise<GeoJSON.FeatureCollection | null> {
+async function boundariesFor(params: RawParams): Promise<FeatureCollection | null> {
   const city = first(params.city_id);
   const district = first(params.district_id);
   try {
     if (district) {
-      const feature = await serverApiFetch<GeoJSON.Feature>(
+      const feature = await serverApiFetch<Feature>(
         `/api/v1/locations/districts/${encodeURIComponent(district)}/geojson`,
       );
       return {
@@ -33,7 +34,7 @@ async function boundariesFor(params: RawParams): Promise<GeoJSON.FeatureCollecti
       };
     }
     if (city) {
-      return await serverApiFetch<GeoJSON.FeatureCollection>(
+      return await serverApiFetch<FeatureCollection>(
         `/api/v1/locations/boundaries?level=districts&parent_id=${encodeURIComponent(city)}`,
       );
     }

@@ -17,10 +17,11 @@ import type { Locale } from "@/i18n/config";
 import { formatCompactPrice } from "@/lib/format";
 import { type Bbox, closedRing, type LonLat, readBboxProperty } from "@/lib/map/geo";
 import type { MapConfig } from "@/lib/map/provider";
+import type { Feature, FeatureCollection, Point } from "geojson";
 
 export interface MapFeatureCollection {
   type: "FeatureCollection";
-  features: GeoJSON.Feature[];
+  features: Feature[];
   meta?: { mode: "points" | "clusters"; total: number; limit: number };
 }
 
@@ -30,7 +31,7 @@ export interface PropertyMapProps {
   locale: Locale;
   initialBbox: Bbox;
   data: MapFeatureCollection | null;
-  boundaries: GeoJSON.FeatureCollection | null;
+  boundaries: FeatureCollection | null;
   polygon: LonLat[] | null;
   drawing: LonLat[] | null;
   highlightId: string | null;
@@ -39,7 +40,7 @@ export interface PropertyMapProps {
   onDrawPoint: (point: LonLat) => void;
 }
 
-const EMPTY: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: [] };
+const EMPTY: FeatureCollection = { type: "FeatureCollection", features: [] };
 let rtlPluginRequested = false;
 
 /** Text-only popup content (never innerHTML with listing data). */
@@ -242,7 +243,7 @@ export function PropertyMap(props: PropertyMapProps) {
               const zoom = await source.getClusterExpansionZoom(
                 Number(feature.properties?.cluster_id),
               );
-              const geometry = feature.geometry as GeoJSON.Point;
+              const geometry = feature.geometry as Point;
               map.easeTo({ center: geometry.coordinates as [number, number], zoom });
             },
           );
@@ -250,7 +251,7 @@ export function PropertyMap(props: PropertyMapProps) {
             const feature = event.features?.[0];
             if (!feature || !map) return;
             const p = (feature.properties ?? {}) as Record<string, unknown>;
-            const geometry = feature.geometry as GeoJSON.Point;
+            const geometry = feature.geometry as Point;
             new maplibre.Popup({ closeButton: true, maxWidth: "260px" })
               .setLngLat(geometry.coordinates as [number, number])
               .setDOMContent(popupNode(p, latest.current.dict, latest.current.locale))
@@ -293,7 +294,7 @@ export function PropertyMap(props: PropertyMapProps) {
     const map = mapRef.current;
     if (!ready || !map) return;
     (map.getSource("properties") as GeoJSONSource | undefined)?.setData(
-      (props.data as GeoJSON.FeatureCollection | null) ?? EMPTY,
+      (props.data as FeatureCollection | null) ?? EMPTY,
     );
   }, [ready, props.data]);
 
@@ -307,7 +308,7 @@ export function PropertyMap(props: PropertyMapProps) {
     const map = mapRef.current;
     if (!ready || !map) return;
     const points = props.drawing ?? props.polygon ?? [];
-    const features: GeoJSON.Feature[] = points.map((coordinates) => ({
+    const features: Feature[] = points.map((coordinates) => ({
       type: "Feature",
       properties: {},
       geometry: { type: "Point", coordinates },
