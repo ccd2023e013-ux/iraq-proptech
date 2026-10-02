@@ -313,6 +313,8 @@ def ensure_accounts(db: Session, password: str | None) -> dict[str, uuid.UUID]:
             city_id=basra.id,
             status=AgencyStatus.VERIFIED,
             verified_at=datetime.now(UTC),
+            created_by_id=ids["demo.agency@example.com"],
+            is_demo=True,
         )
         db.add(agency)
         db.flush()

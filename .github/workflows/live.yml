@@ -1,0 +1,181 @@
+name: Live site
+
+# Verifies the DEPLOYED site (Render + Supabase) — never the CI copy:
+#   database  read-only audit of the live database (PostGIS, migrations, schema, DEMO data)
+#   acceptance  customer/agent/agency/admin flows through the public URL
+#   browser   real Chromium: RTL + phone layout, language switch, map draws, AI summary
+#   security  HTTPS, headers/CSP, CORS, cookies, exposure, traversal, IP attribution, rate limit
+#   backup    export the live database and restore it into a fresh stack (never writes to it)
+#
+# Runs after CI succeeds on main (waits until Render serves that commit), on demand, and
+# daily. Public URLs live in deploy/live.env; credentials only in GitHub secrets:
+#   DEMO_ACCOUNT_PASSWORD  (same value as on Render)   SUPABASE_DB_URL (session pooler URI)
+#   optional for media backup: S3_ENDPOINT_URL, S3_REGION, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      skip_backup:
+        description: "Skip the backup/restore job"
+        type: boolean
+        default: false
+  schedule:
+    - cron: "41 3 * * *"
+
+concurrency:
+  group: live-site
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  ANNOTATE: ${{ github.workspace }}/scripts/ci/annotate.sh
+
+jobs:
+  config:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      web: ${{ steps.urls.outputs.web }}
+      api: ${{ steps.urls.outputs.api }}
+      sha: ${{ steps.urls.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - id: urls
+        run: |
+          . deploy/live.env
+          echo "web=${LIVE_WEB_URL:-}" >> "$GITHUB_OUTPUT"
+          echo "api=${LIVE_API_URL:-}" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          if [ -z "${LIVE_WEB_URL:-}" ] || [ -z "${LIVE_API_URL:-}" ]; then
+            echo "::notice title=live site summary::No live URLs in deploy/live.env yet — nothing to verify."
+          fi
+
+  deployed:
+    needs: config
+    if: needs.config.outputs.web != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Wait until Render serves this commit
+        env:
+          WEB: ${{ needs.config.outputs.web }}
+          API: ${{ needs.config.outputs.api }}
+          SHA: ${{ needs.config.outputs.sha }}
+          STRICT: ${{ github.event_name == 'workflow_run' }}
+        run: |
+          for i in $(seq 1 60); do
+            api=$(curl -fsS --max-time 120 "$API/api/v1/health" | jq -r '.commit // ""' || true)
+            web=$(curl -fsS --max-time 120 "$WEB/healthz" | jq -r '.commit // ""' || true)
+            echo "attempt $i: api=$api web=$web want=$SHA"
+            if [ "$STRICT" != "true" ] && [ -n "$api" ] && [ -n "$web" ]; then exit 0; fi
+            if [ "$api" = "$SHA" ] && [ "$web" = "$SHA" ]; then exit 0; fi
+            sleep 30
+          done
+          echo "::error title=deploy::Render did not serve $SHA within 30 minutes (api=$api web=$web)"
+          exit 1
+
+  database:
+    needs: [config, deployed]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.config.outputs.sha }}
+      - name: Build the backend image
+        run: docker build -q -t proptech-backend backend
+      - name: Read-only audit of the live database
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then echo "::warning::SUPABASE_DB_URL secret missing"; exit 1; fi
+          $ANNOTATE "live database" docker run --rm -e DATABASE_URL -e APP_ENV=production \
+            -e JWT_SECRET="$(openssl rand -hex 32)" -e PREFLIGHT=0 \
+            -v "$PWD/scripts/live:/live:ro" proptech-backend python /live/db_audit.py
+
+  acceptance:
+    needs: [config, deployed]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.config.outputs.sha }}
+      - name: Deploy smoke test (existing script)
+        run: $ANNOTATE "live smoke" bash scripts/deploy/smoke.sh "${{ needs.config.outputs.web }}" "${{ needs.config.outputs.api }}"
+      - name: Live acceptance (customer, agent, agency owner, admin)
+        env:
+          WEB_URL: ${{ needs.config.outputs.web }}
+          API_URL: ${{ needs.config.outputs.api }}
+          DEMO_ACCOUNT_PASSWORD: ${{ secrets.DEMO_ACCOUNT_PASSWORD }}
+        run: $ANNOTATE "live acceptance" bash scripts/live/acceptance.sh
+
+  browser:
+    needs: [config, deployed]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.config.outputs.sha }}
+      - name: Install Playwright + Chromium
+        run: |
+          python -m pip install --quiet playwright pillow
+          python -m playwright install --with-deps chromium
+      - name: Real-browser check
+        env:
+          WEB_URL: ${{ needs.config.outputs.web }}
+        run: $ANNOTATE "live browser" python scripts/live/browser_check.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-screenshots
+          path: screenshots/
+          retention-days: 14
+
+  security:
+    needs: [config, deployed, acceptance]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.config.outputs.sha }}
+      - name: Security checks against the live site
+        env:
+          WEB_URL: ${{ needs.config.outputs.web }}
+          API_URL: ${{ needs.config.outputs.api }}
+          DEMO_ACCOUNT_PASSWORD: ${{ secrets.DEMO_ACCOUNT_PASSWORD }}
+        run: $ANNOTATE "live security" bash scripts/live/security.sh
+
+  backup:
+    needs: [config, deployed, acceptance]
+    if: github.event_name != 'workflow_dispatch' || !inputs.skip_backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.config.outputs.sha }}
+      - name: Build images
+        run: $ANNOTATE "docker build" docker compose build
+      - name: Backup the live database and restore it into a fresh stack
+        env:
+          SOURCE_DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+          S3_ENDPOINT_URL: ${{ secrets.S3_ENDPOINT_URL }}
+          S3_REGION: ${{ secrets.S3_REGION }}
+          S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
+          S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
+        run: $ANNOTATE "live backup restore" bash scripts/live/backup_restore.sh
+      - name: Logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.yml -f docker-compose.production.yml logs --no-color --tail=60 || true
+      - name: Tear down (the backup copy never leaves this runner)
+        if: always()
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.production.yml down -v || true
+          rm -rf live-backup .env

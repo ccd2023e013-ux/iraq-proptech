@@ -5,9 +5,9 @@ name: Scheduled jobs (worker-less hosts)
 # worker — e.g. the temporary Render free deployment. On the production PC,
 # Celery beat does this and this workflow is unnecessary.
 #
-# Configure repository secrets JOBS_API_URL (https://<api-host>) and
-# JOBS_TRIGGER_TOKEN (same value as the API's JOBS_TRIGGER_TOKEN). Without
-# them the workflow does nothing and succeeds.
+# The API URL comes from deploy/live.env (or the optional secret JOBS_API_URL);
+# the token from the secret JOBS_TRIGGER_TOKEN (same value as the API's
+# JOBS_TRIGGER_TOKEN). Without them the workflow does nothing and succeeds.
 
 on:
   schedule:
@@ -24,11 +24,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: deploy
       - name: Run jobs
         env:
-          API: ${{ secrets.JOBS_API_URL }}
+          API_SECRET: ${{ secrets.JOBS_API_URL }}
           TOKEN: ${{ secrets.JOBS_TRIGGER_TOKEN }}
         run: |
+          . deploy/live.env
+          API="${API_SECRET:-$LIVE_API_URL}"
           if [ -z "$API" ] || [ -z "$TOKEN" ]; then
             echo "JOBS_API_URL / JOBS_TRIGGER_TOKEN not configured — nothing to do."
             exit 0

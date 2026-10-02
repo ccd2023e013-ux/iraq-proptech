@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from typing import Literal
 
 import redis
@@ -34,6 +35,8 @@ class LivenessOut(BaseModel):
     service: str
     version: str
     environment: str
+    # Deployed git commit when the host provides it (Render: RENDER_GIT_COMMIT).
+    commit: str | None = None
 
 
 class DependencyCheck(BaseModel):
@@ -51,7 +54,13 @@ class ReadinessOut(BaseModel):
 @router.get("", response_model=LivenessOut)
 def liveness() -> LivenessOut:
     settings = get_settings()
-    return LivenessOut(service=settings.app_name, version=__version__, environment=settings.app_env)
+    commit = os.environ.get("RENDER_GIT_COMMIT") or os.environ.get("GIT_COMMIT")
+    return LivenessOut(
+        service=settings.app_name,
+        version=__version__,
+        environment=settings.app_env,
+        commit=commit[:40] if commit else None,
+    )
 
 
 def _check_database(db: Session) -> tuple[DependencyCheck, DependencyCheck]:
