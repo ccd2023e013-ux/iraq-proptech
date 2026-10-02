@@ -11,15 +11,22 @@ Read this first when resuming work in a new session.
 
 ## Completed
 
-All phases (1–12), the final security audit and the 16-step E2E scenario —
-see [PHASE-STATUS.md](PHASE-STATUS.md). The build directive is finished.
+All phases (1–12), final audit, 16-step E2E. Online-launch preparation
+(national DEMO dataset, demo accounts from DEMO_ACCOUNT_PASSWORD, labelled AI,
+Live site workflow, docs/ONLINE-LAUNCH-STATUS.md) — CI green at `f5e2c47`.
 
-## Next actions
+## In progress: ONLINE LAUNCH
 
-None required by the directive. Owner actions to go live are listed in
-[RENDER.md](RENDER.md), [SUPABASE.md](SUPABASE.md) and
-[MIGRATE-TO-LOCAL-PC.md](MIGRATE-TO-LOCAL-PC.md); future work in
-[ROADMAP.md](ROADMAP.md).
+Blocked on the owner creating the free Supabase project and Render Blueprint
+and adding GitHub secrets (SUPABASE_DB_URL, DEMO_ACCOUNT_PASSWORD,
+JOBS_TRIGGER_TOKEN). Instructions were sent; see ONLINE-LAUNCH-STATUS.md.
+
+## Next actions (in order)
+
+1. Owner sends the two public URLs → write them to `deploy/live.env`, push.
+2. CI → Live site workflow (or dispatch it): fix failures until all jobs green.
+3. Tick the checklist in ONLINE-LAUNCH-STATUS.md, record URLs in README.
+4. Live deployment report.
 
 ## Local tooling notes
 

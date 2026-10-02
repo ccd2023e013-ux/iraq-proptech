@@ -4,6 +4,9 @@ An Arabic-first real-estate platform for Iraq (starting with Basra): listings,
 map search on PostGIS, an agent CRM, and AI analysis that never invents
 property facts.
 
+> **Online launch:** see [docs/ONLINE-LAUNCH-STATUS.md](docs/ONLINE-LAUNCH-STATUS.md) for the
+> public URL and the live verification status.
+>
 > **Status:** all build phases (1–12) complete and CI verified, plus a final
 > security audit and an automated 16-step acceptance scenario. Demo data only;
 > no real listings yet. Checkpoints: [docs/PHASE-STATUS.md](docs/PHASE-STATUS.md).
