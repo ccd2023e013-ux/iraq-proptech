@@ -19,7 +19,7 @@ FROM base AS runtime
 RUN groupadd --system app && useradd --system --gid app --home /app app
 COPY --from=deps /install /usr/local
 COPY --chown=app:app . .
-RUN chmod +x scripts/entrypoint.sh
+RUN chmod +x scripts/entrypoint.sh && mkdir -p /app/storage && chown app:app /app/storage
 USER app
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \

@@ -2,15 +2,20 @@
 
 from __future__ import annotations
 
+import io
 import re
 import uuid
 from collections.abc import Iterable
 from datetime import UTC, datetime
 
 from fastapi.testclient import TestClient
+from PIL import Image
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.auth.security import hash_password
+from app.geo.models import City, District, Governorate, Neighborhood
+from app.geo.spatial import make_point
 from app.notifications.email import MockEmailProvider
 from app.rbac.catalog import Role
 from app.users.models import User, UserRole, UserStatus
@@ -67,3 +72,104 @@ def token_from_outbox(outbox: MockEmailProvider, tag: str) -> str:
     match = re.search(r"token=([A-Za-z0-9_-]+)", messages[-1].text)
     assert match, "no token link in email"
     return match.group(1)
+
+
+# --------------------------------------------------------------------------- real-estate helpers
+
+# Real Basra reference points (WGS84).
+BASRA_ASHAR = (47.8160, 30.5090)  # (lon, lat) Al-Ashar
+BASRA_CORNICHE = (47.8417, 30.5160)
+
+
+def basra(db: Session) -> tuple[Governorate, City]:
+    gov = db.execute(select(Governorate).where(Governorate.code == "BSR")).scalar_one()
+    city = db.execute(
+        select(City).where(City.governorate_id == gov.id, City.slug == "basra")
+    ).scalar_one()
+    return gov, city
+
+
+def make_district(db: Session, city: City, slug: str = "ashar") -> District:
+    district = District(
+        city_id=city.id, name_ar="العشار", name_en="Al-Ashar", slug=slug, is_active=True
+    )
+    db.add(district)
+    db.commit()
+    return district
+
+
+def make_neighborhood(
+    db: Session, district: District, centroid: tuple[float, float] | None = None
+) -> Neighborhood:
+    hood = Neighborhood(
+        district_id=district.id,
+        name_ar="الجمهورية",
+        name_en="Al-Jumhuriya",
+        slug=f"hood-{uuid.uuid4().hex[:6]}",
+        centroid=make_point(*centroid) if centroid else None,
+        is_active=True,
+    )
+    db.add(hood)
+    db.commit()
+    return hood
+
+
+def listing_payload(gov: Governorate, city: City, **overrides: object) -> dict:
+    payload: dict = {
+        "title_ar": "بيت للبيع في العشار قرب الكورنيش",
+        "description_ar": "بيت مساحته 200 متر مربع، ثلاث غرف نوم، قريب من الخدمات.",
+        "property_type_code": "HOUSE",
+        "purpose": "SALE",
+        "price_amount": "250000000",
+        "currency": "IQD",
+        "area_m2": "200",
+        "bedrooms": 3,
+        "bathrooms": 2,
+        "governorate_id": str(gov.id),
+        "city_id": str(city.id),
+        "location": {"lon": BASRA_ASHAR[0], "lat": BASRA_ASHAR[1]},
+        "location_privacy": "APPROXIMATE",
+        "amenities": ["NATIONAL_GRID", "GENERATOR_SUBSCRIPTION"],
+    }
+    payload.update(overrides)
+    return payload
+
+
+def image_bytes(fmt: str = "PNG", color: tuple[int, int, int] = (40, 120, 110)) -> bytes:
+    img = Image.new("RGB", (640, 480), color)
+    for x in range(0, 640, 40):  # some structure so perceptual hashes differ from flat images
+        for y in range(480):
+            img.putpixel((x, y), (220, 190, 60))
+    buffer = io.BytesIO()
+    img.save(buffer, format=fmt)
+    return buffer.getvalue()
+
+
+def upload_image(api: TestClient, headers: dict[str, str], property_id: str) -> dict:
+    response = api.post(
+        f"/api/v1/properties/{property_id}/media",
+        files={"file": ("photo.png", image_bytes(), "image/png")},
+        data={"kind": "IMAGE"},
+        headers=headers,
+    )
+    assert response.status_code == 201, response.text
+    return response.json()
+
+
+def publish(
+    api: TestClient,
+    owner_headers: dict[str, str],
+    moderator_headers: dict[str, str],
+    property_id: str,
+) -> dict:
+    """Upload a photo, submit and approve: returns the approved listing."""
+    upload_image(api, owner_headers, property_id)
+    submitted = api.post(f"/api/v1/properties/{property_id}/submit", headers=owner_headers)
+    assert submitted.status_code == 200, submitted.text
+    approved = api.post(
+        f"/api/v1/properties/{property_id}/moderate",
+        json={"decision": "APPROVE"},
+        headers=moderator_headers,
+    )
+    assert approved.status_code == 200, approved.text
+    return approved.json()

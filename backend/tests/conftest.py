@@ -9,6 +9,7 @@ missing database is a hard failure there.
 from __future__ import annotations
 
 import os
+import tempfile
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -26,6 +27,8 @@ os.environ.setdefault("LOG_JSON", "false")
 # it would make results depend on test order.
 os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
 os.environ.setdefault("EMAIL_PROVIDER", "mock")
+os.environ.setdefault("STORAGE_BACKEND", "local")
+os.environ.setdefault("STORAGE_LOCAL_PATH", tempfile.mkdtemp(prefix="proptech-test-storage-"))
 
 from app.core.config import get_settings
 from app.db.session import get_db, get_engine, get_sessionmaker

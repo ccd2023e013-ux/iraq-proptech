@@ -101,6 +101,7 @@ class Permission(StrEnum):
 
 
 _BUYER = {
+    Permission.AGENCIES_CREATE,  # anyone may apply to open an agency (needs verification)
     Permission.INQUIRIES_CREATE,
     Permission.FAVORITES_MANAGE,
     Permission.SAVED_SEARCHES_MANAGE,
@@ -117,7 +118,6 @@ _LISTER = _BUYER | {
 }
 
 _AGENCY_OWNER = _LISTER | {
-    Permission.AGENCIES_CREATE,
     Permission.LEADS_READ_AGENCY,
     Permission.ANALYTICS_AGENCY,
 }

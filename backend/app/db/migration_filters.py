@@ -52,3 +52,29 @@ def make_include_object(connection: Connection) -> IncludeObject:
         return True
 
     return include_object
+
+
+def compare_type(
+    context: Any,
+    inspected_column: Any,
+    metadata_column: Any,
+    inspected_type: Any,
+    metadata_type: Any,
+) -> bool | None:
+    """PostGIS-aware type comparison (``None`` = use Alembic's default).
+
+    Geometry columns are equal when geometry type and SRID match; Alembic's
+    generic comparison would otherwise report spurious differences.
+    """
+    from geoalchemy2 import Geometry
+    from sqlalchemy.types import NullType
+
+    if isinstance(metadata_type, Geometry):
+        if isinstance(inspected_type, NullType):
+            return False  # reflection without PostGIS type info: nothing to compare
+        if isinstance(inspected_type, Geometry):
+            same_kind = (inspected_type.geometry_type or "").upper() == (
+                metadata_type.geometry_type or ""
+            ).upper()
+            return not (same_kind and inspected_type.srid == metadata_type.srid)
+    return None

@@ -13,7 +13,7 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from app.core.config import get_settings
-from app.db.migration_filters import make_include_object
+from app.db.migration_filters import compare_type, make_include_object
 from app.db.models import Base
 
 config = context.config
@@ -30,7 +30,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
-        compare_type=True,
+        compare_type=compare_type,
     )
     with context.begin_transaction():
         context.run_migrations()
@@ -49,7 +49,7 @@ def run_migrations_online() -> None:
             connection=connection,
             target_metadata=target_metadata,
             include_object=include_object,
-            compare_type=True,
+            compare_type=compare_type,
         )
         with context.begin_transaction():
             context.run_migrations()

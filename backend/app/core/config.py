@@ -72,6 +72,21 @@ class Settings(BaseSettings):
     smtp_password: str | None = None
     smtp_starttls: bool = True
 
+    # Object storage: "local" (filesystem) or "s3" (MinIO, Supabase Storage, R2, S3...).
+    storage_backend: Literal["local", "s3"] = "local"
+    storage_local_path: str = "./storage"
+    s3_bucket: str | None = None
+    s3_endpoint_url: str | None = None
+    s3_region: str | None = None
+    s3_access_key_id: str | None = None
+    s3_secret_access_key: str | None = None
+
+    # Upload limits (bytes)
+    max_image_bytes: int = 10 * 1024 * 1024
+    max_document_bytes: int = 15 * 1024 * 1024
+    max_video_bytes: int = 100 * 1024 * 1024
+    max_media_per_property: int = 40
+
     # Development helpers such as the mock outbox endpoint. Forced off in production.
     dev_tools_enabled: bool = True
 
