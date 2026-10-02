@@ -87,6 +87,16 @@ class Settings(BaseSettings):
     max_video_bytes: int = 100 * 1024 * 1024
     max_media_per_property: int = 40
 
+    # AI: "mock" is deterministic, offline and free (default). Real providers need a key.
+    ai_provider: Literal["mock", "claude", "openai", "gemini"] = "mock"
+    ai_model: str | None = None  # provider default when unset
+    ai_timeout_seconds: float = Field(default=30, gt=0, le=120)
+    ai_max_output_tokens: int = Field(default=1200, ge=64, le=8000)
+    ai_daily_limit_per_user: int = Field(default=100, ge=0)  # generative calls; 0 = unlimited
+    anthropic_api_key: str | None = None
+    openai_api_key: str | None = None
+    gemini_api_key: str | None = None
+
     # Development helpers such as the mock outbox endpoint. Forced off in production.
     dev_tools_enabled: bool = True
 

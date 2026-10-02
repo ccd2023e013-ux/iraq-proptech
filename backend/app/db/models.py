@@ -1,6 +1,7 @@
 """Import every model module here so Alembic autogenerate sees all tables."""
 
 from app.agencies.models import Agency, AgencyInvitation, AgencyMember, AgentProfile
+from app.ai.models import AIGeneration
 from app.audit.models import AuditLog
 from app.auth.models import AuthSession, RefreshToken, VerificationToken
 from app.crm.models import (
@@ -36,6 +37,7 @@ from app.system.models import SystemSetting
 from app.users.models import User, UserRole
 
 __all__ = [
+    "AIGeneration",
     "Agency",
     "AgencyInvitation",
     "AgencyMember",

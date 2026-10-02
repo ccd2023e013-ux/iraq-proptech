@@ -3,6 +3,7 @@
 from fastapi import APIRouter
 
 from app.agencies.router import router as agencies_router
+from app.ai.router import router as ai_router
 from app.auth.router import router as auth_router
 from app.core.config import Settings
 from app.crm.router import router as crm_router
@@ -41,6 +42,7 @@ def build_api_router(settings: Settings) -> APIRouter:
     api_router.include_router(pois_router)
     api_router.include_router(money_router)
     api_router.include_router(crm_router)
+    api_router.include_router(ai_router)
     if settings.dev_tools:
         api_router.include_router(dev_router)
     return api_router

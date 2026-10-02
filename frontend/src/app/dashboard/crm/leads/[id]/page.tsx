@@ -2,7 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Card } from "@/components/ui/Card";
-import { ActivityForm, AppointmentPanel, LeadEditor, TaskPanel } from "@/features/crm/LeadPanels";
+import {
+  ActivityForm,
+  AppointmentPanel,
+  LeadEditor,
+  ReplyDraft,
+  TaskPanel,
+} from "@/features/crm/LeadPanels";
 import { formatDateTime, statusName } from "@/features/crm/labels";
 import { getDictionary } from "@/i18n";
 import { getRequestLocale } from "@/i18n/server";
@@ -123,6 +129,11 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
               )}
               {customer.notes && <p className="text-sand-700">{customer.notes}</p>}
             </div>
+            {lead.can_manage && (
+              <div className="mt-3">
+                <ReplyDraft dict={dict} leadId={lead.id} />
+              </div>
+            )}
             {(lead.budget_min || lead.budget_max) && lead.budget_currency && (
               <p className="mt-3 text-sm tabular">
                 {c.budget}: {formatPrice(lead.budget_min, lead.budget_currency, locale) ?? "…"} –{" "}

@@ -42,6 +42,9 @@ export default async function HomePage() {
           <h1 className="text-3xl leading-tight font-bold sm:text-5xl">{l.heroTitle}</h1>
           <p className="max-w-2xl text-brand-100 sm:text-lg">{l.heroSubtitle}</p>
           <HeroSearch dict={dict} />
+          <Link href="/search/smart" className="text-sm text-brand-100 underline">
+            {dict.ai.smartSearch} — {dict.ai.smartSearchPlaceholder}
+          </Link>
         </div>
       </section>
 

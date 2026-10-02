@@ -73,6 +73,9 @@ export default async function PropertiesPage({
                 nextPath={`/properties?${toApiQuery(params)}`}
               />
             )}
+            <Link href="/search/smart" className="text-sm font-medium text-brand-700">
+              {dict.ai.smartSearch}
+            </Link>
             <Link
               href={`/map?${toApiQuery(params)}`}
               className="text-sm font-medium text-brand-700"

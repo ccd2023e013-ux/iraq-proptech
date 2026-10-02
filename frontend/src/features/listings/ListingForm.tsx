@@ -6,6 +6,7 @@ import { type FormEvent, type ReactNode, useEffect, useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
+import { AuthoringAssistant } from "@/features/ai/AuthoringAssistant";
 import { LocationPicker, type Resolved } from "@/features/map/LocationPicker";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
@@ -344,6 +345,15 @@ export function ListingForm({
             className="rounded-lg border border-sand-200 bg-white p-3 font-normal"
           />
         </label>
+        <div className="sm:col-span-2">
+          <AuthoringAssistant
+            dict={dict}
+            propertyId={initial?.id ?? null}
+            currentDescription={s.description_ar}
+            onUseDescription={(text) => set("description_ar", text)}
+            onUseTitle={(text) => set("title_ar", text)}
+          />
+        </div>
         <label className="flex flex-col gap-1.5 text-sm font-medium text-sand-900 sm:col-span-2">
           {f.descriptionEn}
           <textarea

@@ -460,3 +460,46 @@ export function AppointmentPanel({
     </div>
   );
 }
+
+export function ReplyDraft({ dict, leadId }: { dict: Dictionary; leadId: string }) {
+  const [text, setText] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function draft() {
+    setBusy(true);
+    setError(null);
+    try {
+      const r = await apiFetch<{ result: { reply: string } }>(
+        `/api/v1/ai/leads/${leadId}/reply-draft`,
+        {
+          method: "POST",
+          body: { language: "ar" },
+        },
+      );
+      setText(r.result.reply);
+    } catch (err) {
+      setError(describeError(dict, err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Button size="sm" variant="secondary" loading={busy} onClick={draft}>
+        {dict.ai.replyDraft}
+      </Button>
+      {error && <p className="text-sm text-danger">{error}</p>}
+      {text && (
+        <textarea
+          readOnly
+          value={text}
+          rows={6}
+          aria-label={dict.ai.replyDraft}
+          className="rounded-lg border border-sand-200 bg-white p-2 text-sm"
+        />
+      )}
+    </div>
+  );
+}

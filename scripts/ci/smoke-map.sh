@@ -55,4 +55,14 @@ curl -fsS "$WEB/api/v1/properties/compare?ids=$ids" | jq -e '.items | length == 
 curl -fsS "$WEB/compare?ids=$ids" | grep -q 'مقارنة العقارات' || fail "compare page"
 curl -fsS "$WEB/properties/$first" | grep -q 'ما حول العقار' || fail "nearby section on detail page"
 
+echo "8. AI (mock provider): estimate, NL search, smart search page"
+curl -fsS "$WEB/api/v1/ai/properties/$first/price-analysis" \
+  | jq -e '.kind == "estimate" and .provider == "platform" and (.limitations | length) > 0' >/dev/null \
+  || fail "price analysis"
+q=$(python3 -c "import urllib.parse;print(urllib.parse.quote('بيت للبيع في البصرة'))")
+curl -fsS "$WEB/api/v1/ai/search?q=$q" \
+  | jq -e '.interpretation.result.filters.purpose == "SALE" and (.interpretation.result.filters.city_id | length) > 0' >/dev/null \
+  || fail "NL search"
+curl -fsS "$WEB/search/smart?q=$q" | grep -q 'فهمنا من طلبك' || fail "smart search page"
+
 echo "MAP SMOKE OK"

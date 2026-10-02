@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { Alert } from "@/components/ui/Alert";
 import { Card } from "@/components/ui/Card";
+import { Insights } from "@/features/ai/Insights";
 import { InquiryForm } from "@/features/crm/InquiryForm";
 import { FavoriteButton } from "@/features/properties/FavoriteButton";
 import { Gallery, ShareButton } from "@/features/properties/Gallery";
@@ -219,6 +220,15 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                   : null}
             </p>
           </Card>
+
+          {property.status === "APPROVED" && (
+            <Insights
+              propertyId={property.id}
+              purpose={property.purpose}
+              dict={dict}
+              locale={locale}
+            />
+          )}
 
           <Nearby propertyId={property.id} dict={dict} locale={locale} />
 

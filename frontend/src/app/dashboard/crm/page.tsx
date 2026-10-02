@@ -28,6 +28,10 @@ export default async function CrmPage() {
     serverApiFetch<LeadStatus[]>("/api/v1/crm/statuses"),
     serverApiFetch<Page<Lead>>("/api/v1/crm/leads?open_only=true&page_size=100"),
   ]);
+  const prioritized = await serverApiFetch<{
+    result: { items: { lead_id: string; score: number }[] };
+  }>("/api/v1/ai/leads/prioritized").catch(() => null);
+  const leadById = new Map(leads.items.map((l) => [l.id, l]));
   const columns = statuses.filter((s) => s.is_active && !s.is_terminal);
   const canManage = me.permissions.includes("leads.manage");
   const stats: [string, string | number, string?][] = [
@@ -147,6 +151,29 @@ export default async function CrmPage() {
           })}
         </div>
       </section>
+
+      {prioritized && prioritized.result.items.length > 0 && (
+        <Card title={dict.ai.prioritized}>
+          <ol className="flex flex-col gap-2 text-sm">
+            {prioritized.result.items.slice(0, 5).map((item) => {
+              const lead = leadById.get(item.lead_id);
+              return (
+                <li key={item.lead_id} className="flex items-center justify-between gap-3">
+                  <Link
+                    href={`/dashboard/crm/leads/${item.lead_id}`}
+                    className="text-brand-700 hover:underline"
+                  >
+                    {lead?.customer.full_name ?? item.lead_id}
+                  </Link>
+                  <span className="rounded bg-brand-50 px-2 py-0.5 text-xs text-brand-800 tabular">
+                    {dict.ai.score}: {item.score}
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+        </Card>
+      )}
 
       <Card title={c.upcoming}>
         {board.upcoming_appointments.length === 0 ? (
