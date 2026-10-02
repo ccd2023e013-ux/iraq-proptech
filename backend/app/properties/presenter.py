@@ -198,6 +198,7 @@ def to_out(db: Session, prop: Property, principal: Principal | None) -> Property
     if private:
         out.exact_location = _latlon(prop.location)
         out.status_reason = prop.status_reason
+        out.status_reason_code = prop.status_reason_code
         out.needs_review = prop.needs_review
         out.show_phone = prop.show_phone
         out.allow_whatsapp = prop.allow_whatsapp

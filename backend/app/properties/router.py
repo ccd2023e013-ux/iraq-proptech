@@ -172,7 +172,8 @@ def moderate_property(
     db: Session = Depends(get_db),
 ) -> PropertyOut:
     prop = service.get_property_or_404(db, property_id, lock=True)
-    return to_out(db, service.moderate(db, principal, prop, body.decision, body.reason), principal)
+    moderated = service.moderate(db, principal, prop, body.decision, body.reason, body.reason_code)
+    return to_out(db, moderated, principal)
 
 
 @router.post(

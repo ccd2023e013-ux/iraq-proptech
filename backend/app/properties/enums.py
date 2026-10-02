@@ -108,3 +108,18 @@ class VerificationResult(StrEnum):
 def sql_in(enum: type[StrEnum]) -> str:
     """``'A','B'`` for CHECK constraints."""
     return ",".join(f"'{member.value}'" for member in enum)
+
+
+class ModerationReason(StrEnum):
+    """Why a listing was rejected or suspended (shown to the lister)."""
+
+    INCOMPLETE = "INCOMPLETE"
+    MISLEADING = "MISLEADING"
+    DUPLICATE = "DUPLICATE"
+    WRONG_CATEGORY = "WRONG_CATEGORY"
+    POOR_PHOTOS = "POOR_PHOTOS"
+    PROHIBITED_CONTENT = "PROHIBITED_CONTENT"
+    SUSPECTED_FRAUD = "SUSPECTED_FRAUD"
+    CONTACT_IN_TEXT = "CONTACT_IN_TEXT"
+    REPORTED = "REPORTED"
+    OTHER = "OTHER"

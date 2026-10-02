@@ -19,6 +19,7 @@ from app.db.base import Base
 from app.favorites import Favorite
 from app.geo.models import City, District, Governorate, Neighborhood
 from app.geo.pois import PointOfInterest
+from app.moderation.models import ErrorEvent, Report
 from app.money import ExchangeRate
 from app.properties.models import (
     Amenity,
@@ -52,6 +53,7 @@ __all__ = [
     "CrmTask",
     "Customer",
     "District",
+    "ErrorEvent",
     "ExchangeRate",
     "Favorite",
     "Governorate",
@@ -71,6 +73,7 @@ __all__ = [
     "PropertyType",
     "PropertyVerification",
     "RefreshToken",
+    "Report",
     "RoleRecord",
     "SavedSearch",
     "SystemSetting",

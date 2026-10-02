@@ -12,6 +12,7 @@ from app.properties.enums import (
     DocumentType,
     Furnishing,
     LocationPrivacy,
+    ModerationReason,
     OwnershipDocument,
     Purpose,
     RentPeriod,
@@ -183,6 +184,7 @@ class StatusChangeIn(BaseModel):
 class ModerationIn(BaseModel):
     decision: str = Field(pattern="^(APPROVE|REJECT|SUSPEND|REINSTATE)$")
     reason: str | None = Field(default=None, max_length=1000)
+    reason_code: ModerationReason | None = None
 
 
 class VerificationIn(BaseModel):
@@ -312,6 +314,7 @@ class PropertyOut(BaseModel):
     # Private (owner/agent/agency owner/moderators only)
     exact_location: LatLon | None = None
     status_reason: str | None = None
+    status_reason_code: str | None = None
     needs_review: bool | None = None
     show_phone: bool | None = None
     allow_whatsapp: bool | None = None

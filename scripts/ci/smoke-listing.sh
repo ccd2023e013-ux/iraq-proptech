@@ -144,4 +144,24 @@ curl -fsS -b "$OWNER_JAR" "$WEB/dashboard/crm" | grep -q "زبون تجريبي"
 curl -fsS -b "$OWNER_JAR" "$WEB/dashboard/crm/leads/$LEAD" | grep -q "تم الاتصال" || fail "lead page"
 curl -fsS -b "$BUYER_JAR" "$WEB/messages/$CONV" | grep -q "متاح يوم السبت" || fail "thread page"
 
+echo "15. the customer reports the listing; the admin sees and dismisses it"
+REPORT=$(curl -fsS -b "$BUYER_JAR" -X POST "$WEB/api/v1/reports" \
+  -H 'Content-Type: application/json' -H "X-CSRF-Token: $(csrf "$BUYER_JAR")" \
+  -d "{\"target_type\":\"PROPERTY\",\"target_id\":\"$ID\",\"reason\":\"INCORRECT\",\"details\":\"السعر غير صحيح\"}" | jq -r .id)
+[ -n "$REPORT" ] && [ "$REPORT" != "null" ] || fail "report"
+curl -fsS -b "$ADMIN_JAR" "$WEB/admin/reports" | grep -q "السعر غير صحيح" || fail "admin reports page"
+curl -fsS -b "$ADMIN_JAR" -X POST "$WEB/api/v1/admin/reports/$REPORT/resolve" \
+  -H 'Content-Type: application/json' -H "X-CSRF-Token: $(csrf "$ADMIN_JAR")" \
+  -d '{"outcome":"DISMISSED","note":"تم التحقق من السعر"}' | grep -q '"DISMISSED"' || fail "resolve report"
+
+echo "16. admin pages render (overview, moderation, system, audit)"
+for page in /admin /admin/moderation /admin/system /admin/audit /admin/settings; do
+  code=$(curl -s -o /dev/null -w '%{http_code}' -b "$ADMIN_JAR" "$WEB$page")
+  [ "$code" = "200" ] || fail "admin page $page ($code)"
+done
+code=$(curl -s -o /dev/null -w '%{http_code}' -b "$BUYER_JAR" "$WEB/api/v1/admin/stats")
+[ "$code" = "403" ] || fail "customer reached admin stats ($code)"
+curl -fsS -b "$ADMIN_JAR" "$WEB/api/v1/admin/audit-logs?action=report.dismissed" | jq -e '.total >= 1' >/dev/null \
+  || fail "audit record for the dismissal"
+
 echo "LISTING SMOKE OK"

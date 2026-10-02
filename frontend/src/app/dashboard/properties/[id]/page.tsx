@@ -52,6 +52,14 @@ export default async function EditListingPage({ params }: { params: Promise<{ id
 
       {property.status_reason && (
         <Alert tone={property.status === "REJECTED" ? "error" : "warning"}>
+          {property.status_reason_code && (
+            <strong className="me-1">
+              {dict.admin.reasonCodes[
+                property.status_reason_code as keyof typeof dict.admin.reasonCodes
+              ] ?? property.status_reason_code}
+              :
+            </strong>
+          )}
           {property.status_reason}
         </Alert>
       )}

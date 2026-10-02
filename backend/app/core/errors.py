@@ -12,6 +12,7 @@ friendly Arabic/English message; ``message`` is an English developer message.
 from __future__ import annotations
 
 import logging
+import uuid
 from typing import Any
 
 from fastapi import FastAPI, Request, status
@@ -117,9 +118,33 @@ def register_exception_handlers(app: FastAPI) -> None:
         )
 
     @app.exception_handler(Exception)
-    async def _unhandled(_: Request, exc: Exception) -> JSONResponse:
+    async def _unhandled(request: Request, exc: Exception) -> JSONResponse:
         logger.exception("unhandled_error", extra={"error_type": type(exc).__name__})
+        _record_error_event(request, exc)
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content=error_body("INTERNAL_ERROR", "An unexpected error occurred"),
         )
+
+
+def _record_error_event(request: Request, exc: Exception) -> None:
+    """Best effort: keep a minimal record for the admin error log (never raises)."""
+    try:
+        from app.core.logging import user_id_var
+        from app.db.session import get_sessionmaker
+        from app.moderation.models import ErrorEvent
+
+        uid = user_id_var.get()
+        with get_sessionmaker()() as db:
+            db.add(
+                ErrorEvent(
+                    request_id=request_id_var.get(),
+                    method=request.method,
+                    path=request.url.path[:300],
+                    error_type=type(exc).__name__[:120],
+                    user_id=uuid.UUID(uid) if uid else None,
+                )
+            )
+            db.commit()
+    except Exception:  # pragma: no cover - the error log must never cause a second failure
+        logger.warning("error_event_not_recorded")

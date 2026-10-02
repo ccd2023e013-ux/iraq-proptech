@@ -208,6 +208,7 @@ class Property(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
     # Lifecycle
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="DRAFT")
     status_reason: Mapped[str | None] = mapped_column(Text)
+    status_reason_code: Mapped[str | None] = mapped_column(String(24))
     needs_review: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
@@ -355,6 +356,7 @@ class PropertyStatusHistory(UUIDPrimaryKeyMixin, Base):
     from_status: Mapped[str | None] = mapped_column(String(16))
     to_status: Mapped[str] = mapped_column(String(16), nullable=False)
     reason: Mapped[str | None] = mapped_column(Text)
+    reason_code: Mapped[str | None] = mapped_column(String(24))
     changed_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

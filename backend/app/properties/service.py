@@ -9,6 +9,7 @@ from typing import Any
 from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
+from app import events
 from app.agencies.models import Agency, AgencyStatus, MemberRole
 from app.audit import service as audit
 from app.auth.deps import Principal
@@ -41,8 +42,8 @@ from app.properties.schemas import (
     check_price_rules,
 )
 from app.rbac.catalog import Permission
+from app.system.settings_service import get_setting
 
-LISTING_LIFETIME = timedelta(days=90)
 # Verification kinds that, when PASSED, earn the public "verified" badge.
 BADGE_KINDS = {VerificationKind.OWNERSHIP, VerificationKind.DOCUMENT, VerificationKind.SITE_VISIT}
 SOLD_PURPOSES = {Purpose.SALE, Purpose.EXCHANGE}
@@ -174,7 +175,12 @@ def _next_reference(db: Session, governorate: Governorate) -> str:
 
 
 def _record_status(
-    db: Session, prop: Property, to: PropertyStatus, actor: uuid.UUID | None, reason: str | None
+    db: Session,
+    prop: Property,
+    to: PropertyStatus,
+    actor: uuid.UUID | None,
+    reason: str | None,
+    reason_code: str | None = None,
 ) -> None:
     db.add(
         PropertyStatusHistory(
@@ -182,6 +188,7 @@ def _record_status(
             from_status=None if prop.status is None else str(prop.status),
             to_status=to.value,
             reason=reason,
+            reason_code=reason_code,
             changed_by_id=actor,
             # Explicit wall-clock time (not transaction time) keeps ordering exact.
             changed_at=_now(),
@@ -189,6 +196,7 @@ def _record_status(
     )
     prop.status = to.value
     prop.status_reason = reason
+    prop.status_reason_code = reason_code
 
 
 def _record_price(db: Session, prop: Property, actor: uuid.UUID) -> None:
@@ -385,6 +393,13 @@ def submission_problems(prop: Property) -> list[str]:
     return problems
 
 
+def _auto_approvable(db: Session, prop: Property) -> bool:
+    if prop.agency_id is None or not get_setting(db, "listings.auto_approve_verified_agencies"):
+        return False
+    agency = db.get(Agency, prop.agency_id)
+    return agency is not None and agency.status == AgencyStatus.VERIFIED
+
+
 def owner_transition(
     db: Session, principal: Principal, prop: Property, action: str, reason: str | None
 ) -> Property:
@@ -411,6 +426,12 @@ def owner_transition(
             "Only rental listings can be marked rented", code="INVALID_TRANSITION", status_code=409
         )
     _record_status(db, prop, target, principal.id, reason)
+    if action == "submit" and _auto_approvable(db, prop):
+        _record_status(db, prop, PropertyStatus.APPROVED, None, "auto-approved: verified agency")
+        now = _now()
+        prop.published_at = prop.published_at or now
+        prop.expires_at = now + timedelta(days=get_setting(db, "listings.lifetime_days"))
+        prop.needs_review = False
     audit.record(
         db,
         f"property.{action}",
@@ -437,7 +458,12 @@ _MODERATION: dict[str, tuple[set[PropertyStatus], PropertyStatus, bool]] = {
 
 
 def moderate(
-    db: Session, principal: Principal, prop: Property, decision: str, reason: str | None
+    db: Session,
+    principal: Principal,
+    prop: Property,
+    decision: str,
+    reason: str | None,
+    reason_code: str | None = None,
 ) -> Property:
     allowed_from, target, needs_reason = _MODERATION[decision]
     m = membership(db, principal.id)
@@ -454,11 +480,13 @@ def moderate(
         )
     if needs_reason and not (reason and reason.strip()):
         raise AppError("A reason is required", code="REASON_REQUIRED")
-    _record_status(db, prop, target, principal.id, reason)
+    if needs_reason and reason_code is None:
+        reason_code = "OTHER"
+    _record_status(db, prop, target, principal.id, reason, reason_code if needs_reason else None)
     if target == PropertyStatus.APPROVED:
         now = _now()
         prop.published_at = prop.published_at or now
-        prop.expires_at = now + LISTING_LIFETIME
+        prop.expires_at = now + timedelta(days=get_setting(db, "listings.lifetime_days"))
         prop.needs_review = False
     audit.record(
         db,
@@ -466,7 +494,18 @@ def moderate(
         actor_id=principal.id,
         resource_type="property",
         resource_id=prop.id,
-        data={"to": target.value, "reason": reason},
+        data={"to": target.value, "reason": reason, "reason_code": reason_code},
+    )
+    events.emit(
+        db,
+        f"property.{target.value.lower()}",
+        {
+            "property_id": str(prop.id),
+            "lister_id": str(prop.lister_id),
+            "agent_id": str(prop.agent_id) if prop.agent_id else None,
+            "decision": decision,
+            "reason_code": reason_code,
+        },
     )
     db.commit()
     return prop

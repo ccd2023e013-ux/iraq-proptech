@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Alert } from "@/components/ui/Alert";
 import { Card } from "@/components/ui/Card";
 import { Insights } from "@/features/ai/Insights";
+import { ReportButton } from "@/features/admin/ReportButton";
 import { InquiryForm } from "@/features/crm/InquiryForm";
 import { FavoriteButton } from "@/features/properties/FavoriteButton";
 import { Gallery, ShareButton } from "@/features/properties/Gallery";
@@ -315,6 +316,10 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
               </Link>
             )}
           </div>
+
+          {me && !property.can_edit && property.status === "APPROVED" && (
+            <ReportButton dict={dict} targetType="PROPERTY" targetId={property.id} />
+          )}
 
           <Card title={p.verification}>
             <p className="text-sm text-sand-700">

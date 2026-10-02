@@ -12,6 +12,7 @@ from app.geo.manage import router as gis_router
 from app.geo.pois import router as pois_router
 from app.geo.router import router as geo_router
 from app.map.router import router as map_router
+from app.moderation.router import router as moderation_router
 from app.money import router as money_router
 from app.properties.compare import router as compare_router
 from app.properties.router import router as properties_router
@@ -43,6 +44,7 @@ def build_api_router(settings: Settings) -> APIRouter:
     api_router.include_router(money_router)
     api_router.include_router(crm_router)
     api_router.include_router(ai_router)
+    api_router.include_router(moderation_router)
     if settings.dev_tools:
         api_router.include_router(dev_router)
     return api_router

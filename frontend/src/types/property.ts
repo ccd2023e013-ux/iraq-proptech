@@ -121,6 +121,7 @@ export interface Property {
   lister: Lister;
   exact_location: LatLon | null;
   status_reason: string | null;
+  status_reason_code?: string | null;
   needs_review: boolean | null;
   show_phone: boolean | null;
   allow_whatsapp: boolean | null;

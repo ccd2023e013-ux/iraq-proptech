@@ -7,6 +7,7 @@ import { CompareBar } from "@/features/compare/CompareControls";
 import { getDictionary } from "@/i18n";
 import { directionOf } from "@/i18n/config";
 import { getRequestLocale } from "@/i18n/server";
+import { serverApiFetch } from "@/lib/api/server";
 import { getCurrentUser } from "@/lib/auth/session";
 
 import "./globals.css";
@@ -36,10 +37,21 @@ export const viewport: Viewport = {
   themeColor: "#1d504d",
 };
 
+async function loadAnnouncement(locale: string): Promise<string | null> {
+  try {
+    const settings = await serverApiFetch<Record<string, unknown>>("/api/v1/settings/public");
+    const text = settings[`site.announcement_${locale}`] ?? settings["site.announcement_ar"];
+    return typeof text === "string" && text.trim() ? text.trim() : null;
+  } catch {
+    return null; // the banner is optional; never break the page
+  }
+}
+
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const locale = await getRequestLocale();
   const dict = getDictionary(locale);
   const me = await getCurrentUser();
+  const announcement = await loadAnnouncement(locale);
 
   return (
     <html
@@ -48,6 +60,11 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       className={`${arabic.variable} ${latin.variable}`}
     >
       <body className="min-h-dvh antialiased">
+        {announcement && (
+          <div role="status" className="bg-gold-100 px-4 py-2 text-center text-sm text-gold-700">
+            {announcement}
+          </div>
+        )}
         <SiteHeader dict={dict} locale={locale} me={me} />
         <main>{children}</main>
         <CompareBar dict={dict} />

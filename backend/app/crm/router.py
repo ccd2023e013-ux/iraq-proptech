@@ -53,6 +53,7 @@ from app.db.session import get_db
 from app.properties.models import Property
 from app.properties.service import get_property_or_404
 from app.rbac.catalog import Permission
+from app.system.settings_service import get_setting
 
 router = APIRouter(tags=["crm"])
 
@@ -82,7 +83,12 @@ def send_inquiry(
 ) -> InquiryOut:
     if not principal.has(Permission.INQUIRIES_CREATE):
         raise PermissionDeniedError("You cannot send inquiries")
-    limit_identifier("inquiry-user", str(principal.id), limit=10, window=3600)
+    limit_identifier(
+        "inquiry-user",
+        str(principal.id),
+        limit=get_setting(db, "inquiries.daily_limit_per_user"),
+        window=3600,
+    )
     prop = get_property_or_404(db, property_id)
     inquiry = service.create_inquiry(db, principal, prop, body)
     return InquiryOut.model_validate(inquiry)
