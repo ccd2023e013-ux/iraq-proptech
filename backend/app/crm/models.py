@@ -76,6 +76,7 @@ class ActivityKind(StrEnum):
     ASSIGNMENT = "ASSIGNMENT"
     TASK = "TASK"
     APPOINTMENT = "APPOINTMENT"
+    MESSAGE = "MESSAGE"
 
 
 # Kinds a user may log by hand; the rest are written by the system.
@@ -324,3 +325,53 @@ class Appointment(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         String(12), nullable=False, default=AppointmentStatus.SCHEDULED
     )
     notes: Mapped[str | None] = mapped_column(Text)
+
+
+class Conversation(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """A message thread between a customer (platform user) and the listing side.
+
+    One thread per customer per listing. The listing side is whoever may see
+    the linked lead (agent, independent owner, agency owner, admins).
+    """
+
+    __tablename__ = "conversations"
+    __table_args__ = (
+        Index(
+            "uq_conversations_customer_property",
+            "customer_user_id",
+            "property_id",
+            unique=True,
+            postgresql_where=text("property_id IS NOT NULL"),
+        ),
+    )
+
+    property_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("properties.id", ondelete="SET NULL")
+    )
+    lead_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("crm_leads.id", ondelete="SET NULL"), index=True
+    )
+    customer_user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    lister_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), index=True
+    )
+    last_message_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class Message(UUIDPrimaryKeyMixin, Base):
+    __tablename__ = "messages"
+    __table_args__ = (Index("ix_messages_conversation_created", "conversation_id", "created_at"),)
+
+    conversation_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False
+    )
+    sender_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+    )
+    body: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

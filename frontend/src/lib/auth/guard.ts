@@ -22,3 +22,10 @@ export async function requirePermission(permission: string): Promise<Me> {
   if (!hasPermission(me.permissions, permission)) redirect("/dashboard?denied=1");
   return me;
 }
+
+/** Requires at least one of the permissions. */
+export async function requireAnyPermission(permissions: string[]): Promise<Me> {
+  const me = await requireUser();
+  if (!permissions.some((p) => hasPermission(me.permissions, p))) redirect("/dashboard?denied=1");
+  return me;
+}

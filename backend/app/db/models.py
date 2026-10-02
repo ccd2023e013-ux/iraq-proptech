@@ -5,12 +5,14 @@ from app.audit.models import AuditLog
 from app.auth.models import AuthSession, RefreshToken, VerificationToken
 from app.crm.models import (
     Appointment,
+    Conversation,
     CrmTask,
     Customer,
     Inquiry,
     Lead,
     LeadActivity,
     LeadStatus,
+    Message,
 )
 from app.db.base import Base
 from app.favorites import Favorite
@@ -44,6 +46,7 @@ __all__ = [
     "AuthSession",
     "Base",
     "City",
+    "Conversation",
     "CrmTask",
     "Customer",
     "District",
@@ -54,6 +57,7 @@ __all__ = [
     "Lead",
     "LeadActivity",
     "LeadStatus",
+    "Message",
     "Neighborhood",
     "PointOfInterest",
     "Property",

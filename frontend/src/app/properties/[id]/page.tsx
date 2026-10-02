@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { Alert } from "@/components/ui/Alert";
 import { Card } from "@/components/ui/Card";
+import { InquiryForm } from "@/features/crm/InquiryForm";
 import { FavoriteButton } from "@/features/properties/FavoriteButton";
 import { Gallery, ShareButton } from "@/features/properties/Gallery";
 import { Nearby } from "@/features/properties/Nearby";
@@ -272,6 +273,19 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
               )}
             </div>
           </Card>
+
+          {!property.can_edit && property.status === "APPROVED" && (
+            <Card title={dict.inquiry.title}>
+              <InquiryForm
+                dict={dict}
+                propertyId={property.id}
+                signedIn={!!me}
+                defaultName={me?.user.full_name ?? ""}
+                defaultPhone={me?.user.phone ?? ""}
+                defaultEmail={me?.user.email ?? ""}
+              />
+            </Card>
+          )}
 
           <div className="flex flex-wrap gap-2">
             <FavoriteButton

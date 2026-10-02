@@ -37,7 +37,10 @@ class InquiryCreate(BaseModel):
     message: str = Field(min_length=5, max_length=3000)
     preferred_contact: ContactPreference = ContactPreference.ANY
 
-    _normalize_phone = field_validator("phone")(classmethod(lambda cls, v: _phone(v)))
+    @field_validator("phone")
+    @classmethod
+    def _normalize_phone(cls, value: str | None) -> str | None:
+        return _phone(value)
 
     @model_validator(mode="after")
     def _reachable(self) -> InquiryCreate:
@@ -102,7 +105,10 @@ class CustomerIn(BaseModel):
     email: EmailStr | None = None
     notes: str | None = Field(default=None, max_length=5000)
 
-    _normalize_phone = field_validator("phone")(classmethod(lambda cls, v: _phone(v)))
+    @field_validator("phone")
+    @classmethod
+    def _normalize_phone(cls, value: str | None) -> str | None:
+        return _phone(value)
 
 
 class CustomerUpdate(BaseModel):
@@ -113,7 +119,10 @@ class CustomerUpdate(BaseModel):
     email: EmailStr | None = None
     notes: str | None = Field(default=None, max_length=5000)
 
-    _normalize_phone = field_validator("phone")(classmethod(lambda cls, v: _phone(v)))
+    @field_validator("phone")
+    @classmethod
+    def _normalize_phone(cls, value: str | None) -> str | None:
+        return _phone(value)
 
 
 class CustomerOut(BaseModel):
@@ -162,11 +171,11 @@ class LeadCreate(BaseModel):
             raise ValueError("Provide exactly one of customer_id or customer")
         if self.source == LeadSource.INQUIRY:
             raise ValueError("INQUIRY leads are created from inquiries")
-        _check_budget(self.budget_min, self.budget_max, self.budget_currency)
+        check_budget(self.budget_min, self.budget_max, self.budget_currency)
         return self
 
 
-def _check_budget(lo: Decimal | None, hi: Decimal | None, currency: str | None) -> None:
+def check_budget(lo: Decimal | None, hi: Decimal | None, currency: str | None) -> None:
     if (lo is not None or hi is not None) and currency is None:
         raise ValueError("A budget needs a currency (IQD or USD); amounts are never converted")
     if lo is not None and hi is not None and lo > hi:
@@ -324,3 +333,33 @@ class CrmDashboard(BaseModel):
     conversion_rate: float | None = Field(
         description="won / (won + lost); null without closed leads"
     )
+
+
+# --------------------------------------------------------------------------- conversations
+
+
+class MessageIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    body: str = Field(min_length=1, max_length=4000)
+
+
+class MessageOut(BaseModel):
+    id: uuid.UUID
+    sender: PersonRef | None
+    body: str
+    created_at: datetime
+    read_at: datetime | None
+    mine: bool
+
+
+class ConversationOut(BaseModel):
+    id: uuid.UUID
+    property: PropertyRef | None
+    lead_id: uuid.UUID | None
+    customer: PersonRef | None
+    lister: PersonRef | None
+    last_message_at: datetime | None
+    last_message: str | None
+    unread: int
+    role: Literal["customer", "lister"]
