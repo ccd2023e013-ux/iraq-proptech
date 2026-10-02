@@ -19,7 +19,6 @@ import "@fontsource/ibm-plex-sans/400.css";
 import "@fontsource/ibm-plex-sans/600.css";
 import "./globals.css";
 
-
 export async function generateMetadata(): Promise<Metadata> {
   const dict = getDictionary(await getRequestLocale());
   return { title: dict.meta.title, description: dict.meta.description };
@@ -48,10 +47,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const announcement = await loadAnnouncement(locale);
 
   return (
-    <html
-      lang={locale}
-      dir={directionOf(locale)}
-    >
+    <html lang={locale} dir={directionOf(locale)}>
       <body className="min-h-dvh antialiased">
         {announcement && (
           <div role="status" className="bg-gold-100 px-4 py-2 text-center text-sm text-gold-700">

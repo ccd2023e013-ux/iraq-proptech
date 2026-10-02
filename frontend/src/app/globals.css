@@ -7,7 +7,8 @@
  * flip correctly between RTL (Arabic, default) and LTR (English).
  */
 @theme {
-  --font-sans: "IBM Plex Sans Arabic", "IBM Plex Sans", ui-sans-serif, system-ui, Tahoma, sans-serif;
+  --font-sans:
+    "IBM Plex Sans Arabic", "IBM Plex Sans", ui-sans-serif, system-ui, Tahoma, sans-serif;
 
   --color-brand-50: #eef7f6;
   --color-brand-100: #d5ebe8;

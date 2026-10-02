@@ -594,7 +594,10 @@ def test_lead_list_uses_constant_queries(api: TestClient, db_session: Session, w
     statements: list[str] = []
 
     def count(*args: object, **kwargs: object) -> None:
-        statements.append(str(args[2]))
+        sql = str(args[2])
+        # Savepoint bookkeeping depends on session state, not on the page size.
+        if not sql.startswith(("SAVEPOINT", "RELEASE SAVEPOINT", "ROLLBACK TO SAVEPOINT")):
+            statements.append(sql)
 
     headers = world["h"]["owner"]
     engine = get_engine()

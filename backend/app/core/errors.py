@@ -138,7 +138,9 @@ def _record_error_event(request: Request, exc: Exception) -> None:
         with get_sessionmaker()() as db:
             db.add(
                 ErrorEvent(
-                    request_id=request_id_var.get(),
+                    # The request context may already be reset when this handler runs
+                    # (outermost middleware); fall back to the validated inbound header.
+                    request_id=request_id_var.get() or _safe_request_id(request),
                     method=request.method,
                     path=request.url.path[:300],
                     error_type=type(exc).__name__[:120],
@@ -148,3 +150,12 @@ def _record_error_event(request: Request, exc: Exception) -> None:
             db.commit()
     except Exception:  # pragma: no cover - the error log must never cause a second failure
         logger.warning("error_event_not_recorded")
+
+
+def _safe_request_id(request: Request) -> str | None:
+    value = request.headers.get("x-request-id", "")
+    return (
+        value
+        if value and len(value) <= 64 and value.replace("-", "").replace("_", "").isalnum()
+        else None
+    )
