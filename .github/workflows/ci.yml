@@ -59,7 +59,7 @@ jobs:
       - name: Tests
         env:
           ANNOTATE_SUMMARY_PATTERN: "(passed|failed|TOTAL)"
-        run: $ANNOTATE "pytest" pytest --cov=app --cov-report=term-missing
+        run: $ANNOTATE "pytest" pytest --tb=short --cov=app --cov-report=term-missing:skip-covered
 
   frontend:
     name: Frontend (lint, tests, build, types)

@@ -23,6 +23,8 @@ from sqlalchemy.orm import Session
 
 os.environ.setdefault("APP_ENV", "test")
 os.environ.setdefault("LOG_JSON", "false")
+# A full-length test secret (PyJWT warns below 32 bytes for HS256).
+os.environ.setdefault("JWT_SECRET", "test-secret-" + "x" * 52)
 # Tests exercise rate limiting explicitly (tests/test_rate_limit.py); elsewhere
 # it would make results depend on test order.
 os.environ.setdefault("RATE_LIMIT_ENABLED", "false")

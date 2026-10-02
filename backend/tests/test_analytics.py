@@ -91,8 +91,8 @@ def test_search_statistics_are_aggregated_without_query_text(
     api: TestClient, db_session: Session
 ) -> None:
     owner = make_user(db_session, roles=[Role.PROPERTY_OWNER])
-    make_listing(db_session, owner)
-    api.get("/api/v1/search/properties?q=بيت&purpose=SALE")
+    make_listing(db_session, owner, title_ar="بيت للبيع في البصرة")
+    assert api.get("/api/v1/search/properties?q=بيت&purpose=SALE").json()["total"] == 1
     api.get("/api/v1/search/properties?q=zzzz-no-match-zzzz&purpose=SALE")
     api.get("/api/v1/search/properties?purpose=SALE&page=2")  # later pages are not counted
     db_session.expire_all()

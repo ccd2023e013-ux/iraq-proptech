@@ -305,7 +305,9 @@ def top_listings(
                 Inquiry.created_at < rng.end_at,
             )
             .group_by(Inquiry.property_id)
-        ).tuples()
+        )
+        .tuples()
+        .all()
     )
     favorites = dict(
         db.execute(
@@ -316,7 +318,9 @@ def top_listings(
                 Favorite.created_at < rng.end_at,
             )
             .group_by(Favorite.property_id)
-        ).tuples()
+        )
+        .tuples()
+        .all()
     )
     return [
         {
@@ -348,12 +352,16 @@ def agent_activity(db: Session, scope: ScopeSpec, rng: Range) -> list[dict[str, 
     else:
         member_ids = [
             uid
-            for uid, _ in db.execute(assigned_q.order_by(func.count().desc()).limit(20)).tuples()
+            for uid, _ in db.execute(assigned_q.order_by(func.count().desc()).limit(20))
+            .tuples()
+            .all()
             if uid is not None
         ]
     if not member_ids:
         return []
-    assigned = dict(db.execute(assigned_q.where(Lead.assigned_to_id.in_(member_ids))).tuples())
+    assigned = dict(
+        db.execute(assigned_q.where(Lead.assigned_to_id.in_(member_ids))).tuples().all()
+    )
     won = dict(
         db.execute(
             select(Lead.assigned_to_id, func.count())
@@ -366,7 +374,9 @@ def agent_activity(db: Session, scope: ScopeSpec, rng: Range) -> list[dict[str, 
                 Lead.closed_at < rng.end_at,
             )
             .group_by(Lead.assigned_to_id)
-        ).tuples()
+        )
+        .tuples()
+        .all()
     )
     activities = dict(
         db.execute(
@@ -379,10 +389,12 @@ def agent_activity(db: Session, scope: ScopeSpec, rng: Range) -> list[dict[str, 
                 LeadActivity.created_at < rng.end_at,
             )
             .group_by(LeadActivity.actor_id)
-        ).tuples()
+        )
+        .tuples()
+        .all()
     )
     names = dict(
-        db.execute(select(User.id, User.full_name).where(User.id.in_(member_ids))).tuples()
+        db.execute(select(User.id, User.full_name).where(User.id.in_(member_ids))).tuples().all()
     )
     rows: list[dict[str, Any]] = [
         {

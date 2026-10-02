@@ -201,7 +201,15 @@ def test_search_runs_a_constant_number_of_queries(
     finally:
         event.remove(engine, "before_cursor_execute", count)
     assert len(response.json()["items"]) == 12
-    assert len(statements) <= 10, statements  # no N+1: independent of result count
+    # Count the reads that build the result page. Transaction bookkeeping and the
+    # constant aggregate search-statistics write (one upsert per search) are excluded.
+    reads = [
+        s
+        for s in statements
+        if not s.lstrip().upper().startswith(("SAVEPOINT", "RELEASE", "ROLLBACK"))
+        and "search_stats_daily" not in s
+    ]
+    assert len(reads) <= 10, reads  # no N+1: independent of result count
 
 
 # --------------------------------------------------------------------------- spatial
