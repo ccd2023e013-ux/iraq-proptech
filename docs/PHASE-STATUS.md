@@ -21,13 +21,13 @@ roadmap maps as shown in the last column.
 | 9 Automation + notifications | ✅ Complete | `43a7842` | [37021328715](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37021328715) | 8 |
 | 10 Analytics | ✅ Complete | `c4a6688` | [37057349521](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37057349521) | 9 |
 | 10b Monetization (demo payments) | ✅ Complete | `c4a6688` | [37057349521](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37057349521) | 10 |
-| 11 Temporary cloud deployment (prepared; accounts required to go live) | ✅ Complete | `f1ad8f4` | [37063110216](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37063110216) | 11 |
-| 12 Local PC migration (rehearsed in CI) | ✅ Complete | `f1ad8f4` | [37063110216](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37063110216) | 12 |
-| Final security audit + 16-step E2E | ✅ Complete | `f1ad8f4` | [37063110216](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37063110216) | — |
+| 11 Temporary cloud deployment (prepared; accounts required to go live) | ✅ Complete | `195449e` | [37065196155](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37065196155) | 11 |
+| 12 Local PC migration (rehearsed in CI) | ✅ Complete | `195449e` | [37065196155](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37065196155) | 12 |
+| Final security audit + 16-step E2E | ✅ Complete | `195449e` | [37065196155](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37065196155) | — |
 
 ---
 
-## Phases 11–12 and the final audit (green at `f1ad8f4`, run [37063110216](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37063110216))
+## Phases 11–12 and the final audit (green at `195449e`, run [37065196155](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37065196155))
 
 CI at this commit: backend 287 tests on PostGIS (91 % coverage), frontend 78
 tests + build, Docker stack smoke (auth, listing, map) **plus the 16-step
@@ -68,7 +68,10 @@ second listing → 12 statistical price analysis + mock-AI summary →
 Errors found and fixed: `pg_restore` without a target database;
 `pg_restore` 17 emitting a setting PostgreSQL 16 does not know; E2E
 assumptions about response fields (agency ownership is under `lister`,
-price analysis is statistics, not LLM output).
+price analysis is statistics, not LLM output); a fresh-volume race where
+socket `pg_isready` reported the temporary init server as ready (the
+healthcheck and scripts now check over TCP). The final commit passed CI on two
+consecutive attempts.
 
 ---
 

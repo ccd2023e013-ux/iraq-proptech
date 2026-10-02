@@ -2,16 +2,16 @@
 
 All notable changes, newest first. Each entry lists the CI-verified commit.
 
-## Final audit + acceptance scenario (`f1ad8f4`)
+## Final audit + acceptance scenario (`195449e`)
 Security audit (see docs/SECURITY.md): web CSP, proxy path hardening, all
 foreign keys indexed (migration 0013) with a schema test; 16-step E2E
 acceptance scenario in CI.
 
-## Phase 12 — Production PC migration (`f1ad8f4`)
+## Phase 12 — Production PC migration (`195449e`)
 Production overlay, backup/restore, cloud→PC data-only export/import,
 verification and deploy smoke scripts; full runbook rehearsed in CI.
 
-## Phase 11 — Temporary cloud deployment (`f1ad8f4`)
+## Phase 11 — Temporary cloud deployment (`195449e`)
 Render blueprint, Supabase and Cloudflare guides, preflight checks,
 `TRUSTED_PROXY_HOPS`, jobs trigger + scheduled workflow, S3 storage,
 transaction-pooler support.

@@ -7,7 +7,7 @@ Read this first when resuming work in a new session.
   Job logs cannot be downloaded from the development environment; failures
   are republished as check-run annotations by `scripts/ci/annotate.sh`
   (`gh api repos/<repo>/check-runs/<id>/annotations`).
-- **Last green commit**: `f1ad8f4` — CI run [37063110216](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37063110216).
+- **Last green commit**: `195449e` — CI run [37065196155](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37065196155).
 
 ## Completed
 
