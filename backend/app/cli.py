@@ -74,6 +74,14 @@ def main(argv: list[str] | None = None) -> int:
     demo.add_argument("--listings", type=int, default=40)
     demo.add_argument("--allow-production", action="store_true")
     sub.add_parser("reset-demo", help="Delete DEMO listings created by seed-demo")
+    iraq = sub.add_parser(
+        "seed-demo-iraq",
+        help="National DEMO dataset (7 cities, generated images, demo accounts if "
+        "DEMO_ACCOUNT_PASSWORD is set)",
+    )
+    iraq.add_argument("--per-city", type=int, default=18)
+    iraq.add_argument("--no-images", action="store_true")
+    iraq.add_argument("--allow-production", action="store_true")
     pf = sub.add_parser("preflight", help="Check configuration (and the database with --db)")
     pf.add_argument("--db", action="store_true", help="also check PostGIS and migrations")
     for name, text in (
@@ -132,6 +140,23 @@ def main(argv: list[str] | None = None) -> int:
                 result = demo_data.seed(db, listings=max(0, min(args.listings, 500)))
             else:
                 result = demo_data.reset(db)
+        print(result)
+        return 0
+
+    if args.command == "seed-demo-iraq":
+        from app import demo_iraq
+        from app.core.config import get_settings
+
+        if get_settings().is_production and not args.allow_production:
+            print("Refusing to seed DEMO data in production without --allow-production")
+            return 2
+        with get_sessionmaker()() as db:
+            result = demo_iraq.seed(
+                db,
+                per_city=max(0, min(args.per_city, 200)),
+                account_password=os.environ.get("DEMO_ACCOUNT_PASSWORD") or None,
+                images=not args.no_images,
+            )
         print(result)
         return 0
 

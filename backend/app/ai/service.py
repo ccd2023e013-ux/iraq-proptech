@@ -655,6 +655,73 @@ def price_analysis(db: Session, principal: Principal | None, prop: Property) -> 
     )
 
 
+def compare_properties(
+    db: Session, principal: Principal | None, props: list[Property]
+) -> AIEnvelope:
+    """Side-by-side figures from declared facts plus each listing's local median.
+
+    Prices are compared only between listings with the same currency and
+    purpose (never converted); "highlights" name the listing with the lowest
+    price per m², the largest area and the most bedrooms.
+    """
+    rows: list[dict[str, Any]] = []
+    for prop in props:
+        per_m2: Decimal | None = None
+        if prop.price_amount is not None and not prop.price_on_request and prop.area_m2:
+            per_m2 = _q2(Decimal(prop.price_amount) / Decimal(prop.area_m2))
+        comps, scope = comparables(db, prop)
+        values = _per_m2(comps)
+        median = _quartiles(values)[1] if len(values) >= MIN_COMPARABLES else None
+        vs_median = (
+            float(_q2((per_m2 - median) / median * 100)) if per_m2 is not None and median else None
+        )
+        rows.append(
+            {
+                "id": str(prop.id),
+                "currency": prop.currency,
+                "purpose": prop.purpose,
+                "price_per_m2": str(per_m2) if per_m2 is not None else None,
+                "local_median_per_m2": str(_q2(median)) if median else None,
+                "median_scope": scope if median else None,
+                "vs_local_median_percent": vs_median,
+                "area_m2": str(prop.area_m2) if prop.area_m2 is not None else None,
+                "bedrooms": prop.bedrooms,
+            }
+        )
+    priced = [r for r in rows if r["price_per_m2"] is not None]
+    comparable = len({(r["currency"], r["purpose"]) for r in priced}) == 1 and len(priced) >= 2
+    with_area = [r for r in rows if r["area_m2"]]
+    with_rooms = [r for r in rows if r["bedrooms"] is not None]
+    highlights: dict[str, str | None] = {
+        "lowest_price_per_m2": (
+            min(priced, key=lambda r: Decimal(r["price_per_m2"]))["id"] if comparable else None
+        ),
+        "largest_area": (
+            max(with_area, key=lambda r: Decimal(r["area_m2"]))["id"] if with_area else None
+        ),
+        "most_bedrooms": (
+            max(with_rooms, key=lambda r: int(r["bedrooms"]))["id"] if with_rooms else None
+        ),
+    }
+    limitations = ["Asking prices, not transaction prices."]
+    if not comparable:
+        limitations.append("Prices are not compared: different currency or purpose.")
+    return _analysis(
+        db,
+        principal,
+        feature="property.compare",
+        kind="analysis",
+        methodology=(
+            "Price per m² from each listing's declared price and area, compared with the median "
+            "price per m² of similar public listings (same type, purpose and currency). "
+            "Prices are compared only when currency and purpose match; no conversion."
+        ),
+        result={"properties": rows, "prices_comparable": comparable, "highlights": highlights},
+        sources=["listing fields", "public listings on this platform"],
+        limitations=limitations,
+    )
+
+
 def investment_analysis(db: Session, principal: Principal | None, prop: Property) -> AIEnvelope:
     result: dict[str, Any] = {
         "currency": prop.currency,

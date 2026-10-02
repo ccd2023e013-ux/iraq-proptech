@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Alert } from "@/components/ui/Alert";
 import { Card } from "@/components/ui/Card";
 import { Insights } from "@/features/ai/Insights";
+import { PropertySummary } from "@/features/ai/PropertySummary";
 import { ReportButton } from "@/features/admin/ReportButton";
 import { ViewBeacon } from "@/features/analytics/ViewBeacon";
 import { InquiryForm } from "@/features/crm/InquiryForm";
@@ -223,6 +224,10 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                   : null}
             </p>
           </Card>
+
+          {property.status === "APPROVED" && (
+            <PropertySummary dict={dict} locale={locale} propertyId={property.id} />
+          )}
 
           {property.status === "APPROVED" && (
             <Insights

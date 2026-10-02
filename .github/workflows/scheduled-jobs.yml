@@ -11,7 +11,9 @@ name: Scheduled jobs (worker-less hosts)
 
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    # Hourly: keeps the free database active and runs alerts/expiry without
+    # keeping the free Render instance awake most of the month.
+    - cron: "17 * * * *"
   workflow_dispatch:
 
 permissions:

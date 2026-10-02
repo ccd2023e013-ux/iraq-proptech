@@ -5,6 +5,8 @@ import { serverApiFetch } from "@/lib/api/server";
 import { formatPrice } from "@/lib/format";
 import type { AIEnvelope, InvestmentResult, PriceResult } from "@/types/ai";
 
+import { ProviderBadge } from "./ProviderBadge";
+
 function Explain({
   dict,
   envelope,
@@ -64,6 +66,7 @@ export async function Insights({
   return (
     <Card title={`${a.insights} · ${a.estimate}`}>
       <div className="flex flex-col gap-4">
+        <ProviderBadge dict={dict} provider={price.provider} model={price.model} />
         <section aria-label={a.priceAnalysis}>
           <h3 className="text-sm font-semibold text-sand-900">
             {a.priceAnalysis}

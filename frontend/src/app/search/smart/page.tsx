@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Alert } from "@/components/ui/Alert";
+import { ProviderBadge } from "@/features/ai/ProviderBadge";
 import { PropertyCard } from "@/features/properties/PropertyCard";
 import { favoriteIds } from "@/features/search/data";
 import { errorMessage, getDictionary } from "@/i18n";
@@ -75,6 +76,11 @@ export default async function SmartSearchPage({
         <>
           <section aria-label={a.understood} className="flex flex-col gap-2">
             <h2 className="text-sm font-semibold text-sand-700">{a.understood}</h2>
+            <ProviderBadge
+              dict={dict}
+              provider={data.interpretation.provider}
+              model={data.interpretation.model}
+            />
             <ul className="flex flex-wrap gap-2">
               {data.interpretation.result.understood.map((u, i) => (
                 <li key={i} className="rounded-full bg-brand-50 px-3 py-1 text-xs text-brand-800">

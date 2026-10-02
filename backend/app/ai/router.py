@@ -28,7 +28,7 @@ from app.auth.deps import (
     require_any_permission,
     require_permission,
 )
-from app.core.errors import NotFoundError, PermissionDeniedError
+from app.core.errors import AppError, NotFoundError, PermissionDeniedError
 from app.core.pagination import Page, PageParams, page_params
 from app.core.rate_limit import rate_limit
 from app.crm import policies as crm_policies
@@ -266,6 +266,21 @@ def my_recommendations(
 ) -> RecommendationsOut:
     envelope = service.recommendations(db, principal)
     return RecommendationsOut(envelope=envelope, items=_cards(db, envelope.result["items"]))
+
+
+@router.get("/ai/compare", response_model=AIEnvelope, dependencies=[Depends(_public_limit)])
+def ai_compare(
+    ids: str = Query(min_length=36, max_length=200, description="2–4 comma-separated listing ids"),
+    principal: Principal | None = Depends(get_optional_principal),
+    db: Session = Depends(get_db),
+) -> AIEnvelope:
+    try:
+        wanted = list(dict.fromkeys(uuid.UUID(part.strip()) for part in ids.split(",")))
+    except ValueError as exc:
+        raise AppError("Invalid listing id", code="INVALID_IDS", status_code=422) from exc
+    if not 2 <= len(wanted) <= 4:
+        raise AppError("Compare 2 to 4 listings", code="INVALID_IDS", status_code=422)
+    return service.compare_properties(db, principal, [_visible(db, principal, i) for i in wanted])
 
 
 # --- natural-language search

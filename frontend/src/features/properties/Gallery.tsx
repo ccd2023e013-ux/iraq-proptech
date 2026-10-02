@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { SafeImage } from "@/components/ui/SafeImage";
 import type { Media } from "@/types/property";
 
 /** Accessible image gallery: large view + thumbnails (keyboard & touch friendly). */
@@ -31,10 +32,12 @@ export function Gallery({
     <div className="flex flex-col gap-3">
       {current && (
         <div className="relative overflow-hidden rounded-[var(--radius-card)] bg-sand-100">
-          {/* eslint-disable-next-line @next/next/no-img-element -- served by our API */}
-          <img
+          <SafeImage
+            key={current.id}
             src={current.url}
             alt={current.caption ?? title}
+            fallbackLabel={emptyLabel}
+            loading="eager"
             className="aspect-[16/10] w-full object-cover"
           />
           {images.length > 1 && (
@@ -72,8 +75,12 @@ export function Gallery({
                 aria-current={i === index}
                 className={`block overflow-hidden rounded-md border-2 ${i === index ? "border-brand-600" : "border-transparent"}`}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element -- served by our API */}
-                <img src={m.thumbnail_url ?? m.url} alt="" className="h-16 w-24 object-cover" />
+                <SafeImage
+                  src={m.thumbnail_url ?? m.url}
+                  alt=""
+                  fallbackLabel="—"
+                  className="h-16 w-24 object-cover"
+                />
               </button>
             </li>
           ))}

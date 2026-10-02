@@ -8,6 +8,8 @@ import { apiFetch } from "@/lib/api/client";
 import { describeError } from "@/lib/errors";
 import type { AIEnvelope } from "@/types/ai";
 
+import { ProviderBadge } from "./ProviderBadge";
+
 /**
  * AI drafting help inside the listing form. Suggestions are never applied
  * automatically: the lister chooses what to use.
@@ -30,6 +32,7 @@ export function AuthoringAssistant({
   const [error, setError] = useState<string | null>(null);
   const [description, setDescription] = useState<string | null>(null);
   const [titles, setTitles] = useState<string[]>([]);
+  const [provider, setProvider] = useState<string | null>(null);
 
   async function run(kind: string, fn: () => Promise<void>) {
     setBusy(kind);
@@ -62,6 +65,7 @@ export function AuthoringAssistant({
                     { method: "POST", body: { language: "ar" } },
                   );
                   setDescription(r.result.description);
+                  setProvider(r.provider);
                 })
               }
             >
@@ -78,6 +82,7 @@ export function AuthoringAssistant({
                     { method: "POST", body: { language: "ar" } },
                   );
                   setTitles(r.result.titles);
+                  setProvider(r.provider);
                 })
               }
             >
@@ -100,6 +105,7 @@ export function AuthoringAssistant({
                 },
               );
               setDescription(r.result.text);
+              setProvider(r.provider);
             })
           }
         >
@@ -107,6 +113,9 @@ export function AuthoringAssistant({
         </Button>
       </div>
       {error && <p className="text-sm text-danger">{error}</p>}
+      {provider && (description || titles.length > 0) && (
+        <ProviderBadge dict={dict} provider={provider} />
+      )}
       {description && (
         <div className="flex flex-col gap-2 rounded-md bg-white p-3 text-sm">
           <p className="whitespace-pre-line">{description}</p>

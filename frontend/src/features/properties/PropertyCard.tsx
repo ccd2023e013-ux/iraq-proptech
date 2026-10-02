@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { SafeImage } from "@/components/ui/SafeImage";
+
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
 import { formatArea, formatCompactPrice, placeName } from "@/lib/format";
@@ -49,11 +51,10 @@ export function PropertyCard({
       <Link href={`/properties/${card.id}`} className="absolute inset-0 z-10" aria-label={title} />
       <div className="relative aspect-[4/3] bg-sand-100">
         {card.cover_url ? (
-          // eslint-disable-next-line @next/next/no-img-element -- images are served by our API
-          <img
+          <SafeImage
             src={card.cover_url}
             alt=""
-            loading="lazy"
+            fallbackLabel={dict.listing.noImage}
             className="size-full object-cover transition group-hover:scale-[1.02]"
           />
         ) : (

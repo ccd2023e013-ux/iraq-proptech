@@ -15,6 +15,12 @@ case "$role" in
     if [ "${RUN_MIGRATIONS:-0}" = "1" ]; then
       alembic upgrade head
     fi
+    # Optional, explicit opt-in: clearly-labelled national DEMO dataset, seeded in
+    # the background (idempotent) so the API starts answering immediately.
+    if [ "${DEMO_SEED:-off}" = "iraq" ]; then
+      (python -m app.cli seed-demo-iraq --allow-production \
+        || echo "demo seed failed (the API keeps running)") &
+    fi
     exec uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8000}" \
       --proxy-headers --forwarded-allow-ips="${FORWARDED_ALLOW_IPS:-127.0.0.1}"
     ;;

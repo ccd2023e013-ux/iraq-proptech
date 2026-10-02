@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
+import { SafeImage } from "@/components/ui/SafeImage";
 import { priceLabel } from "@/features/properties/PropertyCard";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
@@ -221,10 +222,10 @@ export function MapSearch({
                     className={`flex gap-3 rounded-[var(--radius-card)] border bg-white p-2 transition ${highlightId === card.id ? "border-gold-500" : "border-sand-200"}`}
                   >
                     {card.cover_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element -- served by our API
-                      <img
+                      <SafeImage
                         src={card.cover_url}
                         alt=""
+                        fallbackLabel="—"
                         className="h-20 w-24 shrink-0 rounded object-cover"
                       />
                     ) : (
