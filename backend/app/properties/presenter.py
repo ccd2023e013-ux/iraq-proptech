@@ -171,8 +171,8 @@ def to_out(db: Session, prop: Property, principal: Principal | None) -> Property
         furnishing=prop.furnishing,
         ownership_document=prop.ownership_document,
         amenities=prop.amenity_codes,
-        governorate=_ref(ctx.governorates[prop.governorate_id]),  # type: ignore[arg-type]
-        city=_ref(ctx.cities[prop.city_id]),  # type: ignore[arg-type]
+        governorate=_ref(ctx.governorates[prop.governorate_id]),
+        city=_ref(ctx.cities[prop.city_id]),
         district=_ref(ctx.districts.get(prop.district_id)) if prop.district_id else None,
         neighborhood=_ref(ctx.neighborhoods.get(prop.neighborhood_id))
         if prop.neighborhood_id
@@ -222,7 +222,7 @@ def to_cards(db: Session, props: Sequence[Property]) -> list[PropertyCard]:
                 area_m2=prop.area_m2,
                 bedrooms=prop.bedrooms,
                 bathrooms=prop.bathrooms,
-                city=_ref(ctx.cities[prop.city_id]),  # type: ignore[arg-type]
+                city=_ref(ctx.cities[prop.city_id]),
                 district=_ref(ctx.districts.get(prop.district_id)) if prop.district_id else None,
                 neighborhood=_ref(ctx.neighborhoods.get(prop.neighborhood_id))
                 if prop.neighborhood_id
