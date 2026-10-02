@@ -2,8 +2,8 @@
 
 | # | Phase | Status |
 | --- | --- | --- |
-| 1 | Foundation | Done — CI green (run 36955562983) |
-| 2 | Authentication + RBAC | Not started |
+| 1 | Foundation | Done — see PHASE-STATUS.md |
+| 2 | Authentication + RBAC | Done — see PHASE-STATUS.md |
 | 3 | Properties | Not started |
 | 4 | Search | Not started |
 | 5 | GIS / Maps | Not started |
@@ -15,7 +15,7 @@
 | 11 | Temporary cloud deployment | Not started |
 | 12 | Production migration documentation | Not started |
 
-A phase is only marked done after CI is green on `main`.
+A phase is only marked done after CI is green on `main`. Current checkpoints: [PHASE-STATUS.md](PHASE-STATUS.md).
 
 ## Phase 1 — Foundation
 
