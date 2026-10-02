@@ -17,6 +17,13 @@ export default async function DashboardPage() {
     ...(hasPermission(me.permissions, "properties.create")
       ? [{ href: "/dashboard/properties", label: dict.myListings.title }]
       : []),
+    ...(["leads.read_own", "leads.read_agency", "leads.read_any"].some((p) =>
+      hasPermission(me.permissions, p),
+    )
+      ? [{ href: "/dashboard/crm", label: dict.crm.title }]
+      : []),
+    { href: "/messages", label: dict.messages.title },
+    { href: "/saved-searches", label: dict.savedSearches.title },
     { href: "/dashboard/agency", label: dict.agency.title },
     { href: "/account", label: dict.nav.account },
   ];

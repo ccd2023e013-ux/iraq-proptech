@@ -7,11 +7,12 @@
 set -euo pipefail
 
 WEB="${WEB_URL:-http://localhost:3000}"
-OWNER_JAR="$(mktemp)"; ADMIN_JAR="$(mktemp)"; IMG="$(mktemp --suffix=.png)"
-trap 'rm -f "$OWNER_JAR" "$ADMIN_JAR" "$IMG"' EXIT
+OWNER_JAR="$(mktemp)"; ADMIN_JAR="$(mktemp)"; BUYER_JAR="$(mktemp)"; IMG="$(mktemp --suffix=.png)"
+trap 'rm -f "$OWNER_JAR" "$ADMIN_JAR" "$BUYER_JAR" "$IMG"' EXIT
 STAMP="$(date +%s)-$RANDOM"
 OWNER="owner-$STAMP@example.com"
 ADMIN="admin-$STAMP@example.com"
+BUYER="buyer-$STAMP@example.com"
 PASSWORD="Smoke-Test-Pass-2026"
 
 fail() { echo "SMOKE FAIL: $*"; exit 1; }
@@ -106,5 +107,41 @@ echo "11. public search and detail pages render server-side"
 curl -fsS "$WEB/properties?q=$q" | grep -q "بيت تجريبي في العشار" || fail "search page"
 curl -fsS "$WEB/properties/$ID" | grep -q "بيت تجريبي في العشار" || fail "detail page"
 curl -fsS -b "$OWNER_JAR" "$WEB/favorites" | grep -q "بيت تجريبي في العشار" || fail "favorites page"
+
+echo "12. a customer registers, verifies and sends an inquiry"
+curl -fsS -X POST "$WEB/api/v1/auth/register" -H 'Content-Type: application/json' \
+  -d "{\"email\":\"$BUYER\",\"password\":\"$PASSWORD\",\"full_name\":\"زبون تجريبي\"}" >/dev/null
+btoken=$(curl -fsS "$WEB/api/v1/dev/outbox" | py "
+import json,re,sys
+for m in json.load(sys.stdin):
+    if m['to']=='$BUYER': print(re.search(r'token=([A-Za-z0-9_-]+)', m['text']).group(1)); break")
+curl -fsS -X POST "$WEB/api/v1/auth/verify-email" -H 'Content-Type: application/json' -d "{\"token\":\"$btoken\"}" >/dev/null
+login "$BUYER_JAR" "$BUYER"
+curl -fsS -b "$BUYER_JAR" -X POST "$WEB/api/v1/properties/$ID/inquiries" \
+  -H 'Content-Type: application/json' -H "X-CSRF-Token: $(csrf "$BUYER_JAR")" \
+  -d '{"name":"زبون تجريبي","phone":"07701234567","message":"هل العقار متاح للمعاينة؟"}' >/dev/null
+
+echo "13. the owner receives the lead, works it, and replies"
+leads=$(curl -fsS -b "$OWNER_JAR" "$WEB/api/v1/crm/leads")
+LEAD=$(jq -r --arg p "$ID" '.items[] | select(.property.id == $p) | .id' <<<"$leads")
+[ -n "$LEAD" ] || fail "lead not received: $leads"
+curl -fsS -b "$OWNER_JAR" -X POST "$WEB/api/v1/crm/leads/$LEAD/activities" \
+  -H 'Content-Type: application/json' -H "X-CSRF-Token: $(csrf "$OWNER_JAR")" \
+  -d '{"kind":"CALL","body":"تم الاتصال"}' >/dev/null
+curl -fsS -b "$OWNER_JAR" -X PATCH "$WEB/api/v1/crm/leads/$LEAD" \
+  -H 'Content-Type: application/json' -H "X-CSRF-Token: $(csrf "$OWNER_JAR")" \
+  -d '{"status_code":"QUALIFIED"}' | grep -q '"QUALIFIED"' || fail "lead update"
+CONV=$(curl -fsS -b "$OWNER_JAR" "$WEB/api/v1/me/conversations" | jq -r '.[0].id')
+curl -fsS -b "$OWNER_JAR" -X POST "$WEB/api/v1/conversations/$CONV/messages" \
+  -H 'Content-Type: application/json' -H "X-CSRF-Token: $(csrf "$OWNER_JAR")" \
+  -d '{"body":"نعم، متاح يوم السبت"}' >/dev/null
+
+echo "14. the customer sees the reply; the CRM pages render for the owner"
+curl -fsS -b "$BUYER_JAR" "$WEB/api/v1/conversations/$CONV/messages" | grep -q "متاح يوم السبت" || fail "reply"
+code=$(curl -s -o /dev/null -w '%{http_code}' -b "$BUYER_JAR" "$WEB/api/v1/crm/leads/$LEAD")
+[ "$code" = "403" ] || fail "customer could read the CRM ($code)"
+curl -fsS -b "$OWNER_JAR" "$WEB/dashboard/crm" | grep -q "زبون تجريبي" || fail "CRM page"
+curl -fsS -b "$OWNER_JAR" "$WEB/dashboard/crm/leads/$LEAD" | grep -q "تم الاتصال" || fail "lead page"
+curl -fsS -b "$BUYER_JAR" "$WEB/messages/$CONV" | grep -q "متاح يوم السبت" || fail "thread page"
 
 echo "LISTING SMOKE OK"

@@ -27,7 +27,9 @@ def _ts(name: str) -> sa.Column:
 
 
 def upgrade() -> None:
-    op.drop_constraint(op.f("ck_crm_lead_activities_kind_valid"), "crm_lead_activities", type_="check")
+    op.drop_constraint(
+        op.f("ck_crm_lead_activities_kind_valid"), "crm_lead_activities", type_="check"
+    )
     op.create_check_constraint(
         op.f("ck_crm_lead_activities_kind_valid"), "crm_lead_activities", f"kind IN ({NEW_KINDS})"
     )
@@ -109,7 +111,9 @@ def downgrade() -> None:
     op.drop_table("messages")
     op.drop_table("conversations")
     op.execute("DELETE FROM crm_lead_activities WHERE kind = 'MESSAGE'")
-    op.drop_constraint(op.f("ck_crm_lead_activities_kind_valid"), "crm_lead_activities", type_="check")
+    op.drop_constraint(
+        op.f("ck_crm_lead_activities_kind_valid"), "crm_lead_activities", type_="check"
+    )
     op.create_check_constraint(
         op.f("ck_crm_lead_activities_kind_valid"), "crm_lead_activities", f"kind IN ({OLD_KINDS})"
     )
