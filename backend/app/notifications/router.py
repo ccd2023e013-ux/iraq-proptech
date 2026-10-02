@@ -443,11 +443,12 @@ def admin_deliveries(
     _: Principal = Depends(_automation),
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
-    counts = dict(
-        db.execute(
+    counts: dict[str, int] = {
+        str(k): int(v)
+        for k, v in db.execute(
             select(NotificationDelivery.status, func.count()).group_by(NotificationDelivery.status)
         ).all()
-    )
+    }
     stmt = select(NotificationDelivery).order_by(NotificationDelivery.created_at.desc()).limit(50)
     if delivery_status:
         stmt = stmt.where(NotificationDelivery.status == delivery_status)
@@ -463,4 +464,4 @@ def admin_deliveries(
         }
         for d in db.execute(stmt).scalars()
     ]
-    return {"counts": {str(k): int(v) for k, v in counts.items()}, "recent": recent}
+    return {"counts": counts, "recent": recent}
