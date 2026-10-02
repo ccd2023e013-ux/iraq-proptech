@@ -411,9 +411,13 @@ def test_place_geojson_without_boundary_returns_centroid(
 
 def test_demo_seed_is_labelled_idempotent_and_resettable(db_session: Session) -> None:
     first = demo.seed(db_session, listings=12)
-    assert first == {"listings_created": 12, "districts": len(demo.BASRA_DISTRICTS)}
+    assert first == {
+        "listings_created": 12,
+        "districts": len(demo.BASRA_DISTRICTS),
+        "pois_created": len(demo.BASRA_DISTRICTS) * len(demo._DEMO_POIS),
+    }
     again = demo.seed(db_session, listings=12)
-    assert again["listings_created"] == 0
+    assert again["listings_created"] == 0 and again["pois_created"] == 0
 
     rows = (
         db_session.execute(select(Property).where(Property.title_ar.like("عقار تجريبي%")))

@@ -7,7 +7,14 @@ export const ACCESS_COOKIE = "access_token";
 export const REFRESH_COOKIE = "refresh_token";
 
 /** Paths that require a signed-in user. */
-export const PROTECTED_PREFIXES = ["/dashboard", "/account", "/admin", "/favorites", "/messages"];
+export const PROTECTED_PREFIXES = [
+  "/dashboard",
+  "/account",
+  "/admin",
+  "/favorites",
+  "/saved-searches",
+  "/messages",
+];
 
 export const DEFAULT_AFTER_LOGIN = "/dashboard";
 

@@ -44,4 +44,15 @@ grep -q 'dir="rtl"' <<<"$page" || fail "map page not RTL"
 grep -q 'البحث على الخريطة' <<<"$page" || fail "map page title"
 grep -q 'map-canvas' <<<"$page" || fail "map container"
 
+echo "7. nearby POIs, nearby listings and comparison for demo listings"
+ids=$(jq -r '[.features[] | select(.properties.is_demo == true) | .properties.id] | .[0:2] | join(",")' <<<"$geo")
+first=${ids%%,*}
+curl -fsS "$WEB/api/v1/properties/$first/nearby?radius_m=2000" | jq -e '.available and .total > 0' >/dev/null \
+  || fail "nearby POIs"
+curl -fsS "$WEB/api/v1/properties/$first/nearby-properties" | jq -e '.items | length > 0' >/dev/null \
+  || fail "nearby properties"
+curl -fsS "$WEB/api/v1/properties/compare?ids=$ids" | jq -e '.items | length == 2' >/dev/null || fail "compare API"
+curl -fsS "$WEB/compare?ids=$ids" | grep -q 'مقارنة العقارات' || fail "compare page"
+curl -fsS "$WEB/properties/$first" | grep -q 'ما حول العقار' || fail "nearby section on detail page"
+
 echo "MAP SMOKE OK"

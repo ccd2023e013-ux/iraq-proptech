@@ -3,6 +3,7 @@ import { IBM_Plex_Sans, IBM_Plex_Sans_Arabic } from "next/font/google";
 import type { ReactNode } from "react";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { CompareBar } from "@/features/compare/CompareControls";
 import { getDictionary } from "@/i18n";
 import { directionOf } from "@/i18n/config";
 import { getRequestLocale } from "@/i18n/server";
@@ -49,6 +50,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <body className="min-h-dvh antialiased">
         <SiteHeader dict={dict} locale={locale} me={me} />
         <main>{children}</main>
+        <CompareBar dict={dict} />
       </body>
     </html>
   );

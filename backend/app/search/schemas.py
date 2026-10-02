@@ -74,7 +74,7 @@ class SearchFilters(BaseModel):
     near_lat: float | None = Field(default=None, ge=-90, le=90)
     near_lon: float | None = Field(default=None, ge=-180, le=180)
     radius_km: float | None = Field(default=None, gt=0, le=100)
-    polygon: list[tuple[float, float]] | None = Field(default=None, min_length=4, max_length=200)
+    polygon: list[tuple[float, float]] | None = Field(default=None, min_length=3, max_length=200)
     sort: SortOrder = SortOrder.NEWEST
 
     @model_validator(mode="after")
@@ -104,8 +104,11 @@ class SearchFilters(BaseModel):
             raise ValueError("Distance sort needs a radius search")
         if self.sort == SortOrder.RELEVANCE and not self.q:
             self.sort = SortOrder.NEWEST
-        if self.polygon is not None and self.polygon[0] != self.polygon[-1]:
-            self.polygon = [*self.polygon, self.polygon[0]]  # close the ring
+        if self.polygon is not None:
+            if len(set(self.polygon)) < 3:
+                raise ValueError("A polygon needs at least 3 distinct points")
+            if self.polygon[0] != self.polygon[-1]:
+                self.polygon = [*self.polygon, self.polygon[0]]  # close the ring
         self.property_types = sorted(set(self.property_types))
         self.amenities = sorted(set(self.amenities))
         return self

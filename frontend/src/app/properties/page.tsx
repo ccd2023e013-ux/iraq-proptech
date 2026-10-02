@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Alert } from "@/components/ui/Alert";
 import { PropertyCard } from "@/features/properties/PropertyCard";
 import { favoriteIds, runSearch } from "@/features/search/data";
+import { SaveSearchButton } from "@/features/search/SaveSearchButton";
 import { SearchFilters, SortSelect } from "@/features/search/SearchFilters";
 import { getDictionary, errorMessage } from "@/i18n";
 import { getRequestLocale } from "@/i18n/server";
@@ -63,7 +64,15 @@ export default async function PropertiesPage({
               </span>
             )}
           </h1>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            {"filters" in result && (
+              <SaveSearchButton
+                dict={dict}
+                filters={result.filters}
+                signedIn={!!me}
+                nextPath={`/properties?${toApiQuery(params)}`}
+              />
+            )}
             <Link
               href={`/map?${toApiQuery(params)}`}
               className="text-sm font-medium text-brand-700"

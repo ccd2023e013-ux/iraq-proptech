@@ -10,6 +10,8 @@ export interface SearchResult {
   total: number;
   page: number;
   page_size: number;
+  /** The validated, canonical filters the API actually applied. */
+  filters: Record<string, unknown>;
 }
 
 export async function runSearch(query: string): Promise<SearchResult | { error: string }> {

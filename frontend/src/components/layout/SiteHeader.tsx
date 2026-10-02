@@ -44,6 +44,11 @@ export function SiteHeader({
             </Link>
           )}
           {me && (
+            <Link href="/saved-searches" className="text-sand-700 hover:text-brand-700">
+              {dict.savedSearches.title}
+            </Link>
+          )}
+          {me && (
             <Link
               href="/dashboard/properties/new"
               className="rounded-lg border border-brand-300 px-3 py-1 font-medium text-brand-700 hover:bg-brand-50"

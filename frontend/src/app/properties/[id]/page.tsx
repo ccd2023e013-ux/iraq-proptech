@@ -6,6 +6,7 @@ import { Alert } from "@/components/ui/Alert";
 import { Card } from "@/components/ui/Card";
 import { FavoriteButton } from "@/features/properties/FavoriteButton";
 import { Gallery, ShareButton } from "@/features/properties/Gallery";
+import { Nearby } from "@/features/properties/Nearby";
 import { favoriteIds } from "@/features/search/data";
 import { getDictionary } from "@/i18n";
 import { getRequestLocale } from "@/i18n/server";
@@ -22,6 +23,12 @@ interface Verification {
   kind: keyof ReturnType<typeof getDictionary>["property"]["checks"];
   result: "PASSED" | "FAILED";
   created_at: string;
+}
+
+interface Conversion {
+  converted: string | null;
+  to: "IQD" | "USD";
+  rate: { source: string; effective_at: string } | null;
 }
 
 interface PricePoint {
@@ -70,6 +77,13 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
     getCurrentUser(),
     favoriteIds(),
   ]);
+  // Indicative equivalent in the other currency — only when an operator has configured a rate.
+  const conversion =
+    !property.price_on_request && property.price_amount
+      ? await serverApiFetch<Conversion>(
+          `/api/v1/exchange-rates/convert?amount=${encodeURIComponent(property.price_amount)}&from=${property.currency}&to=${property.currency === "USD" ? "IQD" : "USD"}`,
+        ).catch(() => null)
+      : null;
   const label = (items: ReferenceItem[], code: string) => {
     const item = items.find((i) => i.code === code);
     return item ? (locale === "ar" ? item.name_ar : item.name_en) : code;
@@ -147,6 +161,15 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                 </span>
               )}
             </p>
+            {conversion?.converted && conversion.rate && (
+              <p className="text-sm text-sand-500 tabular">
+                ≈ {formatPrice(conversion.converted, conversion.to, locale)} (
+                {dict.money.indicative}
+                {" — "}
+                {dict.money.indicativeNote} {conversion.rate.source},{" "}
+                {formatDate(conversion.rate.effective_at, locale)})
+              </p>
+            )}
           </header>
 
           <Card title={p.facts}>
@@ -195,6 +218,8 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                   : null}
             </p>
           </Card>
+
+          <Nearby propertyId={property.id} dict={dict} locale={locale} />
 
           {history.length > 1 && (
             <Card title={p.priceHistory}>

@@ -122,6 +122,43 @@ def _districts(db: Session, city: City) -> list[tuple[DemoDistrict, District]]:
     return out
 
 
+_DEMO_POIS = [
+    ("SCHOOL", "مدرسة تجريبية", "Demo school", 0.002, 0.001),
+    ("HOSPITAL", "مستشفى تجريبي", "Demo hospital", -0.003, 0.002),
+    ("MOSQUE", "جامع تجريبي", "Demo mosque", 0.001, -0.002),
+    ("MARKET", "سوق تجريبي", "Demo market", -0.001, -0.003),
+]
+
+
+def _demo_pois(db: Session, districts: list[tuple[DemoDistrict, District]]) -> int:
+    from app.geo.pois import PointOfInterest  # local: keeps demo import-light
+
+    created = 0
+    for d, district in districts:
+        for category, name_ar, name_en, dx, dy in _DEMO_POIS:
+            ref = f"demo:{d.slug}:{category.lower()}"
+            exists = db.execute(
+                select(PointOfInterest.id).where(PointOfInterest.external_ref == ref)
+            ).first()
+            if exists:
+                continue
+            db.add(
+                PointOfInterest(
+                    category=category,
+                    name_ar=f"{name_ar} — {d.name_ar}",
+                    name_en=f"{name_en} — {d.name_en}",
+                    location=make_point(d.lon + dx, d.lat + dy),
+                    city_id=district.city_id,
+                    source="DEMO — not a real place",
+                    external_ref=ref,
+                    is_demo=True,
+                    is_active=True,
+                )
+            )
+            created += 1
+    return created
+
+
 def seed(db: Session, *, listings: int = 40) -> dict[str, int]:
     """Create the demo lister, demo district squares in Basra and demo listings."""
     gov = db.execute(select(Governorate).where(Governorate.code == "BSR")).scalar_one()
@@ -130,6 +167,7 @@ def seed(db: Session, *, listings: int = 40) -> dict[str, int]:
     ).scalar_one()
     user = _demo_user(db)
     districts = _districts(db, city)
+    pois_created = _demo_pois(db, districts)
     existing = len(
         db.execute(select(Property.id).where(Property.lister_id == user.id)).scalars().all()
     )
@@ -221,7 +259,7 @@ def seed(db: Session, *, listings: int = 40) -> dict[str, int]:
         data={"listings_created": created, "districts": len(districts)},
     )
     db.commit()
-    return {"listings_created": created, "districts": len(districts)}
+    return {"listings_created": created, "districts": len(districts), "pois_created": pois_created}
 
 
 def reset(db: Session) -> dict[str, int]:

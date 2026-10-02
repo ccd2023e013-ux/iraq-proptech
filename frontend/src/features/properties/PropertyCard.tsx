@@ -5,6 +5,8 @@ import type { Locale } from "@/i18n/config";
 import { formatArea, formatCompactPrice, placeName } from "@/lib/format";
 import type { PropertyCard as Card } from "@/types/property";
 
+import { CompareToggle } from "@/features/compare/CompareControls";
+
 import { FavoriteButton } from "./FavoriteButton";
 
 export function priceLabel(card: Card, dict: Dictionary, locale: Locale): string {
@@ -73,6 +75,9 @@ export function PropertyCard({
               {dict.listing.demo}
             </span>
           )}
+        </div>
+        <div className="absolute bottom-2 start-2 z-20">
+          <CompareToggle id={card.id} dict={dict} />
         </div>
         <div className="absolute end-2 top-2 z-20">
           <FavoriteButton

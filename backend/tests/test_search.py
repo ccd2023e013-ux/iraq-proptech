@@ -231,6 +231,11 @@ def test_bbox_radius_and_polygon(api: TestClient, db_session: Session, lister) -
     body = {"polygon": [[47.80, 30.50], [47.83, 30.50], [47.83, 30.52], [47.80, 30.52]]}
     assert _ids(api.post(SEARCH, json=body)) == [str(ashar.id)]
     assert str(baghdad.id) in _ids(api.get(SEARCH))
+    # a drawn triangle (3 open points, as the map UI sends) is valid
+    triangle = "47.79,30.49;47.84,30.49;47.815,30.53"
+    assert _ids(api.get(SEARCH, params={"polygon": triangle})) == [str(ashar.id)]
+    # degenerate shapes are rejected
+    assert api.get(SEARCH, params={"polygon": "47.8,30.5;47.9,30.5;47.8,30.5"}).status_code == 422
 
 
 def test_hidden_locations_never_appear_in_spatial_results(
