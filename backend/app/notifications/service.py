@@ -140,6 +140,7 @@ def notify(
                     next_attempt_at=_now(),
                 )
             )
+    db.flush()  # sessions do not autoflush; make the outbox rows visible to later queries
     db.info["notifications_pending"] = True
     return notification
 
