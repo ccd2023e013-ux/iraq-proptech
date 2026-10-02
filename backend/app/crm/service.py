@@ -986,7 +986,7 @@ def _conversation_for(
 def _post_message(
     db: Session, conv: Conversation, sender_id: uuid.UUID, body: str, *, log_on_lead: bool
 ) -> Message:
-    message = Message(conversation_id=conv.id, sender_id=sender_id, body=body)
+    message = Message(conversation_id=conv.id, sender_id=sender_id, body=body, created_at=_now())
     db.add(message)
     conv.last_message_at = _now()
     if log_on_lead and conv.lead_id:

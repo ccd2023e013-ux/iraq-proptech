@@ -3,7 +3,9 @@ appointments, customers, conversations, dashboard, events."""
 
 from __future__ import annotations
 
+import re
 import uuid
+from collections import Counter
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -611,8 +613,13 @@ def test_lead_list_uses_constant_queries(api: TestClient, db_session: Session, w
     finally:
         sa_event.remove(engine, "before_cursor_execute", count)
     assert len(small.json()["items"]) == 2 and len(large.json()["items"]) == 6
-    extra = [q[:120] for q in statements if q not in small_sql]
-    assert n_large == n_small, extra  # no per-row queries
+
+    def shape(sql: str) -> str:
+        return re.sub(r"\([^()]*%\(\w+\)s[^()]*\)", "(?)", sql)[:160]
+
+    small_shapes = Counter(shape(q) for q in small_sql)
+    large_shapes = Counter(shape(q) for q in statements)
+    assert n_large == n_small, sorted((large_shapes - small_shapes).elements())  # no N+1
 
 
 def test_failing_event_handler_does_not_break_inquiry(
