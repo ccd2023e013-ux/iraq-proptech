@@ -14,6 +14,7 @@ from __future__ import annotations
 from celery import Celery
 
 from app.core.config import get_settings
+from app.db import models as _models  # noqa: F401  (register all tables)
 
 settings = get_settings()
 
