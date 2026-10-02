@@ -5,7 +5,13 @@ import { serverApiFetch } from "@/lib/api/server";
 import { formatPrice } from "@/lib/format";
 import type { AIEnvelope, InvestmentResult, PriceResult } from "@/types/ai";
 
-function Explain({ dict, envelope }: { dict: Dictionary; envelope: AIEnvelope }) {
+function Explain({
+  dict,
+  envelope,
+}: {
+  dict: Dictionary;
+  envelope: Pick<AIEnvelope, "methodology" | "limitations">;
+}) {
   return (
     <details className="mt-3 text-xs text-sand-500">
       <summary className="cursor-pointer">{dict.ai.methodology}</summary>
