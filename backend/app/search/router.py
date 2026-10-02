@@ -75,8 +75,7 @@ def _run(db: Session, filters: SearchFilters, params: PageParams) -> SearchResul
     )
 
 
-@router.get("/search/properties", response_model=SearchResult)
-def search_get(
+def query_filters(
     q: Annotated[str | None, Query(max_length=200)] = None,
     governorate_id: uuid.UUID | None = None,
     city_id: uuid.UUID | None = None,
@@ -108,9 +107,8 @@ def search_get(
         str | None, Query(max_length=8000, description="lon,lat;lon,lat;...")
     ] = None,
     sort: str = "newest",
-    params: PageParams = Depends(page_params),
-    db: Session = Depends(get_db),
-) -> SearchResult:
+) -> SearchFilters:
+    """FastAPI dependency: search filters from the query string (shared with /map)."""
     raw: dict[str, Any] = {
         "q": q,
         "governorate_id": governorate_id,
@@ -142,7 +140,16 @@ def search_get(
         "polygon": _parse_polygon(polygon),
         "sort": sort,
     }
-    return _run(db, validate_filters({k: v for k, v in raw.items() if v is not None}), params)
+    return validate_filters({k: v for k, v in raw.items() if v is not None})
+
+
+@router.get("/search/properties", response_model=SearchResult)
+def search_get(
+    filters: SearchFilters = Depends(query_filters),
+    params: PageParams = Depends(page_params),
+    db: Session = Depends(get_db),
+) -> SearchResult:
+    return _run(db, filters, params)
 
 
 @router.post("/search/properties", response_model=SearchResult)

@@ -6,7 +6,9 @@ from app.agencies.router import router as agencies_router
 from app.auth.router import router as auth_router
 from app.core.config import Settings
 from app.favorites import router as favorites_router
+from app.geo.manage import router as gis_router
 from app.geo.router import router as geo_router
+from app.map.router import router as map_router
 from app.properties.router import router as properties_router
 from app.rbac.router import router as rbac_router
 from app.search.router import router as search_router
@@ -22,10 +24,12 @@ def build_api_router(settings: Settings) -> APIRouter:
     api_router.include_router(users_router)
     api_router.include_router(rbac_router)
     api_router.include_router(geo_router)
+    api_router.include_router(gis_router)
     api_router.include_router(agencies_router)
     api_router.include_router(properties_router)
     api_router.include_router(search_router)
     api_router.include_router(favorites_router)
+    api_router.include_router(map_router)
     if settings.dev_tools:
         api_router.include_router(dev_router)
     return api_router

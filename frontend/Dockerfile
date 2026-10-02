@@ -4,7 +4,11 @@
 FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
+# Reconcile the lockfile with package.json first (no-op when they agree), then
+# install exactly what it pins.
+RUN if [ -f package-lock.json ]; then \
+      npm install --package-lock-only --ignore-scripts --no-audit --no-fund && npm ci --no-audit --no-fund; \
+    else npm install --no-audit --no-fund; fi
 
 FROM node:22-alpine AS build
 WORKDIR /app

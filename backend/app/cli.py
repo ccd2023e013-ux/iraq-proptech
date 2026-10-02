@@ -2,6 +2,8 @@
 
     python -m app.cli create-superadmin --email admin@example.com --name "Admin"
         (password from SUPERADMIN_PASSWORD or an interactive prompt)
+    python -m app.cli seed-demo [--listings 40] [--allow-production]
+    python -m app.cli reset-demo
 
 SUPER_ADMIN can only be created here — never through the API — so a
 compromised admin account cannot mint new super admins.
@@ -63,7 +65,30 @@ def main(argv: list[str] | None = None) -> int:
     sa = sub.add_parser("create-superadmin", help="Create or promote a SUPER_ADMIN")
     sa.add_argument("--email", required=True)
     sa.add_argument("--name", default="Super Admin")
+    demo = sub.add_parser("seed-demo", help="Create clearly-labelled DEMO districts and listings")
+    demo.add_argument("--listings", type=int, default=40)
+    demo.add_argument("--allow-production", action="store_true")
+    sub.add_parser("reset-demo", help="Delete DEMO listings created by seed-demo")
     args = parser.parse_args(argv)
+
+    if args.command in ("seed-demo", "reset-demo"):
+        from app import demo as demo_data
+        from app.core.config import get_settings
+
+        if (
+            args.command == "seed-demo"
+            and get_settings().is_production
+            and not args.allow_production
+        ):
+            print("Refusing to seed DEMO data in production without --allow-production")
+            return 2
+        with get_sessionmaker()() as db:
+            if args.command == "seed-demo":
+                result = demo_data.seed(db, listings=max(0, min(args.listings, 500)))
+            else:
+                result = demo_data.reset(db)
+        print(result)
+        return 0
 
     if args.command == "create-superadmin":
         password = os.environ.get("SUPERADMIN_PASSWORD") or getpass.getpass("Password: ")

@@ -70,6 +70,9 @@ class Permission(StrEnum):
     AGENCIES_MANAGE_ANY = "agencies.manage_any"
     AGENCIES_VERIFY = "agencies.verify"
 
+    # Locations / GIS (districts, neighborhoods, boundaries)
+    LOCATIONS_MANAGE = "locations.manage"
+
     # CRM
     LEADS_READ_OWN = "leads.read_own"
     LEADS_READ_AGENCY = "leads.read_agency"
@@ -145,6 +148,7 @@ _ADMIN = (
         Permission.AI_ADMIN,
         Permission.ANALYTICS_ALL,
         Permission.AUTOMATION_MANAGE,
+        Permission.LOCATIONS_MANAGE,
     }
 )
 

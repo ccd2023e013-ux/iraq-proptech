@@ -72,8 +72,14 @@ export function SearchFilters({
     const hasPrice = form.min_price !== "" || form.max_price !== "";
     go(
       toApiQuery({
-        // keep non-form params (map viewport, sort) but reset the page
-        bbox: first(params.bbox),
+        // Keep non-form params (map viewport/area, sort) but reset the page. A new
+        // location choice drops the old viewport so the map can move to it.
+        bbox:
+          form.governorate_id === (first(params.governorate_id) ?? "") &&
+          form.city_id === (first(params.city_id) ?? "")
+            ? first(params.bbox)
+            : undefined,
+        polygon: first(params.polygon),
         sort: first(params.sort),
         q: form.q.trim(),
         governorate_id: form.governorate_id,

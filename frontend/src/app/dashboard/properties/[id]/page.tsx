@@ -12,6 +12,7 @@ import { getRequestLocale } from "@/i18n/server";
 import { ApiError } from "@/lib/api/client";
 import { serverApiFetch } from "@/lib/api/server";
 import { requireUser } from "@/lib/auth/guard";
+import { resolveMapConfig } from "@/lib/map/provider";
 import type { Property, PropertyDocument } from "@/types/property";
 
 export const dynamic = "force-dynamic";
@@ -61,7 +62,13 @@ export default async function EditListingPage({ params }: { params: Promise<{ id
       <Card title={f.media}>
         <MediaManager dict={dict} property={property} />
       </Card>
-      <ListingForm dict={dict} locale={locale} reference={reference} initial={property} />
+      <ListingForm
+        dict={dict}
+        locale={locale}
+        reference={reference}
+        mapConfig={resolveMapConfig(process.env)}
+        initial={property}
+      />
       <Card title={f.documents}>
         <DocumentManager dict={dict} propertyId={property.id} documents={documents} />
       </Card>

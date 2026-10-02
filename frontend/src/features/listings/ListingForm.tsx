@@ -6,10 +6,12 @@ import { type FormEvent, type ReactNode, useEffect, useState } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
+import { LocationPicker, type Resolved } from "@/features/map/LocationPicker";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
 import { apiFetch } from "@/lib/api/client";
 import { describeError } from "@/lib/errors";
+import type { MapConfig } from "@/lib/map/provider";
 import type {
   Condition,
   Currency,
@@ -232,11 +234,13 @@ export function ListingForm({
   locale,
   reference,
   initial,
+  mapConfig = null,
 }: {
   dict: Dictionary;
   locale: Locale;
   reference: ListingReference;
   initial: Property | null;
+  mapConfig?: MapConfig | null;
 }) {
   const router = useRouter();
   const f = dict.listingForm;
@@ -260,6 +264,17 @@ export function ListingForm({
   const neighborhoods = usePlaces(
     s.district_id ? `/api/v1/locations/neighborhoods?district_id=${s.district_id}` : null,
   );
+
+  function applyArea(r: Resolved) {
+    setSaved(false);
+    setS((prev) => ({
+      ...prev,
+      governorate_id: r.governorate?.id ?? prev.governorate_id,
+      city_id: r.city?.id ?? (r.governorate ? "" : prev.city_id),
+      district_id: r.district?.id ?? "",
+      neighborhood_id: r.neighborhood?.id ?? "",
+    }));
+  }
 
   function fillMyLocation() {
     navigator.geolocation?.getCurrentPosition((pos) => {
@@ -587,6 +602,22 @@ export function ListingForm({
           value={s.lon}
           onChange={(e) => set("lon", e.target.value)}
         />
+        {mapConfig && (
+          <div className="sm:col-span-2">
+            <LocationPicker
+              config={mapConfig}
+              dict={dict}
+              locale={locale}
+              lat={s.lat.trim() === "" ? null : Number(s.lat)}
+              lon={s.lon.trim() === "" ? null : Number(s.lon)}
+              onPick={(lat, lon) => {
+                set("lat", String(lat));
+                set("lon", String(lon));
+              }}
+              onApply={applyArea}
+            />
+          </div>
+        )}
         <div className="sm:col-span-2">
           <Button variant="secondary" size="sm" onClick={fillMyLocation}>
             {f.useMyLocation}

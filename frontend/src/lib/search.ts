@@ -32,6 +32,7 @@ export const SEARCH_KEYS = [
   "near_lat",
   "near_lon",
   "radius_km",
+  "polygon",
   "sort",
   "page",
   "page_size",

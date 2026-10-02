@@ -35,7 +35,7 @@ A user may hold several roles; permissions are the union.
 | `properties.create`, `leads.read_own`, `leads.manage`, `ai.author`, `analytics.own` | | ✓ | ✓ | | ✓ | ✓ |
 | `leads.read_agency`, `analytics.agency` | | | ✓ | | ✓ | ✓ |
 | `users.read`, `properties.moderate`, `properties.verify`, `properties.read_private`, `agencies.verify`, `reports.review`, `audit.read` | | | | ✓ | ✓ | ✓ |
-| `users.suspend`, `roles.assign`, `properties.manage_any`, `agencies.manage_any`, `leads.read_any`, `leads.configure`, `ai.admin`, `analytics.all`, `automation.manage` | | | | | ✓ | ✓ |
+| `users.suspend`, `roles.assign`, `properties.manage_any`, `agencies.manage_any`, `leads.read_any`, `leads.configure`, `ai.admin`, `analytics.all`, `automation.manage`, `locations.manage` | | | | | ✓ | ✓ |
 | `settings.manage` | | | | | | ✓ |
 
 ¹ Any account may *apply* to open an agency. The creator becomes
