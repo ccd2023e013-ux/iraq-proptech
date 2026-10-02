@@ -16,6 +16,7 @@ from sqlalchemy import CursorResult, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app import events
 from app.audit import service as audit
 from app.auth.models import AuthSession, RefreshToken, TokenPurpose, VerificationToken
 from app.auth.security import (
@@ -107,6 +108,7 @@ def register_user(
         data={"account_type": account_type.value},
     )
     token = _issue_token(db, user, TokenPurpose.EMAIL_VERIFY, user.email)
+    events.emit(db, "user.registered", {"user_id": str(user.id)})
     db.commit()
     _send_verification(user, token)
     return user

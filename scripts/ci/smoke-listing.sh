@@ -164,4 +164,19 @@ code=$(curl -s -o /dev/null -w '%{http_code}' -b "$BUYER_JAR" "$WEB/api/v1/admin
 curl -fsS -b "$ADMIN_JAR" "$WEB/api/v1/admin/audit-logs?action=report.dismissed" | jq -e '.total >= 1' >/dev/null \
   || fail "audit record for the dismissal"
 
+echo "17. notifications: owner was told about publication + inquiry, reporter about the review"
+curl -fsS -b "$OWNER_JAR" "$WEB/api/v1/me/notifications?page_size=50" > /tmp/owner-notes.json
+jq -e '[.items[].kind] | index("listing.approved") != null' /tmp/owner-notes.json >/dev/null \
+  || fail "listing.approved notification ($(jq -c '[.items[].kind]' /tmp/owner-notes.json))"
+jq -e '[.items[].kind] | index("inquiry.received") != null' /tmp/owner-notes.json >/dev/null \
+  || fail "inquiry.received notification"
+curl -fsS -b "$BUYER_JAR" "$WEB/api/v1/me/notifications" | jq -e '[.items[].kind] | index("report.closed") != null' >/dev/null \
+  || fail "report.closed notification"
+curl -fsS -b "$OWNER_JAR" "$WEB/api/v1/me/notifications/unread-count" | jq -e '.unread >= 2' >/dev/null || fail "unread count"
+curl -fsS -b "$OWNER_JAR" "$WEB/notifications" | grep -q "تم نشر إعلانك" || fail "notifications page"
+for page in /admin/webhooks /admin/jobs; do
+  code=$(curl -s -o /dev/null -w '%{http_code}' -b "$ADMIN_JAR" "$WEB$page")
+  [ "$code" = "200" ] || fail "admin page $page ($code)"
+done
+
 echo "LISTING SMOKE OK"

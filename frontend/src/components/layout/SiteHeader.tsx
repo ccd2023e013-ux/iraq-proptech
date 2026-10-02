@@ -11,10 +11,12 @@ export function SiteHeader({
   dict,
   locale,
   me,
+  unread = 0,
 }: {
   dict: Dictionary;
   locale: Locale;
   me: Me | null;
+  unread?: number;
 }) {
   return (
     <header className="sticky top-0 z-30 border-b border-sand-200 bg-sand-50/90 backdrop-blur">
@@ -59,6 +61,20 @@ export function SiteHeader({
         </nav>
         <div className="flex items-center gap-2">
           <LanguageSwitcher current={locale} label={dict.nav.switchLanguage} />
+          {me && (
+            <Link
+              href="/notifications"
+              aria-label={`${dict.notifications.title}${unread ? ` (${unread})` : ""}`}
+              className="relative grid size-9 place-items-center rounded-lg text-sand-700 hover:bg-sand-100"
+            >
+              <span aria-hidden>🔔</span>
+              {unread > 0 && (
+                <span className="absolute -end-0.5 -top-0.5 min-w-4 rounded-full bg-danger px-1 text-center text-[10px] font-bold text-white tabular">
+                  {unread > 99 ? "99+" : unread}
+                </span>
+              )}
+            </Link>
+          )}
           {me ? (
             <UserMenu dict={dict} name={me.user.full_name} />
           ) : (

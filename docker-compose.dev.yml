@@ -12,12 +12,16 @@ services:
 
   backend:
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
-    environment:
+    environment: &dev-backend-env
       LOG_JSON: "false"
+      # Allow http://n8n:5678 (same Docker network) as a webhook target in development.
+      WEBHOOK_ALLOW_HTTP: "true"
+      WEBHOOK_ALLOW_PRIVATE_HOSTS: "true"
     volumes:
       - ./backend:/app
 
   worker:
+    environment: *dev-backend-env
     volumes:
       - ./backend:/app
 

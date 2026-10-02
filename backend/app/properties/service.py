@@ -253,6 +253,15 @@ def create_property(db: Session, principal: Principal, data: PropertyCreate) -> 
         resource_id=prop.id,
         data={"reference": prop.reference_code},
     )
+    events.emit(
+        db,
+        "listing.created",
+        {
+            "property_id": str(prop.id),
+            "reference_code": prop.reference_code,
+            "lister_id": str(prop.lister_id),
+        },
+    )
     db.commit()
     return prop
 
@@ -345,6 +354,11 @@ def update_property(
         resource_type="property",
         resource_id=prop.id,
         data={"fields": ",".join(sorted(data.model_fields_set))},
+    )
+    events.emit(
+        db,
+        "listing.updated",
+        {"property_id": str(prop.id), "fields": sorted(data.model_fields_set)},
     )
     db.commit()
     return prop

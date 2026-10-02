@@ -44,7 +44,14 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const locale = await getRequestLocale();
   const dict = getDictionary(locale);
   const me = await getCurrentUser();
-  const announcement = await loadAnnouncement(locale);
+  const [announcement, unread] = await Promise.all([
+    loadAnnouncement(locale),
+    me
+      ? serverApiFetch<{ unread: number }>("/api/v1/me/notifications/unread-count")
+          .then((r) => r.unread)
+          .catch(() => 0)
+      : Promise.resolve(0),
+  ]);
 
   return (
     <html lang={locale} dir={directionOf(locale)}>
@@ -54,7 +61,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             {announcement}
           </div>
         )}
-        <SiteHeader dict={dict} locale={locale} me={me} />
+        <SiteHeader dict={dict} locale={locale} me={me} unread={unread} />
         <main>{children}</main>
         <CompareBar dict={dict} />
       </body>

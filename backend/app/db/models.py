@@ -21,6 +21,15 @@ from app.geo.models import City, District, Governorate, Neighborhood
 from app.geo.pois import PointOfInterest
 from app.moderation.models import ErrorEvent, Report
 from app.money import ExchangeRate
+from app.notifications.models import (
+    JobRun,
+    Notification,
+    NotificationDelivery,
+    NotificationPreference,
+    PushSubscription,
+    WebhookDelivery,
+    WebhookEndpoint,
+)
 from app.properties.models import (
     Amenity,
     Property,
@@ -58,11 +67,15 @@ __all__ = [
     "Favorite",
     "Governorate",
     "Inquiry",
+    "JobRun",
     "Lead",
     "LeadActivity",
     "LeadStatus",
     "Message",
     "Neighborhood",
+    "Notification",
+    "NotificationDelivery",
+    "NotificationPreference",
     "PointOfInterest",
     "Property",
     "PropertyAmenity",
@@ -72,6 +85,7 @@ __all__ = [
     "PropertyStatusHistory",
     "PropertyType",
     "PropertyVerification",
+    "PushSubscription",
     "RefreshToken",
     "Report",
     "RoleRecord",
@@ -80,4 +94,6 @@ __all__ = [
     "User",
     "UserRole",
     "VerificationToken",
+    "WebhookDelivery",
+    "WebhookEndpoint",
 ]

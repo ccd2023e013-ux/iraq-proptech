@@ -16,6 +16,8 @@ const ADMIN_SECTIONS = [
   ["/admin/users", "users", "users.read"],
   ["/admin/audit", "audit", "audit.read"],
   ["/admin/ai", "aiUsage", "ai.admin"],
+  ["/admin/webhooks", "webhooks", "automation.manage"],
+  ["/admin/jobs", "jobs", "automation.manage"],
   ["/admin/settings", "settings", "settings.manage"],
   ["/admin/system", "system", "analytics.all"],
 ] as const;

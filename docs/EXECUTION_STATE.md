@@ -7,28 +7,35 @@ Read this first when resuming work in a new session.
   Job logs cannot be downloaded from the development environment; failures
   are republished as check-run annotations by `scripts/ci/annotate.sh`
   (`gh api repos/<repo>/check-runs/<id>/annotations`).
-- **Last green commit**: `3fc684f` — CI run 36962496975 (backend 185 tests,
-  frontend 64 tests, Docker stack + auth/listing/map smoke tests).
+- **Last green commit**: `088419e` — CI run 37019370137 (backend 240 tests,
+  91 % coverage; frontend 74 tests; Docker stack + auth/listing/map smoke).
 
 ## Completed
 
 See [PHASE-STATUS.md](PHASE-STATUS.md): Foundation, Auth + RBAC, Real estate
-core, Search + discovery, GIS + maps.
+core, Search + discovery, GIS + maps, discovery gap-fill, CRM, AI,
+Admin + moderation.
 
 ## In progress
 
-Phase 6 — CRM + leads (backend models/migration `0005`, schemas, events
-module written locally; service/router/tests/UI not yet).
+Phase 9 — Automation + notifications (notifications, preferences, outbox,
+SMS/push mock channels, signed webhooks with SSRF guard, Celery beat jobs,
+admin webhooks/jobs pages). Docs: [AUTOMATION.md](AUTOMATION.md).
 
 ## Next actions (in order)
 
-1. Gap-fill from the master directive: saved searches, property comparison
-   API, POIs + nearby, exchange-rate abstraction (no hard-coded rates).
-2. Finish CRM: service, router, tests, inquiry form, CRM dashboard,
-   pipeline, lead detail, tasks, appointments, conversation threads.
-3. AI engine (mock provider default), Admin + moderation, Automation +
-   notifications + webhooks, Analytics, Monetization (demo payments),
-   Cloud deployment docs, Local PC migration, final security audit + E2E.
+1. Get Phase 9 CI green; record checkpoint.
+2. Analytics (privacy-conscious events; admin/agency/agent dashboards).
+3. Monetization with payment-provider abstraction and DEMO payment mode.
+4. Cloud deployment docs; local PC migration; DATA_MODEL, SECURITY,
+   DEPLOYMENT docs; README/ARCHITECTURE/ROADMAP refresh.
+5. Final security audit, final E2E, final report.
+
+## Local tooling notes
+
+Only ruff, black, pytest (without app deps) and prettier run locally; mypy,
+the backend test-suite and the frontend build run only in CI. The shell has
+no brace expansion — create directories one by one.
 
 ## Known failures
 

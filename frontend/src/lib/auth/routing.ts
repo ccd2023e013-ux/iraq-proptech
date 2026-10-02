@@ -14,6 +14,7 @@ export const PROTECTED_PREFIXES = [
   "/favorites",
   "/saved-searches",
   "/messages",
+  "/notifications",
 ];
 
 export const DEFAULT_AFTER_LOGIN = "/dashboard";

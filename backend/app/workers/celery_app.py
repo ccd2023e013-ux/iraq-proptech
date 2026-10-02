@@ -15,6 +15,7 @@ from celery import Celery
 
 from app.core.config import get_settings
 from app.db import models as _models  # noqa: F401  (register all tables)
+from app.notifications import handlers as notification_handlers
 
 settings = get_settings()
 
@@ -32,6 +33,8 @@ celery_app.conf.update(
     broker_connection_retry_on_startup=True,
 )
 celery_app.autodiscover_tasks(["app.workers"])
+
+notification_handlers.install()  # the worker emits events too (e.g. listing expiry)
 
 
 @celery_app.task(name="system.ping")

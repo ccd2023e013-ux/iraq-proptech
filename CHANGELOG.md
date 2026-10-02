@@ -2,6 +2,24 @@
 
 All notable changes, newest first. Each entry lists the CI-verified commit.
 
+## Phase 8 — Admin + moderation (`088419e`)
+Listing/user reports, moderation reason codes, review queues, admin console
+(overview, moderation, reports, verification, users, audit, AI usage,
+settings, system/errors), typed runtime settings, site announcement.
+
+## Phase 7 — AI (`088419e`)
+Provider abstraction (mock default; Claude/OpenAI/Gemini with keys), fact
+guards, explainable price estimates, NL search, authoring assistant, reply
+drafts, lead prioritisation, usage limits and logging.
+
+## Phase 6 — CRM + leads (`088419e`)
+Inquiries, leads with agency scoping, pipeline, notes, tasks, appointments,
+conversation threads, CRM dashboard and messages UI.
+
+## Phase 5b — Discovery gap-fill (`683d92a`)
+Saved searches, property comparison, POIs + nearby, exchange-rate
+abstraction with indicative conversion.
+
 ## Phase 5 — GIS + maps (`3fc684f`)
 Map GeoJSON with server clustering, boundaries API, point resolution, admin
 boundary management, labelled DEMO seed, MapLibre map search page, location

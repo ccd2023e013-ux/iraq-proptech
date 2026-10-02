@@ -87,6 +87,20 @@ class Settings(BaseSettings):
     max_video_bytes: int = 100 * 1024 * 1024
     max_media_per_property: int = 40
 
+    # SMS: "mock" records deliveries only; "http" posts {to, text} to a gateway.
+    sms_provider: Literal["mock", "http"] = "mock"
+    sms_gateway_url: str | None = None
+    sms_gateway_token: str | None = None
+
+    # Webhooks (n8n and other automation). Private hosts (e.g. http://n8n:5678 on the
+    # same Docker network) must be allowed explicitly; production defaults are strict.
+    webhook_allow_http: bool = False
+    webhook_allow_private_hosts: bool = False
+
+    # Deliver notifications/webhooks right after commit in the API process (useful when
+    # no Celery worker runs, e.g. on a free single-container host).
+    notifications_inline: bool = False
+
     # AI: "mock" is deterministic, offline and free (default). Real providers need a key.
     ai_provider: Literal["mock", "claude", "openai", "gemini"] = "mock"
     ai_model: str | None = None  # provider default when unset

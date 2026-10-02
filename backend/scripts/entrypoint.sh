@@ -14,8 +14,18 @@ case "$role" in
       --proxy-headers --forwarded-allow-ips="${FORWARDED_ALLOW_IPS:-127.0.0.1}"
     ;;
   worker)
+    # WORKER_BEAT=1 (default) embeds the scheduler; run exactly one such worker.
+    beat=""
+    if [ "${WORKER_BEAT:-1}" = "1" ]; then
+      beat="--beat --schedule=/tmp/celerybeat-schedule"
+    fi
+    # shellcheck disable=SC2086
     exec celery -A app.workers.celery_app worker --loglevel="${LOG_LEVEL:-INFO}" \
-      --concurrency="${WORKER_CONCURRENCY:-2}"
+      --concurrency="${WORKER_CONCURRENCY:-2}" $beat
+    ;;
+  beat)
+    exec celery -A app.workers.celery_app beat --loglevel="${LOG_LEVEL:-INFO}" \
+      --schedule=/tmp/celerybeat-schedule
     ;;
   migrate)
     exec alembic upgrade head

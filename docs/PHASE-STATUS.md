@@ -14,16 +14,38 @@ roadmap maps as shown in the last column.
 | 3 Real estate core | ✅ Complete | `ee0b8c8` | [36960780682](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/36960780682) | 3 |
 | 4 Search + discovery | ✅ Complete | `ef5a719` | [36961539892](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/36961539892) | 3 |
 | 5 GIS + maps | ✅ Complete | `3fc684f` | [36962496975](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/36962496975) | 4 |
-| 5b Marketplace/GIS gap-fill (saved searches, comparison, POIs/nearby, exchange rates) | ⏳ Next | | | 3, 4 |
-| 6 CRM + leads | ⏳ In progress (WIP not pushed) | | | 5 |
-| 7 AI | Not started | | | 6 |
-| 8 Admin + moderation | Not started | | | 7 |
-| 9 Automation + notifications | Not started | | | 8 |
+| 5b Marketplace/GIS gap-fill (saved searches, comparison, POIs/nearby, exchange rates) | ✅ Complete | `683d92a` | [37013888512](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37013888512) | 3, 4 |
+| 6 CRM + leads | ✅ Complete | `088419e` | [37019370137](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37019370137) | 5 |
+| 7 AI | ✅ Complete | `088419e` | [37019370137](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37019370137) | 6 |
+| 8 Admin + moderation | ✅ Complete | `088419e` | [37019370137](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37019370137) | 7 |
+| 9 Automation + notifications | ⏳ In progress | | | 8 |
 | 10 Analytics | Not started | | | 9 |
 | 10b Monetization (demo payments) | Not started | | | 10 |
 | 11 Temporary cloud deployment | Not started | | | 11 |
 | 12 Local PC migration | Not started | | | 12 |
 | Final audit + E2E | Not started | | | — |
+
+---
+
+## Phases 6–8 — CRM, AI, Admin + moderation (verified together at `088419e`)
+
+Phases 6, 7 and 8 were pushed in sequence; intermediate runs exposed type,
+formatting and test-measurement issues that were fixed in follow-up commits.
+The first fully green run covering all three is 37019370137 (backend 240
+tests, 91 % coverage; frontend 74 tests; Docker stack + auth/listing/map
+smoke incl. CRM steps 12–14 and moderation/report steps 15–16).
+
+**Implemented**: see [CRM.md](CRM.md), [AI.md](AI.md) and the admin section
+of [API.md](API.md). Highlights — inquiries → leads with agency scoping,
+pipeline, notes, tasks, appointments, conversation threads; provider-neutral
+AI (mock default) with 17 features, explainable estimates and fact guards;
+reports, moderation reason codes, queues, admin console, error log, typed
+settings whitelist.
+
+**Errors found and fixed**: mypy Optional narrowing and dict-key typing;
+query-count test counted SAVEPOINT bookkeeping; equal transaction timestamps
+broke message ordering; error-log request id lost after context reset;
+Google font fetch flaked in CI (self-hosted fonts).
 
 ---
 
