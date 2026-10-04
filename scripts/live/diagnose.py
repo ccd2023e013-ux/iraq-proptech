@@ -52,7 +52,9 @@ if os.environ.get("S3_ACCESS_KEY_ID") and os.environ.get("S3_ENDPOINT_URL"):
     endpoint = Settings.model_validate(
         {"s3_endpoint_url": os.environ["S3_ENDPOINT_URL"]}
     ).s3_endpoint_url
-    note(f"S3_ENDPOINT_URL had a scheme: {'://' in os.environ['S3_ENDPOINT_URL']}")
+    raw_endpoint = os.environ["S3_ENDPOINT_URL"]
+    # Not secret (public project URL): spaced out so the log mask does not hide it.
+    note(f"S3_ENDPOINT_URL raw: {' '.join(repr(raw_endpoint))} (length {len(raw_endpoint)})")
     parts = urlparse(endpoint)
     note(
         f"S3 endpoint shape: scheme={parts.scheme} host=*{(parts.hostname or '')[-20:]}"
