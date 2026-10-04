@@ -40,22 +40,55 @@ if password:
     )
 
 if os.environ.get("S3_ACCESS_KEY_ID") and os.environ.get("S3_ENDPOINT_URL"):
-    os.environ.setdefault("STORAGE_BACKEND", "s3")
-    os.environ.setdefault("S3_BUCKET", "media")
-    try:
-        from app.storage import get_storage
+    from urllib.parse import urlparse
 
-        storage = get_storage()
-        key = f"diagnostics/{uuid.uuid4()}.txt"
-        storage.put(key, b"probe", "text/plain")
-        ok = storage.get(key) == b"probe"
-        storage.delete(key)
-        note(
-            f"S3 write/read/delete on bucket '{os.environ['S3_BUCKET']}': "
-            f"{'OK' if ok else 'MISMATCH'}"
+    import boto3
+    from botocore.config import Config
+    from botocore.exceptions import ClientError
+
+    endpoint = os.environ["S3_ENDPOINT_URL"]
+    parts = urlparse(endpoint)
+    note(
+        f"S3 endpoint shape: scheme={parts.scheme} host=*{(parts.hostname or '')[-20:]}"
+        f" path={parts.path!r}; region={os.environ.get('S3_REGION')!r}; "
+        f"boto3 {boto3.__version__}"
+    )
+    variants = {
+        "current": Config(s3={"addressing_style": "path"}, signature_version="s3v4"),
+        "checksum-when-required": Config(
+            s3={"addressing_style": "path"},
+            signature_version="s3v4",
+            request_checksum_calculation="when_required",
+            response_checksum_validation="when_required",
+        ),
+    }
+    for name, config in variants.items():
+        client = boto3.client(
+            "s3",
+            endpoint_url=endpoint,
+            config=config,
+            region_name=os.environ.get("S3_REGION"),
+            aws_access_key_id=os.environ["S3_ACCESS_KEY_ID"],
+            aws_secret_access_key=os.environ["S3_SECRET_ACCESS_KEY"],
         )
-    except Exception as exc:  # report the class and message, never credentials
-        note(f"S3 round trip FAILED: {type(exc).__name__}: {str(exc)[:300]}")
+        try:
+            names = [b["Name"] for b in client.list_buckets().get("Buckets", [])]
+            note(f"S3[{name}] buckets visible: {names}")
+        except ClientError as exc:
+            note(f"S3[{name}] list_buckets: {exc.response.get('Error', {})}")
+        key = f"diagnostics/{uuid.uuid4()}.txt"
+        try:
+            client.put_object(Bucket="media", Key=key, Body=b"probe", ContentType="text/plain")
+            body = client.get_object(Bucket="media", Key=key)["Body"].read()
+            client.delete_object(Bucket="media", Key=key)
+            note(
+                f"S3[{name}] write/read/delete on 'media': "
+                f"{'OK' if body == b'probe' else 'MISMATCH'}"
+            )
+        except ClientError as exc:
+            err = exc.response.get("Error", {})
+            meta = exc.response.get("ResponseMetadata", {})
+            note(f"S3[{name}] put/get FAILED: {err} http={meta.get('HTTPStatusCode')}")
 
 if os.environ.get("DATABASE_URL"):
     from sqlalchemy import text
