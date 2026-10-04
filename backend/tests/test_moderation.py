@@ -203,6 +203,12 @@ def test_admin_stats_and_system(api: TestClient, db_session: Session, owner) -> 
     assert "ACTIVE" in stats["users_by_status"]
     system = api.get("/api/v1/admin/system", headers=admin).json()
     assert system["database"] == "ok" and system["migration"]
+    assert set(system["request_network"]) == {
+        "peer",
+        "x_forwarded_for",
+        "trusted_proxy_hops",
+        "resolved_client_ip",
+    }
     moderator = auth_headers(api, make_user(db_session, roles=[Role.MODERATOR]))
     assert api.get("/api/v1/admin/stats", headers=moderator).status_code == 403
 

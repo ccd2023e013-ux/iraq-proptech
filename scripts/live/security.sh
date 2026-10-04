@@ -113,6 +113,9 @@ curl -fsS -c "$TMP/admin.jar" -o /dev/null -X POST "$WEB/api/v1/auth/login" -H '
 seen=$(curl -fsS -b "$TMP/admin.jar" "$WEB/api/v1/admin/audit-logs?action=auth.login_failed&since=$since&page_size=5" \
   | jq -r '.items[0].ip_address // empty')
 echo "  runner=$mine api-saw=$seen"
+net=$(curl -fsS -b "$TMP/admin.jar" "$WEB/api/v1/admin/system" | jq -c '.request_network // {}')
+echo "  proxy chain at the API: $net"
+echo "::notice title=live proxy chain summary::$net"
 echo "::notice title=live client ip summary::runner=$mine api_saw=${seen:-unknown}"
 if [ -n "$mine" ] && [ -n "$seen" ]; then
   [ "$seen" = "$mine" ] || fail "API sees $seen instead of the client $mine — adjust TRUSTED_PROXY_HOPS"

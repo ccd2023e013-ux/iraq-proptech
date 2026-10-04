@@ -7,7 +7,7 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Request, status
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import func, or_, select, text
 from sqlalchemy.exc import IntegrityError
@@ -561,11 +561,21 @@ def admin_errors(
 
 
 @router.get("/admin/system")
-def admin_system(_: Principal = Depends(_admin), db: Session = Depends(get_db)) -> dict[str, Any]:
+def admin_system(
+    request: Request, _: Principal = Depends(_admin), db: Session = Depends(get_db)
+) -> dict[str, Any]:
+    from app.core.client_ip import client_ip
     from app.core.config import get_settings
 
     settings = get_settings()
     info: dict[str, Any] = {"environment": settings.app_env, "ai_provider": settings.ai_provider}
+    # Proxy chain as received, so operators can set TRUSTED_PROXY_HOPS correctly.
+    info["request_network"] = {
+        "peer": request.client.host if request.client else None,
+        "x_forwarded_for": request.headers.get("x-forwarded-for"),
+        "trusted_proxy_hops": settings.trusted_proxy_hops,
+        "resolved_client_ip": client_ip(request),
+    }
     try:
         db.execute(text("SELECT 1"))
         info["database"] = "ok"
