@@ -9,11 +9,13 @@ migrations at head).
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from typing import Literal
 from urllib.parse import urlparse
 
 from app.core.config import Settings
+from app.users.validation import password_problems
 
 Level = Literal["error", "warning"]
 
@@ -51,6 +53,22 @@ def config_findings(settings: Settings) -> list[Finding]:
         add("error", "SMTP_HOST_MISSING", "EMAIL_PROVIDER=smtp needs SMTP_HOST")
     if settings.storage_backend == "s3" and not settings.s3_bucket:
         add("error", "S3_BUCKET_MISSING", "STORAGE_BACKEND=s3 needs S3_BUCKET")
+    if settings.s3_endpoint_url:
+        endpoint = urlparse(settings.s3_endpoint_url)
+        if (
+            endpoint.scheme not in ("http", "https")
+            or not endpoint.hostname
+            or any(c in settings.s3_endpoint_url for c in " []()<>")
+        ):
+            # e.g. pasted as a markdown link "https://x/s3](https://x/s3)"
+            add("warning", "S3_ENDPOINT_MALFORMED", "S3_ENDPOINT_URL is not a plain URL")
+    demo_password = os.environ.get("DEMO_ACCOUNT_PASSWORD")
+    if demo_password and password_problems(demo_password):
+        add(
+            "warning",
+            "DEMO_PASSWORD_REJECTED",
+            "DEMO_ACCOUNT_PASSWORD fails the password policy; demo seeding will stop",
+        )
 
     if not prod:
         return out

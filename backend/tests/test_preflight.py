@@ -91,3 +91,29 @@ def test_jobs_trigger_runs_registered_jobs(api, monkeypatch: pytest.MonkeyPatch)
     assert [r["job"] for r in one["results"]] == ["expire_listings"]
     bad = api.post("/api/v1/internal/jobs/run?job=drop_tables", headers={"X-Jobs-Token": TOKEN})
     assert bad.status_code == 400 and bad.json()["error"]["code"] == "UNKNOWN_JOB"
+
+
+def test_malformed_s3_endpoint_and_weak_demo_password_are_flagged(monkeypatch) -> None:
+    from app.core.config import Settings
+    from app.core.preflight import config_findings
+
+    settings = Settings.model_validate(
+        {
+            "storage_backend": "s3",
+            "s3_bucket": "media",
+            "s3_endpoint_url": "https://x.storage.supabase.co/storage/v1/s3](https://x.storage.supabase.co/storage/v1/s3)",
+        }
+    )
+    monkeypatch.setenv("DEMO_ACCOUNT_PASSWORD", "short")
+    codes = {f.code for f in config_findings(settings)}
+    assert {"S3_ENDPOINT_MALFORMED", "DEMO_PASSWORD_REJECTED"} <= codes
+    good = Settings.model_validate(
+        {
+            "storage_backend": "s3",
+            "s3_bucket": "media",
+            "s3_endpoint_url": "https://x.storage.supabase.co/storage/v1/s3",
+        }
+    )
+    monkeypatch.setenv("DEMO_ACCOUNT_PASSWORD", "A-Strong-Demo-Pass-1")
+    codes = {f.code for f in config_findings(good)}
+    assert not {"S3_ENDPOINT_MALFORMED", "DEMO_PASSWORD_REJECTED"} & codes
