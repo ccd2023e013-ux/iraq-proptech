@@ -62,6 +62,39 @@ if os.environ.get("S3_ACCESS_KEY_ID") and os.environ.get("S3_ENDPOINT_URL"):
             response_checksum_validation="when_required",
         ),
     }
+    region_raw = os.environ.get("S3_REGION", "")
+    # The region is not secret; spaced out so the log mask does not hide its shape.
+    note(f"S3_REGION shape: {' '.join(region_raw)!r} (length {len(region_raw)})")
+    raw: list[str] = []
+
+    def capture(http_response, **_: object) -> None:
+        raw.append(f"{http_response.status_code} {http_response.text[:300]!r}")
+
+    for region in [region_raw.strip(), "eu-central-1", "us-east-1"]:
+        probe_client = boto3.client(
+            "s3",
+            endpoint_url=endpoint,
+            config=variants_config
+            if (
+                variants_config := Config(s3={"addressing_style": "path"}, signature_version="s3v4")
+            )
+            else None,
+            region_name=region,
+            aws_access_key_id=os.environ["S3_ACCESS_KEY_ID"].strip(),
+            aws_secret_access_key=os.environ["S3_SECRET_ACCESS_KEY"].strip(),
+        )
+        probe_client.meta.events.register("after-call.s3", capture)
+        raw.clear()
+        try:
+            probe_client.list_objects_v2(Bucket="media", MaxKeys=1)
+            note(f"S3 list_objects with region {region!r}: OK")
+        except ClientError:
+            note(f"S3 list_objects with region {region!r}: {raw[-1] if raw else 'no response'}")
+    key_id, secret = os.environ["S3_ACCESS_KEY_ID"], os.environ["S3_SECRET_ACCESS_KEY"]
+    note(
+        f"S3 key shapes: id length {len(key_id)} (stripped {len(key_id.strip())}), "
+        f"secret length {len(secret)} (stripped {len(secret.strip())})"
+    )
     for name, config in variants.items():
         client = boto3.client(
             "s3",
