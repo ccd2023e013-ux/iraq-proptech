@@ -1,0 +1,19 @@
+name: Live probe
+
+# Manual diagnostics of the deployed services (status, headers, bodies).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Probe
+        run: |
+          . deploy/live.env
+          WEB_URL="$LIVE_WEB_URL" API_URL="$LIVE_API_URL" bash scripts/live/probe.sh
