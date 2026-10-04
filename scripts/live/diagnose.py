@@ -46,7 +46,13 @@ if os.environ.get("S3_ACCESS_KEY_ID") and os.environ.get("S3_ENDPOINT_URL"):
     from botocore.config import Config
     from botocore.exceptions import ClientError
 
-    endpoint = os.environ["S3_ENDPOINT_URL"]
+    from app.core.config import Settings
+
+    # Same normalization as the API (adds a missing https:// scheme).
+    endpoint = Settings.model_validate(
+        {"s3_endpoint_url": os.environ["S3_ENDPOINT_URL"]}
+    ).s3_endpoint_url
+    note(f"S3_ENDPOINT_URL had a scheme: {'://' in os.environ['S3_ENDPOINT_URL']}")
     parts = urlparse(endpoint)
     note(
         f"S3 endpoint shape: scheme={parts.scheme} host=*{(parts.hostname or '')[-20:]}"

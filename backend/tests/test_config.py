@@ -62,3 +62,14 @@ def test_prepared_statements_auto_detect_transaction_poolers(
     assert Settings().use_prepared_statements is expected
     monkeypatch.setenv("DB_PREPARED_STATEMENTS", "true")
     assert Settings().use_prepared_statements is True
+
+
+def test_s3_endpoint_without_scheme_gets_https() -> None:
+    from app.core.config import Settings
+
+    s = Settings.model_validate({"s3_endpoint_url": " ref.storage.supabase.co/storage/v1/s3/ "})
+    assert s.s3_endpoint_url == "https://ref.storage.supabase.co/storage/v1/s3"
+    assert Settings.model_validate({"s3_endpoint_url": "http://minio:9000"}).s3_endpoint_url == (
+        "http://minio:9000"
+    )
+    assert Settings.model_validate({"s3_endpoint_url": ""}).s3_endpoint_url is None

@@ -142,6 +142,15 @@ class Settings(BaseSettings):
     def _normalize_db_url(cls, value: str) -> str:
         return normalize_database_url(value)
 
+    @field_validator("s3_endpoint_url")
+    @classmethod
+    def _normalize_s3_endpoint(cls, value: str | None) -> str | None:
+        """Tolerate a pasted host without scheme ("x.storage.supabase.co/...")."""
+        if value is None or not value.strip():
+            return None
+        value = value.strip().rstrip("/")
+        return value if "://" in value else f"https://{value}"
+
     @field_validator("cors_origins", mode="before")
     @classmethod
     def _split_origins(cls, value: object) -> object:
