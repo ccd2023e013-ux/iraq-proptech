@@ -90,6 +90,31 @@ if os.environ.get("S3_ACCESS_KEY_ID") and os.environ.get("S3_ENDPOINT_URL"):
             note(f"S3 list_objects with region {region!r}: OK")
         except ClientError:
             note(f"S3 list_objects with region {region!r}: {raw[-1] if raw else 'no response'}")
+    # The project ref is not secret (it is in every public Supabase URL).
+    db_user = urlparse(os.environ.get("DATABASE_URL", "")).username or ""
+    db_ref = db_user.split(".", 1)[1] if "." in db_user else ""
+    host_ref = (parts.hostname or "").split(".", 1)[0]
+    note(f"project ref: database={db_ref!r} endpoint={host_ref!r} match={db_ref == host_ref}")
+    if db_ref:
+        for candidate in (
+            f"https://{db_ref}.storage.supabase.co/storage/v1/s3",
+            f"https://{db_ref}.supabase.co/storage/v1/s3",
+        ):
+            c = boto3.client(
+                "s3",
+                endpoint_url=candidate,
+                config=Config(s3={"addressing_style": "path"}, signature_version="s3v4"),
+                region_name=region_raw.strip(),
+                aws_access_key_id=os.environ["S3_ACCESS_KEY_ID"],
+                aws_secret_access_key=os.environ["S3_SECRET_ACCESS_KEY"],
+            )
+            c.meta.events.register("after-call.s3", capture)
+            raw.clear()
+            try:
+                c.list_objects_v2(Bucket="media", MaxKeys=1)
+                note(f"S3 candidate endpoint {candidate}: OK")
+            except ClientError:
+                note(f"S3 candidate endpoint {candidate}: {raw[-1] if raw else 'no response'}")
     key_id, secret = os.environ["S3_ACCESS_KEY_ID"], os.environ["S3_SECRET_ACCESS_KEY"]
     note(
         f"S3 key shapes: id length {len(key_id)} (stripped {len(key_id.strip())}), "
