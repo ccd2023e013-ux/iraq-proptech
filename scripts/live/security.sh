@@ -67,21 +67,27 @@ c=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H "X-Jobs-Token: wrong-token
 ok "docs/OpenAPI/dev outbox hidden, error envelope without internals, jobs trigger hidden"
 
 echo "6. path traversal, injection, reflected XSS"
+# Render sits behind Cloudflare: attack-looking requests may be stopped at the edge
+# (403 without the app's X-Request-ID). That is a block, not a failure; otherwise
+# the app itself must answer with a safe status.
+edge_blocked=0
+expect() { # url allowed-status-regex label  → sets $body
+  local h; h=$(curl -s -D - -o "$TMP/body" "$1" | tr -d '\r'); local c; c=$(head -1 <<<"$h" | awk '{print $2}')
+  body=$(cat "$TMP/body")
+  if [ "$c" = 403 ] && ! grep -qi '^x-request-id:' <<<"$h"; then edge_blocked=$((edge_blocked + 1)); body=""; return 0; fi
+  [[ "$c" =~ ^($2)$ ]] || fail "$3 answered $c"
+}
 for p in "/api/v1/..%2F..%2Fdocs" "/api/v1/%2e%2e/%2e%2e/openapi.json" "/api/v1/media/..%2f..%2fetc%2fpasswd"; do
-  c=$(curl -s -o /dev/null -w '%{http_code}' "$WEB$p"); [[ "$c" =~ ^(400|404|422)$ ]] || fail "$p answered $c"
+  expect "$WEB$p" "400|404|422" "traversal $p"
 done
-inj=$(curl -s -D - -o /dev/null "$WEB/api/v1/search/properties?q=%27%20OR%201%3D1%20--" | tr -d '\r')
-c=$(head -1 <<<"$inj" | awk '{print $2}')
-if [ "$c" = 403 ] && ! grep -qi '^x-request-id:' <<<"$inj"; then
-  echo "  (SQL-injection-looking query blocked at the hosting edge (WAF) before the app)"
-else
-  [ "$c" = 200 ] || fail "q injection $c"
-fi
-# The same input as data, not an attack pattern, must be inert inside the app:
-c=$(curl -s -o /dev/null -w '%{http_code}' "$WEB/api/v1/search/properties?q=%27%3B%20DROP%20TABLE%20x"); [[ "$c" =~ ^(200|403)$ ]] || fail "quote in q answered $c"
-c=$(curl -s -o /dev/null -w '%{http_code}' "$WEB/api/v1/search/properties?city_id=1%20OR%201%3D1"); [ "$c" = 422 ] || fail "id injection $c"
-page=$(curl -fsS "$WEB/properties?q=%3Cscript%3Ealert(1)%3C%2Fscript%3E")
-! grep -q '<script>alert(1)</script>' <<<"$page" || fail "reflected XSS on the search page"
+expect "$WEB/api/v1/search/properties?q=%27%20OR%201%3D1%20--" "200" "q injection"
+expect "$WEB/api/v1/search/properties?city_id=1%20OR%201%3D1" "422" "id injection"
+expect "$WEB/properties?q=%3Cscript%3Ealert(1)%3C%2Fscript%3E" "200" "XSS search page"
+! grep -q '<script>alert(1)</script>' <<<"$body" || fail "reflected XSS on the search page"
+# Ordinary input with quotes (not an attack pattern) reaches the app and is inert.
+c=$(curl -s -o /dev/null -w '%{http_code}' "$WEB/api/v1/search/properties?q=O%27Brien%20%22villa%22")
+[ "$c" = 200 ] || fail "quotes in a search answered $c"
+[ "$edge_blocked" -gt 0 ] && echo "  ($edge_blocked attack-pattern requests blocked at the hosting edge before the app)"
 ok "traversal rejected, injection inert, search input escaped"
 
 echo "7. no secrets in public HTML/JS"
