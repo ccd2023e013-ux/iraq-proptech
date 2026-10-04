@@ -349,7 +349,9 @@ export function PropertyMap(props: PropertyMapProps) {
 
   return (
     <div className="relative h-full min-h-[420px] w-full overflow-hidden rounded-[var(--radius-card)] bg-sand-100">
-      <div ref={container} className="absolute inset-0" data-testid="map-canvas" />
+      {/* Inline position: MapLibre adds .maplibregl-map { position: relative }, which
+          overrides an `absolute` class and collapsed the map to 0px height. */}
+      <div ref={container} style={{ position: "absolute", inset: 0 }} data-testid="map-canvas" />
       {!ready && !failed && (
         <p className="absolute inset-0 grid place-items-center text-sm text-sand-500">
           {props.dict.map.loading}

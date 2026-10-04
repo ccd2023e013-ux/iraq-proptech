@@ -44,16 +44,23 @@ jobs:
       web: ${{ steps.urls.outputs.web }}
       api: ${{ steps.urls.outputs.api }}
       sha: ${{ steps.urls.outputs.sha }}
+      api_sha: ${{ steps.urls.outputs.api_sha }}
+      web_sha: ${{ steps.urls.outputs.web_sha }}
     steps:
       - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0
       - id: urls
         run: |
           . deploy/live.env
           echo "web=${LIVE_WEB_URL:-}" >> "$GITHUB_OUTPUT"
           echo "api=${LIVE_API_URL:-}" >> "$GITHUB_OUTPUT"
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          # Render services have rootDir backend/ and frontend/: a service only
+          # redeploys when a commit touches its directory.
+          echo "api_sha=$(git log -1 --format=%H -- backend)" >> "$GITHUB_OUTPUT"
+          echo "web_sha=$(git log -1 --format=%H -- frontend)" >> "$GITHUB_OUTPUT"
           if [ -z "${LIVE_WEB_URL:-}" ] || [ -z "${LIVE_API_URL:-}" ]; then
             echo "::notice title=live site summary::No live URLs in deploy/live.env yet — nothing to verify."
           fi
@@ -68,18 +75,19 @@ jobs:
         env:
           WEB: ${{ needs.config.outputs.web }}
           API: ${{ needs.config.outputs.api }}
-          SHA: ${{ needs.config.outputs.sha }}
+          API_SHA: ${{ needs.config.outputs.api_sha }}
+          WEB_SHA: ${{ needs.config.outputs.web_sha }}
           STRICT: ${{ github.event_name == 'workflow_run' }}
         run: |
           for i in $(seq 1 60); do
             api=$(curl -fsS --max-time 120 "$API/api/v1/health" | jq -r '.commit // ""' || true)
             web=$(curl -fsS --max-time 120 "$WEB/healthz" | jq -r '.commit // ""' || true)
-            echo "attempt $i: api=$api web=$web want=$SHA"
+            echo "attempt $i: api=$api (want $API_SHA) web=$web (want $WEB_SHA)"
             if [ "$STRICT" != "true" ] && [ -n "$api" ] && [ -n "$web" ]; then exit 0; fi
-            if [ "$api" = "$SHA" ] && [ "$web" = "$SHA" ]; then exit 0; fi
+            if [ "$api" = "$API_SHA" ] && [ "$web" = "$WEB_SHA" ]; then exit 0; fi
             sleep 30
           done
-          echo "::error title=deploy::Render did not serve $SHA within 30 minutes (api=$api web=$web)"
+          echo "::error title=deploy::Render did not serve api=$API_SHA web=$WEB_SHA within 30 minutes (api=$api web=$web)"
           exit 1
 
   database:
