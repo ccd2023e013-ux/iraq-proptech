@@ -19,4 +19,6 @@ probe web-proxy-health "$WEB/api/v1/health"
 probe web-status "$WEB/status"
 probe api-health "$API/api/v1/health"
 probe api-ready "$API/api/v1/health/ready"
+media=$(curl -s "$WEB/api/v1/search/properties?page_size=1" | python3 -c "import json,sys; print(json.load(sys.stdin)['items'][0].get('cover_url') or '')")
+[ -n "$media" ] && probe media "$WEB$media"
 exit 0
