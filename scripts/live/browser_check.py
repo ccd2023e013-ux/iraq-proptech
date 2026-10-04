@@ -64,11 +64,12 @@ def main() -> int:
         page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
         page.goto(WEB + "/", wait_until="load", timeout=120_000)
         page.locator('header button[lang="en"]').first.click()
-        page.wait_for_function("document.documentElement.lang === 'en'", timeout=30_000)
+        # Selector waits, not wait_for_function: the site's CSP forbids eval.
+        page.wait_for_selector('html[lang="en"]', state="attached", timeout=30_000)
         check(page.get_attribute("html", "dir") == "ltr", "English switch → LTR")
         page.screenshot(path=str(OUT / "home-en.png"))
         page.locator('header button[lang="ar"]').first.click()
-        page.wait_for_function("document.documentElement.lang === 'ar'", timeout=30_000)
+        page.wait_for_selector('html[lang="ar"]', state="attached", timeout=30_000)
 
         # 3. Map: tiles drawn, properties returned, list ↔ map, click through.
         tiles: list[int] = []

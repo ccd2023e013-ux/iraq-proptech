@@ -81,12 +81,13 @@ echo "3. Iraqi DEMO data in seven cities"
 read -r -a CITY_IDS < <(anon /locations/governorates | python3 -c "
 import json, sys, urllib.request
 wanted = {'BSR':'basra','BGD':'baghdad','NJF':'najaf','KRB':'karbala','EBL':'erbil','NIN':'mosul','SUL':'sulaymaniyah'}
-out = []
+out = {}
 for g in json.load(sys.stdin):
     if g['code'] in wanted:
         cities = json.load(urllib.request.urlopen('$WEB/api/v1/locations/cities?governorate_id=' + g['id']))
-        out.append(next(c['id'] for c in cities if c['slug'] == wanted[g['code']]))
-print(' '.join(out))")
+        out[g['code']] = next(c['id'] for c in cities if c['slug'] == wanted[g['code']])
+# Basra first: later steps use it as the reference city (IQD prices).
+print(' '.join([out.pop('BSR')] + list(out.values())))")
 [ "${#CITY_IDS[@]}" = 7 ] || fail "city lookup: ${CITY_IDS[*]}"
 total=0
 for cid in "${CITY_IDS[@]}"; do
