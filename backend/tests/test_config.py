@@ -73,3 +73,11 @@ def test_s3_endpoint_without_scheme_gets_https() -> None:
         "http://minio:9000"
     )
     assert Settings.model_validate({"s3_endpoint_url": ""}).s3_endpoint_url is None
+    pasted = "S3_ENDPOINT_URL=https://ref.storage.supabase.co/storage/v1/s3"
+    assert Settings.model_validate({"s3_endpoint_url": pasted}).s3_endpoint_url == (
+        "https://ref.storage.supabase.co/storage/v1/s3"
+    )
+    quoted = '"https://ref.storage.supabase.co/storage/v1/s3"'
+    assert Settings.model_validate({"s3_endpoint_url": quoted}).s3_endpoint_url == (
+        "https://ref.storage.supabase.co/storage/v1/s3"
+    )

@@ -145,10 +145,14 @@ class Settings(BaseSettings):
     @field_validator("s3_endpoint_url")
     @classmethod
     def _normalize_s3_endpoint(cls, value: str | None) -> str | None:
-        """Tolerate a pasted host without scheme ("x.storage.supabase.co/...")."""
+        """Tolerate common paste mistakes: no scheme, quotes, a "NAME=" prefix."""
         if value is None or not value.strip():
             return None
-        value = value.strip().rstrip("/")
+        value = value.strip()
+        # Also a pasted "S3_ENDPOINT_URL=https://..." line (name copied into the value).
+        if value.upper().startswith("S3_ENDPOINT_URL="):
+            value = value.split("=", 1)[1].strip()
+        value = value.strip("\"'").rstrip("/")
         return value if "://" in value else f"https://{value}"
 
     @field_validator("cors_origins", mode="before")
