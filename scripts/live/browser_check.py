@@ -50,7 +50,7 @@ def main() -> int:
             locale="ar-IQ",
         )
         page = phone.new_page()
-        page.goto(WEB + "/", wait_until="networkidle", timeout=120_000)
+        page.goto(WEB + "/", wait_until="load", timeout=120_000)
         check(page.get_attribute("html", "dir") == "rtl", "home page is RTL")
         check(page.get_attribute("html", "lang") == "ar", "home page is Arabic")
         check(no_horizontal_scroll(page), "no horizontal scrolling on a 390px phone")
@@ -62,7 +62,7 @@ def main() -> int:
         page = desktop.new_page()
         errors: list[str] = []
         page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
-        page.goto(WEB + "/", wait_until="networkidle", timeout=120_000)
+        page.goto(WEB + "/", wait_until="load", timeout=120_000)
         page.locator('header button[lang="en"]').first.click()
         page.wait_for_function("document.documentElement.lang === 'en'", timeout=30_000)
         check(page.get_attribute("html", "dir") == "ltr", "English switch → LTR")
@@ -84,7 +84,7 @@ def main() -> int:
                     features.append(-1)
 
         page.on("response", on_response)
-        page.goto(WEB + "/map", wait_until="networkidle", timeout=120_000)
+        page.goto(WEB + "/map", wait_until="load", timeout=120_000)
         page.wait_for_selector("[data-testid=map-canvas] canvas", timeout=60_000)
         page.wait_for_timeout(8_000)  # let tiles and the property layer draw
         shot = page.locator("[data-testid=map-canvas]").screenshot()
@@ -104,7 +104,7 @@ def main() -> int:
             check(True, "map list item opens the property page")
 
         # 4. Property page: photo, AI summary.
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state("load")
         img = page.locator("img[src*='/api/v1/media/']").first
         img.wait_for(timeout=30_000)
         loaded = page.evaluate("(el) => el.complete && el.naturalWidth > 0", img.element_handle())

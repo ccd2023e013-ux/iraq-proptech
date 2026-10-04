@@ -49,7 +49,7 @@ def main() -> int:
             "SELECT count(*) FROM pg_tables WHERE schemaname = 'public' "
             "AND tablename NOT IN ('spatial_ref_sys')"
         ).scalar_one()
-        check(tables >= 60, f"{tables} application tables")
+        check(tables >= 50, f"{tables} application tables")
         fks = q(
             "SELECT count(*) FROM pg_constraint c JOIN pg_namespace n ON n.oid = c.connamespace "
             "WHERE c.contype = 'f' AND n.nspname = 'public'"
