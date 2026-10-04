@@ -88,7 +88,29 @@ def main() -> int:
         page.goto(WEB + "/map", wait_until="load", timeout=120_000)
         page.wait_for_selector("[data-testid=map-canvas] canvas", timeout=60_000)
         page.wait_for_timeout(8_000)  # let tiles and the property layer draw
-        shot = page.locator("[data-testid=map-canvas]").screenshot()
+        info = page.evaluate(
+            """() => {
+              const el = document.querySelector('[data-testid=map-canvas]');
+              const chain = [];
+              for (let n = el; n && chain.length < 6; n = n.parentElement) {
+                const r = n.getBoundingClientRect(), cs = getComputedStyle(n);
+                chain.push(`${n.tagName}.${(n.className || '').toString().slice(0, 40)} `
+                  + `${Math.round(r.width)}x${Math.round(r.height)} `
+                  + `${cs.display}/${cs.visibility}`);
+              }
+              const alert = document.querySelector('[role=alert]');
+              return {chain, alert: alert ? alert.textContent : null,
+                      width: window.innerWidth,
+                      canvases: document.querySelectorAll('canvas').length};
+            }"""
+        )
+        print(f"  map element diagnostics: {info}", flush=True)
+        page.screenshot(path=str(OUT / "map-page.png"), full_page=True)
+        box = page.locator("[data-testid=map-canvas]").bounding_box()
+        check(bool(box and box["width"] > 100 and box["height"] > 100), f"map has a size ({box})")
+        if not box or box["width"] < 10 or box["height"] < 10:
+            raise SystemExit(f"BROWSER CHECK FAILED: map element not visible: {info}")
+        shot = page.screenshot(clip=box)
         (OUT / "map.png").write_bytes(shot)
         gray = Image.open(io.BytesIO(shot)).convert("L").resize((200, 120))
         spread = statistics.pstdev(gray.getdata())

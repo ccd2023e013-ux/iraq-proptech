@@ -127,14 +127,15 @@ detail=$(anon "/properties/$PROP")
 [ "$(jq -r .exact_location <<<"$detail")" = "null" ] || fail "exact location leaked"
 cover=$(jq -r '.media[0].url // empty' <<<"$detail")
 [ -n "$cover" ] || fail "demo listing without image"
-ctype=$(curl -fsS -o /dev/null -w '%{content_type}' "$WEB$cover")
-[ "$ctype" = "image/webp" ] || fail "image content type $ctype"
-curl -fsS "$WEB/properties/$PROP" | grep -q "$(jq -r .reference_code <<<"$detail")" || fail "detail page"
+img=$(curl -sS -o /dev/null -w '%{http_code} %{content_type}' "$WEB$cover")
+[ "$img" = "200 image/webp" ] || fail "listing photo $cover answered: $img (photo storage settings on the API?)"
+c=$(curl -s -o "$TMP/detail.html" -w '%{http_code}' "$WEB/properties/$PROP")
+[ "$c" = 200 ] && grep -q "$(jq -r .reference_code <<<"$detail")" "$TMP/detail.html" || fail "detail page: $c"
 geo=$(anon "/map/properties?bbox=47.70,30.45,47.90,30.60&zoom=14")
 jq -e '[.features[] | select(.properties.id != null)] | length > 0' <<<"$geo" >/dev/null || fail "map points"
 country=$(anon "/map/properties?bbox=38.7,29.0,48.8,37.4&zoom=5")
 jq -e '.features | length > 0' <<<"$country" >/dev/null || fail "country map"
-anon "/properties/$PROP/nearby" | jq -e '.' >/dev/null || fail "nearby places"
+c=$(curl -s -o /dev/null -w '%{http_code}' "$WEB/api/v1/properties/$PROP/nearby"); [ "$c" = 200 ] || fail "nearby places: $c"
 lat=$(jq -r .display_location.lat <<<"$detail"); lon=$(jq -r .display_location.lon <<<"$detail")
 anon "/search/properties?near_lat=$lat&near_lon=$lon&radius_km=3&sort=distance" | jq -e '.total > 0' >/dev/null \
   || fail "radius search"
