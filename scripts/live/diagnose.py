@@ -80,7 +80,14 @@ if os.environ.get("DATABASE_URL"):
                 "ORDER BY occurred_at DESC LIMIT 3"
             )
         ).all()
+        errors = db.execute(
+            text(
+                "SELECT created_at, path, error_type FROM error_events "
+                "ORDER BY created_at DESC LIMIT 5"
+            )
+        ).all()
     note(f"database counts: {counts}")
+    note(f"recent errors: {[(str(r[0])[:19], r[1], r[2]) for r in errors]}")
     note(f"demo seed audit events: {[(str(r[0]), r[1]) for r in seeded]}")
 
 print("::notice title=live diagnose summary::" + " | ".join(checks).replace("\n", " "))

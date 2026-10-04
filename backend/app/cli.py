@@ -64,6 +64,18 @@ def create_superadmin(email: str, name: str, password: str) -> str:
         return str(user.id)
 
 
+def _record_cli_error(command: str, exc: Exception) -> None:
+    from app.moderation.models import ErrorEvent
+
+    summary = f"{type(exc).__name__}: {str(exc).splitlines()[0] if str(exc) else ''}"
+    try:
+        with get_sessionmaker()() as db:
+            db.add(ErrorEvent(path=f"cli:{command}", method="CLI", error_type=summary[:120]))
+            db.commit()
+    except Exception as db_exc:  # the database itself may be the problem
+        print(f"could not record the error: {type(db_exc).__name__}", file=sys.stderr)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m app.cli")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -150,13 +162,19 @@ def main(argv: list[str] | None = None) -> int:
         if get_settings().is_production and not args.allow_production:
             print("Refusing to seed DEMO data in production without --allow-production")
             return 2
-        with get_sessionmaker()() as db:
-            result = demo_iraq.seed(
-                db,
-                per_city=max(0, min(args.per_city, 200)),
-                account_password=os.environ.get("DEMO_ACCOUNT_PASSWORD") or None,
-                images=not args.no_images,
-            )
+        try:
+            with get_sessionmaker()() as db:
+                result = demo_iraq.seed(
+                    db,
+                    per_city=max(0, min(args.per_city, 200)),
+                    account_password=os.environ.get("DEMO_ACCOUNT_PASSWORD") or None,
+                    images=not args.no_images,
+                )
+        except Exception as exc:
+            # Start-up seeding runs in the background where logs are easy to miss:
+            # leave the failure in the admin error log (type + short message only).
+            _record_cli_error("seed-demo-iraq", exc)
+            raise
         print(result)
         return 0
 
