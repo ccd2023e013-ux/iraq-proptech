@@ -73,9 +73,12 @@ def main() -> int:
 
         # 3. Map: tiles drawn, properties returned, list ↔ map, click through.
         tiles: list[int] = []
+        failed_urls: list[str] = []
         features: list[int] = []
 
         def on_response(r: Response) -> None:
+            if r.status >= 400:
+                failed_urls.append(f"{r.status} {r.url[:120]}")
             if "openfreemap.org" in r.url and r.status == 200:
                 tiles.append(r.status)
             if "/api/v1/map/properties" in r.url and r.status == 200:
@@ -144,6 +147,8 @@ def main() -> int:
         check(not csp, f"no CSP violations in the console ({csp[:2]})")
         if errors:
             print("  console errors (informational):", errors[:5])
+        if failed_urls:
+            print("  failed requests (informational):", sorted(set(failed_urls))[:10])
         browser.close()
 
     print(

@@ -70,7 +70,15 @@ echo "6. path traversal, injection, reflected XSS"
 for p in "/api/v1/..%2F..%2Fdocs" "/api/v1/%2e%2e/%2e%2e/openapi.json" "/api/v1/media/..%2f..%2fetc%2fpasswd"; do
   c=$(curl -s -o /dev/null -w '%{http_code}' "$WEB$p"); [[ "$c" =~ ^(400|404|422)$ ]] || fail "$p answered $c"
 done
-c=$(curl -s -o /dev/null -w '%{http_code}' "$WEB/api/v1/search/properties?q=%27%20OR%201%3D1%20--"); [ "$c" = 200 ] || fail "q injection $c"
+inj=$(curl -s -D - -o /dev/null "$WEB/api/v1/search/properties?q=%27%20OR%201%3D1%20--" | tr -d '\r')
+c=$(head -1 <<<"$inj" | awk '{print $2}')
+if [ "$c" = 403 ] && ! grep -qi '^x-request-id:' <<<"$inj"; then
+  echo "  (SQL-injection-looking query blocked at the hosting edge (WAF) before the app)"
+else
+  [ "$c" = 200 ] || fail "q injection $c"
+fi
+# The same input as data, not an attack pattern, must be inert inside the app:
+c=$(curl -s -o /dev/null -w '%{http_code}' "$WEB/api/v1/search/properties?q=%27%3B%20DROP%20TABLE%20x"); [[ "$c" =~ ^(200|403)$ ]] || fail "quote in q answered $c"
 c=$(curl -s -o /dev/null -w '%{http_code}' "$WEB/api/v1/search/properties?city_id=1%20OR%201%3D1"); [ "$c" = 422 ] || fail "id injection $c"
 page=$(curl -fsS "$WEB/properties?q=%3Cscript%3Ealert(1)%3C%2Fscript%3E")
 ! grep -q '<script>alert(1)</script>' <<<"$page" || fail "reflected XSS on the search page"

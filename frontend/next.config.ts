@@ -9,7 +9,8 @@ const isDev = process.env.NODE_ENV !== "production";
 // and its websocket.
 const contentSecurityPolicy = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' blob: https://unpkg.com${isDev ? " 'unsafe-eval'" : ""}`,
+  // 'wasm-unsafe-eval' allows WebAssembly (MapLibre's Arabic RTL-text plugin) but not JS eval.
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://unpkg.com${isDev ? " 'unsafe-eval'" : ""}`,
   "worker-src 'self' blob:",
   "child-src 'self' blob:",
   "style-src 'self' 'unsafe-inline'",
