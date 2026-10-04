@@ -8,15 +8,15 @@ note() { local t="$1"; shift; local b="$*"; b="${b//'%'/'%25'}"; b="${b//$'\n'/'
 probe() { # title url [curl args]
   local t="$1" u="$2"; shift 2
   local out
-  out=$(curl -sS -m 150 -D - -o /tmp/body "$@" "$u" 2>&1 | tr -d '\r' | head -25)
+  out=$(curl -sS -m 150 -D - -o /tmp/body -w 'time_total=%{time_total}s\n' "$@" "$u" 2>&1 | tr -d '\r' | grep -iE '^(HTTP|time_total|location|retry-after|x-render|rndr|content-type)' )
   note "$t" "$u"$'\n'"$out"$'\n'"--- body:"$'\n'"$(head -c 1200 /tmp/body 2>/dev/null)"
 }
-probe api-health "$API/api/v1/health"
-probe api-ready "$API/api/v1/health/ready"
-probe web-root "$WEB/"
+probe web-root-cold "$WEB/"
 sleep 20
 probe web-root-again "$WEB/"
 probe web-healthz "$WEB/healthz"
 probe web-proxy-health "$WEB/api/v1/health"
 probe web-status "$WEB/status"
+probe api-health "$API/api/v1/health"
+probe api-ready "$API/api/v1/health/ready"
 exit 0

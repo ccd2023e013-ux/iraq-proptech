@@ -72,7 +72,10 @@ services:
     plan: free
     rootDir: frontend
     dockerfilePath: ./Dockerfile
-    healthCheckPath: /
+    # Dependency-free liveness route. "/" renders the home page, which needs the
+    # API; while the API is starting, sleeping or migrating, "/" fails and Render
+    # marks the web service unhealthy (503 to visitors).
+    healthCheckPath: /healthz
     autoDeploy: true
     envVars:
       - key: API_INTERNAL_URL        # the API service URL, e.g. https://iraq-proptech-api.onrender.com
