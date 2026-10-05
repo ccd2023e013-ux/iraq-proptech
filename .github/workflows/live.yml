@@ -71,6 +71,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - name: Wait until Render serves this commit
         env:
           WEB: ${{ needs.config.outputs.web }}
@@ -79,12 +82,15 @@ jobs:
           WEB_SHA: ${{ needs.config.outputs.web_sha }}
           STRICT: ${{ github.event_name == 'workflow_run' }}
         run: |
+          git fetch -q origin main || true
+          served() { [ "$1" = "$2" ] || { [ -n "$1" ] && git merge-base --is-ancestor "$2" "$1" 2>/dev/null; }; }
           for i in $(seq 1 60); do
             api=$(curl -fsS --max-time 120 "$API/api/v1/health" | jq -r '.commit // ""' || true)
             web=$(curl -fsS --max-time 120 "$WEB/healthz" | jq -r '.commit // ""' || true)
             echo "attempt $i: api=$api (want $API_SHA) web=$web (want $WEB_SHA)"
             if [ "$STRICT" != "true" ] && [ -n "$api" ] && [ -n "$web" ]; then exit 0; fi
-            if [ "$api" = "$API_SHA" ] && [ "$web" = "$WEB_SHA" ]; then exit 0; fi
+            # A newer commit (e.g. CI's lockfile commit) also contains the wanted one.
+            if served "$api" "$API_SHA" && served "$web" "$WEB_SHA"; then exit 0; fi
             sleep 30
           done
           echo "::error title=deploy::Render did not serve api=$API_SHA web=$WEB_SHA within 30 minutes (api=$api web=$web)"
