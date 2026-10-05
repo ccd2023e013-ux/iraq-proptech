@@ -283,7 +283,11 @@ export function MapSearch({
         <div className="ms-auto flex flex-wrap items-center gap-2">
           {drawing ? (
             <>
-              <Button onClick={finishDrawing} disabled={drawing.length < 3} data-testid="finish-area">
+              <Button
+                onClick={finishDrawing}
+                disabled={drawing.length < 3}
+                data-testid="finish-area"
+              >
                 {m.finishDrawing}
               </Button>
               <Button variant="ghost" onClick={() => setDrawing(null)}>
