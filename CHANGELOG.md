@@ -2,6 +2,12 @@
 
 All notable changes, newest first. Each entry lists the CI-verified commit.
 
+## 2.0 Stage 4: Property Intelligence (`e8d6fda`)
+"Is this a good property?" report with statements typed FACT / SOURCE /
+ESTIMATE / AI_INTERPRETATION (kind bound to origin server-side), sources and
+confidence; buyer assistant answering only from the same evidence
+(injection-safe); property page panel; live browser check.
+
 ## 2.0 Stage 3: Basra-first Map 2.0 (`d2849a0`)
 Map provider evaluation for Iraq (docs/MAP-PROVIDERS.md); price tags,
 grouped circles, layers panel (areas, places, optional satellite), selection

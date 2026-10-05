@@ -15,7 +15,7 @@ Status legend: ✅ done (live-verified) · 🚧 in progress · ⏳ planned ·
 | 1 | Premium design system | ✅ |
 | 2 | Authentication and core UX | ✅ (email sending 🔑) |
 | 3 | Basra-first Map 2.0 | ✅ (satellite 🔑) |
-| 4 | Property Intelligence | ⏳ |
+| 4 | Property Intelligence | ✅ |
 | 5 | Development Intelligence ("Future Iraq") | ⏳ 🔑 |
 | 6 | AI Property Vision | ⏳ 🔑 |
 | 7 | Property Media Studio (+ drone workflow) | ⏳ 🔑 |
@@ -137,6 +137,18 @@ statement typed **FACT / SOURCE / ESTIMATE / AI INTERPRETATION / SIMULATION**.
 Buyer assistant (chat over the listing's facts, injection-safe).
 - **Acceptance**: typed statement schema enforced server-side; tests prove no
   AI statement can be labelled FACT; UI shows labels; works with MockAI.
+
+**Status ✅ — live-verified** (Live site run 37293358685 on `e8d6fda`).
+`GET /ai/properties/{id}/report` and `POST /ai/properties/{id}/ask`
+(app/ai/intelligence.py). A model validator binds each statement's kind to
+its origin (listing/verification/platform → FACT, external → SOURCE,
+computed → ESTIMATE, ai → AI_INTERPRETATION, scenario → SIMULATION); tests
+prove a provider cannot get a FACT label, provider-made statements are
+ignored, invented numbers/claims fall back to the template, and the buyer's
+question reaches the provider only as data. The property page shows the
+labelled panel and the ask box; the live browser check runs both. Works with
+MockAI today; a real provider is a configuration change (keys 🔑).
+Development signals are listed as a gap until Stage 5 data exists.
 
 ## 5 — Development Intelligence ("Future Iraq")
 

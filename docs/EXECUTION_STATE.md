@@ -24,9 +24,9 @@ during launch: ONLINE-LAUNCH-STATUS.md.
 
 ## 2.0 (docs/ROADMAP-2.0.md)
 
-Stages 0–3 done and live-verified (latest Live site run 37289046154 on `d2849a0`).
-Next: Stage 4 (Property Intelligence: FACT / SOURCE / ESTIMATE / AI
-INTERPRETATION / SIMULATION labelling and an AI provider abstraction).
+Stages 0–4 done and live-verified (latest Live site run 37293358685 on `e8d6fda`).
+Next: Stage 5 (Development Intelligence: provenance model, official sources,
+"Future Iraq" map layer).
 
 Helpers: `live-probe.yml` with `mode=auth` or `mode=map` runs only those browser checks;
 `live-screenshots.yml` with `pages=` pushes JPEGs to `screenshots/run-<id>`.
