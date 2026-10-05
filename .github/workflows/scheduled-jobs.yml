@@ -11,9 +11,10 @@ name: Scheduled jobs (worker-less hosts)
 
 on:
   schedule:
-    # Hourly: keeps the free database active and runs alerts/expiry without
-    # keeping the free Render instance awake most of the month.
-    - cron: "17 * * * *"
+    # Every 3 hours: keeps the free database active and runs alerts, expiry and
+    # the daily market snapshot, while staying well inside the free Actions
+    # minutes of a private repository (hourly runs exhausted them).
+    - cron: "17 */3 * * *"
   workflow_dispatch:
 
 permissions:

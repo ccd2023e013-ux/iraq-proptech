@@ -25,8 +25,18 @@ during launch: ONLINE-LAUNCH-STATUS.md.
 ## 2.0 (docs/ROADMAP-2.0.md)
 
 Stages 0–7 done and live-verified (latest Live site run 37306723398 on `c2fa8fe`).
-Next: Stage 8 (Market Intelligence: time on market, price changes, supply,
-duplicates, neighbourhood trends — platform data only, labelled).
+Brand: مَكان | MAKAN (`0dfbb95`) — deployed by Render; CI/live run blocked (below).
+Stage 8 (Market Intelligence) is built on branch `stage-8-market` (PR) and is
+NOT merged: it waits for CI and the Live site run.
+
+**Blocker (2026-10-05 ~13:35 UTC):** GitHub Actions refuses to start jobs
+("recent account payments have failed or your spending limit needs to be
+increased") — the private repo's free minutes are used up. CI, Live site and
+the scheduled jobs cannot run. Owner options: make the repo public (free
+Actions), wait for the monthly reset, or raise the limit (not $0). The
+scheduled jobs now run every 3 hours instead of hourly to save minutes.
+Render still deploys `main` on push without CI, so unverified work stays on
+branches until CI is back.
 
 Helpers: `live-probe.yml` with `mode=auth` or `mode=map` runs only those browser checks;
 `live-screenshots.yml` with `pages=` pushes JPEGs to `screenshots/run-<id>`.
