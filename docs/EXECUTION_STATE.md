@@ -36,10 +36,12 @@ increased") — the private repo's free minutes are used up. **Owner decision:
 keep the repo private, do not raise spending, wait for the monthly reset.**
 The scheduled jobs now run every 3 hours instead of hourly to save minutes.
 
-When Actions is back, in order: full CI on PR #1 → Live site probe of the
-branch checks (browser 1920/1440/390, dark+light, AR+EN, Basra + Baghdad, demo
-exclusion, provenance/gaps) → security → merge → Live site on main →
-re-verify production → only then call Stage 8 complete.
+When Actions is back, follow the "Verification gate" in docs/STAGE-8-AUDIT.md
+(on the branch) exactly: branch CI with the 12-combination browser matrix and
+stack security → merge only if all pass → Render deploy → full Live site +
+`live-probe mode=market` on production → only then Stage 8 COMPLETE, remove
+the daily retry, and start Stage 9. Stage 8 is UNVERIFIED until then.
+
 Render still deploys `main` on push without CI, so unverified work stays on
 branches until CI is back.
 
