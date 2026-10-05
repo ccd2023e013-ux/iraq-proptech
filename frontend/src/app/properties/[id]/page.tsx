@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
 
 import { Alert } from "@/components/ui/Alert";
-import { Card } from "@/components/ui/Card";
+import { TrustBadge } from "@/components/ui/TrustBadge";
 import { Insights } from "@/features/ai/Insights";
 import { PropertySummary } from "@/features/ai/PropertySummary";
 import { ReportButton } from "@/features/admin/ReportButton";
@@ -131,122 +132,120 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
   ];
   const shownFacts = facts.filter(([, value]) => value !== "");
 
+  // The three numbers people scan first, shown large under the title.
+  const keyStats: [string, string][] = (
+    [
+      [dict.listing.area, formatArea(property.area_m2, locale) ?? ""],
+      [dict.listing.bedrooms, property.bedrooms?.toString() ?? ""],
+      [dict.listing.bathrooms, property.bathrooms?.toString() ?? ""],
+    ] as [string, string][]
+  ).filter(([, v]) => v !== "");
+
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6">
+    <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
       {property.status === "APPROVED" && <ViewBeacon propertyId={property.id} />}
-      {property.is_demo && <Alert tone="warning">{p.demoBanner}</Alert>}
       {property.status !== "APPROVED" && (
         <Alert tone="info">{dict.listing.statuses[property.status]}</Alert>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-        <div className="flex flex-col gap-6">
-          <Gallery media={property.media} title={title} emptyLabel={dict.listing.noImage} />
+      <Gallery media={property.media} title={title} emptyLabel={dict.listing.noImage} />
 
-          <header className="flex flex-col gap-2">
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12">
+        <div className="flex min-w-0 flex-col">
+          <header className="flex flex-col gap-3 pb-8">
             <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="rounded-md bg-brand-700 px-2 py-0.5 font-medium text-white">
+              <span className="rounded-full bg-accent-tint px-2.5 py-1 font-medium text-accent">
                 {dict.listing.purposes[property.purpose]}
               </span>
               {property.verified && (
-                <span className="rounded-md bg-success px-2 py-0.5 font-medium text-white">
+                <span className="rounded-full bg-success/15 px-2.5 py-1 font-medium text-success">
                   ✓ {dict.listing.verified}
                 </span>
               )}
-              <span className="font-mono text-sand-500" dir="ltr">
+              {property.is_demo && <TrustBadge kind="demo">{dict.listing.demo}</TrustBadge>}
+              <span className="text-ink-3 tabular" dir="ltr">
                 {property.reference_code}
               </span>
             </div>
-            <h1 className="text-2xl font-bold text-brand-900 sm:text-3xl">{title}</h1>
-            <p className="text-sand-700">{where}</p>
-            <p className="text-3xl font-bold text-brand-800 tabular">
-              {price}
-              {property.negotiable && (
-                <span className="ms-2 text-sm font-normal text-sand-500">
-                  ({dict.listing.negotiable})
-                </span>
-              )}
-            </p>
-            {conversion?.converted && conversion.rate && (
-              <p className="text-sm text-sand-500 tabular">
-                ≈ {formatPrice(conversion.converted, conversion.to, locale)} (
-                {dict.money.indicative}
-                {" — "}
-                {dict.money.indicativeNote} {conversion.rate.source},{" "}
-                {formatDate(conversion.rate.effective_at, locale)})
-              </p>
+            <h1 className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+              {title}
+            </h1>
+            <p className="text-ink-2">{where}</p>
+            {property.is_demo && <p className="text-sm text-ink-3">{p.demoBanner}</p>}
+            {keyStats.length > 0 && (
+              <dl className="mt-3 flex flex-wrap gap-x-10 gap-y-3">
+                {keyStats.map(([k, v]) => (
+                  <div key={k}>
+                    <dd className="font-display text-2xl font-semibold text-ink tabular">{v}</dd>
+                    <dt className="text-sm text-ink-3">{k}</dt>
+                  </div>
+                ))}
+              </dl>
             )}
           </header>
 
-          <Card title={p.facts}>
-            <dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3">
+          <Section title={p.facts}>
+            <dl className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
               {shownFacts.map(([k, v]) => (
                 <div key={k}>
-                  <dt className="text-xs text-sand-500">{k}</dt>
-                  <dd className="font-medium text-sand-900 tabular">{v}</dd>
+                  <dt className="text-xs text-ink-3">{k}</dt>
+                  <dd className="mt-0.5 font-medium text-ink tabular">{v}</dd>
                 </div>
               ))}
             </dl>
-          </Card>
+          </Section>
 
           {description && (
-            <Card title={p.description}>
-              <p className="leading-8 whitespace-pre-line text-sand-900">{description}</p>
-            </Card>
+            <Section title={p.description}>
+              <p className="max-w-[68ch] leading-8 whitespace-pre-line text-ink">{description}</p>
+            </Section>
           )}
 
           {property.amenities.length > 0 && (
-            <Card title={p.amenities}>
-              <ul className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
+            <Section title={p.amenities}>
+              <ul className="flex flex-wrap gap-2 text-sm">
                 {property.amenities.map((code) => (
-                  <li key={code} className="flex items-center gap-2">
-                    <span aria-hidden className="text-success">
-                      ✓
-                    </span>
+                  <li key={code} className="rounded-full bg-fill px-3 py-1.5 text-ink">
                     {label(amenities, code)}
                   </li>
                 ))}
               </ul>
-            </Card>
+            </Section>
           )}
 
-          <Card title={p.location}>
-            <p className="font-medium">{where}</p>
-            {property.street && <p className="text-sm text-sand-700">{property.street}</p>}
-            {property.address_text && (
-              <p className="text-sm text-sand-700">{property.address_text}</p>
+          <Section title={p.location}>
+            <p className="font-medium text-ink">{where}</p>
+            {property.street && <p className="text-sm text-ink-2">{property.street}</p>}
+            {property.address_text && <p className="text-sm text-ink-2">{property.address_text}</p>}
+            {property.location_privacy !== "EXACT" && (
+              <p className="mt-2 text-xs text-ink-3">
+                {property.location_privacy === "HIDDEN" ? p.hiddenNote : p.approximateNote}
+              </p>
             )}
-            <p className="mt-2 text-xs text-sand-500">
-              {property.location_privacy === "HIDDEN"
-                ? p.hiddenNote
-                : property.location_privacy === "APPROXIMATE"
-                  ? p.approximateNote
-                  : null}
-            </p>
-          </Card>
+          </Section>
 
-          {property.status === "APPROVED" && (
-            <PropertySummary dict={dict} locale={locale} propertyId={property.id} />
-          )}
-
-          {property.status === "APPROVED" && (
-            <Insights
-              propertyId={property.id}
-              purpose={property.purpose}
-              dict={dict}
-              locale={locale}
-            />
-          )}
-
-          <Nearby propertyId={property.id} dict={dict} locale={locale} />
+          <div className="flex flex-col gap-6 border-t border-hairline py-8">
+            {property.status === "APPROVED" && (
+              <PropertySummary dict={dict} locale={locale} propertyId={property.id} />
+            )}
+            {property.status === "APPROVED" && (
+              <Insights
+                propertyId={property.id}
+                purpose={property.purpose}
+                dict={dict}
+                locale={locale}
+              />
+            )}
+            <Nearby propertyId={property.id} dict={dict} locale={locale} />
+          </div>
 
           {history.length > 1 && (
-            <Card title={p.priceHistory}>
+            <Section title={p.priceHistory}>
               <ol className="flex flex-col gap-2 text-sm">
                 {history.map((h, i) => (
                   <li key={i} className="flex justify-between gap-3 tabular">
-                    <span className="text-sand-500">{formatDate(h.changed_at, locale)}</span>
-                    <span className="font-medium">
+                    <span className="text-ink-3">{formatDate(h.changed_at, locale)}</span>
+                    <span className="font-medium text-ink">
                       {h.price_on_request
                         ? dict.listing.priceOnRequest
                         : formatPrice(h.price_amount, h.currency, locale)}
@@ -254,56 +253,75 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                   </li>
                 ))}
               </ol>
-            </Card>
+            </Section>
           )}
         </div>
 
-        <aside className="flex flex-col gap-4 lg:sticky lg:top-20 lg:self-start">
-          <Card title={p.contact}>
-            <p className="text-sm text-sand-500">{p.by}</p>
-            <p className="font-semibold">
-              {property.lister.name}
-              {property.lister.kind === "agency" && property.lister.agency_verified && (
-                <span className="ms-1 text-success">✓</span>
-              )}
+        <aside className="flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start">
+          <div className="rounded-[var(--radius-card)] bg-surface p-6 shadow-float ring-1 ring-hairline">
+            <p className="font-display text-3xl font-semibold tracking-tight text-ink tabular">
+              {price}
             </p>
-            <div className="mt-4 flex flex-col gap-2">
-              {property.lister.phone ? (
-                <a
-                  href={`tel:${property.lister.phone}`}
-                  dir="ltr"
-                  className="rounded-lg bg-brand-700 px-4 py-2.5 text-center font-medium text-white hover:bg-brand-600"
-                >
-                  {p.call} {property.lister.phone}
-                </a>
-              ) : (
-                <p className="text-sm text-sand-500">{p.contactHidden}</p>
-              )}
-              {property.lister.whatsapp && (
-                <a
-                  href={`https://wa.me/${property.lister.whatsapp.replace(/\D/g, "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-lg border border-success px-4 py-2.5 text-center font-medium text-success"
-                >
-                  {p.whatsapp}
-                </a>
-              )}
-            </div>
-          </Card>
+            {property.negotiable && (
+              <p className="mt-1 text-sm text-ink-3">{dict.listing.negotiable}</p>
+            )}
+            {conversion?.converted && conversion.rate && (
+              <p className="mt-1 text-sm text-ink-3 tabular">
+                ≈ {formatPrice(conversion.converted, conversion.to, locale)} (
+                {dict.money.indicative}
+                {" — "}
+                {dict.money.indicativeNote} {conversion.rate.source},{" "}
+                {formatDate(conversion.rate.effective_at, locale)})
+              </p>
+            )}
 
-          {!property.can_edit && property.status === "APPROVED" && (
-            <Card title={dict.inquiry.title}>
-              <InquiryForm
-                dict={dict}
-                propertyId={property.id}
-                signedIn={!!me}
-                defaultName={me?.user.full_name ?? ""}
-                defaultPhone={me?.user.phone ?? ""}
-                defaultEmail={me?.user.email ?? ""}
-              />
-            </Card>
-          )}
+            <div className="mt-5 border-t border-hairline pt-5">
+              <p className="text-xs text-ink-3">{p.by}</p>
+              <p className="font-semibold text-ink">
+                {property.lister.name}
+                {property.lister.kind === "agency" && property.lister.agency_verified && (
+                  <span className="ms-1 text-success">✓</span>
+                )}
+              </p>
+              <div className="mt-4 flex flex-col gap-2">
+                {property.lister.phone ? (
+                  <a
+                    href={`tel:${property.lister.phone}`}
+                    dir="ltr"
+                    className="inline-flex h-12 items-center justify-center rounded-full bg-accent-fill px-5 font-medium text-white transition hover:bg-accent-fill-hover"
+                  >
+                    {p.call} {property.lister.phone}
+                  </a>
+                ) : (
+                  <p className="text-sm text-ink-3">{p.contactHidden}</p>
+                )}
+                {property.lister.whatsapp && (
+                  <a
+                    href={`https://wa.me/${property.lister.whatsapp.replace(/\D/g, "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex h-12 items-center justify-center rounded-full px-5 font-medium text-success ring-1 ring-inset ring-success/50 transition hover:bg-success/10"
+                  >
+                    {p.whatsapp}
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {!property.can_edit && property.status === "APPROVED" && (
+              <div className="mt-5 border-t border-hairline pt-5">
+                <h2 className="mb-3 font-semibold text-ink">{dict.inquiry.title}</h2>
+                <InquiryForm
+                  dict={dict}
+                  propertyId={property.id}
+                  signedIn={!!me}
+                  defaultName={me?.user.full_name ?? ""}
+                  defaultPhone={me?.user.phone ?? ""}
+                  defaultEmail={me?.user.email ?? ""}
+                />
+              </div>
+            )}
+          </div>
 
           <div className="flex flex-wrap gap-2">
             <FavoriteButton
@@ -317,7 +335,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             {property.can_edit && (
               <Link
                 href={`/dashboard/properties/${property.id}`}
-                className="rounded-lg border border-sand-200 px-4 py-2 text-sm font-medium"
+                className="inline-flex h-10 items-center rounded-full px-4 text-sm font-medium text-ink ring-1 ring-inset ring-hairline hover:bg-fill"
               >
                 {dict.myListings.edit}
               </Link>
@@ -328,15 +346,16 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             <ReportButton dict={dict} targetType="PROPERTY" targetId={property.id} />
           )}
 
-          <Card title={p.verification}>
-            <p className="text-sm text-sand-700">
+          <section className="rounded-[var(--radius-card)] bg-fill p-5">
+            <h2 className="text-sm font-semibold text-ink">{p.verification}</h2>
+            <p className="mt-1 text-sm text-ink-2">
               {property.verified ? p.verifiedText : p.notVerifiedText}
             </p>
             {verifications.length > 0 && (
               <ul className="mt-3 flex flex-col gap-1.5 text-sm">
                 {verifications.map((v) => (
                   <li key={v.id} className="flex justify-between gap-3">
-                    <span>{p.checks[v.kind]}</span>
+                    <span className="text-ink">{p.checks[v.kind]}</span>
                     <span className={v.result === "PASSED" ? "text-success" : "text-danger"}>
                       {v.result === "PASSED" ? p.passed : p.failed}
                     </span>
@@ -344,9 +363,19 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                 ))}
               </ul>
             )}
-          </Card>
+          </section>
         </aside>
       </div>
     </div>
+  );
+}
+
+/** A calm page section: heading and content separated by a hairline, no box. */
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className="border-t border-hairline py-8">
+      <h2 className="mb-4 font-display text-xl font-semibold tracking-tight text-ink">{title}</h2>
+      {children}
+    </section>
   );
 }

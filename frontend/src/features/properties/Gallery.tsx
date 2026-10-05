@@ -22,7 +22,7 @@ export function Gallery({
 
   if (!images.length && !videos.length) {
     return (
-      <div className="grid aspect-[16/9] place-items-center rounded-[var(--radius-card)] bg-sand-100 text-sand-500">
+      <div className="grid aspect-[16/9] place-items-center rounded-[var(--radius-media)] bg-fill text-sand-500">
         {emptyLabel}
       </div>
     );
@@ -31,14 +31,14 @@ export function Gallery({
   return (
     <div className="flex flex-col gap-3">
       {current && (
-        <div className="relative overflow-hidden rounded-[var(--radius-card)] bg-sand-100">
+        <div className="relative overflow-hidden rounded-[var(--radius-media)] bg-fill">
           <SafeImage
             key={current.id}
             src={current.url}
             alt={current.caption ?? title}
             fallbackLabel={emptyLabel}
             loading="eager"
-            className="aspect-[16/10] w-full object-cover"
+            className="aspect-[4/3] w-full object-cover sm:aspect-[2/1]"
           />
           {images.length > 1 && (
             <>
@@ -46,7 +46,7 @@ export function Gallery({
                 type="button"
                 aria-label="‹"
                 onClick={() => setIndex((index - 1 + images.length) % images.length)}
-                className="absolute start-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-surface/90 text-xl shadow"
+                className="absolute start-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-glass text-xl text-ink shadow-soft backdrop-blur-md"
               >
                 ‹
               </button>
@@ -54,11 +54,11 @@ export function Gallery({
                 type="button"
                 aria-label="›"
                 onClick={() => setIndex((index + 1) % images.length)}
-                className="absolute end-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-surface/90 text-xl shadow"
+                className="absolute end-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-glass text-xl text-ink shadow-soft backdrop-blur-md"
               >
                 ›
               </button>
-              <span className="absolute bottom-3 end-3 rounded-md bg-black/60 px-2 py-0.5 text-xs text-white tabular">
+              <span className="absolute bottom-3 end-3 rounded-full bg-black/55 px-2.5 backdrop-blur-md py-0.5 text-xs text-white tabular">
                 {index + 1} / {images.length}
               </span>
             </>
@@ -73,7 +73,7 @@ export function Gallery({
                 type="button"
                 onClick={() => setIndex(i)}
                 aria-current={i === index}
-                className={`block overflow-hidden rounded-md border-2 ${i === index ? "border-brand-600" : "border-transparent"}`}
+                className={`block overflow-hidden rounded-xl ring-2 ${i === index ? "ring-accent" : "ring-transparent"}`}
               >
                 <SafeImage
                   src={m.thumbnail_url ?? m.url}
@@ -109,7 +109,7 @@ export function ShareButton({ label, copied }: { label: string; copied: string }
     <button
       type="button"
       onClick={share}
-      className="inline-flex items-center gap-2 rounded-lg border border-sand-200 px-4 py-2 text-sm font-medium hover:border-brand-300"
+      className="inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-medium text-ink ring-1 ring-inset ring-hairline transition hover:bg-fill"
     >
       {done ? copied : label}
     </button>
