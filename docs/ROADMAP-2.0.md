@@ -18,7 +18,7 @@ Status legend: ✅ done (live-verified) · 🚧 in progress · ⏳ planned ·
 | 4 | Property Intelligence | ✅ |
 | 5 | Development Intelligence ("Future Iraq") | ✅ first dataset (more sources ongoing) |
 | 6 | AI Property Vision | ✅ (image-model key 🔑 optional) |
-| 7 | Property Media Studio (+ drone workflow) | ⏳ 🔑 |
+| 7 | Property Media Studio (+ drone workflow) | ✅ browser renderer (server/voice providers 🔑) |
 | 8 | Market Intelligence | ⏳ |
 | 9 | Social / Meta authorized intelligence | ⏳ 🔑 ⚖️ |
 | 10 | Monetization (entitlements) | ⏳ |
@@ -203,6 +203,19 @@ boundary animation, overlays) via pluggable render/voice providers. Initial
 free implementation: server-side slideshow/caption composition within free
 limits; heavy rendering via external provider later. 🔑
 - **Acceptance**: job pipeline + a real slideshow export works live.
+
+**Status ✅ — live-verified** (Live site run 37306723398 on `c2fa8fe`).
+Storyboard pipeline (`/studio/jobs`, migration 0016) built only from the
+listing's facts, approved photos and recorded nearby places; renderers
+BROWSER (default, free: canvas + MediaRecorder on the user's device),
+SERVER/EXTERNAL reserved. `/studio`: 16:9 or 9:16, Arabic/English
+captions, animated map intro, Ken Burns photos with price, facts, nearby
+places, call to action, DEMO watermark; optional drone/phone clip kept on
+the device with a location card and a "not geo-registered" note; save
+(WebM/MP4 checked by magic bytes, 40 MB cap, owner-private) or download.
+The live browser check signs in as the demo agent, renders a real video and
+saves it. Not yet: AI image enhancement, voiceover (provider 🔑), true
+geo-registered drone overlays (needs flight metadata), server rendering.
 
 ## 8 — Market Intelligence
 

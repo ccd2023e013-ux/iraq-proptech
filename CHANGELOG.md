@@ -2,6 +2,11 @@
 
 All notable changes, newest first. Each entry lists the CI-verified commit.
 
+## 2.0 Stage 7: Property Media Studio (`c2fa8fe`)
+Storyboard pipeline with pluggable renderers; in-browser 16:9/9:16 video
+(map intro, photos, facts, nearby places, CTA, AR/EN captions, optional
+drone clip); validated private storage; live browser render-and-save check.
+
 ## 2.0 Stage 6: AI Property Vision (`a0b61e8`)
 Brief → labelled concept + future street-view images (label burned in),
 provider abstraction (offline renderer default, OpenAI images optional),

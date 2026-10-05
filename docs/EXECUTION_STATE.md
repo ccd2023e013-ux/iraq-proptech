@@ -24,9 +24,9 @@ during launch: ONLINE-LAUNCH-STATUS.md.
 
 ## 2.0 (docs/ROADMAP-2.0.md)
 
-Stages 0–6 done and live-verified (latest Live site run 37302842547 on `a0b61e8`).
-Next: Stage 7 (Property Media Studio: media pipeline abstraction,
-slideshow/video rendering, drone workflow).
+Stages 0–7 done and live-verified (latest Live site run 37306723398 on `c2fa8fe`).
+Next: Stage 8 (Market Intelligence: time on market, price changes, supply,
+duplicates, neighbourhood trends — platform data only, labelled).
 
 Helpers: `live-probe.yml` with `mode=auth` or `mode=map` runs only those browser checks;
 `live-screenshots.yml` with `pages=` pushes JPEGs to `screenshots/run-<id>`.
