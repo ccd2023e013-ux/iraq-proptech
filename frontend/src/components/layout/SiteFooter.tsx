@@ -9,7 +9,7 @@ export function SiteFooter({ dict, locale }: { dict: Dictionary; locale: Locale 
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-10 text-sm text-ink-3 sm:px-6 md:flex-row md:items-start md:justify-between">
         <div className="max-w-md">
           <p className="font-display text-base font-semibold text-ink">
-            {locale === "ar" ? "عقار العراق" : "Iraq PropTech"}
+            {locale === "ar" ? "مَكان" : "MAKAN"}
           </p>
           <p className="mt-1">{dict.footer.tagline}</p>
           <p className="mt-3 text-xs">{dict.footer.demoNotice}</p>

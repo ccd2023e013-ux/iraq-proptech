@@ -143,7 +143,7 @@ export function IntelligentSearch({
         />
         <button
           type="submit"
-          className="h-11 rounded-full bg-accent-fill px-6 font-medium text-white shadow-soft transition hover:bg-accent-fill-hover active:scale-[0.98]"
+          className="h-11 rounded-full bg-accent-fill px-6 font-medium text-on-accent shadow-soft transition hover:bg-accent-fill-hover active:scale-[0.98]"
         >
           {h.search}
         </button>

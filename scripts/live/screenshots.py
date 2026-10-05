@@ -77,7 +77,12 @@ def main() -> None:
         ]
         for tag, opts, locale, scheme in variants:
             ctx = browser.new_context(**opts, color_scheme=scheme)
-            ctx.add_cookies([{"name": "locale", "value": locale, "url": WEB}])
+            ctx.add_cookies(
+                [
+                    {"name": "locale", "value": locale, "url": WEB},
+                    {"name": "theme", "value": scheme, "url": WEB},
+                ]
+            )
             page = ctx.new_page()
             for path in PAGES:
                 slug = (

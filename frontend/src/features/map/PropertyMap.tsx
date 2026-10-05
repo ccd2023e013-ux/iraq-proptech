@@ -209,12 +209,14 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
     },
     paint: {
       "text-color": ink,
-      "text-halo-color": isDark() ? "#0b1112" : "#ffffff",
+      "text-halo-color": isDark() ? "#0b0f17" : "#ffffff",
       "text-halo-width": 1.2,
     },
   });
 
-  const accentRgb = `rgb(${accent[0]} ${accent[1]} ${accent[2]})`;
+  // Grouped listings and dots are spatial marks: cyan, per the MAKAN palette.
+  const spatial = parseHex(cssVar("--spatial-fill"), [6, 182, 212, 255]);
+  const accentRgb = `rgb(${spatial[0]} ${spatial[1]} ${spatial[2]})`;
   // Future Iraq: gold diamonds; area-level positions get a soft halo so they
   // never read as an exact site.
   map.addLayer({
@@ -258,7 +260,7 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
     },
     paint: {
       "text-color": "#8f6418",
-      "text-halo-color": isDark() ? "#0b1112" : "#ffffff",
+      "text-halo-color": isDark() ? "#0b0f17" : "#ffffff",
       "text-halo-width": 1.4,
     },
   });

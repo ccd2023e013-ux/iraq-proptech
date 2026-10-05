@@ -101,7 +101,7 @@ export function MediaManager({ dict, property }: { dict: Dictionary; property: P
           </li>
         ))}
       </ul>
-      <label className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600">
+      <label className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-on-accent hover:bg-brand-600">
         {busy ? dict.auth.loading : f.uploadImage}
         <input
           type="file"

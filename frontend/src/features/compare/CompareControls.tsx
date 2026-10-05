@@ -29,7 +29,7 @@ export function CompareToggle({ id, dict }: { id: string; dict: Dictionary }) {
       type="button"
       onClick={toggle}
       aria-pressed={on}
-      className={`rounded-full px-2.5 py-0.5 text-xs font-medium backdrop-blur-md ${on ? "bg-accent-fill text-white" : "bg-glass text-ink"}`}
+      className={`rounded-full px-2.5 py-0.5 text-xs font-medium backdrop-blur-md ${on ? "bg-accent-fill text-on-accent" : "bg-glass text-ink"}`}
     >
       {on ? `✓ ${dict.compare.add}` : dict.compare.add}
     </button>
@@ -63,7 +63,7 @@ export function CompareBar({ dict }: { dict: Dictionary }) {
           {ready && (
             <Link
               href={`/compare?ids=${ids.join(",")}`}
-              className="rounded-lg bg-brand-700 px-4 py-1.5 text-sm font-medium text-white"
+              className="rounded-lg bg-brand-700 px-4 py-1.5 text-sm font-medium text-on-accent"
             >
               {dict.compare.compareNow}
             </Link>

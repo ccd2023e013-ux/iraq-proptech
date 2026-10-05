@@ -172,7 +172,7 @@ def render(property_type: str, seed: int) -> bytes:
     draw.rectangle([0, HEIGHT - 50, WIDTH, HEIGHT], fill=(30, 30, 30))
     draw.text(
         (32, HEIGHT - 42),
-        f"Iraq PropTech demo illustration #{seed}",
+        f"MAKAN demo illustration #{seed}",
         fill=(220, 220, 220),
         font=_font(26),
     )

@@ -59,7 +59,7 @@ export default async function ThreadPage({ params }: { params: Promise<{ id: str
         {messages.map((msg) => (
           <li key={msg.id} className={`flex ${msg.mine ? "justify-start" : "justify-end"}`}>
             <div
-              className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${msg.mine ? "bg-brand-700 text-white" : "border border-sand-200 bg-surface text-sand-900"}`}
+              className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${msg.mine ? "bg-brand-700 text-on-accent" : "border border-sand-200 bg-surface text-sand-900"}`}
             >
               <p className="whitespace-pre-line">{msg.body}</p>
               <p className={`mt-1 text-[11px] ${msg.mine ? "text-brand-100" : "text-sand-500"}`}>

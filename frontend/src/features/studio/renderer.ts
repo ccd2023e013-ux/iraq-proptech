@@ -119,11 +119,12 @@ export function pickMimeType(isSupported: (type: string) => boolean): string | n
 
 const easeOut = (x: number) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
 
-const INK = "#0b1112";
-const ACCENT = "#1fa394";
+const INK = "#0b0f17";
+const ACCENT = "#06b6d4"; // spatial cyan for the map intro
+const EMERALD = "#10b981";
 const GOLD = "#e0b45a";
-const DISPLAY = '"Readex Pro Variable", "IBM Plex Sans Arabic", system-ui, sans-serif';
-const BODY = '"IBM Plex Sans Arabic", "IBM Plex Sans", system-ui, sans-serif';
+const DISPLAY = '"Inter Variable", "Readex Pro Variable", system-ui, sans-serif';
+const BODY = '"Inter Variable", "Readex Pro Variable", system-ui, sans-serif';
 
 function font(size: number, weight = 600, family = DISPLAY): string {
   return `${weight} ${Math.round(size)}px ${family}`;
@@ -406,7 +407,7 @@ function drawDrone(
 
 function drawCta(ctx: CanvasRenderingContext2D, w: number, h: number, p: number, tx: Texts) {
   const g = ctx.createLinearGradient(0, 0, w, h);
-  g.addColorStop(0, "#0d3b37");
+  g.addColorStop(0, "#0f2e2a");
   g.addColorStop(1, INK);
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, w, h);
@@ -416,7 +417,7 @@ function drawCta(ctx: CanvasRenderingContext2D, w: number, h: number, p: number,
     size: size * 0.05,
     rtl: tx.rtl,
     align: "center",
-    color: GOLD,
+    color: EMERALD,
   });
   text(ctx, tx.ctaTitle, w / 2, h * 0.5, {
     size: size * 0.07,

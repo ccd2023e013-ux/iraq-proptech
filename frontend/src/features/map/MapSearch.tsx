@@ -285,7 +285,7 @@ export function MapSearch({
   const pill = (active: boolean) =>
     `inline-flex h-9 items-center gap-2 rounded-full px-3.5 text-sm font-medium transition ${
       active
-        ? "bg-accent-fill text-white"
+        ? "bg-accent-fill text-on-accent"
         : "bg-surface text-ink-2 ring-1 ring-inset ring-hairline hover:text-ink"
     }`;
 
@@ -445,7 +445,7 @@ export function MapSearch({
                 <svg
                   aria-hidden
                   viewBox="0 0 20 20"
-                  className="size-4"
+                  className="size-4 text-spatial"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.6"

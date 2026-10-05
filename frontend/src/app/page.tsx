@@ -155,7 +155,7 @@ export default async function HomePage() {
               <div className="mt-2 flex flex-wrap gap-2">
                 <Link
                   href={`/properties?city_id=${basra.city_id}`}
-                  className="inline-flex h-10 items-center rounded-full bg-accent-fill px-5 text-sm font-medium text-white hover:bg-accent-fill-hover"
+                  className="inline-flex h-10 items-center rounded-full bg-accent-fill px-5 text-sm font-medium text-on-accent hover:bg-accent-fill-hover"
                 >
                   {h.basraAll}
                 </Link>
@@ -324,7 +324,7 @@ export default async function HomePage() {
           </div>
           <Link
             href={me ? "/dashboard/properties/new" : "/register"}
-            className="inline-flex h-11 shrink-0 items-center rounded-full bg-accent-fill px-6 font-medium text-white shadow-soft hover:bg-accent-fill-hover"
+            className="inline-flex h-11 shrink-0 items-center rounded-full bg-accent-fill px-6 font-medium text-on-accent shadow-soft hover:bg-accent-fill-hover"
           >
             {h.listButton}
           </Link>

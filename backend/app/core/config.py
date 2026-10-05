@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     )
 
     app_env: Literal["development", "test", "production"] = "development"
-    app_name: str = "Iraq PropTech"
+    app_name: str = "MAKAN"
     log_level: str = "INFO"
     log_json: bool = True
 
@@ -72,7 +72,7 @@ class Settings(BaseSettings):
 
     # Notifications: "mock" logs messages and keeps them in an in-memory outbox.
     email_provider: Literal["mock", "smtp"] = "mock"
-    email_from: str = "Iraq PropTech <no-reply@iraq-proptech.local>"
+    email_from: str = "MAKAN <no-reply@makan.local>"
     smtp_host: str | None = None
     smtp_port: int = 587
     smtp_username: str | None = None

@@ -58,7 +58,7 @@ export default async function VisionPage({ searchParams }: { searchParams: Promi
           <p className="text-ink-2">{v.signIn}</p>
           <Link
             href={`/login?next=${encodeURIComponent(next)}`}
-            className="inline-flex h-11 items-center rounded-full bg-accent-fill px-5 font-medium text-white hover:bg-accent-fill-hover"
+            className="inline-flex h-11 items-center rounded-full bg-accent-fill px-5 font-medium text-on-accent hover:bg-accent-fill-hover"
           >
             {v.signInButton}
           </Link>

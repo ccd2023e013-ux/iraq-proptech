@@ -31,8 +31,8 @@ export function RiverMap({
       >
         <defs>
           <radialGradient id="basra-glow">
-            <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.35" />
-            <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
+            <stop offset="0%" stopColor="var(--spatial-fill)" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="var(--spatial-fill)" stopOpacity="0" />
           </radialGradient>
         </defs>
         {(["euphrates", "tigris"] as const).map((river) => (
@@ -54,7 +54,7 @@ export function RiverMap({
           className={animate ? "river-path" : undefined}
           style={{ animationDelay: "1.6s" }}
           fill="none"
-          stroke="var(--accent)"
+          stroke="var(--spatial-fill)"
           strokeWidth="3.5"
           strokeLinecap="round"
         />
@@ -71,7 +71,7 @@ export function RiverMap({
                 cx={x}
                 cy={y}
                 r={basra ? 6.5 : 4}
-                fill={basra ? "var(--accent)" : "var(--surface)"}
+                fill={basra ? "var(--spatial-fill)" : "var(--surface)"}
                 stroke={basra ? "var(--surface)" : "var(--ink-2)"}
                 strokeWidth={basra ? 2.5 : 1.6}
               />

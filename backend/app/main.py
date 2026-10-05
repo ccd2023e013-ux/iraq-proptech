@@ -23,7 +23,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app = FastAPI(
         title=f"{settings.app_name} API",
         version=__version__,
-        description="REST API for the Iraq PropTech platform.",
+        description="REST API for MAKAN (مَكان) — property, spatial and market intelligence.",
         # The schema and interactive docs are a development aid: not exposed in production.
         openapi_url=None if settings.is_production else "/api/v1/openapi.json",
         docs_url=None if settings.is_production else "/docs",

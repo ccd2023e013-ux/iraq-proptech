@@ -34,7 +34,7 @@ export function HeroSearch({ dict }: { dict: Dictionary }) {
             role="radio"
             aria-checked={purpose === p}
             onClick={() => setPurpose(p)}
-            className={`rounded-lg px-4 py-1.5 text-sm font-medium ${purpose === p ? "bg-brand-700 text-white" : "text-sand-700 hover:bg-sand-100"}`}
+            className={`rounded-lg px-4 py-1.5 text-sm font-medium ${purpose === p ? "bg-brand-700 text-on-accent" : "text-sand-700 hover:bg-sand-100"}`}
           >
             {dict.listing.purposes[p]}
           </button>

@@ -62,7 +62,7 @@ export function SettingEditor({
       <button
         type="button"
         onClick={save}
-        className="rounded-md bg-brand-700 px-3 py-1.5 text-xs font-medium text-white"
+        className="rounded-md bg-brand-700 px-3 py-1.5 text-xs font-medium text-on-accent"
       >
         {dict.admin.save}
       </button>

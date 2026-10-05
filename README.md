@@ -1,4 +1,4 @@
-# Iraq PropTech — منصة العقارات العراقية
+# مَكان | MAKAN (formerly Iraq PropTech) — منصة العقارات العراقية
 
 An Arabic-first real-estate platform for Iraq (starting with Basra): listings,
 map search on PostGIS, an agent CRM, and AI analysis that never invents

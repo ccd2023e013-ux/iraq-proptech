@@ -11,19 +11,24 @@ import { MobileMenu } from "./MobileMenu";
 import { ThemeToggle } from "./ThemeToggle";
 import { UserMenu } from "./UserMenu";
 
-/** Brand mark: a river bend — the Shatt al-Arab — inside a rounded tile. */
+/** MAKAN mark: a place pin over the bend of the Shatt al-Arab, in a rounded tile. */
 export function BrandMark({ className = "size-8" }: { className?: string }) {
   return (
     <svg aria-hidden viewBox="0 0 32 32" className={className}>
       <rect width="32" height="32" rx="9" className="fill-accent-fill" />
       <path
-        d="M8 9c5 0 5 5 9 5s4 5 7 9"
+        d="M6 22c4-1 6-4 10-4s6 2 10 0"
         fill="none"
-        stroke="white"
-        strokeWidth="2.6"
+        stroke="#04130d"
+        strokeOpacity="0.45"
+        strokeWidth="2.2"
         strokeLinecap="round"
       />
-      <circle cx="23.5" cy="23" r="2.2" className="fill-gold-300" />
+      <path
+        d="M16 6.5a5.5 5.5 0 0 0-5.5 5.5c0 4 5.5 8.5 5.5 8.5s5.5-4.5 5.5-8.5A5.5 5.5 0 0 0 16 6.5Z"
+        fill="#04130d"
+      />
+      <circle cx="16" cy="12" r="2" className="fill-accent-fill" />
     </svg>
   );
 }
@@ -71,7 +76,7 @@ export function SiteHeader({
           <Link href="/" className="flex items-center gap-2.5" aria-label={dict.nav.home}>
             <BrandMark />
             <span className="font-display text-[17px] font-semibold tracking-tight whitespace-nowrap text-ink max-[380px]:hidden">
-              {locale === "ar" ? "عقار العراق" : "Iraq PropTech"}
+              {locale === "ar" ? "مَكان" : "MAKAN"}
             </span>
           </Link>
           <nav aria-label="primary" className="hidden items-center gap-1 text-sm md:flex">
@@ -131,7 +136,7 @@ export function SiteHeader({
               </Link>
               <Link
                 href="/register"
-                className="inline-flex h-9 items-center rounded-full bg-accent-fill px-3.5 text-sm font-medium whitespace-nowrap text-white shadow-soft transition hover:bg-accent-fill-hover"
+                className="inline-flex h-9 items-center rounded-full bg-accent-fill px-3.5 text-sm font-medium whitespace-nowrap text-on-accent shadow-soft transition hover:bg-accent-fill-hover"
               >
                 {dict.nav.register}
               </Link>

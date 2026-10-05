@@ -52,7 +52,7 @@ export default async function MessagesPage() {
                   <span className="flex items-center justify-between gap-3">
                     <span className="truncate text-sm text-sand-700">{c.last_message}</span>
                     {c.unread > 0 && (
-                      <span className="shrink-0 rounded-full bg-brand-700 px-2 py-0.5 text-xs text-white tabular">
+                      <span className="shrink-0 rounded-full bg-brand-700 px-2 py-0.5 text-xs text-on-accent tabular">
                         {c.unread} {m.unread}
                       </span>
                     )}

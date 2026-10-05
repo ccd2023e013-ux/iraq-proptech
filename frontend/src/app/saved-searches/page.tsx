@@ -56,7 +56,7 @@ export default async function SavedSearchesPage() {
               <div className="flex flex-wrap items-center gap-2">
                 <Link
                   href={`/properties?${filtersToQuery(row.filters)}`}
-                  className="rounded-lg bg-brand-700 px-3 py-1.5 text-sm font-medium text-white"
+                  className="rounded-lg bg-brand-700 px-3 py-1.5 text-sm font-medium text-on-accent"
                 >
                   {s.open}
                 </Link>

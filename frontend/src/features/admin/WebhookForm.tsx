@@ -75,7 +75,7 @@ export function WebhookForm({ dict, events }: { dict: Dictionary; events: string
               type="button"
               aria-pressed={on}
               onClick={() => setSelected(on ? selected.filter((x) => x !== ev) : [...selected, ev])}
-              className={`rounded-full border px-2.5 py-0.5 font-mono text-[11px] ${on ? "border-brand-600 bg-brand-600 text-white" : "border-sand-200"}`}
+              className={`rounded-full border px-2.5 py-0.5 font-mono text-[11px] ${on ? "border-brand-600 bg-brand-600 text-on-accent" : "border-sand-200"}`}
               dir="ltr"
             >
               {ev}

@@ -1,115 +1,129 @@
 @import "tailwindcss";
 
 /*
- * Iraq PropTech design system — "water and light".
+ * مَكان | MAKAN design system.
  *
  * Semantic tokens live on :root as CSS variables with a light and a dark value
- * (system preference by default; data-theme="light|dark" forces one). The
+ * (dark by default; data-theme="light|dark" forces one, no attribute follows the system). The
  * Tailwind palette names used throughout the codebase (sand-*, brand-*,
  * gold-*, surface, ink-*) point at these variables, so every screen follows
  * the theme without per-component dark styles.
  *
- * Accent: the teal of the Shatt al-Arab. Secondary: date-palm gold, reserved
- * for DEMO / estimate / promoted signals. Neutrals are cool, not cream.
+ * MAKAN: emerald (#10B981) is the brand and action colour; cyan (#06B6D4) is
+ * reserved for spatial things (map, GIS, places). Date-palm gold marks DEMO /
+ * estimate / promoted signals. Dark (#0B0F17 / #161E2E) is the default theme.
  * Logical utilities (ms-/me-/ps-/pe-/start-/end-) keep RTL and LTR mirrored.
  */
 
 :root {
   color-scheme: light;
-  --canvas: #f5f7f6;
+  --canvas: #f8fafc;
   --surface: #ffffff;
-  --surface-glass: rgb(255 255 255 / 0.72);
-  --fill: #edf1ef;
-  --fill-strong: #e2e8e5;
-  --hairline: rgb(16 32 30 / 0.1);
-  --hairline-strong: rgb(16 32 30 / 0.18);
-  --ink: #10201e;
-  --ink-2: #43524f;
-  --ink-3: #6b7a77;
-  --accent: #0f6b63;
-  --accent-strong: #0a4d47;
-  --accent-fill: #12746b;
-  --accent-fill-hover: #0f6159;
-  --accent-tint: #e3f1ee;
-  --accent-tint-strong: #c7e4de;
-  --accent-line: #8cc8bf;
+  --surface-glass: rgb(255 255 255 / 0.74);
+  --fill: #eef2f6;
+  --fill-strong: #e2e8f0;
+  --hairline: rgb(15 23 42 / 0.09);
+  --hairline-strong: rgb(15 23 42 / 0.16);
+  --ink: #0b0f17;
+  --ink-2: #475569;
+  --ink-3: #64748b;
+  --accent: #047857;
+  --accent-strong: #065f46;
+  --accent-fill: #10b981;
+  --accent-fill-hover: #0ea371;
+  --on-accent: #04130d;
+  --accent-tint: #e6f6ef;
+  --accent-tint-strong: #c8eddc;
+  --accent-line: #7dd3b0;
+  --spatial: #0e7490;
+  --spatial-fill: #06b6d4;
+  --spatial-tint: #e3f6fa;
   --gold: #8f6418;
   --gold-fill: #b98a2c;
   --gold-tint: #f6ecd6;
   --gold-line: #e2c88f;
-  --positive: #18794e;
+  --positive: #047857;
   --caution: #9a6700;
   --critical: #b42318;
-  --shadow-soft: 0 1px 2px rgb(16 32 30 / 0.06), 0 8px 24px -12px rgb(16 32 30 / 0.18);
-  --shadow-float: 0 2px 6px rgb(16 32 30 / 0.08), 0 24px 60px -24px rgb(16 32 30 / 0.35);
+  --shadow-soft: 0 1px 2px rgb(15 23 42 / 0.06), 0 8px 24px -12px rgb(15 23 42 / 0.16);
+  --shadow-float: 0 2px 6px rgb(15 23 42 / 0.08), 0 24px 60px -24px rgb(15 23 42 / 0.32);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --canvas: #0b1112;
-    --surface: #121a1b;
-    --surface-glass: rgb(18 26 27 / 0.72);
-    --fill: #1a2425;
-    --fill-strong: #233032;
-    --hairline: rgb(226 236 234 / 0.1);
-    --hairline-strong: rgb(226 236 234 / 0.18);
-    --ink: #e8efee;
-    --ink-2: #a9b7b4;
-    --ink-3: #7c8b88;
-    --accent: #5cc2b6;
-    --accent-strong: #93dbd1;
-    --accent-fill: #187d74;
-    --accent-fill-hover: #1d9085;
-    --accent-tint: #12302d;
-    --accent-tint-strong: #1a423e;
-    --accent-line: #2e6d66;
+    --canvas: #0b0f17;
+    --surface: #161e2e;
+    --surface-glass: rgb(22 30 46 / 0.72);
+    --fill: #1c2536;
+    --fill-strong: #243045;
+    --hairline: rgb(226 232 240 / 0.09);
+    --hairline-strong: rgb(226 232 240 / 0.16);
+    --ink: #e6eaf2;
+    --ink-2: #a3aec2;
+    --ink-3: #7c879c;
+    --accent: #10b981;
+    --accent-strong: #6ee7b7;
+    --accent-fill: #10b981;
+    --accent-fill-hover: #34d399;
+    --on-accent: #04130d;
+    --accent-tint: #0f2e2a;
+    --accent-tint-strong: #144038;
+    --accent-line: #1f6b55;
+    --spatial: #22d3ee;
+    --spatial-fill: #06b6d4;
+    --spatial-tint: #0b2a33;
     --gold: #e0b45c;
     --gold-fill: #b98a2c;
     --gold-tint: #2b2414;
     --gold-line: #5c4a22;
-    --positive: #4cc38a;
+    --positive: #34d399;
     --caution: #e0a43a;
     --critical: #f0705f;
-    --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
-    --shadow-float: 0 2px 6px rgb(0 0 0 / 0.4), 0 24px 60px -24px rgb(0 0 0 / 0.8);
+    --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.45), 0 8px 24px -12px rgb(0 0 0 / 0.65);
+    --shadow-float: 0 2px 6px rgb(0 0 0 / 0.45), 0 24px 60px -24px rgb(0 0 0 / 0.85);
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --canvas: #0b1112;
-  --surface: #121a1b;
-  --surface-glass: rgb(18 26 27 / 0.72);
-  --fill: #1a2425;
-  --fill-strong: #233032;
-  --hairline: rgb(226 236 234 / 0.1);
-  --hairline-strong: rgb(226 236 234 / 0.18);
-  --ink: #e8efee;
-  --ink-2: #a9b7b4;
-  --ink-3: #7c8b88;
-  --accent: #5cc2b6;
-  --accent-strong: #93dbd1;
-  --accent-fill: #187d74;
-  --accent-fill-hover: #1d9085;
-  --accent-tint: #12302d;
-  --accent-tint-strong: #1a423e;
-  --accent-line: #2e6d66;
+  --canvas: #0b0f17;
+  --surface: #161e2e;
+  --surface-glass: rgb(22 30 46 / 0.72);
+  --fill: #1c2536;
+  --fill-strong: #243045;
+  --hairline: rgb(226 232 240 / 0.09);
+  --hairline-strong: rgb(226 232 240 / 0.16);
+  --ink: #e6eaf2;
+  --ink-2: #a3aec2;
+  --ink-3: #7c879c;
+  --accent: #10b981;
+  --accent-strong: #6ee7b7;
+  --accent-fill: #10b981;
+  --accent-fill-hover: #34d399;
+  --on-accent: #04130d;
+  --accent-tint: #0f2e2a;
+  --accent-tint-strong: #144038;
+  --accent-line: #1f6b55;
+  --spatial: #22d3ee;
+  --spatial-fill: #06b6d4;
+  --spatial-tint: #0b2a33;
   --gold: #e0b45c;
   --gold-fill: #b98a2c;
   --gold-tint: #2b2414;
   --gold-line: #5c4a22;
-  --positive: #4cc38a;
+  --positive: #34d399;
   --caution: #e0a43a;
   --critical: #f0705f;
-  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
-  --shadow-float: 0 2px 6px rgb(0 0 0 / 0.4), 0 24px 60px -24px rgb(0 0 0 / 0.8);
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.45), 0 8px 24px -12px rgb(0 0 0 / 0.65);
+  --shadow-float: 0 2px 6px rgb(0 0 0 / 0.45), 0 24px 60px -24px rgb(0 0 0 / 0.85);
 }
 
 @theme {
+  /* Inter draws Latin letters and digits; Readex Pro draws Arabic. */
   --font-sans:
-    "IBM Plex Sans Arabic", "IBM Plex Sans", ui-sans-serif, system-ui, Tahoma, sans-serif;
-  --font-display: "Readex Pro Variable", "IBM Plex Sans Arabic", ui-sans-serif, system-ui;
+    "Inter Variable", "Readex Pro Variable", ui-sans-serif, system-ui, Tahoma, sans-serif;
+  --font-display: "Inter Variable", "Readex Pro Variable", ui-sans-serif, system-ui;
 
   /* Semantic colours (preferred in new code). */
   --color-canvas: var(--canvas);
@@ -127,6 +141,10 @@
   --color-accent-fill: var(--accent-fill);
   --color-accent-fill-hover: var(--accent-fill-hover);
   --color-accent-tint: var(--accent-tint);
+  --color-on-accent: var(--on-accent);
+  --color-spatial: var(--spatial);
+  --color-spatial-fill: var(--spatial-fill);
+  --color-spatial-tint: var(--spatial-tint);
 
   /* Legacy palette names, mapped onto the semantic tokens (theme-aware). */
   --color-sand-50: var(--canvas);

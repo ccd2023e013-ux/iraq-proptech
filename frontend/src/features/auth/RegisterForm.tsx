@@ -80,7 +80,7 @@ export function RegisterForm({
         )}
         <Link
           href="/login"
-          className="inline-flex h-12 items-center justify-center rounded-full bg-accent-fill px-6 font-medium text-white transition hover:bg-accent-fill-hover"
+          className="inline-flex h-12 items-center justify-center rounded-full bg-accent-fill px-6 font-medium text-on-accent transition hover:bg-accent-fill-hover"
         >
           {dict.auth.submitLogin}
         </Link>

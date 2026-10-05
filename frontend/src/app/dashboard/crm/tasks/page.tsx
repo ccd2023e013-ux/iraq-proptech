@@ -37,7 +37,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
             key={f}
             href={`/dashboard/crm/tasks?status=${f}`}
             aria-current={f === status ? "page" : undefined}
-            className={`rounded-full border px-3 py-1 text-sm ${f === status ? "border-brand-600 bg-brand-600 text-white" : "border-sand-200 bg-surface"}`}
+            className={`rounded-full border px-3 py-1 text-sm ${f === status ? "border-brand-600 bg-brand-600 text-on-accent" : "border-sand-200 bg-surface"}`}
           >
             {c.taskFilters[f]}
           </Link>

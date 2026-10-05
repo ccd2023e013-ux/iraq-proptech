@@ -53,7 +53,7 @@ export default async function SmartSearchPage({
     <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6">
       <h1 className="flex items-center gap-2 text-2xl font-bold text-brand-900">
         {a.smartSearch}
-        <span className="rounded bg-brand-700 px-1.5 py-0.5 text-xs font-bold text-white">
+        <span className="rounded bg-brand-700 px-1.5 py-0.5 text-xs font-bold text-on-accent">
           {a.badge}
         </span>
       </h1>
@@ -67,7 +67,7 @@ export default async function SmartSearchPage({
           maxLength={300}
           className="h-12 min-w-0 flex-1 rounded-lg border border-sand-200 bg-surface px-4"
         />
-        <button type="submit" className="rounded-lg bg-brand-700 px-5 font-medium text-white">
+        <button type="submit" className="rounded-lg bg-brand-700 px-5 font-medium text-on-accent">
           {dict.landing.heroCta}
         </button>
       </form>

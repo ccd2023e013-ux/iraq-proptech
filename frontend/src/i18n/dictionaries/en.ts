@@ -2,8 +2,9 @@ import type { Dictionary } from "./ar";
 
 const en: Dictionary = {
   meta: {
-    title: "Iraq PropTech — Smart Real Estate Platform",
-    description: "An Iraqi platform to find, sell and rent property, with maps and AI analysis.",
+    title: "MAKAN — Property · Spatial · Market Intelligence",
+    description:
+      "MAKAN — Property · Spatial · Market Intelligence for Iraq: properties on the map with their surroundings, market and nearby projects, starting in Basra.",
   },
   nav: {
     menu: "Menu",
@@ -646,7 +647,7 @@ const en: Dictionary = {
       cta: "View the listing",
       ctaLine: "Reference {ref}",
       demo: "DEMO",
-      brand: "Iraq PropTech",
+      brand: "MAKAN",
     },
   },
   vision: {
@@ -1119,8 +1120,9 @@ const en: Dictionary = {
     dark: "Theme: dark",
   },
   homeV2: {
-    heroTitle: "Discover Iraq through property intelligence",
-    heroSubtitle: "Search, compare and understand every property in context — starting in Basra.",
+    heroTitle: "Property intelligence that understands place.",
+    heroSubtitle:
+      "Search, compare and understand every property where it is — its surroundings, its market and what is planned nearby. Starting in Basra.",
     searchPlaceholder: "Area, city, or describe what you need",
     aiPlaceholder: "e.g. 3-bedroom house for sale in Basra",
     aiToggle: "AI search",
@@ -1168,7 +1170,7 @@ const en: Dictionary = {
     listButton: "Add your property",
   },
   footer: {
-    tagline: "Property intelligence for Iraq.",
+    tagline: "Property · Spatial · Market Intelligence",
     demoNotice:
       "All current listings are DEMO listings that demonstrate the platform, not real offers.",
     status: "System status",

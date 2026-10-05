@@ -49,7 +49,7 @@ export function AuthoringAssistant({
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-dashed border-brand-300 bg-brand-50 p-3">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded bg-brand-700 px-1.5 py-0.5 text-[11px] font-bold text-white">
+        <span className="rounded bg-brand-700 px-1.5 py-0.5 text-[11px] font-bold text-on-accent">
           {a.badge}
         </span>
         {propertyId && (

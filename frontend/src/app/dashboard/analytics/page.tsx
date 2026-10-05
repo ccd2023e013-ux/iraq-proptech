@@ -35,7 +35,7 @@ export default async function MyAnalyticsPage({
               key={s}
               href={`/dashboard/analytics?scope=${s}`}
               aria-current={scope === s ? "page" : undefined}
-              className={`rounded-full border px-3 py-1 ${scope === s ? "border-brand-700 bg-brand-700 text-white" : "border-sand-300"}`}
+              className={`rounded-full border px-3 py-1 ${scope === s ? "border-brand-700 bg-brand-700 text-on-accent" : "border-sand-300"}`}
             >
               {s === "me" ? t.myScope : t.agencyScope}
             </Link>

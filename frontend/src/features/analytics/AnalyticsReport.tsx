@@ -254,7 +254,7 @@ export function RangeForm({
         <input type="checkbox" name="include_demo" value="1" defaultChecked={data.include_demo} />
         {t.includeDemo}
       </label>
-      <button type="submit" className="rounded bg-brand-700 px-3 py-1.5 font-medium text-white">
+      <button type="submit" className="rounded bg-brand-700 px-3 py-1.5 font-medium text-on-accent">
         {t.apply}
       </button>
     </form>
