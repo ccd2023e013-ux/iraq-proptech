@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { TrustBadge } from "@/components/ui/TrustBadge";
 import { IntelligentSearch } from "@/features/home/IntelligentSearch";
+import { NearYou } from "@/features/home/NearYou";
 import { RiverMap } from "@/features/home/RiverMap";
 import { PropertyCard, priceLabel } from "@/features/properties/PropertyCard";
 import { favoriteIds, runSearch } from "@/features/search/data";
@@ -261,6 +262,8 @@ export default async function HomePage() {
             </ul>
           </section>
         )}
+
+        <NearYou dict={dict} locale={locale} />
 
         {/* In development — honest previews, no fake data. */}
         <section aria-labelledby="next-heading" className="grid gap-8 lg:grid-cols-[0.8fr_2fr]">

@@ -227,6 +227,29 @@ def map_v2(browser) -> None:
     page.screenshot(path=str(OUT / "map-drawn.png"))
     ctx.close()
 
+    # "Properties near you" (homepage) and "Near me" (map) with a Basra location.
+    ctx = browser.new_context(
+        viewport={"width": 1366, "height": 900},
+        locale="en-US",
+        permissions=["geolocation"],
+        geolocation={"latitude": 30.508, "longitude": 47.783},
+    )
+    page = ctx.new_page()
+    page.goto(WEB + "/", wait_until="load", timeout=120_000)
+    page.locator("[data-testid=near-you]").click()
+    near = page.locator('section[aria-labelledby=near-heading] a[href^="/properties/"]')
+    try:
+        near.first.wait_for(timeout=60_000)
+        found = near.count()
+    except Exception:
+        found = 0
+    check(found > 0, f"homepage 'near you' lists nearby properties ({found})")
+    page.goto(WEB + "/map", wait_until="load", timeout=120_000)
+    page.get_by_role("button", name="Near me").click()
+    page.wait_for_url(lambda u: "near_lat=" in u, timeout=30_000, wait_until="commit")
+    check("radius_km=3" in page.url, "map 'near me' runs a 3 km radius search")
+    ctx.close()
+
 
 def main() -> int:
     with sync_playwright() as p:

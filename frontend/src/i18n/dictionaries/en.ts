@@ -919,6 +919,11 @@ const en: Dictionary = {
     basraAll: "All Basra properties",
     basraMap: "Basra on the map",
     exploreTitle: "Explore by city",
+    nearTitle: "Properties near you",
+    nearBody: "Use your location once to see the closest listings. It isn't saved.",
+    nearButton: "Show properties near me",
+    nearNone: "No listings within {km} km of you yet.",
+    nearOnMap: "See them on the map",
     marketTitle: "Market reading",
     marketBody:
       "Medians from listings on the platform. Current data is DEMO, not real market prices.",
