@@ -85,15 +85,15 @@ def import_dataset(db: Session, name: str = "basra") -> dict[str, Any]:
         if s["kind"] not in SourceKind.__members__:
             raise ProvenanceError(f"unknown source kind {s['kind']}")
         check_url(s["url"])
-        row = db.execute(
+        source = db.execute(
             select(DevelopmentSource).where(DevelopmentSource.url == s["url"])
         ).scalar_one_or_none()
-        if row is None:
-            row = DevelopmentSource(url=s["url"])
-            db.add(row)
-        row.name, row.organization, row.kind = s["name"], s["organization"], s["kind"]
-        row.terms_note = s.get("terms_note")
-        sources[s["key"]] = row
+        if source is None:
+            source = DevelopmentSource(url=s["url"])
+            db.add(source)
+        source.name, source.organization, source.kind = s["name"], s["organization"], s["kind"]
+        source.terms_note = s.get("terms_note")
+        sources[s["key"]] = source
     db.flush()
 
     created = updated = 0
