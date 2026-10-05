@@ -18,6 +18,7 @@ from app.crm.models import (
     Message,
 )
 from app.db.base import Base
+from app.development.models import DevelopmentEvidence, DevelopmentProject, DevelopmentSource
 from app.favorites import Favorite
 from app.geo.models import City, District, Governorate, Neighborhood
 from app.geo.pois import PointOfInterest
@@ -63,6 +64,9 @@ __all__ = [
     "Conversation",
     "CrmTask",
     "Customer",
+    "DevelopmentEvidence",
+    "DevelopmentProject",
+    "DevelopmentSource",
     "District",
     "ErrorEvent",
     "ExchangeRate",

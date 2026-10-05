@@ -9,6 +9,7 @@ from app.auth.router import router as auth_router
 from app.billing.router import router as billing_router
 from app.core.config import Settings
 from app.crm.router import router as crm_router
+from app.development.router import router as development_router
 from app.favorites import router as favorites_router
 from app.geo.manage import router as gis_router
 from app.geo.pois import router as pois_router
@@ -46,6 +47,7 @@ def build_api_router(settings: Settings) -> APIRouter:
     api_router.include_router(favorites_router)
     api_router.include_router(map_router)
     api_router.include_router(market_router)
+    api_router.include_router(development_router)
     api_router.include_router(saved_search_router)
     api_router.include_router(pois_router)
     api_router.include_router(money_router)

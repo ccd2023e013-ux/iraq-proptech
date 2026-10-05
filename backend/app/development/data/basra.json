@@ -1,0 +1,174 @@
+{
+  "_comment": "Curated Basra development records. Every project cites its published source; wording of status/timeline follows the source. Retrieved 2026-10-05. Locations are approximate (see location_note) unless stated.",
+  "sources": [
+    {
+      "key": "gcpi",
+      "name": "Al-Faw Grand Port — official news",
+      "organization": "General Company for Ports of Iraq (Ministry of Transport)",
+      "url": "https://en.alfawport.gov.iq/",
+      "kind": "OFFICIAL",
+      "terms_note": "Official announcements; statements are the company's own."
+    },
+    {
+      "key": "nic",
+      "name": "National Investment Commission — investment opportunities",
+      "organization": "National Investment Commission, Presidency of the Council of Ministers",
+      "url": "https://investpromo.gov.iq/",
+      "kind": "OFFICIAL",
+      "terms_note": "Opportunity lists are offers to investors, not approved projects; some pages are undated."
+    },
+    {
+      "key": "wikipedia",
+      "name": "Wikipedia",
+      "organization": "Wikimedia Foundation (community-edited)",
+      "url": "https://en.wikipedia.org/",
+      "kind": "PUBLIC",
+      "terms_note": "Used only for approximate map positions, never for status."
+    }
+  ],
+  "projects": [
+    {
+      "slug": "basra-grand-faw-port",
+      "name_ar": "ميناء الفاو الكبير",
+      "name_en": "Al-Faw Grand Port",
+      "category": "PORT",
+      "status": "TRIAL_OPERATION",
+      "summary_ar": "ميناء على ساحل الفاو جنوب البصرة. بحسب الشركة العامة لموانئ العراق اكتملت القنوات الملاحية والأرصفة الرئيسية وبدأ الميناء استقبال السفن للتشغيل التجريبي.",
+      "summary_en": "A port on the Faw coast south of Basra. According to the General Company for Ports of Iraq, the navigation channels and main berths are complete and the port has begun receiving vessels for trial operations.",
+      "lon": 48.4411,
+      "lat": 29.9148,
+      "location_precision": "APPROXIMATE",
+      "location_note": "Position from public maps (Wikipedia), not a surveyed site boundary.",
+      "timeline_ar": "التشغيل التجاري الكامل مستهدف في عام 2026 (بحسب الشركة العامة لموانئ العراق، كانون الثاني 2026).",
+      "timeline_en": "Full commercial operations targeted for 2026 (General Company for Ports of Iraq, January 2026).",
+      "target_year": 2026,
+      "confidence": "HIGH",
+      "evidence": [
+        {
+          "source": "gcpi",
+          "url": "https://en.alfawport.gov.iq/5130",
+          "title": "Al-Faw Grand Port progress announcement",
+          "published_on": "2026-01-05",
+          "excerpt": "Navigation channels and main berths completed; the port has begun receiving vessels for trial operations; full commercial operations targeted for 2026.",
+          "supports": "STATUS"
+        },
+        {
+          "source": "wikipedia",
+          "url": "https://en.wikipedia.org/wiki/Grand_Faw_Port",
+          "title": "Grand Faw Port",
+          "published_on": null,
+          "excerpt": "29.9148°N 48.4411°E",
+          "supports": "LOCATION"
+        }
+      ]
+    },
+    {
+      "slug": "basra-faw-umm-qasr-immersed-tunnel",
+      "name_ar": "النفق المغمور بين الفاو وأم قصر",
+      "name_en": "Faw – Umm Qasr immersed tunnel",
+      "category": "BRIDGE_TUNNEL",
+      "status": "UNDER_CONSTRUCTION",
+      "summary_ar": "نفق مغمور ضمن مشروع ميناء الفاو الكبير يربط جانبي ميناءي الفاو وأم قصر لتحسين حركة البضائع.",
+      "summary_en": "An immersed tunnel within the Al-Faw Grand Port project linking the two sides of the Faw and Umm Qasr ports to improve cargo movement.",
+      "lon": 47.95,
+      "lat": 30.03,
+      "location_precision": "AREA",
+      "location_note": "Placed in the Umm Qasr area; the exact alignment is not published.",
+      "timeline_ar": "مرور المركبات متوقع أواخر شباط 2026 والإنجاز الكامل قبل منتصف 2026 (بحسب الشركة، كانون الثاني 2026).",
+      "timeline_en": "Vehicle passage expected by late February 2026 and full completion before mid-2026 (company statement, January 2026).",
+      "target_year": 2026,
+      "confidence": "MEDIUM",
+      "evidence": [
+        {
+          "source": "gcpi",
+          "url": "https://en.alfawport.gov.iq/5132",
+          "title": "Immersed tunnel project progress",
+          "published_on": "2026-01-05",
+          "excerpt": "Vehicles anticipated to transit the tunnel by late February; full completion targeted before mid-year.",
+          "supports": "TIMELINE"
+        }
+      ]
+    },
+    {
+      "slug": "basra-faw-seawater-desalination",
+      "name_ar": "محطة تحلية مياه البحر في ميناء الفاو الكبير",
+      "name_en": "Al-Faw seawater desalination plant",
+      "category": "WATER",
+      "status": "UNDER_CONSTRUCTION",
+      "summary_ar": "محطة استراتيجية لتحلية مياه البحر في ميناء الفاو الكبير بطاقة مليون متر مكعب يومياً بحسب الشركة العامة لموانئ العراق، أُعلن إطلاق مرحلة تنفيذها في تموز 2025.",
+      "summary_en": "A strategic seawater desalination plant at Al-Faw Grand Port with a stated capacity of one million cubic metres per day; the execution phase was announced in July 2025.",
+      "lon": 48.43,
+      "lat": 29.93,
+      "location_precision": "AREA",
+      "location_note": "Placed at the port area; the plant site is not published.",
+      "timeline_ar": null,
+      "timeline_en": null,
+      "target_year": null,
+      "confidence": "MEDIUM",
+      "evidence": [
+        {
+          "source": "gcpi",
+          "url": "https://en.alfawport.gov.iq/4791",
+          "title": "Execution phase launched for the strategic seawater desalination plant",
+          "published_on": "2025-07-24",
+          "excerpt": "Capacity of one million cubic meters per day; execution phase officially launched. No completion date given.",
+          "supports": "FIGURES"
+        }
+      ]
+    },
+    {
+      "slug": "basra-nic-faw-housing-opportunity",
+      "name_ar": "مشروع إسكان الفاو (فرصة استثمارية)",
+      "name_en": "Al-Faw housing project (investment opportunity)",
+      "category": "INVESTMENT_OPPORTUNITY",
+      "status": "OPPORTUNITY",
+      "summary_ar": "فرصة استثمارية سكنية مدرجة لدى هيئة الاستثمار الوطنية على مساحة 326 دونماً (القطعة 5/8 م6) في الفاو.",
+      "summary_en": "A housing investment opportunity listed by the National Investment Commission on 326 dunams (plot 5/8, m6) in Al-Faw.",
+      "lon": 48.472,
+      "lat": 29.976,
+      "location_precision": "AREA",
+      "location_note": "Placed at Al-Faw town; only the plot reference is published.",
+      "timeline_ar": null,
+      "timeline_en": null,
+      "target_year": null,
+      "confidence": "LOW",
+      "evidence": [
+        {
+          "source": "nic",
+          "url": "https://investpromo.gov.iq/?p=4365",
+          "title": "Available Investment Opportunities at Housing Sector",
+          "published_on": null,
+          "excerpt": "Row 24: Al Faw housing project — 5/8 m6 — 326 dunams — Basra. The page is undated; current availability is not confirmed.",
+          "supports": "EXISTENCE"
+        }
+      ]
+    },
+    {
+      "slug": "basra-nic-ports-housing-opportunity",
+      "name_ar": "مجمع سكني لموظفي الشركة العامة لموانئ العراق (فرصة استثمارية)",
+      "name_en": "Housing complex for the State Company of Iraq's Ports (investment opportunity)",
+      "category": "INVESTMENT_OPPORTUNITY",
+      "status": "OPPORTUNITY",
+      "summary_ar": "فرصة استثمارية سكنية مدرجة لدى هيئة الاستثمار الوطنية على مساحة 99 دونماً (22 النجيبية م7) في البصرة.",
+      "summary_en": "A housing investment opportunity listed by the National Investment Commission on 99 dunams (22 Najebiya, m7) in Basra.",
+      "lon": 47.79,
+      "lat": 30.54,
+      "location_precision": "AREA",
+      "location_note": "Placed in Basra city; only the parcel reference (Najebiya) is published.",
+      "timeline_ar": null,
+      "timeline_en": null,
+      "target_year": null,
+      "confidence": "LOW",
+      "evidence": [
+        {
+          "source": "nic",
+          "url": "https://investpromo.gov.iq/?p=4365",
+          "title": "Available Investment Opportunities at Housing Sector",
+          "published_on": null,
+          "excerpt": "Row 23: Housing complex for the State Co. of Iraq's Ports — 22 Najebiya m7 — 99 dunams — Basra. The page is undated; current availability is not confirmed.",
+          "supports": "EXISTENCE"
+        }
+      ]
+    }
+  ]
+}

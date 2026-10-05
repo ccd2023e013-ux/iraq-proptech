@@ -36,7 +36,9 @@ from app.properties.models import Property
 
 Kind = Literal["FACT", "SOURCE", "ESTIMATE", "AI_INTERPRETATION", "SIMULATION"]
 Origin = Literal["listing", "verification", "platform", "external", "computed", "ai", "scenario"]
-Section = Literal["facts", "price", "neighbourhood", "quality", "interpretation", "answer"]
+Section = Literal[
+    "facts", "price", "neighbourhood", "development", "quality", "interpretation", "answer"
+]
 
 # Which kinds each origin may produce. AI output can only ever be an interpretation.
 ALLOWED: dict[str, set[str]] = {
@@ -342,6 +344,44 @@ def _neighbourhood(db: Session, prop: Property) -> tuple[list[Statement], dict[s
     return out, summary
 
 
+DEVELOPMENT_RADIUS_M = 15_000
+
+
+def _development(db: Session, prop: Property) -> list[Statement]:
+    """Published projects near the property, each with its source and date."""
+    from app.development import service as development
+
+    if prop.display_location is None:
+        return []
+    point = db.execute(
+        select(func.ST_X(Property.display_location), func.ST_Y(Property.display_location)).where(
+            Property.id == prop.id
+        )
+    ).one()
+    out: list[Statement] = []
+    for project, distance in development.projects_near(
+        db, float(point[0]), float(point[1]), DEVELOPMENT_RADIUS_M
+    ):
+        newest = max((e.published_on for e in project.evidence if e.published_on), default=None)
+        out.append(
+            sourced(
+                "development",
+                "source.development_nearby",
+                source=" · ".join(sorted({e.source.organization for e in project.evidence})),
+                project_id=str(project.id),
+                name_ar=project.name_ar,
+                name_en=project.name_en,
+                category=project.category,
+                status=project.status,
+                distance_km=round(distance / 1000, 1),
+                published_on=newest.isoformat() if newest else None,
+                confidence=project.confidence,
+                location_precision=project.location_precision,
+            )
+        )
+    return out
+
+
 def _quality(db: Session, prop: Property) -> list[Statement]:
     report = service.quality_report(prop)
     out = [
@@ -439,6 +479,7 @@ def build_report(
     facts_s = _facts(db, prop)
     price_s, price_summary = _price(db, prop)
     places_s, places_summary = _neighbourhood(db, prop)
+    development_s = _development(db, prop)
     quality_s = _quality(db, prop)
     base = service.property_facts(db, prop)
     ai_facts = _interpretation_facts(base, price_summary, places_summary)
@@ -453,14 +494,14 @@ def build_report(
         instructions="In 2–4 short sentences, explain what the facts and estimates mean for "
         "someone considering this property. Name estimates as estimates.",
     )
-    gaps = ["development_signals", "transaction_prices"]
+    gaps = (["development_signals"] if not development_s else []) + ["transaction_prices"]
     if prop.is_demo:
         gaps.insert(0, "demo_listing")
     return IntelligenceReport(
         property_id=prop.id,
         generated_at=datetime.now(UTC),
         is_demo=prop.is_demo,
-        statements=[*facts_s, *price_s, *places_s, *quality_s, ai],
+        statements=[*facts_s, *price_s, *places_s, *development_s, *quality_s, ai],
         gaps=gaps,
         provider=provider,
         model=model,

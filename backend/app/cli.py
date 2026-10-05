@@ -102,6 +102,11 @@ def main(argv: list[str] | None = None) -> int:
     osm_cmd.add_argument("--city", default="basra")
     osm_cmd.add_argument("--bbox", help="west,south,east,north (city-sized, inside Iraq)")
     osm_cmd.add_argument("--dry-run", action="store_true")
+    dev = sub.add_parser(
+        "import-development",
+        help="Load a curated, source-cited development dataset (idempotent)",
+    )
+    dev.add_argument("--dataset", default="basra")
     pf = sub.add_parser("preflight", help="Check configuration (and the database with --db)")
     pf.add_argument("--db", action="store_true", help="also check PostGIS and migrations")
     for name, text in (
@@ -130,6 +135,13 @@ def main(argv: list[str] | None = None) -> int:
         with get_sessionmaker()() as db:
             for result in registry.run(db, args.names or registry.FREQUENT):
                 print(f"{result['job']}: {result['status']} {result['detail'] or result['error']}")
+        return 0
+
+    if args.command == "import-development":
+        from app.development import service as development
+
+        with get_sessionmaker()() as db:
+            print(development.import_dataset(db, args.dataset))
         return 0
 
     if args.command == "import-osm-pois":

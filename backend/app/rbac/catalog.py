@@ -72,6 +72,7 @@ class Permission(StrEnum):
 
     # Locations / GIS (districts, neighborhoods, boundaries)
     LOCATIONS_MANAGE = "locations.manage"
+    DEVELOPMENT_MANAGE = "development.manage"  # development projects and their sources
 
     # CRM
     LEADS_READ_OWN = "leads.read_own"
@@ -152,6 +153,7 @@ _ADMIN = (
         Permission.ANALYTICS_ALL,
         Permission.AUTOMATION_MANAGE,
         Permission.LOCATIONS_MANAGE,
+        Permission.DEVELOPMENT_MANAGE,
     }
 )
 
