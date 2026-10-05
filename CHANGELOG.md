@@ -2,6 +2,11 @@
 
 All notable changes, newest first. Each entry lists the CI-verified commit.
 
+## 2.0 Stage 6: AI Property Vision (`a0b61e8`)
+Brief → labelled concept + future street-view images (label burned in),
+provider abstraction (offline renderer default, OpenAI images optional),
+owner-private storage, quota; property pages link to it.
+
 ## 2.0 Stage 5: Development Intelligence — Future Iraq (`6236919`)
 Provenance model (sources, projects, evidence); five official-source Basra
 records; `/future` page with sources and dates; Future Iraq map layer;

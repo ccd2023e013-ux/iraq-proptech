@@ -17,7 +17,7 @@ Status legend: ✅ done (live-verified) · 🚧 in progress · ⏳ planned ·
 | 3 | Basra-first Map 2.0 | ✅ (satellite 🔑) |
 | 4 | Property Intelligence | ✅ |
 | 5 | Development Intelligence ("Future Iraq") | ✅ first dataset (more sources ongoing) |
-| 6 | AI Property Vision | ⏳ 🔑 |
+| 6 | AI Property Vision | ✅ (image-model key 🔑 optional) |
 | 7 | Property Media Studio (+ drone workflow) | ⏳ 🔑 |
 | 8 | Market Intelligence | ⏳ |
 | 9 | Social / Meta authorized intelligence | ⏳ 🔑 ⚖️ |
@@ -183,6 +183,17 @@ abstraction (mock provider = labelled placeholder concepts). Every output
 watermarked "AI CONCEPT — NOT AN ENGINEERING OR GOVERNMENT APPROVAL". 🔑
 - **Acceptance**: job pipeline (queued → processing → done/failed), storage,
   watermark test, entitlement gate; mock provider works live.
+
+**Status ✅ — live-verified** (Live site run 37302842547 on `a0b61e8`). `/vision`
+(signed-in): brief → two images (concept on the plot, future street view)
+shown as CURRENT → AI CONCEPT → FUTURE VISION, with "AI CONCEPT - NOT AN
+ENGINEERING OR GOVERNMENT APPROVAL" burned into every image and repeated on
+the page; assumptions and limitations returned with each concept. Provider
+abstraction: offline massing renderer (default, free) or OpenAI images with
+`VISION_PROVIDER=openai` + key (🔑; label burned in, renderer fallback).
+Owner-private images, quota + rate limit, migration 0015. Not claimed:
+photo-realistic output (needs the keyed provider), use of uploaded photos
+as model input (planned with the media pipeline in Stage 7).
 
 ## 7 — Property Media Studio + drone workflow
 
