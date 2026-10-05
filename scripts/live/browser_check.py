@@ -114,6 +114,19 @@ def auth_flow(browser, *, phone: bool, locale: str) -> None:
     page.wait_for_url("**/favorites", timeout=60_000)
     check(True, f"[{tag}] sign-in returns to the requested page (/favorites)")
     cookies = {c["name"]: c for c in ctx.cookies()}
+    print(
+        f"  [{tag}] cookies after sign-in: "
+        + ", ".join(
+            f"{n}(len={len(c['value'])},httpOnly={c['httpOnly']},secure={c['secure']},"
+            f"domain={c['domain']},expires={int(c['expires'])})"
+            for n, c in cookies.items()
+        ),
+        flush=True,
+    )
+    me_status = page.evaluate(
+        "fetch('/api/v1/auth/me', {credentials: 'same-origin'}).then(r => r.status)"
+    )
+    print(f"  [{tag}] browser GET /api/v1/auth/me → {me_status}; url={page.url}", flush=True)
     session = cookies.get("access_token", {})
     check(
         bool(session.get("httpOnly")) and bool(session.get("secure")),
@@ -145,6 +158,14 @@ def main() -> int:
         browser = p.chromium.launch(
             args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
         )
+
+        if os.environ.get("BROWSER_ONLY") == "auth":
+            themes(browser)
+            auth_flow(browser, phone=True, locale="ar")
+            auth_flow(browser, phone=False, locale="en")
+            browser.close()
+            print("AUTH-ONLY RESULT: " + ("OK" if not FAILURES else "; ".join(FAILURES)))
+            return 1 if FAILURES else 0
 
         # 1. Phone, Arabic default.
         phone = browser.new_context(

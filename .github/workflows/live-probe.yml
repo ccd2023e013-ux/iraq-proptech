@@ -3,6 +3,10 @@ name: Live probe
 # Manual diagnostics of the deployed services (status, headers, bodies).
 on:
   workflow_dispatch:
+    inputs:
+      mode:
+        description: "probe (HTTP) or auth (real-browser sign-in journey only)"
+        default: probe
 
 permissions:
   contents: read
@@ -13,7 +17,18 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
+      - name: Install Playwright + Chromium
+        if: inputs.mode == 'auth'
+        run: |
+          python -m pip install --quiet playwright pillow
+          python -m playwright install --with-deps chromium
+      - name: Browser auth journey
+        if: inputs.mode == 'auth'
+        run: |
+          . deploy/live.env
+          WEB_URL="$LIVE_WEB_URL" BROWSER_ONLY=auth bash scripts/ci/annotate.sh "auth probe" python scripts/live/browser_check.py
       - name: Probe
+        if: inputs.mode != 'auth'
         run: |
           . deploy/live.env
           WEB_URL="$LIVE_WEB_URL" API_URL="$LIVE_API_URL" bash scripts/live/probe.sh
