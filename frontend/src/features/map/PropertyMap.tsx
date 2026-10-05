@@ -91,8 +91,8 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
   const tagText = isDark() ? ink : "#ffffff";
   const edge: [number, number, number, number] = isDark() ? [0, 0, 0, 90] : [255, 255, 255, 230];
   for (const [name, fill, stroke] of [
-    ["bubble", tag, edge],
-    ["bubble-active", accent, accent],
+    ["iqp-price-tag", tag, edge],
+    ["iqp-price-tag-active", accent, accent],
   ] as const) {
     if (map.hasImage(name)) map.removeImage(name);
     const pill = pillImage(fill, stroke, 2);
@@ -306,8 +306,14 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
         "icon-opacity": ["case", ["boolean", ["get", "approximate"], false], 0.85, 1],
       },
     });
-  bubble("price-bubbles", "bubble", tagText, ["!", ["has", "point_count"]], false);
-  bubble("price-bubbles-active", "bubble-active", "#ffffff", ["==", ["get", "id"], ""], true);
+  bubble("price-bubbles", "iqp-price-tag", tagText, ["!", ["has", "point_count"]], false);
+  bubble(
+    "price-bubbles-active",
+    "iqp-price-tag-active",
+    "#ffffff",
+    ["==", ["get", "id"], ""],
+    true,
+  );
 }
 
 export function PropertyMap(props: PropertyMapProps) {
@@ -345,7 +351,11 @@ export function PropertyMap(props: PropertyMapProps) {
         });
         mapRef.current = map;
         map.addControl(new maplibre.NavigationControl({ showCompass: false }), "top-left");
-        map.on("error", () => undefined); // tile errors must not crash the page
+        // Errors must not crash the page; non-tile errors are logged for diagnosis.
+        map.on("error", (e) => {
+          const message = e.error?.message ?? "";
+          if (!/tile|fetch|load/i.test(message)) console.warn(`[map] ${message}`);
+        });
 
         map.on("style.load", () => {
           if (!map) return;

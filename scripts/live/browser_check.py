@@ -178,6 +178,8 @@ def map_v2(browser) -> None:
     """Stage 3: price bubbles, places layer, draw-area search (Basra viewport)."""
     ctx = browser.new_context(viewport={"width": 1366, "height": 900}, locale="en-US")
     page = ctx.new_page()
+    warnings: list[str] = []
+    page.on("console", lambda m: warnings.append(m.text) if "[map]" in m.text else None)
     seen: list[str] = []
     page.on(
         "response",
@@ -206,6 +208,7 @@ def map_v2(browser) -> None:
         page.wait_for_timeout(1_000)
     check(pois_ok, f"places layer toggles on ({canvas.get_attribute('data-pois')} places)")
     print(f"  map requests: {seen[-6:]}", flush=True)
+    print(f"  map warnings: {warnings[:5]}", flush=True)
     page.screenshot(path=str(OUT / "map-places.png"))
     page.locator("[data-testid=map-layers] summary").click()
 
