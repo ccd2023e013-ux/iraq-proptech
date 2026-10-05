@@ -94,14 +94,14 @@ def main(argv: list[str] | None = None) -> int:
     iraq.add_argument("--per-city", type=int, default=18)
     iraq.add_argument("--no-images", action="store_true")
     iraq.add_argument("--allow-production", action="store_true")
-    osm = sub.add_parser(
+    osm_cmd = sub.add_parser(
         "import-osm-pois",
         help="Import named places (schools, hospitals, mosques…) for a city from "
         "OpenStreetMap via one Overpass request (ODbL attribution kept)",
     )
-    osm.add_argument("--city", default="basra")
-    osm.add_argument("--bbox", help="west,south,east,north (city-sized, inside Iraq)")
-    osm.add_argument("--dry-run", action="store_true")
+    osm_cmd.add_argument("--city", default="basra")
+    osm_cmd.add_argument("--bbox", help="west,south,east,north (city-sized, inside Iraq)")
+    osm_cmd.add_argument("--dry-run", action="store_true")
     pf = sub.add_parser("preflight", help="Check configuration (and the database with --db)")
     pf.add_argument("--db", action="store_true", help="also check PostGIS and migrations")
     for name, text in (
