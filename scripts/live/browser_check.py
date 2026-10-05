@@ -72,6 +72,16 @@ def auth_flow(browser, *, phone: bool, locale: str) -> None:
     )
     ctx = browser.new_context(locale="ar-IQ" if locale == "ar" else "en-US", **opts)
     page = ctx.new_page()
+    def on_auth(r: Response) -> None:
+        if "/api/v1/auth/login" in r.url or "/api/v1/auth/register" in r.url:
+            redacted = [
+                h["value"].split("=", 1)[0] + "=…;" + h["value"].split(";", 1)[-1]
+                for h in r.headers_array()
+                if h["name"].lower() == "set-cookie"
+            ]
+            print(f"  [{tag}] {r.status} {r.url[-24:]} set-cookie: {redacted}", flush=True)
+
+    page.on("response", on_auth)
     email = f"e2e-browser-{int(time.time())}-{tag}@example.com"
     password = f"Live-{int(time.time())}-Check!"
 
