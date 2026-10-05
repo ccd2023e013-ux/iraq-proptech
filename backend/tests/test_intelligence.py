@@ -33,7 +33,7 @@ class ClaimingProvider:
             data={
                 "text": "A family house in Basra.",
                 "kind": "FACT",
-                "statements": [{"kind": "FACT", "key": "fact.verified"}],
+                "statements": [{"kind": "FACT", "text": "A bargain, says the owner"}],
             },
             provider=self.name,
             model=self.model,
@@ -153,8 +153,8 @@ def test_provider_cannot_label_its_output_fact(api: TestClient, db_session: Sess
     ai = [s for s in report["statements"] if s["origin"] == "ai"]
     assert [s["kind"] for s in ai] == ["AI_INTERPRETATION"]
     assert ai[0]["text"] == "A family house in Basra."
-    # the provider's fake "verified" fact did not appear
-    assert "fact.verified" not in {s["key"] for s in report["statements"]}
+    # the provider's own "FACT" statement was ignored
+    assert not any("bargain" in (s["text"] or "") for s in report["statements"])
     assert report["provider"] == "claiming"
 
 
