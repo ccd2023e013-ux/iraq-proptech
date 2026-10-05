@@ -17,6 +17,7 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@fontsource-variable/readex-pro": "^5.0.0",
     "@fontsource/ibm-plex-sans": "^5.0.0",
     "@fontsource/ibm-plex-sans-arabic": "^5.0.0",
     "maplibre-gl": "^5.0.0",

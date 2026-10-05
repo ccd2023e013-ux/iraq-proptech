@@ -23,7 +23,7 @@ export default async function AiUsagePage() {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl font-bold text-brand-900">{a.aiUsage}</h1>
-      <div className="overflow-x-auto rounded-[var(--radius-card)] border border-sand-200 bg-white">
+      <div className="overflow-x-auto rounded-[var(--radius-card)] border border-sand-200 bg-surface">
         <table className="w-full min-w-[640px] text-sm">
           <thead>
             <tr className="border-b border-sand-200 text-xs text-sand-500">

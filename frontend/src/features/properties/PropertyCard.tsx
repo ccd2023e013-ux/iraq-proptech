@@ -25,6 +25,7 @@ export function PropertyCard({
   typeName,
   favorite,
   signedIn,
+  compact = false,
 }: {
   card: Card;
   dict: Dictionary;
@@ -32,6 +33,8 @@ export function PropertyCard({
   typeName?: string;
   favorite?: boolean;
   signedIn: boolean;
+  /** Smaller tile for dense editorial layouts (no facts row). */
+  compact?: boolean;
 }) {
   const title = locale === "en" && card.title_en ? card.title_en : card.title_ar;
   const where = [
@@ -47,45 +50,49 @@ export function PropertyCard({
   ].filter(Boolean);
 
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-sand-200 bg-white shadow-sm transition hover:shadow-md">
+    <article className="group relative flex flex-col gap-3">
       <Link href={`/properties/${card.id}`} className="absolute inset-0 z-10" aria-label={title} />
-      <div className="relative aspect-[4/3] bg-sand-100">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-card)] bg-fill">
         {card.cover_url ? (
           <SafeImage
             src={card.cover_url}
             alt=""
             fallbackLabel={dict.listing.noImage}
-            className="size-full object-cover transition group-hover:scale-[1.02]"
+            className="size-full object-cover transition duration-[var(--duration-slow)] ease-[var(--ease-out-soft)] group-hover:scale-[1.03]"
           />
         ) : (
-          <div className="grid size-full place-items-center text-sm text-sand-500">
+          <div className="grid size-full place-items-center text-sm text-ink-3">
             {dict.listing.noImage}
           </div>
         )}
-        <div className="absolute start-2 top-2 flex flex-wrap gap-1.5">
-          <span className="rounded-md bg-brand-800/90 px-2 py-0.5 text-xs font-medium text-white">
+        <div className="absolute start-2.5 top-2.5 flex flex-wrap gap-1.5">
+          <span className="rounded-full bg-glass px-2.5 py-0.5 text-xs font-medium text-ink backdrop-blur-md">
             {dict.listing.purposes[card.purpose]}
           </span>
           {card.verified && (
-            <span className="rounded-md bg-success px-2 py-0.5 text-xs font-medium text-white">
+            <span className="rounded-full bg-success px-2.5 py-0.5 text-xs font-medium text-white">
               ✓ {dict.listing.verified}
             </span>
           )}
-          {card.is_featured && (
-            <span className="rounded-md bg-brand-700 px-2 py-0.5 text-xs font-bold text-white">
-              {dict.listing.promoted}
-            </span>
-          )}
+        </div>
+        <div className="absolute bottom-2.5 start-2.5 flex flex-wrap gap-1.5">
           {card.is_demo && (
-            <span className="rounded-md bg-gold-500 px-2 py-0.5 text-xs font-bold text-white">
+            <span className="rounded-full bg-gold-500 px-2 py-0.5 text-[11px] font-semibold text-white">
               {dict.listing.demo}
             </span>
           )}
+          {card.is_featured && (
+            <span className="rounded-full bg-glass px-2 py-0.5 text-[11px] font-medium text-ink backdrop-blur-md">
+              {dict.listing.promoted}
+            </span>
+          )}
         </div>
-        <div className="absolute bottom-2 start-2 z-20">
-          <CompareToggle id={card.id} dict={dict} />
-        </div>
-        <div className="absolute end-2 top-2 z-20">
+        {!compact && (
+          <div className="absolute end-2.5 bottom-2.5 z-20 opacity-90 transition group-hover:opacity-100">
+            <CompareToggle id={card.id} dict={dict} />
+          </div>
+        )}
+        <div className="absolute end-2.5 top-2.5 z-20">
           <FavoriteButton
             propertyId={card.id}
             initial={!!favorite}
@@ -98,14 +105,20 @@ export function PropertyCard({
           />
         </div>
       </div>
-      <div className="flex flex-1 flex-col gap-1.5 p-4">
-        <p className="text-lg font-bold text-brand-900 tabular">{priceLabel(card, dict, locale)}</p>
-        <h3 className="line-clamp-2 font-semibold text-sand-900">{title}</h3>
-        <p className="text-sm text-sand-500">{[typeName, where].filter(Boolean).join(" · ")}</p>
-        {facts.length > 0 && (
-          <p className="mt-auto pt-2 text-sm text-sand-700 tabular">{facts.join(" · ")}</p>
+      <div className="flex flex-col gap-0.5 px-0.5">
+        <p
+          className={`font-display font-semibold text-ink tabular ${compact ? "text-base" : "text-lg"}`}
+        >
+          {priceLabel(card, dict, locale)}
+        </p>
+        <h3 className={`line-clamp-1 text-ink-2 ${compact ? "text-sm" : ""}`}>{title}</h3>
+        {!compact && (
+          <p className="text-sm text-ink-3">{[typeName, where].filter(Boolean).join(" · ")}</p>
         )}
-        {card.agency_name && <p className="text-xs text-sand-500">{card.agency_name}</p>}
+        {!compact && facts.length > 0 && (
+          <p className="text-sm text-ink-3 tabular">{facts.join(" · ")}</p>
+        )}
+        {!compact && card.agency_name && <p className="text-xs text-ink-3">{card.agency_name}</p>}
       </div>
     </article>
   );

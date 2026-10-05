@@ -72,7 +72,7 @@ export function ReportButton({
         aria-label={a.reportListing}
         value={reason}
         onChange={(e) => setReason(e.target.value as (typeof REASONS)[number])}
-        className="h-9 rounded-md border border-sand-200 bg-white px-2"
+        className="h-9 rounded-md border border-sand-200 bg-surface px-2"
       >
         {REASONS.map((r) => (
           <option key={r} value={r}>

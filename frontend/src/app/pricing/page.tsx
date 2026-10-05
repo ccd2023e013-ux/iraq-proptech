@@ -38,7 +38,7 @@ export default async function PricingPage() {
           {plans.map((plan) => (
             <li
               key={plan.id}
-              className="flex flex-col gap-3 rounded-xl border border-sand-200 bg-white p-5"
+              className="flex flex-col gap-3 rounded-xl border border-sand-200 bg-surface p-5"
             >
               <span className="text-xs font-medium text-sand-500">{b.kinds[plan.kind]}</span>
               <h2 className="text-lg font-semibold text-brand-900">

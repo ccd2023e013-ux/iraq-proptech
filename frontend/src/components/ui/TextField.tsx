@@ -16,14 +16,14 @@ export function TextField({ label, hint, error, className = "", id, ...rest }: T
     .join(" ");
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
-      <label htmlFor={inputId} className="text-sm font-medium text-sand-900">
+      <label htmlFor={inputId} className="text-sm font-medium text-ink">
         {label}
       </label>
       <input
         id={inputId}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy || undefined}
-        className={`h-11 rounded-lg border bg-white px-3 text-sand-900 transition placeholder:text-sand-500 focus:border-brand-500 focus:outline-none ${error ? "border-danger" : "border-sand-200"}`}
+        className={`h-12 rounded-[var(--radius-control)] bg-fill px-4 text-ink ring-1 ring-inset transition duration-[var(--duration-quick)] placeholder:text-ink-3 focus:bg-surface focus:ring-2 focus:ring-accent focus:outline-none ${error ? "ring-danger" : "ring-transparent"}`}
         {...rest}
       />
       {hint && !error && (

@@ -4,11 +4,12 @@ type Variant = "primary" | "secondary" | "ghost" | "danger";
 type Size = "sm" | "md" | "lg";
 
 const VARIANTS: Record<Variant, string> = {
-  primary: "bg-brand-700 text-white hover:bg-brand-800 disabled:bg-brand-300",
+  primary:
+    "bg-accent-fill text-white shadow-soft hover:bg-accent-fill-hover disabled:opacity-50 disabled:shadow-none",
   secondary:
-    "border border-sand-200 bg-white text-sand-900 hover:border-brand-300 hover:text-brand-700",
-  ghost: "text-sand-700 hover:bg-sand-100",
-  danger: "bg-danger text-white hover:opacity-90",
+    "bg-surface text-ink ring-1 ring-inset ring-hairline-strong hover:ring-accent/50 hover:text-accent disabled:opacity-50",
+  ghost: "text-ink-2 hover:bg-fill hover:text-ink disabled:opacity-50",
+  danger: "bg-danger text-white hover:opacity-90 disabled:opacity-50",
 };
 
 const SIZES: Record<Size, string> = {
@@ -24,6 +25,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   block?: boolean;
 }
 
+/** Pill-shaped buttons with a pressed state; the label stays visible while loading. */
 export function Button({
   variant = "primary",
   size = "md",
@@ -40,7 +42,7 @@ export function Button({
       type={type}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
-      className={`inline-flex items-center justify-center gap-2 rounded-lg font-medium transition disabled:cursor-not-allowed ${VARIANTS[variant]} ${SIZES[size]} ${block ? "w-full" : ""} ${className}`}
+      className={`inline-flex select-none items-center justify-center gap-2 rounded-full font-medium transition duration-[var(--duration-quick)] ease-[var(--ease-out-soft)] active:scale-[0.98] disabled:cursor-not-allowed ${VARIANTS[variant]} ${SIZES[size]} ${block ? "w-full" : ""} ${className}`}
       {...rest}
     >
       {loading && (

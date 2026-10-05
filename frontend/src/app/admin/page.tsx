@@ -46,7 +46,7 @@ export default async function AdminOverview() {
         {tiles.map(([label, value, alert]) => (
           <div
             key={label}
-            className="rounded-[var(--radius-card)] border border-sand-200 bg-white p-4"
+            className="rounded-[var(--radius-card)] border border-sand-200 bg-surface p-4"
           >
             <dt className="text-xs text-sand-500">{label}</dt>
             <dd
@@ -57,7 +57,7 @@ export default async function AdminOverview() {
           </div>
         ))}
       </dl>
-      <section className="rounded-[var(--radius-card)] border border-sand-200 bg-white p-4">
+      <section className="rounded-[var(--radius-card)] border border-sand-200 bg-surface p-4">
         <h2 className="mb-3 text-sm font-semibold">{a.listingsByStatus}</h2>
         <ul className="flex flex-wrap gap-2 text-sm">
           {Object.entries(s.listings_by_status).map(([status, n]) => (

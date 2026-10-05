@@ -39,7 +39,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
           className="h-10 w-full max-w-md rounded-lg border border-sand-200 px-3 text-sm"
         />
       </form>
-      <div className="overflow-x-auto rounded-[var(--radius-card)] border border-sand-200 bg-white">
+      <div className="overflow-x-auto rounded-[var(--radius-card)] border border-sand-200 bg-surface">
         <table className="w-full min-w-[800px] text-xs">
           <thead>
             <tr className="border-b border-sand-200 text-sand-500">

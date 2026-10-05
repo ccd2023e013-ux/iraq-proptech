@@ -66,7 +66,7 @@ export function ActionButton({
         type="button"
         onClick={run}
         disabled={busy}
-        className={`rounded-md border bg-white px-2.5 py-1 text-xs font-medium disabled:opacity-50 ${colors}`}
+        className={`rounded-md border bg-surface px-2.5 py-1 text-xs font-medium disabled:opacity-50 ${colors}`}
       >
         {label}
       </button>

@@ -61,7 +61,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
     <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <Link href="/dashboard/crm" className="text-sm text-brand-700">
+          <Link href="/dashboard/crm" className="text-sm text-accent">
             {c.dashboard}
           </Link>
           <h1 className="text-2xl font-bold text-brand-900">{customer.full_name}</h1>
@@ -109,7 +109,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
             <div className="mt-3 flex flex-col gap-2 text-sm">
               {customer.phone && (
                 <>
-                  <a href={`tel:${customer.phone}`} dir="ltr" className="text-brand-700">
+                  <a href={`tel:${customer.phone}`} dir="ltr" className="text-accent">
                     {c.call}: {customer.phone}
                   </a>
                   <a
@@ -123,7 +123,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
                 </>
               )}
               {customer.email && (
-                <a href={`mailto:${customer.email}`} dir="ltr" className="text-brand-700">
+                <a href={`mailto:${customer.email}`} dir="ltr" className="text-accent">
                   {customer.email}
                 </a>
               )}
@@ -146,7 +146,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
             <Card title={c.property}>
               <Link
                 href={`/properties/${lead.property.id}`}
-                className="font-medium text-brand-700 hover:underline"
+                className="font-medium text-accent hover:underline"
               >
                 {locale === "en" && lead.property.title_en
                   ? lead.property.title_en

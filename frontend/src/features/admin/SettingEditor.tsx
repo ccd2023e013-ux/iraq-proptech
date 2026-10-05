@@ -45,7 +45,7 @@ export function SettingEditor({
           aria-label={settingKey}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          className="h-9 rounded-md border border-sand-200 bg-white px-2 text-sm"
+          className="h-9 rounded-md border border-sand-200 bg-surface px-2 text-sm"
         >
           <option value="true">true</option>
           <option value="false">false</option>

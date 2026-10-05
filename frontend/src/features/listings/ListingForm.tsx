@@ -195,7 +195,7 @@ function Select({
         required={required}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
-        className="h-11 rounded-lg border border-sand-200 bg-white px-3 font-normal disabled:bg-sand-100"
+        className="h-11 rounded-lg border border-sand-200 bg-surface px-3 font-normal disabled:bg-sand-100"
       >
         {children}
       </select>
@@ -205,7 +205,7 @@ function Select({
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <fieldset className="rounded-[var(--radius-card)] border border-sand-200 bg-white p-5 sm:p-6">
+    <fieldset className="rounded-[var(--radius-card)] border border-sand-200 bg-surface p-5 sm:p-6">
       <legend className="px-2 text-base font-semibold text-brand-900">{title}</legend>
       <div className="grid gap-4 sm:grid-cols-2">{children}</div>
     </fieldset>
@@ -342,7 +342,7 @@ export function ListingForm({
             maxLength={8000}
             value={s.description_ar}
             onChange={(e) => set("description_ar", e.target.value)}
-            className="rounded-lg border border-sand-200 bg-white p-3 font-normal"
+            className="rounded-lg border border-sand-200 bg-surface p-3 font-normal"
           />
         </label>
         <div className="sm:col-span-2">
@@ -362,7 +362,7 @@ export function ListingForm({
             maxLength={8000}
             value={s.description_en}
             onChange={(e) => set("description_en", e.target.value)}
-            className="rounded-lg border border-sand-200 bg-white p-3 font-normal"
+            className="rounded-lg border border-sand-200 bg-surface p-3 font-normal"
           />
         </label>
         <Select

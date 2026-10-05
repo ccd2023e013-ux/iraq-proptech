@@ -145,7 +145,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
 
           <header className="flex flex-col gap-2">
             <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="rounded-md bg-brand-800 px-2 py-0.5 font-medium text-white">
+              <span className="rounded-md bg-brand-700 px-2 py-0.5 font-medium text-white">
                 {dict.listing.purposes[property.purpose]}
               </span>
               {property.verified && (
@@ -272,7 +272,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                 <a
                   href={`tel:${property.lister.phone}`}
                   dir="ltr"
-                  className="rounded-lg bg-brand-700 px-4 py-2.5 text-center font-medium text-white hover:bg-brand-800"
+                  className="rounded-lg bg-brand-700 px-4 py-2.5 text-center font-medium text-white hover:bg-brand-600"
                 >
                   {p.call} {property.lister.phone}
                 </a>

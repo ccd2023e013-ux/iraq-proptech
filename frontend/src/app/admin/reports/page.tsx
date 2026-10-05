@@ -46,7 +46,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
             key={s}
             href={`/admin/reports?status=${s}`}
             aria-current={s === status ? "page" : undefined}
-            className={`rounded-full border px-3 py-1 text-sm ${s === status ? "border-brand-600 bg-brand-600 text-white" : "border-sand-200 bg-white"}`}
+            className={`rounded-full border px-3 py-1 text-sm ${s === status ? "border-brand-600 bg-brand-600 text-white" : "border-sand-200 bg-surface"}`}
           >
             {a.reportStatuses[s]}
           </Link>
@@ -60,7 +60,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
           return (
             <li
               key={r.id}
-              className="flex flex-col gap-2 rounded-[var(--radius-card)] border border-sand-200 bg-white p-4 text-sm"
+              className="flex flex-col gap-2 rounded-[var(--radius-card)] border border-sand-200 bg-surface p-4 text-sm"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="font-semibold">
@@ -68,7 +68,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                   {r.target_type === "PROPERTY" ? (
                     <Link
                       href={`/properties/${r.target_id}`}
-                      className="text-brand-700 hover:underline"
+                      className="text-accent hover:underline"
                     >
                       {r.target_label ?? r.target_id}
                     </Link>

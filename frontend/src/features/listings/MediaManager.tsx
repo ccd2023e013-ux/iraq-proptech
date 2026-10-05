@@ -101,7 +101,7 @@ export function MediaManager({ dict, property }: { dict: Dictionary; property: P
           </li>
         ))}
       </ul>
-      <label className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-800">
+      <label className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600">
         {busy ? dict.auth.loading : f.uploadImage}
         <input
           type="file"
@@ -158,7 +158,7 @@ export function DocumentManager({
       <ul className="divide-y divide-sand-100 text-sm">
         {documents.map((d) => (
           <li key={d.id} className="flex items-center justify-between gap-3 py-2">
-            <a href={`/api/v1/documents/${d.id}`} className="truncate text-brand-700 underline">
+            <a href={`/api/v1/documents/${d.id}`} className="truncate text-accent underline">
               {d.filename}
             </a>
             <span className="text-xs text-sand-500">
@@ -171,7 +171,7 @@ export function DocumentManager({
         <select
           value={docType}
           onChange={(e) => setDocType(e.target.value)}
-          className="h-10 rounded-lg border border-sand-200 bg-white px-3 text-sm"
+          className="h-10 rounded-lg border border-sand-200 bg-surface px-3 text-sm"
         >
           {Object.entries(dict.listing.docTypes).map(([code, label]) => (
             <option key={code} value={code}>

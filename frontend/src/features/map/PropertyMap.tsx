@@ -83,7 +83,7 @@ function popupNode(props: Record<string, unknown>, dict: Dictionary, locale: Loc
   }
   const link = document.createElement("a");
   link.href = `/properties/${encodeURIComponent(String(props.id))}`;
-  link.className = "mt-1 font-medium text-brand-700 underline";
+  link.className = "mt-1 font-medium text-accent underline";
   link.textContent = dict.map.openListing;
   root.append(link);
   return root;

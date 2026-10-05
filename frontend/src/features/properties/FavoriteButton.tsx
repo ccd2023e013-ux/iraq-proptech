@@ -51,7 +51,7 @@ export function FavoriteButton({
         onClick={toggle}
         disabled={busy}
         aria-pressed={saved}
-        className="inline-flex items-center gap-2 rounded-lg border border-sand-200 px-4 py-2 text-sm font-medium hover:border-brand-300"
+        className="inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-medium text-ink ring-1 ring-inset ring-hairline-strong transition hover:bg-fill"
       >
         <Heart filled={saved} />
         {saved ? labels.saved : labels.save}
@@ -66,7 +66,7 @@ export function FavoriteButton({
       aria-pressed={saved}
       aria-label={label}
       title={label}
-      className="grid size-9 place-items-center rounded-full bg-white/90 text-danger shadow-sm backdrop-blur hover:bg-white"
+      className="grid size-9 place-items-center rounded-full bg-glass text-danger shadow-soft backdrop-blur-md transition hover:scale-105 active:scale-95"
     >
       <Heart filled={saved} />
     </button>

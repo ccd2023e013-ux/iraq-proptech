@@ -219,7 +219,7 @@ export function MapSearch({
                     onMouseEnter={() => setHighlightId(card.id)}
                     onMouseLeave={() => setHighlightId(null)}
                     onFocus={() => setHighlightId(card.id)}
-                    className={`flex gap-3 rounded-[var(--radius-card)] border bg-white p-2 transition ${highlightId === card.id ? "border-gold-500" : "border-sand-200"}`}
+                    className={`flex gap-3 rounded-[var(--radius-card)] border bg-surface p-2 transition ${highlightId === card.id ? "border-gold-500" : "border-sand-200"}`}
                   >
                     {card.cover_url ? (
                       <SafeImage
@@ -254,7 +254,7 @@ export function MapSearch({
           {total > items.length && (
             <a
               href={`/properties?${toApiQuery(params)}`}
-              className="text-center text-sm font-medium text-brand-700"
+              className="text-center text-sm font-medium text-accent"
             >
               {dict.landing.viewAll}
             </a>

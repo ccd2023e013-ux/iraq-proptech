@@ -95,7 +95,7 @@ export async function Nearby({
               <li key={card.id}>
                 <Link
                   href={`/properties/${card.id}`}
-                  className="flex items-center justify-between gap-3 py-2 text-sm hover:text-brand-700"
+                  className="flex items-center justify-between gap-3 py-2 text-sm hover:text-accent"
                 >
                   <span className="truncate">
                     {locale === "en" && card.title_en ? card.title_en : card.title_ar}

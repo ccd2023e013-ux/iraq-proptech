@@ -42,11 +42,11 @@ export function DemoCheckout({ dict, payment }: { dict: Dictionary; payment: Pay
         </Alert>
         <div className="flex gap-3 text-sm">
           {current.property_id && (
-            <Link href={`/dashboard/properties/${current.property_id}`} className="text-brand-700">
+            <Link href={`/dashboard/properties/${current.property_id}`} className="text-accent">
               {dict.myListings.title}
             </Link>
           )}
-          <Link href="/account/billing" className="text-brand-700">
+          <Link href="/account/billing" className="text-accent">
             {b.myBilling}
           </Link>
         </div>

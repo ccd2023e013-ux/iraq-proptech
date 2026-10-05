@@ -46,7 +46,7 @@ export function Gallery({
                 type="button"
                 aria-label="‹"
                 onClick={() => setIndex((index - 1 + images.length) % images.length)}
-                className="absolute start-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-xl shadow"
+                className="absolute start-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-surface/90 text-xl shadow"
               >
                 ‹
               </button>
@@ -54,7 +54,7 @@ export function Gallery({
                 type="button"
                 aria-label="›"
                 onClick={() => setIndex((index + 1) % images.length)}
-                className="absolute end-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-xl shadow"
+                className="absolute end-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-surface/90 text-xl shadow"
               >
                 ›
               </button>

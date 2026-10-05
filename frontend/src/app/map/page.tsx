@@ -85,7 +85,7 @@ export default async function MapPage({ searchParams }: { searchParams: Promise<
   return (
     <div className="mx-auto grid max-w-[1600px] gap-4 px-4 py-4 sm:px-6 xl:grid-cols-[280px_1fr]">
       <aside className="xl:sticky xl:top-20 xl:self-start">
-        <details className="rounded-[var(--radius-card)] border border-sand-200 bg-white p-4">
+        <details className="rounded-[var(--radius-card)] border border-sand-200 bg-surface p-4">
           <summary className="cursor-pointer text-sm font-semibold text-brand-900">
             {dict.search.filters}
           </summary>

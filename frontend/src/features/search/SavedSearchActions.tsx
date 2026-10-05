@@ -55,7 +55,7 @@ export function SavedSearchActions({
           value={value}
           disabled={busy}
           onChange={(e) => change(e.target.value as (typeof FREQUENCIES)[number])}
-          className="h-9 rounded-lg border border-sand-200 bg-white px-2 text-sm"
+          className="h-9 rounded-lg border border-sand-200 bg-surface px-2 text-sm"
         >
           {FREQUENCIES.map((f) => (
             <option key={f} value={f}>

@@ -58,7 +58,7 @@ export function NewLeadForm({ dict }: { dict: Dictionary }) {
   return (
     <form
       onSubmit={onSubmit}
-      className="grid gap-3 rounded-[var(--radius-card)] border border-sand-200 bg-white p-4 sm:grid-cols-2"
+      className="grid gap-3 rounded-[var(--radius-card)] border border-sand-200 bg-surface p-4 sm:grid-cols-2"
     >
       {error && (
         <div className="sm:col-span-2">
@@ -84,7 +84,7 @@ export function NewLeadForm({ dict }: { dict: Dictionary }) {
         <select
           value={source}
           onChange={(e) => setSource(e.target.value as LeadSource)}
-          className="h-11 rounded-lg border border-sand-200 bg-white px-3"
+          className="h-11 rounded-lg border border-sand-200 bg-surface px-3"
         >
           {SOURCES.map((s) => (
             <option key={s} value={s}>

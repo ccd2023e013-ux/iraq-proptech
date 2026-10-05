@@ -24,7 +24,7 @@ export default async function MessagesPage() {
           {m.empty}
         </p>
       ) : (
-        <ul className="flex flex-col divide-y divide-sand-100 rounded-[var(--radius-card)] border border-sand-200 bg-white">
+        <ul className="flex flex-col divide-y divide-sand-100 rounded-[var(--radius-card)] border border-sand-200 bg-surface">
           {conversations.map((c) => {
             const counterpart = c.role === "customer" ? c.lister : c.customer;
             const title = c.property
@@ -46,7 +46,7 @@ export default async function MessagesPage() {
                       {formatDateTime(c.last_message_at, locale)}
                     </span>
                   </span>
-                  <span className="text-xs text-brand-700">
+                  <span className="text-xs text-accent">
                     {c.role === "customer" ? m.asCustomer : m.asLister} · {title}
                   </span>
                   <span className="flex items-center justify-between gap-3">

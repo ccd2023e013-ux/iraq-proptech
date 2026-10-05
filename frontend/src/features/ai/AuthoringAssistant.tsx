@@ -117,7 +117,7 @@ export function AuthoringAssistant({
         <ProviderBadge dict={dict} provider={provider} />
       )}
       {description && (
-        <div className="flex flex-col gap-2 rounded-md bg-white p-3 text-sm">
+        <div className="flex flex-col gap-2 rounded-md bg-surface p-3 text-sm">
           <p className="whitespace-pre-line">{description}</p>
           <p className="text-xs text-sand-500">{a.draftNote}</p>
           <Button size="sm" onClick={() => onUseDescription(description)}>
@@ -130,12 +130,12 @@ export function AuthoringAssistant({
           {titles.map((t) => (
             <li
               key={t}
-              className="flex items-center justify-between gap-2 rounded-md bg-white px-3 py-1.5"
+              className="flex items-center justify-between gap-2 rounded-md bg-surface px-3 py-1.5"
             >
               <span>{t}</span>
               <button
                 type="button"
-                className="text-xs font-medium text-brand-700"
+                className="text-xs font-medium text-accent"
                 onClick={() => onUseTitle(t)}
               >
                 {a.useThis}

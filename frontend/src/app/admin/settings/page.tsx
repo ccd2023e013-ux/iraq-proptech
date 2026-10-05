@@ -25,7 +25,7 @@ export default async function SettingsPage() {
         {settings.map((s) => (
           <li
             key={s.key}
-            className="flex flex-col gap-2 rounded-lg border border-sand-200 bg-white p-4"
+            className="flex flex-col gap-2 rounded-lg border border-sand-200 bg-surface p-4"
           >
             <p className="font-mono text-sm" dir="ltr">
               {s.key}

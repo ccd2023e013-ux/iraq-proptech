@@ -32,7 +32,7 @@ export default async function JobsPage() {
         <h2 className="mb-2 font-semibold">{a.deliveryCounts}</h2>
         <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {Object.entries(deliveries.counts).map(([k, v]) => (
-            <div key={k} className="rounded-lg border border-sand-200 bg-white p-3">
+            <div key={k} className="rounded-lg border border-sand-200 bg-surface p-3">
               <dt className="font-mono text-xs text-sand-500">{k}</dt>
               <dd className="text-lg font-semibold">{v}</dd>
             </div>
@@ -46,7 +46,7 @@ export default async function JobsPage() {
           {jobs.map((j) => (
             <li
               key={j.id}
-              className={`rounded bg-white px-3 py-2 ${j.status === "FAILED" ? "text-danger" : ""}`}
+              className={`rounded bg-surface px-3 py-2 ${j.status === "FAILED" ? "text-danger" : ""}`}
             >
               {formatDateTime(j.started_at, locale)} · {j.name} · {j.status}
               {j.detail ? ` · ${JSON.stringify(j.detail)}` : ""}

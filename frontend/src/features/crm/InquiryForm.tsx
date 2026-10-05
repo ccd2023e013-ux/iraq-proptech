@@ -40,7 +40,7 @@ export function InquiryForm({
     return (
       <Link
         href={`/login?next=${encodeURIComponent(`/properties/${propertyId}`)}`}
-        className="block rounded-lg border border-brand-300 px-4 py-2.5 text-center text-sm font-medium text-brand-700"
+        className="block rounded-lg border border-brand-300 px-4 py-2.5 text-center text-sm font-medium text-accent"
       >
         {t.loginToSend}
       </Link>
@@ -51,7 +51,7 @@ export function InquiryForm({
     return (
       <div className="flex flex-col gap-2">
         <Alert tone="success">{t.sent}</Alert>
-        <Link href="/messages" className="text-sm font-medium text-brand-700">
+        <Link href="/messages" className="text-sm font-medium text-accent">
           {t.openMessages}
         </Link>
       </div>
@@ -125,7 +125,7 @@ export function InquiryForm({
         <select
           value={preferred}
           onChange={(e) => setPreferred(e.target.value as (typeof PREFERENCES)[number])}
-          className="h-10 rounded-lg border border-sand-200 bg-white px-3 text-sm"
+          className="h-10 rounded-lg border border-sand-200 bg-surface px-3 text-sm"
         >
           {PREFERENCES.map((p) => (
             <option key={p} value={p}>

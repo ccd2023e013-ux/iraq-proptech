@@ -65,7 +65,7 @@ export default async function SmartSearchPage({
           aria-label={a.smartSearch}
           minLength={2}
           maxLength={300}
-          className="h-12 min-w-0 flex-1 rounded-lg border border-sand-200 bg-white px-4"
+          className="h-12 min-w-0 flex-1 rounded-lg border border-sand-200 bg-surface px-4"
         />
         <button type="submit" className="rounded-lg bg-brand-700 px-5 font-medium text-white">
           {dict.landing.heroCta}
@@ -100,7 +100,7 @@ export default async function SmartSearchPage({
             )}
             <Link
               href={`/properties?${filtersToQuery(data.interpretation.result.filters)}`}
-              className="text-sm font-medium text-brand-700"
+              className="text-sm font-medium text-accent"
             >
               {dict.search.filters} →
             </Link>

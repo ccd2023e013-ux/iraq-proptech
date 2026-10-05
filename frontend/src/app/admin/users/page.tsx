@@ -44,7 +44,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
           className="h-10 min-w-0 flex-1 rounded-lg border border-sand-200 px-3 text-sm"
         />
       </form>
-      <div className="overflow-x-auto rounded-[var(--radius-card)] border border-sand-200 bg-white">
+      <div className="overflow-x-auto rounded-[var(--radius-card)] border border-sand-200 bg-surface">
         <table className="w-full min-w-[720px] text-sm">
           <tbody>
             {users.items.map((u) => (

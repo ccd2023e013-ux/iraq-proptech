@@ -64,7 +64,7 @@ export function StageSelect({
         disabled={busy || disabled}
         onChange={(e) => change(e.target.value)}
         onClick={(e) => e.stopPropagation()}
-        className="h-8 rounded-md border border-sand-200 bg-white px-2 text-xs"
+        className="h-8 rounded-md border border-sand-200 bg-surface px-2 text-xs"
       >
         {statuses
           .filter((s) => s.is_active || s.code === current)

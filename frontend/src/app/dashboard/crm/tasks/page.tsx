@@ -26,7 +26,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6">
       <div>
-        <Link href="/dashboard/crm" className="text-sm text-brand-700">
+        <Link href="/dashboard/crm" className="text-sm text-accent">
           {c.dashboard}
         </Link>
         <h1 className="text-2xl font-bold text-brand-900">{c.tasks}</h1>
@@ -37,13 +37,13 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
             key={f}
             href={`/dashboard/crm/tasks?status=${f}`}
             aria-current={f === status ? "page" : undefined}
-            className={`rounded-full border px-3 py-1 text-sm ${f === status ? "border-brand-600 bg-brand-600 text-white" : "border-sand-200 bg-white"}`}
+            className={`rounded-full border px-3 py-1 text-sm ${f === status ? "border-brand-600 bg-brand-600 text-white" : "border-sand-200 bg-surface"}`}
           >
             {c.taskFilters[f]}
           </Link>
         ))}
       </nav>
-      <div className="rounded-[var(--radius-card)] border border-sand-200 bg-white p-4">
+      <div className="rounded-[var(--radius-card)] border border-sand-200 bg-surface p-4">
         <TaskPanel
           dict={dict}
           locale={locale}

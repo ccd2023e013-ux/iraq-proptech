@@ -40,7 +40,7 @@ export default async function SavedSearchesPage() {
           {rows.map((row) => (
             <li
               key={row.id}
-              className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-sand-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between"
+              className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-sand-200 bg-surface p-4 sm:flex-row sm:items-center sm:justify-between"
             >
               <div className="flex flex-col gap-1">
                 <span className="font-semibold text-sand-900">

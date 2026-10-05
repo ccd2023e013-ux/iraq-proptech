@@ -1,5 +1,9 @@
 import type { ReactNode } from "react";
 
+/**
+ * A quiet surface for grouped content. Hierarchy comes from spacing and type,
+ * not borders: a soft elevation in light mode, a lifted surface in dark mode.
+ */
 export function Card({
   title,
   description,
@@ -15,13 +19,13 @@ export function Card({
 }) {
   return (
     <section
-      className={`rounded-[var(--radius-card)] border border-sand-200 bg-white p-5 shadow-sm sm:p-6 ${className}`}
+      className={`rounded-[var(--radius-card)] bg-surface p-5 shadow-soft ring-1 ring-hairline sm:p-6 ${className}`}
     >
       {(title || actions) && (
         <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div>
-            {title && <h2 className="text-base font-semibold text-sand-900">{title}</h2>}
-            {description && <p className="mt-1 text-sm text-sand-500">{description}</p>}
+            {title && <h2 className="text-base font-semibold text-ink">{title}</h2>}
+            {description && <p className="mt-1 text-sm text-ink-3">{description}</p>}
           </div>
           {actions}
         </header>

@@ -1,78 +1,118 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
+import type { ThemeChoice } from "@/lib/theme";
 import type { Me } from "@/types/auth";
 
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { MobileMenu } from "./MobileMenu";
+import { ThemeToggle } from "./ThemeToggle";
 import { UserMenu } from "./UserMenu";
+
+/** Brand mark: a river bend — the Shatt al-Arab — inside a rounded tile. */
+export function BrandMark({ className = "size-8" }: { className?: string }) {
+  return (
+    <svg aria-hidden viewBox="0 0 32 32" className={className}>
+      <rect width="32" height="32" rx="9" className="fill-accent-fill" />
+      <path
+        d="M8 9c5 0 5 5 9 5s4 5 7 9"
+        fill="none"
+        stroke="white"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+      />
+      <circle cx="23.5" cy="23" r="2.2" className="fill-gold-300" />
+    </svg>
+  );
+}
+
+function NavLink({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="rounded-full px-3 py-1.5 text-ink-2 transition hover:bg-fill hover:text-ink"
+    >
+      {children}
+    </Link>
+  );
+}
 
 export function SiteHeader({
   dict,
   locale,
   me,
   unread = 0,
+  theme = "system",
 }: {
   dict: Dictionary;
   locale: Locale;
   me: Me | null;
   unread?: number;
+  theme?: ThemeChoice;
 }) {
+  const links = [
+    { href: "/properties", label: dict.nav.properties },
+    { href: "/map", label: dict.nav.map },
+    { href: "/pricing", label: dict.billing.pricingTitle },
+    ...(me
+      ? [
+          { href: "/favorites", label: dict.nav.favorites },
+          { href: "/saved-searches", label: dict.savedSearches.title },
+        ]
+      : []),
+  ];
   return (
-    <header className="sticky top-0 z-30 border-b border-sand-200 bg-sand-50/90 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2 font-bold text-brand-800">
-          <span
-            aria-hidden
-            className="grid size-9 place-items-center rounded-xl bg-brand-700 text-lg text-gold-300"
-          >
-            ع
-          </span>
-          <span className="text-lg">{locale === "ar" ? "عقار العراق" : "Iraq PropTech"}</span>
-        </Link>
-        <nav aria-label="primary" className="hidden items-center gap-6 text-sm md:flex">
-          <Link href="/" className="text-sand-700 hover:text-brand-700">
-            {dict.nav.home}
+    <header className="sticky top-0 z-30 border-b border-hairline bg-glass backdrop-blur-xl backdrop-saturate-150">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
+        <div className="flex items-center gap-6">
+          <Link href="/" className="flex items-center gap-2.5" aria-label={dict.nav.home}>
+            <BrandMark />
+            <span className="font-display text-[17px] font-semibold tracking-tight text-ink">
+              {locale === "ar" ? "عقار العراق" : "Iraq PropTech"}
+            </span>
           </Link>
-          <Link href="/properties" className="text-sand-700 hover:text-brand-700">
-            {dict.nav.properties}
-          </Link>
-          <Link href="/map" className="text-sand-700 hover:text-brand-700">
-            {dict.nav.map}
-          </Link>
-          <Link href="/pricing" className="text-sand-700 hover:text-brand-700">
-            {dict.billing.pricingTitle}
-          </Link>
-          {me && (
-            <Link href="/favorites" className="text-sand-700 hover:text-brand-700">
-              {dict.nav.favorites}
-            </Link>
-          )}
-          {me && (
-            <Link href="/saved-searches" className="text-sand-700 hover:text-brand-700">
-              {dict.savedSearches.title}
-            </Link>
-          )}
+          <nav aria-label="primary" className="hidden items-center gap-1 text-sm md:flex">
+            {links.map((l) => (
+              <NavLink key={l.href} href={l.href}>
+                {l.label}
+              </NavLink>
+            ))}
+          </nav>
+        </div>
+        <div className="flex items-center gap-1.5">
           {me && (
             <Link
               href="/dashboard/properties/new"
-              className="rounded-lg border border-brand-300 px-3 py-1 font-medium text-brand-700 hover:bg-brand-50"
+              className="hidden h-9 items-center rounded-full px-3 text-sm font-medium text-accent ring-1 ring-inset ring-accent/40 transition hover:bg-accent-tint lg:inline-flex"
             >
               {dict.nav.addProperty}
             </Link>
           )}
-        </nav>
-        <div className="flex items-center gap-2">
+          <ThemeToggle initial={theme} labels={dict.theme} />
           <LanguageSwitcher current={locale} label={dict.nav.switchLanguage} />
           {me && (
             <Link
               href="/notifications"
               aria-label={`${dict.notifications.title}${unread ? ` (${unread})` : ""}`}
-              className="relative grid size-9 place-items-center rounded-lg text-sand-700 hover:bg-sand-100"
+              className="relative grid size-9 place-items-center rounded-full text-ink-2 transition hover:bg-fill hover:text-ink"
             >
-              <span aria-hidden>🔔</span>
+              <svg
+                aria-hidden
+                viewBox="0 0 24 24"
+                className="size-[18px]"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z" />
+                <path d="M10 20a2.2 2.2 0 0 0 4 0" />
+              </svg>
               {unread > 0 && (
-                <span className="absolute -end-0.5 -top-0.5 min-w-4 rounded-full bg-danger px-1 text-center text-[10px] font-bold text-white tabular">
+                <span className="absolute -end-0.5 -top-0.5 min-w-4 rounded-full bg-danger px-1 text-center text-[10px] font-bold leading-4 text-white tabular">
                   {unread > 99 ? "99+" : unread}
                 </span>
               )}
@@ -84,18 +124,26 @@ export function SiteHeader({
             <>
               <Link
                 href="/login"
-                className="rounded-lg px-3 py-1.5 text-sm font-medium text-sand-700 hover:text-brand-700"
+                className="hidden h-9 items-center rounded-full px-3 text-sm font-medium text-ink-2 transition hover:bg-fill hover:text-ink sm:inline-flex"
               >
                 {dict.nav.login}
               </Link>
               <Link
                 href="/register"
-                className="hidden rounded-lg bg-brand-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-800 sm:inline-block"
+                className="inline-flex h-9 items-center rounded-full bg-accent-fill px-4 text-sm font-medium text-white shadow-soft transition hover:bg-accent-fill-hover"
               >
                 {dict.nav.register}
               </Link>
             </>
           )}
+          <MobileMenu
+            label={dict.nav.menu}
+            links={[
+              { href: "/", label: dict.nav.home },
+              ...links,
+              ...(me ? [] : [{ href: "/login", label: dict.nav.login }]),
+            ]}
+          />
         </div>
       </div>
     </header>

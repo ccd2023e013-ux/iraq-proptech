@@ -21,7 +21,7 @@ export function LanguageSwitcher({ current, label }: { current: Locale; label: s
         document.cookie = `${LOCALE_COOKIE}=${next}; path=/; max-age=${ONE_YEAR_SECONDS}; samesite=lax`;
         startTransition(() => router.refresh());
       }}
-      className="rounded-lg border border-sand-200 px-3 py-1.5 text-sm font-medium text-sand-700 transition hover:border-brand-300 hover:text-brand-700 disabled:opacity-50"
+      className="h-9 rounded-full px-3 text-sm font-medium text-ink-2 transition hover:bg-fill hover:text-ink disabled:opacity-50"
     >
       {label}
     </button>

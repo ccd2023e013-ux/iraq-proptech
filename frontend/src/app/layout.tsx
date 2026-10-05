@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -17,7 +18,11 @@ import "@fontsource/ibm-plex-sans-arabic/600.css";
 import "@fontsource/ibm-plex-sans-arabic/700.css";
 import "@fontsource/ibm-plex-sans/400.css";
 import "@fontsource/ibm-plex-sans/600.css";
+import "@fontsource-variable/readex-pro/index.css";
 import "./globals.css";
+
+import { SiteFooter } from "@/components/layout/SiteFooter";
+import { THEME_COOKIE, type ThemeChoice, parseTheme } from "@/lib/theme";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dict = getDictionary(await getRequestLocale());
@@ -27,8 +32,15 @@ export async function generateMetadata(): Promise<Metadata> {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#1d504d",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f5f7f6" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b1112" },
+  ],
 };
+
+async function themeChoice(): Promise<ThemeChoice> {
+  return parseTheme((await cookies()).get(THEME_COOKIE)?.value);
+}
 
 async function loadAnnouncement(locale: string): Promise<string | null> {
   try {
@@ -44,6 +56,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const locale = await getRequestLocale();
   const dict = getDictionary(locale);
   const me = await getCurrentUser();
+  const theme = await themeChoice();
   const [announcement, unread] = await Promise.all([
     loadAnnouncement(locale),
     me
@@ -54,15 +67,21 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   ]);
 
   return (
-    <html lang={locale} dir={directionOf(locale)}>
-      <body className="min-h-dvh antialiased">
+    <html
+      lang={locale}
+      dir={directionOf(locale)}
+      data-theme={theme === "system" ? undefined : theme}
+      suppressHydrationWarning
+    >
+      <body className="flex min-h-dvh flex-col antialiased">
         {announcement && (
           <div role="status" className="bg-gold-100 px-4 py-2 text-center text-sm text-gold-700">
             {announcement}
           </div>
         )}
-        <SiteHeader dict={dict} locale={locale} me={me} unread={unread} />
-        <main>{children}</main>
+        <SiteHeader dict={dict} locale={locale} me={me} unread={unread} theme={theme} />
+        <main className="flex-1">{children}</main>
+        <SiteFooter dict={dict} locale={locale} />
         <CompareBar dict={dict} />
       </body>
     </html>

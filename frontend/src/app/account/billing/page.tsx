@@ -26,7 +26,7 @@ export default async function MyBillingPage() {
     <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6">
       <h1 className="text-2xl font-bold text-brand-900">{b.myBilling}</h1>
       {config.demo && <Alert tone="warning">{b.demoBanner}</Alert>}
-      <section className="rounded-lg border border-sand-200 bg-white p-4">
+      <section className="rounded-lg border border-sand-200 bg-surface p-4">
         <h2 className="mb-2 font-semibold">{b.subscription}</h2>
         {sub && plan ? (
           <div className="flex flex-col gap-2 text-sm">
@@ -46,13 +46,13 @@ export default async function MyBillingPage() {
         ) : (
           <p className="text-sm text-sand-500">
             {b.noSubscription}{" "}
-            <Link href="/pricing" className="text-brand-700">
+            <Link href="/pricing" className="text-accent">
               {b.pricingTitle}
             </Link>
           </p>
         )}
       </section>
-      <section className="rounded-lg border border-sand-200 bg-white p-4">
+      <section className="rounded-lg border border-sand-200 bg-surface p-4">
         <h2 className="mb-2 font-semibold">{b.payments}</h2>
         {data.payments.length === 0 ? (
           <p className="text-sm text-sand-500">{b.noPayments}</p>
@@ -75,12 +75,12 @@ export default async function MyBillingPage() {
         )}
       </section>
       {data.promotions.length > 0 && (
-        <section className="rounded-lg border border-sand-200 bg-white p-4">
+        <section className="rounded-lg border border-sand-200 bg-surface p-4">
           <h2 className="mb-2 font-semibold">{b.promotions}</h2>
           <ul className="flex flex-col gap-1 text-sm">
             {data.promotions.map((p) => (
               <li key={p.id}>
-                <Link href={`/dashboard/properties/${p.property_id}`} className="text-brand-700">
+                <Link href={`/dashboard/properties/${p.property_id}`} className="text-accent">
                   {formatDate(p.starts_at, locale)} → {formatDate(p.ends_at, locale)}
                 </Link>
                 {p.canceled_at ? ` · ${b.statuses.CANCELED}` : ""}

@@ -130,7 +130,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
     <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 sm:px-6">
       <h1 className="text-2xl font-bold text-brand-900">{c.title}</h1>
       {!data.same_currency && <Alert tone="info">{c.differentCurrencies}</Alert>}
-      <div className="overflow-x-auto rounded-[var(--radius-card)] border border-sand-200 bg-white">
+      <div className="overflow-x-auto rounded-[var(--radius-card)] border border-sand-200 bg-surface">
         <table className="w-full min-w-[640px] text-sm">
           <thead>
             <tr className="border-b border-sand-200">

@@ -24,7 +24,7 @@ export function HeroSearch({ dict }: { dict: Dictionary }) {
     <form
       onSubmit={onSubmit}
       role="search"
-      className="flex w-full max-w-2xl flex-col gap-3 rounded-[var(--radius-card)] bg-white p-3 text-sand-900 shadow-lg"
+      className="flex w-full max-w-2xl flex-col gap-3 rounded-[var(--radius-card)] bg-surface p-3 text-sand-900 shadow-lg"
     >
       <div className="flex gap-1" role="radiogroup" aria-label={dict.property.purpose}>
         {PURPOSES.map((p) => (

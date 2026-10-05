@@ -14,6 +14,7 @@ from app.geo.manage import router as gis_router
 from app.geo.pois import router as pois_router
 from app.geo.router import router as geo_router
 from app.map.router import router as map_router
+from app.market.router import router as market_router
 from app.moderation.router import router as moderation_router
 from app.money import router as money_router
 from app.notifications.router import router as notifications_router
@@ -44,6 +45,7 @@ def build_api_router(settings: Settings) -> APIRouter:
     api_router.include_router(search_router)
     api_router.include_router(favorites_router)
     api_router.include_router(map_router)
+    api_router.include_router(market_router)
     api_router.include_router(saved_search_router)
     api_router.include_router(pois_router)
     api_router.include_router(money_router)

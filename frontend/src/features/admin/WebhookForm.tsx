@@ -42,7 +42,7 @@ export function WebhookForm({ dict, events }: { dict: Dictionary; events: string
   return (
     <form
       onSubmit={onSubmit}
-      className="flex flex-col gap-3 rounded-lg border border-sand-200 bg-white p-4 text-sm"
+      className="flex flex-col gap-3 rounded-lg border border-sand-200 bg-surface p-4 text-sm"
     >
       <h2 className="font-semibold">{a.newWebhook}</h2>
       <p className="text-xs text-sand-500">{a.n8nHint}</p>

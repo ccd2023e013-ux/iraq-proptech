@@ -39,7 +39,7 @@ export default async function WebhooksPage() {
           {hooks.map((h) => (
             <li
               key={h.id}
-              className="flex flex-col gap-2 rounded-lg border border-sand-200 bg-white p-4"
+              className="flex flex-col gap-2 rounded-lg border border-sand-200 bg-surface p-4"
             >
               <div className="flex flex-wrap items-center gap-2">
                 <span className="font-semibold">{h.name}</span>
@@ -86,7 +86,7 @@ export default async function WebhooksPage() {
           ))}
         </ul>
       )}
-      <section className="rounded-lg border border-sand-200 bg-white p-4">
+      <section className="rounded-lg border border-sand-200 bg-surface p-4">
         <h2 className="mb-3 font-semibold">{a.newWebhook}</h2>
         <WebhookForm dict={dict} events={events} />
       </section>

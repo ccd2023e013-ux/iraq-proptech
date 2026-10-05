@@ -36,7 +36,7 @@ export default async function PropertiesPage({
     <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[300px_1fr]">
       <aside className="lg:sticky lg:top-20 lg:self-start">
         <details
-          className="rounded-[var(--radius-card)] border border-sand-200 bg-white p-4 lg:open:block"
+          className="rounded-[var(--radius-card)] border border-sand-200 bg-surface p-4 lg:open:block"
           open
         >
           <summary className="cursor-pointer text-sm font-semibold text-brand-900 lg:hidden">
@@ -73,13 +73,10 @@ export default async function PropertiesPage({
                 nextPath={`/properties?${toApiQuery(params)}`}
               />
             )}
-            <Link href="/search/smart" className="text-sm font-medium text-brand-700">
+            <Link href="/search/smart" className="text-sm font-medium text-accent">
               {dict.ai.smartSearch}
             </Link>
-            <Link
-              href={`/map?${toApiQuery(params)}`}
-              className="text-sm font-medium text-brand-700"
-            >
+            <Link href={`/map?${toApiQuery(params)}`} className="text-sm font-medium text-accent">
               {dict.nav.map}
             </Link>
             <SortSelect dict={dict} params={params} />

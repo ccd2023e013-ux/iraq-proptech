@@ -48,7 +48,7 @@ export default async function SystemPage() {
       <h1 className="text-2xl font-bold text-brand-900">{a.system}</h1>
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {rows.map(([k, v]) => (
-          <div key={k} className="rounded-lg border border-sand-200 bg-white p-3">
+          <div key={k} className="rounded-lg border border-sand-200 bg-surface p-3">
             <dt className="text-xs text-sand-500">{k}</dt>
             <dd
               className={`font-mono text-sm ${v === "error" || v === "unavailable" ? "text-danger" : ""}`}
@@ -66,7 +66,7 @@ export default async function SystemPage() {
         ) : (
           <ul className="flex flex-col gap-1 font-mono text-xs" dir="ltr">
             {errors.items.map((e) => (
-              <li key={e.id} className="rounded bg-white px-3 py-2">
+              <li key={e.id} className="rounded bg-surface px-3 py-2">
                 {formatDateTime(e.created_at, locale)} · {e.method} {e.path} · {e.error_type} ·{" "}
                 {e.request_id}
               </li>

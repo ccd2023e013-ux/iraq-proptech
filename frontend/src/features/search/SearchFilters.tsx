@@ -98,7 +98,7 @@ export function SearchFilters({
     );
   }
 
-  const input = "h-10 w-full rounded-lg border border-sand-200 bg-white px-3 text-sm";
+  const input = "h-10 w-full rounded-lg border border-sand-200 bg-surface px-3 text-sm";
   const label = "flex flex-col gap-1 text-xs font-medium text-sand-700";
 
   return (
@@ -177,7 +177,7 @@ export function SearchFilters({
                       : [...form.property_types, t.code],
                   })
                 }
-                className={`rounded-full border px-3 py-1 text-xs transition ${on ? "border-brand-600 bg-brand-600 text-white" : "border-sand-200 bg-white text-sand-700 hover:border-brand-300"}`}
+                className={`rounded-full border px-3 py-1 text-xs transition ${on ? "border-brand-600 bg-brand-600 text-white" : "border-sand-200 bg-surface text-sand-700 hover:border-brand-300"}`}
               >
                 {name(t)}
               </button>
@@ -301,7 +301,7 @@ export function SortSelect({
       <select
         value={current}
         onChange={(e) => router.push(`${basePath}?${withParam(params, "sort", e.target.value)}`)}
-        className="h-9 rounded-lg border border-sand-200 bg-white px-2 text-sm"
+        className="h-9 rounded-lg border border-sand-200 bg-surface px-2 text-sm"
       >
         {SORTS.filter((sort) => sort !== "relevance" || first(params.q)).map((sort) => (
           <option key={sort} value={sort}>

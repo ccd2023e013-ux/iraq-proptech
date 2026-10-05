@@ -57,7 +57,7 @@ export function ModerationActions({
     }
   }
 
-  const btn = "rounded-md border bg-white px-2.5 py-1 text-xs font-medium disabled:opacity-50";
+  const btn = "rounded-md border bg-surface px-2.5 py-1 text-xs font-medium disabled:opacity-50";
   return (
     <div className="flex flex-wrap items-center gap-2">
       {status === "PENDING_REVIEW" && (
@@ -74,7 +74,7 @@ export function ModerationActions({
         aria-label={a.reasonCode}
         value={code}
         onChange={(e) => setCode(e.target.value as (typeof CODES)[number])}
-        className="h-7 rounded-md border border-sand-200 bg-white px-1 text-xs"
+        className="h-7 rounded-md border border-sand-200 bg-surface px-1 text-xs"
       >
         {CODES.map((c) => (
           <option key={c} value={c}>

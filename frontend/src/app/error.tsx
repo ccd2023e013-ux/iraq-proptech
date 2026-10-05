@@ -23,7 +23,7 @@ export default function GlobalError({
       <button
         type="button"
         onClick={reset}
-        className="rounded-lg bg-brand-700 px-5 py-2 font-medium text-white hover:bg-brand-800"
+        className="rounded-lg bg-brand-700 px-5 py-2 font-medium text-white hover:bg-brand-600"
       >
         إعادة المحاولة / Try again
       </button>

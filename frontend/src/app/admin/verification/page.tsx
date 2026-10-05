@@ -37,7 +37,7 @@ export default async function VerificationPage() {
           {queue.agencies.map((ag) => (
             <div
               key={ag.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-sand-200 bg-white p-3 text-sm"
+              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-sand-200 bg-surface p-3 text-sm"
             >
               <span>{ag.name_ar}</span>
               <span className="flex gap-2">
@@ -67,11 +67,11 @@ export default async function VerificationPage() {
         {queue.listings.map((item) => (
           <div
             key={item.property_id}
-            className="flex flex-col gap-2 rounded-lg border border-sand-200 bg-white p-3 text-sm"
+            className="flex flex-col gap-2 rounded-lg border border-sand-200 bg-surface p-3 text-sm"
           >
             <Link
               href={`/properties/${item.property_id}`}
-              className="font-medium text-brand-700 hover:underline"
+              className="font-medium text-accent hover:underline"
             >
               {item.reference_code} · {item.title_ar}
             </Link>

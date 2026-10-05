@@ -70,7 +70,7 @@ export function ProfileForm({ dict, user }: { dict: Dictionary; user: User }) {
           id="locale"
           value={locale}
           onChange={(e) => setLocale(e.target.value as Locale)}
-          className="h-11 rounded-lg border border-sand-200 bg-white px-3"
+          className="h-11 rounded-lg border border-sand-200 bg-surface px-3"
         >
           <option value="ar">العربية</option>
           <option value="en">English</option>

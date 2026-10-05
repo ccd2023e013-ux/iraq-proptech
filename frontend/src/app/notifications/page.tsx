@@ -51,7 +51,7 @@ export default async function NotificationsPage() {
           {n.empty}
         </p>
       ) : (
-        <ul className="flex flex-col divide-y divide-sand-100 rounded-[var(--radius-card)] border border-sand-200 bg-white">
+        <ul className="flex flex-col divide-y divide-sand-100 rounded-[var(--radius-card)] border border-sand-200 bg-surface">
           {page.items.map((item) => {
             const title = locale === "en" ? item.title_en : item.title_ar;
             const body = locale === "en" ? item.body_en : item.body_ar;

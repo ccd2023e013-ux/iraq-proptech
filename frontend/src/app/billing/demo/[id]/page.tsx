@@ -30,7 +30,7 @@ export default async function DemoCheckoutPage({ params }: { params: Promise<{ i
     <div className="mx-auto flex max-w-xl flex-col gap-5 px-4 py-10 sm:px-6">
       <h1 className="text-2xl font-bold text-brand-900">{b.checkoutTitle}</h1>
       <Alert tone="warning">{b.demoBanner}</Alert>
-      <dl className="rounded-lg border border-sand-200 bg-white p-4 text-sm">
+      <dl className="rounded-lg border border-sand-200 bg-surface p-4 text-sm">
         <dt className="text-sand-500">{b.plans}</dt>
         <dd className="mb-2 font-medium">
           {data.plan ? (locale === "en" ? data.plan.name_en : data.plan.name_ar) : "—"}

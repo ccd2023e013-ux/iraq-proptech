@@ -3,10 +3,10 @@ import type { ReactNode } from "react";
 export type BadgeTone = "success" | "warning" | "danger" | "neutral";
 
 const TONES: Record<BadgeTone, string> = {
-  success: "bg-emerald-50 text-success ring-emerald-200",
-  warning: "bg-amber-50 text-warning ring-amber-200",
-  danger: "bg-red-50 text-danger ring-red-200",
-  neutral: "bg-sand-100 text-sand-700 ring-sand-200",
+  success: "bg-success/10 text-success ring-success/20",
+  warning: "bg-warning/10 text-warning ring-warning/20",
+  danger: "bg-danger/10 text-danger ring-danger/20",
+  neutral: "bg-fill text-ink-2 ring-hairline",
 };
 
 const DOTS: Record<BadgeTone, string> = {
