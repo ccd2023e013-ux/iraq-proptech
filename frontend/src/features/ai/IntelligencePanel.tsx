@@ -23,6 +23,7 @@ const SECTIONS: StatementSection[] = [
   "facts",
   "price",
   "neighbourhood",
+  "development",
   "quality",
 ];
 

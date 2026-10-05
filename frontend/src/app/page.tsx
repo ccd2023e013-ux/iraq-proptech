@@ -20,10 +20,10 @@ import type { PropertyCard as Card, ReferenceItem } from "@/types/property";
 export const dynamic = "force-dynamic";
 
 const NEXT_MODULES = [
-  { key: "future", icon: "M3 20h18M5 20V9l7-5 7 5v11M9 20v-6h6v6" },
-  { key: "vision", icon: "M3 17l6-6 4 4 8-8M14 7h7v7" },
-  { key: "studio", icon: "M4 6h11v12H4zM15 10l5-3v10l-5-3" },
-  { key: "invest", icon: "M12 3v18M7 8h7a3 3 0 0 1 0 6H8a3 3 0 0 0 0 6h9" },
+  { key: "future", icon: "M3 20h18M5 20V9l7-5 7 5v11M9 20v-6h6v6", href: "/future" },
+  { key: "vision", icon: "M3 17l6-6 4 4 8-8M14 7h7v7", href: null },
+  { key: "studio", icon: "M4 6h11v12H4zM15 10l5-3v10l-5-3", href: null },
+  { key: "invest", icon: "M12 3v18M7 8h7a3 3 0 0 1 0 6H8a3 3 0 0 0 0 6h9", href: null },
 ] as const;
 
 function LeadListing({
@@ -298,9 +298,18 @@ export default async function HomePage() {
                     {h[`${m.key}Title` as const]}
                   </p>
                   <p className="text-sm text-ink-2">{h[`${m.key}Body` as const]}</p>
-                  <span className="mt-1 w-fit rounded-full bg-fill px-2 py-0.5 text-[11px] font-medium text-ink-3">
-                    {h.inDevelopment}
-                  </span>
+                  {m.href ? (
+                    <Link
+                      href={m.href}
+                      className="mt-1 w-fit text-sm font-medium text-accent underline-offset-4 hover:underline"
+                    >
+                      {h.explore}
+                    </Link>
+                  ) : (
+                    <span className="mt-1 w-fit rounded-full bg-fill px-2 py-0.5 text-[11px] font-medium text-ink-3">
+                      {h.inDevelopment}
+                    </span>
+                  )}
                 </div>
               </li>
             ))}

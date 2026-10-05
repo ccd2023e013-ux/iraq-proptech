@@ -4,6 +4,7 @@ export type StatementSection =
   | "facts"
   | "price"
   | "neighbourhood"
+  | "development"
   | "quality"
   | "interpretation"
   | "answer";

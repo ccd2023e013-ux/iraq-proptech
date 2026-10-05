@@ -82,6 +82,9 @@ export function MapSearch({
   const [showAreas, setShowAreas] = useState(true);
   const [satellite, setSatellite] = useState(false);
   const [pois, setPois] = useState<FeatureCollection | null>(null);
+  const [future, setFuture] = useState(first(params.layer) === "future");
+  const [projects, setProjects] = useState<FeatureCollection | null>(null);
+  const [project, setProject] = useState<Record<string, unknown> | null>(null);
   const [viewport, setViewport] = useState<Bbox | null>(null);
   const [focusBbox, setFocusBbox] = useState<Bbox | null>(null);
   const [geoError, setGeoError] = useState(false);
@@ -158,6 +161,25 @@ export function MapSearch({
       clearTimeout(handle);
     };
   }, [placesQuery, locale]);
+
+  // Future Iraq projects (few, cached by the API): loaded once when the layer is on.
+  useEffect(() => {
+    if (!future || projects) return;
+    apiFetch<FeatureCollection>("/api/v1/development/projects")
+      .then((fc) =>
+        setProjects({
+          ...fc,
+          features: fc.features.map((f) => ({
+            ...f,
+            properties: {
+              ...f.properties,
+              label: (locale === "en" && f.properties?.name_en) || f.properties?.name_ar,
+            },
+          })),
+        }),
+      )
+      .catch(() => setProjects(null));
+  }, [future, projects, locale]);
 
   const navigate = useCallback(
     (query: string) => router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false }),
@@ -407,6 +429,8 @@ export function MapSearch({
               showBoundaries={showAreas}
               pois={pois}
               satellite={satellite}
+              development={future ? projects : null}
+              onSelectProject={setProject}
               polygon={polygon}
               drawing={drawing}
               highlightId={highlightId}
@@ -449,6 +473,22 @@ export function MapSearch({
                   </div>
                 )}
                 <label className="flex items-center justify-between gap-2 text-ink">
+                  <span className="flex items-center gap-2">
+                    <span aria-hidden className="size-2.5 rounded-full bg-gold-500" />
+                    {dict.future.layer}
+                  </span>
+                  <input
+                    type="checkbox"
+                    data-layer="future"
+                    checked={future}
+                    onChange={(e) => {
+                      setFuture(e.target.checked);
+                      if (!e.target.checked) setProject(null);
+                    }}
+                    className="size-4 accent-[var(--accent)]"
+                  />
+                </label>
+                <label className="flex items-center justify-between gap-2 text-ink">
                   {m.areas}
                   <input
                     type="checkbox"
@@ -485,7 +525,15 @@ export function MapSearch({
               </div>
             </details>
 
-            {selected && (
+            {project && (
+              <ProjectSheet
+                props={project}
+                dict={dict}
+                locale={locale}
+                onClose={() => setProject(null)}
+              />
+            )}
+            {selected && !project && (
               <SelectionSheet
                 props={selected}
                 dict={dict}
@@ -513,6 +561,81 @@ export function MapSearch({
             )}
           </div>
         </section>
+      </div>
+    </div>
+  );
+}
+
+/** A Future Iraq project over the map, always with its source and date. */
+function ProjectSheet({
+  props,
+  dict,
+  locale,
+  onClose,
+}: {
+  props: Record<string, unknown>;
+  dict: Dictionary;
+  locale: Locale;
+  onClose: () => void;
+}) {
+  const f = dict.future;
+  const name = String((locale === "en" && props.name_en) || props.name_ar || "");
+  // MapLibre serialises array properties to JSON strings.
+  const sources: string[] = (() => {
+    const raw = props.sources;
+    if (Array.isArray(raw)) return raw.map(String);
+    try {
+      return typeof raw === "string" ? (JSON.parse(raw) as string[]) : [];
+    } catch {
+      return [];
+    }
+  })();
+  return (
+    <div
+      role="dialog"
+      aria-label={name}
+      data-testid="map-project"
+      className="absolute inset-x-3 bottom-3 z-10 animate-enter sm:inset-x-auto sm:end-3 sm:w-96"
+    >
+      <div className="flex flex-col gap-2 rounded-[var(--radius-card)] bg-glass p-4 text-sm shadow-float ring-1 ring-hairline backdrop-blur-xl">
+        <div className="flex items-start justify-between gap-3">
+          <p className="font-display text-base font-semibold text-ink">{name}</p>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={dict.map.close}
+            className="grid size-8 shrink-0 place-items-center rounded-full text-ink-2 hover:bg-fill"
+          >
+            <svg
+              aria-hidden
+              viewBox="0 0 20 20"
+              className="size-4"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+            >
+              <path d="m5 5 10 10M15 5 5 15" />
+            </svg>
+          </button>
+        </div>
+        <p className="flex flex-wrap gap-1.5">
+          <TrustBadge kind="source">
+            {(f.statuses as Record<string, string>)[String(props.status)] ?? String(props.status)}
+          </TrustBadge>
+          <TrustBadge kind="estimate">
+            {f.precision[String(props.location_precision) as keyof typeof f.precision]}
+          </TrustBadge>
+        </p>
+        <p className="text-xs text-ink-3">
+          {dict.intel.source}: {sources.join(" · ")} ·{" "}
+          {props.latest_source_date ? String(props.latest_source_date) : f.undated}
+        </p>
+        <Link
+          href={`/future#${encodeURIComponent(String(props.slug))}`}
+          className="font-medium text-accent underline-offset-4 hover:underline"
+        >
+          {f.evidence}
+        </Link>
       </div>
     </div>
   );

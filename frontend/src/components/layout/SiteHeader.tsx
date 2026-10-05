@@ -55,6 +55,7 @@ export function SiteHeader({
   const links = [
     { href: "/properties", label: dict.nav.properties },
     { href: "/map", label: dict.nav.map },
+    { href: "/future", label: dict.future.title },
     { href: "/pricing", label: dict.billing.pricingTitle },
     ...(me
       ? [

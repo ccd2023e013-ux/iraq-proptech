@@ -34,6 +34,9 @@ export interface PropertyMapProps {
   boundaries: FeatureCollection | null;
   showBoundaries?: boolean;
   pois?: FeatureCollection | null;
+  /** "Future Iraq" development projects (with provenance in their properties). */
+  development?: FeatureCollection | null;
+  onSelectProject?: (properties: Record<string, unknown> | null) => void;
   satellite?: boolean;
   polygon: LonLat[] | null;
   drawing: LonLat[] | null;
@@ -137,6 +140,7 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
   map.addSource("boundaries", { type: "geojson", data: EMPTY });
   map.addSource("area", { type: "geojson", data: EMPTY });
   map.addSource("pois", { type: "geojson", data: EMPTY });
+  map.addSource("development", { type: "geojson", data: EMPTY, promoteId: "id" });
 
   map.addLayer({
     id: "boundary-fill",
@@ -211,6 +215,53 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
   });
 
   const accentRgb = `rgb(${accent[0]} ${accent[1]} ${accent[2]})`;
+  // Future Iraq: gold diamonds; area-level positions get a soft halo so they
+  // never read as an exact site.
+  map.addLayer({
+    id: "development-area",
+    type: "circle",
+    source: "development",
+    filter: ["!=", ["get", "location_precision"], "EXACT"],
+    paint: {
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 10, 14, 40],
+      "circle-color": "#b98a2c",
+      "circle-opacity": 0.14,
+      "circle-stroke-color": "#b98a2c",
+      "circle-stroke-opacity": 0.5,
+      "circle-stroke-width": 1,
+    },
+  });
+  map.addLayer({
+    id: "development-points",
+    type: "circle",
+    source: "development",
+    paint: {
+      "circle-radius": 7,
+      "circle-color": "#b98a2c",
+      "circle-stroke-color": "#ffffff",
+      "circle-stroke-width": 2.5,
+    },
+  });
+  map.addLayer({
+    id: "development-labels",
+    type: "symbol",
+    source: "development",
+    minzoom: 8,
+    layout: {
+      "text-field": ["get", "label"],
+      "text-size": 11.5,
+      "text-font": ["Noto Sans Bold"],
+      "text-offset": [0, 1.2],
+      "text-anchor": "top",
+      "text-optional": true,
+      "text-max-width": 10,
+    },
+    paint: {
+      "text-color": "#8f6418",
+      "text-halo-color": isDark() ? "#0b1112" : "#ffffff",
+      "text-halo-width": 1.4,
+    },
+  });
   const countOf = ["coalesce", ["get", "total"], ["get", "point_count"]];
   // Grouped circles: client groups below bubble zoom, and server clusters (the
   // API groups when a view holds more than its point limit) at any zoom.
@@ -418,17 +469,31 @@ export function PropertyMap(props: PropertyMapProps) {
             latest.current.onSelect(String(p.id), p);
           },
         );
+        map.on(
+          "click",
+          "development-points",
+          (event: MapMouseEvent & { features?: MapGeoJSONFeature[] }) => {
+            const feature = event.features?.[0];
+            if (!feature || latest.current.drawing !== null) return;
+            latest.current.onSelectProject?.((feature.properties ?? {}) as Record<string, unknown>);
+          },
+        );
         map.on("click", (event: MapMouseEvent) => {
           if (latest.current.drawing !== null) {
             latest.current.onDrawPoint([event.lngLat.lng, event.lngLat.lat]);
             return;
           }
+          const project = map?.queryRenderedFeatures(event.point, {
+            layers: ["development-points"],
+          });
+          if (!project?.length) latest.current.onSelectProject?.(null);
           const hit = map?.queryRenderedFeatures(event.point, {
             layers: ["price-bubbles", "points-under", "clusters", "clusters-server", "points-dots"],
           });
           if (!hit?.length) latest.current.onSelect(null);
         });
         for (const layer of [
+          "development-points",
           "clusters",
           "clusters-server",
           "points-dots",
@@ -455,6 +520,7 @@ export function PropertyMap(props: PropertyMapProps) {
           container.current.dataset.bubbles = String(count(["price-bubbles"]));
           container.current.dataset.clusters = String(count(["clusters", "clusters-server"]));
           container.current.dataset.pois = String(count(["poi-dots"]));
+          container.current.dataset.projects = String(count(["development-points"]));
           container.current.dataset.zoom = map.getZoom().toFixed(2);
         });
       } catch {
@@ -492,6 +558,14 @@ export function PropertyMap(props: PropertyMapProps) {
     if (!ready || !map) return;
     (map.getSource("pois") as GeoJSONSource | undefined)?.setData(props.pois ?? EMPTY);
   }, [ready, styleVersion, props.pois]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!ready || !map) return;
+    (map.getSource("development") as GeoJSONSource | undefined)?.setData(
+      props.development ?? EMPTY,
+    );
+  }, [ready, styleVersion, props.development]);
 
   useEffect(() => {
     const map = mapRef.current;

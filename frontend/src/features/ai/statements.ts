@@ -100,6 +100,14 @@ export function renderStatement(s: Statement, dict: Dictionary, locale: Locale):
           distance: num(p.distance_m, locale),
         }) + approx
       );
+    case "source.development_nearby":
+      return fill(m["source.development_nearby"], {
+        name: String((locale === "en" && p.name_en) || p.name_ar || ""),
+        status:
+          (dict.future.statuses as Record<string, string>)[String(p.status)] ?? String(p.status),
+        distance: num(p.distance_km, locale),
+        date: p.published_on ? String(p.published_on) : dict.future.undated,
+      });
     case "estimate.no_places_recorded":
       return fill(m["estimate.no_places_recorded"], { radius: num(p.radius_m, locale) });
     default: {

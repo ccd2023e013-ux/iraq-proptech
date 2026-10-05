@@ -47,6 +47,31 @@ INVALID_CREDENTIALS_AR = "البريد الإلكتروني أو كلمة الم
 INVALID_CREDENTIALS_EN = "Incorrect email or password."
 
 
+def future_iraq(browser) -> None:
+    """Stage 5: Future Iraq page cites sources; the map layer shows projects."""
+    ctx = browser.new_context(viewport={"width": 1366, "height": 900}, locale="en-US")
+    page = ctx.new_page()
+    page.goto(WEB + "/future", wait_until="load", timeout=120_000)
+    projects = page.locator("[data-testid=future-project]")
+    count = projects.count()
+    check(count > 0, f"Future Iraq lists published projects ({count})")
+    if count:
+        links = projects.first.locator('a[href^="https://"]')
+        check(links.count() > 0, "each project links to its published source")
+    page.screenshot(path=str(OUT / "future.png"), full_page=True)
+    page.goto(WEB + "/map?bbox=47.80,29.80,48.60,30.20&layer=future", wait_until="load")
+    canvas = page.locator("[data-testid=map-canvas]")
+    shown = 0
+    for _ in range(40):
+        shown = int(canvas.get_attribute("data-projects") or 0)
+        if shown > 0:
+            break
+        page.wait_for_timeout(1_000)
+    check(shown > 0, f"Future Iraq map layer shows projects ({shown})")
+    page.screenshot(path=str(OUT / "future-map.png"))
+    ctx.close()
+
+
 def themes(browser) -> None:
     """Dark mode follows the system by default; the toggle can force light."""
     ctx = browser.new_context(viewport={"width": 1366, "height": 900}, color_scheme="dark")
@@ -264,6 +289,7 @@ def main() -> int:
 
         if os.environ.get("BROWSER_ONLY") == "map":
             map_v2(browser)
+            future_iraq(browser)
             browser.close()
             print("MAP-ONLY RESULT: " + ("OK" if not FAILURES else "; ".join(FAILURES)))
             return 1 if FAILURES else 0
@@ -396,6 +422,7 @@ def main() -> int:
 
         # 5. Stage 1/2 (2.0): themes and the authentication journey; Stage 3 map.
         map_v2(browser)
+        future_iraq(browser)
         themes(browser)
         auth_flow(browser, phone=True, locale="ar")
         auth_flow(browser, phone=False, locale="en")
