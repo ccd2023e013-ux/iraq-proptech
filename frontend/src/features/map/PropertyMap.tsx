@@ -86,11 +86,12 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
   const surface = parseHex(cssVar("--surface"), [255, 255, 255, 255]);
   const ink = cssVar("--ink").trim() || "#10201e";
   const accent = parseHex(cssVar("--accent-fill"), [18, 116, 107, 255]);
-  const hairline: [number, number, number, number] = isDark()
-    ? [255, 255, 255, 60]
-    : [16, 32, 30, 50];
+  // High-contrast tags: dark ink pills on the light map, light pills on the dark map.
+  const tag = isDark() ? surface : parseHex(cssVar("--ink"), [16, 32, 30, 255]);
+  const tagText = isDark() ? ink : "#ffffff";
+  const edge: [number, number, number, number] = isDark() ? [0, 0, 0, 90] : [255, 255, 255, 230];
   for (const [name, fill, stroke] of [
-    ["bubble", surface, hairline],
+    ["bubble", tag, edge],
     ["bubble-active", accent, accent],
   ] as const) {
     if (map.hasImage(name)) map.removeImage(name);
@@ -261,7 +262,26 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
     },
   });
   // Price bubbles: every listing shows its asking price on the map.
-  const bubble = (id: string, image: string, color: string, filter: unknown) =>
+  map.addLayer({
+    id: "points-under",
+    type: "circle",
+    source: "properties",
+    minzoom: BUBBLE_MIN_ZOOM,
+    filter: ["!", ["has", "point_count"]],
+    paint: {
+      "circle-color": `rgb(${tag[0]} ${tag[1]} ${tag[2]})`,
+      "circle-radius": 4,
+      "circle-stroke-color": "#ffffff",
+      "circle-stroke-width": 1.5,
+    },
+  });
+  const bubble = (
+    id: string,
+    image: string,
+    color: string,
+    filter: unknown,
+    allowOverlap: boolean,
+  ) =>
     map.addLayer({
       id,
       type: "symbol",
@@ -275,8 +295,10 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
         "icon-image": image,
         "icon-text-fit": "both",
         "icon-text-fit-padding": [3, 9, 3, 9],
-        "icon-allow-overlap": true,
-        "text-allow-overlap": true,
+        // Overlapping tags give way (the dot below still marks every listing);
+        // the active tag always shows.
+        "icon-allow-overlap": allowOverlap,
+        "text-allow-overlap": allowOverlap,
         "symbol-sort-key": ["case", ["boolean", ["get", "is_demo"], false], 1, 0],
       },
       paint: {
@@ -284,8 +306,8 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
         "icon-opacity": ["case", ["boolean", ["get", "approximate"], false], 0.85, 1],
       },
     });
-  bubble("price-bubbles", "bubble", ink, ["!", ["has", "point_count"]]);
-  bubble("price-bubbles-active", "bubble-active", "#ffffff", ["==", ["get", "id"], ""]);
+  bubble("price-bubbles", "bubble", tagText, ["!", ["has", "point_count"]], false);
+  bubble("price-bubbles-active", "bubble-active", "#ffffff", ["==", ["get", "id"], ""], true);
 }
 
 export function PropertyMap(props: PropertyMapProps) {
@@ -374,7 +396,7 @@ export function PropertyMap(props: PropertyMapProps) {
         );
         map.on(
           "click",
-          "price-bubbles",
+          ["price-bubbles", "points-under"],
           (event: MapMouseEvent & { features?: MapGeoJSONFeature[] }) => {
             const feature = event.features?.[0];
             if (!feature || !map || latest.current.drawing !== null) return;
@@ -388,11 +410,17 @@ export function PropertyMap(props: PropertyMapProps) {
             return;
           }
           const hit = map?.queryRenderedFeatures(event.point, {
-            layers: ["price-bubbles", "clusters", "clusters-server", "points-dots"],
+            layers: ["price-bubbles", "points-under", "clusters", "clusters-server", "points-dots"],
           });
           if (!hit?.length) latest.current.onSelect(null);
         });
-        for (const layer of ["clusters", "clusters-server", "points-dots", "price-bubbles"]) {
+        for (const layer of [
+          "clusters",
+          "clusters-server",
+          "points-dots",
+          "points-under",
+          "price-bubbles",
+        ]) {
           map.on("mouseenter", layer, () => map && (map.getCanvas().style.cursor = "pointer"));
           map.on("mouseleave", layer, () => map && (map.getCanvas().style.cursor = ""));
         }
