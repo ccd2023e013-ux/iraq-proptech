@@ -414,3 +414,13 @@ def test_list_sessions_marks_current(api: TestClient, db_session: Session) -> No
     sessions = api.get("/api/v1/auth/sessions", headers=headers).json()
     assert len(sessions) == 2
     assert sum(s["current"] for s in sessions) == 1
+
+
+def test_capabilities_report_email_delivery(client, monkeypatch) -> None:
+    from app.core.config import get_settings
+
+    assert client.get("/api/v1/auth/capabilities").json() == {"email_delivery": False}
+    settings = get_settings()
+    monkeypatch.setattr(settings, "email_provider", "smtp")
+    monkeypatch.setattr(settings, "smtp_host", "smtp.example.com")
+    assert client.get("/api/v1/auth/capabilities").json() == {"email_delivery": True}

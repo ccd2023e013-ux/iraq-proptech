@@ -3,7 +3,11 @@
 Verifies what HTTP checks cannot: the Arabic RTL page renders on a phone, the
 language switch works, the MapLibre map actually draws tiles and shows
 properties, the map list links to a property, the property photo loads and the
-AI summary button produces a labelled answer. Screenshots go to ./screenshots.
+AI summary button produces a labelled answer, dark mode and the theme toggle
+work, and a person can register, sign in, sign out and recover a password on
+a phone (Arabic) and on a desktop (English). The account it creates uses the
+same throw-away pattern as the API acceptance test (e2e-*@example.com).
+Screenshots go to ./screenshots.
 
     WEB_URL=https://… python scripts/live/browser_check.py
 """
@@ -14,6 +18,7 @@ import io
 import os
 import statistics
 import sys
+import time
 from pathlib import Path
 
 from PIL import Image
@@ -33,6 +38,106 @@ def check(condition: bool, message: str) -> None:
 
 def no_horizontal_scroll(page: Page) -> bool:
     return page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1")
+
+
+INVALID_CREDENTIALS_AR = "البريد الإلكتروني أو كلمة المرور غير صحيحة."
+INVALID_CREDENTIALS_EN = "Incorrect email or password."
+
+
+def themes(browser) -> None:
+    """Dark mode follows the system by default; the toggle can force light."""
+    ctx = browser.new_context(viewport={"width": 1366, "height": 900}, color_scheme="dark")
+    page = ctx.new_page()
+    page.goto(WEB + "/", wait_until="load", timeout=120_000)
+    bg = page.evaluate("getComputedStyle(document.body).backgroundColor")
+    rgb = [int(x) for x in bg[bg.index("(") + 1 : bg.index(")")].split(",")[:3]]
+    check(sum(rgb) / 3 < 60, f"system dark mode renders a dark page ({bg})")
+    page.screenshot(path=str(OUT / "home-dark.png"))
+    toggle = page.locator("header [data-theme-choice]").first
+    before = page.get_attribute("html", "data-theme")
+    toggle.click()
+    page.wait_for_timeout(300)
+    after = page.get_attribute("html", "data-theme")
+    check(before != after, f"theme toggle changes the theme ({before} → {after})")
+    ctx.close()
+
+
+def auth_flow(browser, *, phone: bool, locale: str) -> None:
+    """register → wrong password → sign in → guarded redirect → sign out → recovery."""
+    tag = f"{'phone' if phone else 'desktop'}-{locale}"
+    opts = (
+        {"viewport": {"width": 390, "height": 844}, "is_mobile": True, "has_touch": True}
+        if phone
+        else {"viewport": {"width": 1366, "height": 900}}
+    )
+    ctx = browser.new_context(locale="ar-IQ" if locale == "ar" else "en-US", **opts)
+    page = ctx.new_page()
+    email = f"e2e-browser-{int(time.time())}-{tag}@example.com"
+    password = f"Live-{int(time.time())}-Check!"
+
+    # Pages exist (they were 404 before 2.0).
+    for path in ("/login", "/register", "/forgot-password", "/reset-password", "/verify-email"):
+        r = page.goto(WEB + path, wait_until="load", timeout=120_000)
+        check(bool(r and r.status == 200), f"[{tag}] {path} renders ({r.status if r else '-'})")
+    check(page.get_attribute("html", "lang") == locale, f"[{tag}] page language is {locale}")
+
+    # Register: client validation first, then a real account.
+    page.goto(WEB + "/register", wait_until="load", timeout=120_000)
+    if phone:
+        check(no_horizontal_scroll(page), f"[{tag}] register fits the phone width")
+    page.locator("form button[type=submit]").click()
+    check(
+        page.locator("form [role=alert]").count() >= 3,
+        f"[{tag}] empty registration shows field errors",
+    )
+    page.fill("input[name=full_name]", "Live Browser Check")
+    page.fill("input[name=email]", email)
+    page.fill("input[name=password]", password)
+    page.screenshot(path=str(OUT / f"register-{tag}.png"), full_page=True)
+    page.locator("form button[type=submit]").click()
+    page.wait_for_selector('main a[href="/login"]', timeout=60_000)
+    check(True, f"[{tag}] registration succeeds")
+
+    # Wrong password → clear, localized error.
+    page.goto(WEB + "/login?next=/favorites", wait_until="load", timeout=120_000)
+    page.fill("input[name=email]", email)
+    page.fill("input[name=password]", password + "x")
+    page.locator("form button[type=submit]").click()
+    alert = page.locator("form > [role=alert]").first
+    alert.wait_for(timeout=60_000)
+    expected = INVALID_CREDENTIALS_AR if locale == "ar" else INVALID_CREDENTIALS_EN
+    check(expected in alert.inner_text(), f"[{tag}] wrong password shows a clear error")
+
+    # Correct password → back to the guarded page that asked for it.
+    page.fill("input[name=password]", password)
+    page.locator("form button[type=submit]").click()
+    page.wait_for_url("**/favorites", timeout=60_000)
+    check(True, f"[{tag}] sign-in returns to the requested page (/favorites)")
+    cookies = {c["name"]: c for c in ctx.cookies()}
+    session = cookies.get("access_token", {})
+    check(
+        bool(session.get("httpOnly")) and bool(session.get("secure")),
+        f"[{tag}] session cookie is HttpOnly + Secure",
+    )
+    page.goto(WEB + "/login", wait_until="load", timeout=120_000)
+    check("/login" not in page.url, f"[{tag}] signed-in visit to /login redirects ({page.url})")
+    page.screenshot(path=str(OUT / f"signed-in-{tag}.png"))
+
+    # Sign out from the user menu.
+    page.locator("header button[aria-haspopup=menu]").click()
+    page.locator("header [role=menuitem]").last.click()
+    page.wait_for_selector('header a[href="/register"]', timeout=60_000)
+    check(True, f"[{tag}] sign-out returns to the signed-out header")
+    page.goto(WEB + "/favorites", wait_until="load", timeout=120_000)
+    check("/login" in page.url, f"[{tag}] guarded page needs sign-in after sign-out")
+
+    # Recovery: either a working form or an honest "email unavailable" notice.
+    page.goto(WEB + "/forgot-password", wait_until="load", timeout=120_000)
+    has_form = page.locator("form input[name=email]").count() == 1
+    has_notice = page.locator("main [role=status]").count() >= 1
+    check(has_form or has_notice, f"[{tag}] password recovery is usable or honestly unavailable")
+    page.screenshot(path=str(OUT / f"forgot-{tag}.png"))
+    ctx.close()
 
 
 def main() -> int:
@@ -143,6 +248,11 @@ def main() -> int:
         check(len(summary.inner_text()) > 40, "AI summary has content")
         page.screenshot(path=str(OUT / "property.png"), full_page=True)
 
+        # 5. Stage 1/2 (2.0): themes and the authentication journey.
+        themes(browser)
+        auth_flow(browser, phone=True, locale="ar")
+        auth_flow(browser, phone=False, locale="en")
+
         csp = [e for e in errors if "Content Security Policy" in e]
         check(not csp, f"no CSP violations in the console ({csp[:2]})")
         if errors:
@@ -153,7 +263,8 @@ def main() -> int:
 
     print(
         f"::notice title=live browser summary::{'OK' if not FAILURES else 'FAILED'}: "
-        f"RTL+mobile, EN switch, map tiles/properties/list, photo, AI summary"
+        "RTL+mobile, EN switch, map tiles/properties/list, photo, AI summary, "
+        "dark mode, auth journey (phone AR + desktop EN)"
     )
     if FAILURES:
         print("BROWSER CHECK FAILED: " + "; ".join(FAILURES))

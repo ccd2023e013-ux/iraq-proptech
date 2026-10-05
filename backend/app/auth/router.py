@@ -150,6 +150,15 @@ def logout_all(
     return MessageOut(message="Signed out everywhere")
 
 
+@router.get("/capabilities")
+def capabilities() -> dict[str, bool]:
+    """What the sign-up flow can promise: is email (verification, reset) delivered?"""
+    from app.core.config import get_settings
+
+    settings = get_settings()
+    return {"email_delivery": settings.email_provider == "smtp" and bool(settings.smtp_host)}
+
+
 @router.get("/me", response_model=MeOut)
 def me(principal: Principal = Depends(get_principal)) -> MeOut:
     return MeOut(
