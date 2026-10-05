@@ -178,6 +178,13 @@ def map_v2(browser) -> None:
     """Stage 3: price bubbles, places layer, draw-area search (Basra viewport)."""
     ctx = browser.new_context(viewport={"width": 1366, "height": 900}, locale="en-US")
     page = ctx.new_page()
+    seen: list[str] = []
+    page.on(
+        "response",
+        lambda r: seen.append(f"{r.status} {r.url.split('/api/v1/')[-1][:90]}")
+        if "/api/v1/pois" in r.url or "/api/v1/map/" in r.url
+        else None,
+    )
     page.goto(WEB + "/map?bbox=47.70,30.40,47.92,30.62", wait_until="load", timeout=120_000)
     canvas = page.locator("[data-testid=map-canvas]")
     page.wait_for_selector("[data-testid=map-canvas][data-bubbles]", timeout=60_000)
@@ -197,6 +204,7 @@ def map_v2(browser) -> None:
             break
         page.wait_for_timeout(1_000)
     check(pois_ok, f"places layer toggles on ({canvas.get_attribute('data-pois')} places)")
+    print(f"  map requests: {seen[-6:]}", flush=True)
     page.screenshot(path=str(OUT / "map-places.png"))
     page.locator("[data-testid=map-layers] summary").click()
 
