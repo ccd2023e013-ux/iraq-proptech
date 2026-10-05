@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import json
 import os
+import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -32,9 +34,15 @@ def first_ids() -> tuple[str, str]:
     url = f"{WEB}/api/v1/search/properties?page_size=2"
     if not url.startswith("https://"):
         raise SystemExit("WEB_URL must be https")
-    with urllib.request.urlopen(url, timeout=120) as r:  # noqa: S310 - https asserted
-        items = json.load(r)["items"]
-    return items[0]["id"], items[1]["id"]
+    for attempt in range(8):  # free instances may still be waking up (502/503)
+        try:
+            with urllib.request.urlopen(url, timeout=120) as r:  # noqa: S310 - https checked
+                items = json.load(r)["items"]
+            return items[0]["id"], items[1]["id"]
+        except urllib.error.HTTPError as exc:
+            print(f"  waiting for the API ({exc.code}), attempt {attempt + 1}", flush=True)
+            time.sleep(20)
+    raise SystemExit("API did not answer")
 
 
 def shoot(page, name: str, path: str) -> None:
