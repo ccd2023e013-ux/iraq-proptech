@@ -2,6 +2,14 @@
 
 All notable changes, newest first. Each entry lists the CI-verified commit.
 
+## 2.0 Stage 3: Basra-first Map 2.0 (`d2849a0`)
+Map provider evaluation for Iraq (docs/MAP-PROVIDERS.md); price tags,
+grouped circles, layers panel (areas, places, optional satellite), selection
+card, theme-following basemap, Near me; 1,372 real Basra places from
+OpenStreetMap (`import-osm-pois`, ODbL attribution); homepage "Properties
+near you". Fixes on the way: tags hidden by an empty stretchY, clustering at
+fractional city zoom, map clicks zooming while drawing.
+
 ## 2.0 Stages 1–2: design system and working authentication (`bdc731f`)
 Light/dark/system themes on semantic tokens, new header/footer/components,
 new homepage (intelligent search, river map, Basra first, labelled market

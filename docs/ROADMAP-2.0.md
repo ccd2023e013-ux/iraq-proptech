@@ -14,7 +14,7 @@ Status legend: ✅ done (live-verified) · 🚧 in progress · ⏳ planned ·
 | 0 | Product audit | ✅ |
 | 1 | Premium design system | ✅ |
 | 2 | Authentication and core UX | ✅ (email sending 🔑) |
-| 3 | Basra-first Map 2.0 | ⏳ |
+| 3 | Basra-first Map 2.0 | ✅ (satellite 🔑) |
 | 4 | Property Intelligence | ⏳ |
 | 5 | Development Intelligence ("Future Iraq") | ⏳ 🔑 |
 | 6 | AI Property Vision | ⏳ 🔑 |
@@ -111,6 +111,23 @@ require a confirmed email, enforced by the API and checked by the live acceptanc
   places, where licence permits.
 - **Acceptance**: browser check: bubbles render, layer toggles work, draw
   search filters results; provider doc; attribution correct.
+
+**Status ✅ — live-verified** (Live site run 37289046154 on `d2849a0`). Delivered:
+provider evaluation ([MAP-PROVIDERS.md](MAP-PROVIDERS.md)) and the extended
+provider abstraction (dark style, optional keyed satellite); price tags from
+city zoom with grouped circles below; glass layers panel (areas, places,
+satellite when configured); selection card; basemap follows the theme;
+"Near me" radius search; draw-area kept; 1,372 real Basra places imported
+from OpenStreetMap with attribution. The live browser check verifies tags
+render in Basra, the places layer toggles, draw search filters by polygon,
+and "Near me". Not done, with reasons: satellite needs a keyed commercial
+imagery source (owner 🔑, none free for commercial use); terrain was
+evaluated and deferred (Basra is flat; free DEM tiles exist for the
+Kurdistan region if a later feature needs relief); routing/traffic not
+needed yet.
+
+Also delivered from the brief: homepage "Properties near you" (location
+asked on click only, 10 km nearest-first, not stored).
 
 ## 4 — Property Intelligence
 

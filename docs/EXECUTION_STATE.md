@@ -24,10 +24,11 @@ during launch: ONLINE-LAUNCH-STATUS.md.
 
 ## 2.0 (docs/ROADMAP-2.0.md)
 
-Stages 0–2 done and live-verified (Live site run 37262946017 on `bdc731f`).
-Next: Stage 3 (Basra-first Map 2.0, starting with a map-provider evaluation).
+Stages 0–3 done and live-verified (latest Live site run 37289046154 on `d2849a0`).
+Next: Stage 4 (Property Intelligence: FACT / SOURCE / ESTIMATE / AI
+INTERPRETATION / SIMULATION labelling and an AI provider abstraction).
 
-Helpers: `live-probe.yml` with `mode=auth` runs only the browser auth journey;
+Helpers: `live-probe.yml` with `mode=auth` or `mode=map` runs only those browser checks;
 `live-screenshots.yml` with `pages=` pushes JPEGs to `screenshots/run-<id>`.
 
 ## Next actions

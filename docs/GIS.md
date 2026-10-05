@@ -68,6 +68,10 @@ The basemap is configuration read by the frontend server at request time
 | `MAP_ATTRIBUTION` | OSM attribution | Attribution for custom styles |
 | `MAP_DEFAULT_BBOX` | all of Iraq | Initial viewport `w,s,e,n` (`.env.example` sets Basra) |
 | `MAP_RTL_PLUGIN_URL` | MapLibre/Mapbox RTL text plugin on unpkg | Arabic shaping for vector labels; empty disables |
+| `MAP_DARK_STYLE_URL` | OpenFreeMap `dark` | Basemap used when the site is in dark mode |
+| `MAP_SATELLITE_TILES` / `MAP_SATELLITE_ATTRIBUTION` | — | Optional https XYZ imagery (keyed provider); both required, otherwise no satellite toggle |
+
+Provider evaluation for Iraq: [MAP-PROVIDERS.md](MAP-PROVIDERS.md).
 
 No Google Maps data is scraped or used, and no satellite imagery with
 restrictive terms is included. Switching provider never requires code
@@ -79,11 +83,26 @@ changes.
   phones). Moving the map writes `bbox` to the URL (debounced); the server
   re-renders the list for that viewport and the map loads GeoJSON for the
   same filters — list and map always describe the same search, and the URL
-  is shareable. "Draw an area" replaces the viewport with a polygon filter.
-  Hovering a list item highlights its marker; clicking a marker highlights
-  the list item and opens a text-only popup. Clusters zoom in on click.
-  Approximate locations are drawn as softer markers; demo listings in grey.
-  Boundary sources are listed under the map, with a warning for DEMO shapes.
+  is shareable. "Draw an area" replaces the viewport with a polygon filter;
+  "Near me" runs a 3 km radius search from the browser's location (asked
+  only on click, never stored).
+  Below zoom 10.5 listings are grouped circles; from city zoom each listing
+  is a price tag (font-safe short price; overlapping tags give way to a dot).
+  Hovering a list item turns its tag accent; clicking a tag opens a glass
+  selection card. The layers panel toggles area boundaries, places
+  (schools, health, worship, markets, parks) and satellite when configured.
+  The basemap follows the site theme. Boundary and place sources are listed
+  under the map, with warnings for DEMO data.
+
+## Places (points of interest)
+
+`points_of_interest` holds named places with a mandatory `source`.
+`python -m app.cli import-osm-pois --city basra` (Live operations →
+`import-osm`) imports real places from OpenStreetMap with one bounded
+Overpass request (ODbL attribution, `osm:<type>/<id>` references,
+idempotent refresh, removed places deactivated). Live Basra import:
+1,372 places (588 schools, 266 clinics, 85 hospitals, 82 pharmacies,
+79 mosques, 60 universities/colleges, …). DEMO places stay labelled.
 - Listing form: a location picker (click or drag the marker). The containing
   area is *suggested* via `/locations/resolve`; the lister applies it
   explicitly.
