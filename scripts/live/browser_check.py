@@ -72,20 +72,106 @@ def future_iraq(browser) -> None:
     ctx.close()
 
 
-MARKET_MATRIX = (
-    # width, height, language, theme
-    (1920, 1080, "en", "dark"),
-    (1440, 900, "ar", "light"),
-    (390, 844, "ar", "dark"),
-    (390, 844, "en", "light"),
-)
+# Stage 8 browser matrix: every width x theme x language.
+MARKET_MATRIX = [
+    (width, height, theme, lang)
+    for width, height in ((1920, 1080), (1440, 900), (390, 844))
+    for theme in ("dark", "light")
+    for lang in ("ar", "en")
+]
+MARKET_CITIES = (("Basra", "البصرة"), ("Baghdad", "بغداد"))
+KIND_LABELS = {
+    "en": {"FACT": "Fact", "OBSERVED": "Observed statistic", "AI": "AI interpretation"},
+    "ar": {"FACT": "حقيقة", "OBSERVED": "إحصاء مرصود", "AI": "تفسير بالذكاء الاصطناعي"},
+}
+# The market report is rate limited (30 per minute per IP) and the limit is not
+# relaxed for tests: the check paces its own page loads instead.
+_MARKET_LOADS: list[float] = []
+
+
+def _market_pace() -> None:
+    now = time.monotonic()
+    recent = [t for t in _MARKET_LOADS if now - t < 60]
+    _MARKET_LOADS[:] = recent
+    if len(recent) >= 24:
+        time.sleep(60 - (now - recent[0]) + 1)
+    _MARKET_LOADS.append(time.monotonic())
+
+
+def _market_page(
+    page: Page, url: str, tag: str, label: str, lang: str, demo_on: bool
+) -> None:
+    """Checks one rendered market report (one area, one demo setting)."""
+    _market_pace()
+    page.goto(url, wait_until="load", timeout=120_000)
+    where = f"[{tag}] {label}"
+    check(
+        page.get_attribute("html", "dir") == ("rtl" if lang == "ar" else "ltr"),
+        f"{where}: direction {'RTL' if lang == 'ar' else 'LTR'}",
+    )
+    statements = page.locator("[data-testid=market-statement]")
+    count = statements.count()
+    if page.locator("[data-testid=market-empty]").count():
+        # No listings for this setting (e.g. demo off where all data is demo):
+        # the honest result is the empty state, not invented statements.
+        check(count == 0, f"{where}: empty state instead of statements")
+    else:
+        check(count > 0, f"{where}: statements shown ({count})")
+    labels = KIND_LABELS[lang]
+    wrong = []
+    for k in range(count):
+        item = statements.nth(k)
+        kind = item.get_attribute("data-kind") or ""
+        badge = item.locator(
+            f"[data-trust={'observed' if kind == 'OBSERVED' else 'fact'}]"
+        )
+        text = badge.first.inner_text().strip() if badge.count() else ""
+        if kind not in ("FACT", "OBSERVED") or text != labels.get(kind):
+            wrong.append(f"{kind}:{text!r}")
+    check(not wrong, f"{where}: every statement labelled Fact/Observed ({wrong[:3]})")
+    lines = page.locator("[data-testid=market-statement-provenance]")
+    filled = sum(1 for k in range(lines.count()) if lines.nth(k).inner_text().strip())
+    check(
+        filled == count, f"{where}: every statement shows its source ({filled}/{count})"
+    )
+    ai = page.locator("[data-testid=market-ai] [data-trust=ai]")
+    if ai.count():
+        check(
+            ai.first.inner_text().strip() == labels["AI"], f"{where}: AI text labelled"
+        )
+    check(
+        page.locator("[data-testid=market-provenance]").count() == 1,
+        f"{where}: provenance panel shown",
+    )
+    gaps = page.locator("[data-testid=market-unavailable] li")
+    check(gaps.count() >= 1, f"{where}: unavailable metrics listed ({gaps.count()})")
+    check(
+        all(gaps.nth(k).inner_text().strip() for k in range(gaps.count())),
+        f"{where}: each unavailable metric has a reason",
+    )
+    demo_marks = page.locator(
+        "[data-testid=market-statement] [data-trust=demo]"
+    ).count()
+    if demo_on:
+        check(
+            page.locator("[data-testid=market-provenance] [data-trust=demo]").count()
+            >= 1,
+            f"{where}: demo data labelled",
+        )
+    else:
+        check(demo_marks == 0, f"{where}: demo off shows no demo labels")
+        check(
+            page.locator("input[name=demo][type=checkbox]").is_checked() is False,
+            f"{where}: demo toggle shows off",
+        )
+    check(no_horizontal_scroll(page), f"{where}: no horizontal overflow")
 
 
 def market_intelligence(browser) -> None:
-    """Stage 8: typed statements with provenance, honest gaps, demo exclusion,
-    at 1920/1440/390, dark and light, Arabic (RTL) and English, Basra and Baghdad."""
-    for width, height, lang, theme in MARKET_MATRIX:
-        tag = f"{width}-{lang}-{theme}"
+    """Stage 8: 1920/1440/390 x dark/light x Arabic/English; Basra and Baghdad;
+    demo on and off; labels, provenance, unavailable states, RTL, overflow."""
+    for width, height, theme, lang in MARKET_MATRIX:
+        tag = f"{width}-{theme}-{lang}"
         phone = width < 600
         ctx = browser.new_context(
             viewport={"width": width, "height": height},
@@ -100,11 +186,8 @@ def market_intelligence(browser) -> None:
             ]
         )
         page = ctx.new_page()
+        _market_pace()
         page.goto(WEB + "/market", wait_until="load", timeout=120_000)
-        check(
-            page.get_attribute("html", "dir") == ("rtl" if lang == "ar" else "ltr"),
-            f"[{tag}] page direction matches the language",
-        )
         check(
             page.get_attribute("html", "data-theme") == theme,
             f"[{tag}] {theme} theme applied",
@@ -116,67 +199,34 @@ def market_intelligence(browser) -> None:
             luminance < 60 if theme == "dark" else luminance > 200,
             f"[{tag}] background matches the theme ({bg})",
         )
-
-        for city_label in (("Basra", "البصرة"), ("Baghdad", "بغداد")):
-            name = city_label[0] if lang == "en" else city_label[1]
-            option = page.locator("select[name=city_id] option").filter(has_text=name)
-            check(option.count() > 0, f"[{tag}] {city_label[0]} is in the area picker")
-            if not option.count():
+        ids: dict[str, str] = {}
+        for en_name, ar_name in MARKET_CITIES:
+            option = page.locator("select[name=city_id] option").filter(
+                has_text=en_name if lang == "en" else ar_name
+            )
+            check(option.count() > 0, f"[{tag}] {en_name} is in the area picker")
+            if option.count():
+                ids[en_name] = option.first.get_attribute("value") or ""
+        for en_name, _ in MARKET_CITIES:
+            if not ids.get(en_name):
                 continue
-            page.select_option(
-                "select[name=city_id]", value=option.first.get_attribute("value")
+            city = ids[en_name]
+            _market_page(page, f"{WEB}/market?city_id={city}", tag, en_name, lang, True)
+            page.screenshot(
+                path=str(OUT / f"market-{tag}-{en_name.lower()}.png"), full_page=True
             )
-            page.locator("[data-testid=market-controls] button[type=submit]").click()
-            page.wait_for_url("**/market?city_id=*", timeout=60_000)
-            page.wait_for_load_state("load")
-            statements = page.locator("[data-testid=market-statement]")
-            count = statements.count()
-            check(count > 0, f"[{tag}] {city_label[0]}: statements shown ({count})")
-            kinds = {statements.nth(k).get_attribute("data-kind") for k in range(count)}
-            check(
-                kinds <= {"FACT", "OBSERVED"},
-                f"[{tag}] {city_label[0]}: typed ({kinds})",
-            )
-            lines = page.locator("[data-testid=market-statement-provenance]").count()
-            check(
-                lines == count,
-                f"[{tag}] {city_label[0]}: every statement shows its source",
-            )
-            check(
-                page.locator("[data-testid=market-provenance]").count() == 1,
-                f"[{tag}] {city_label[0]}: provenance panel shown",
-            )
-            check(
-                page.locator("[data-testid=market-unavailable] li").count() >= 1,
-                f"[{tag}] {city_label[0]}: unavailable metrics listed with reasons",
-            )
-            check(
-                page.locator(
-                    "[data-testid=market-provenance] [data-trust=demo]"
-                ).count()
-                >= 1,
-                f"[{tag}] {city_label[0]}: demo data labelled",
-            )
-            check(
-                no_horizontal_scroll(page),
-                f"[{tag}] {city_label[0]}: no horizontal scroll",
+            _market_page(
+                page,
+                f"{WEB}/market?city_id={city}&demo=0",
+                tag,
+                f"{en_name} demo off",
+                lang,
+                False,
             )
             page.screenshot(
-                path=str(OUT / f"market-{city_label[0].lower()}-{tag}.png"),
+                path=str(OUT / f"market-{tag}-{en_name.lower()}-demo-off.png"),
                 full_page=True,
             )
-
-        # Excluding demo data must never show a demo label on a statement.
-        page.goto(WEB + "/market?demo=0", wait_until="load")
-        check(
-            page.locator("[data-testid=market-statement] [data-trust=demo]").count()
-            == 0,
-            f"[{tag}] excluding demo data removes demo labels",
-        )
-        check(
-            page.locator("input[name=demo][type=checkbox]").is_checked() is False,
-            f"[{tag}] the demo toggle reflects the exclusion",
-        )
         ctx.close()
 
 
@@ -551,7 +601,9 @@ def main() -> int:
         if os.environ.get("BROWSER_ONLY") == "market":
             market_intelligence(browser)
             browser.close()
-            print("MARKET-ONLY RESULT: " + ("OK" if not FAILURES else "; ".join(FAILURES)))
+            print(
+                "MARKET-ONLY RESULT: " + ("OK" if not FAILURES else "; ".join(FAILURES))
+            )
             return 1 if FAILURES else 0
         if os.environ.get("BROWSER_ONLY") == "auth":
             themes(browser)

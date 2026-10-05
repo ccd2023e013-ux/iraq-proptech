@@ -56,6 +56,8 @@ jobs:
         run: $ANNOTATE "ruff" bash -c 'ruff check . && ruff format --check .'
       - name: Mypy
         run: $ANNOTATE "mypy" mypy app
+      - name: Dependency audit (pip-audit)
+        run: $ANNOTATE "pip-audit" bash -c 'pip install --quiet pip-audit && pip-audit --skip-editable'
       - name: Tests
         env:
           ANNOTATE_SUMMARY_PATTERN: "(passed|failed|TOTAL)"
@@ -88,6 +90,8 @@ jobs:
         run: $ANNOTATE "next build" npm run build
       - name: Type check
         run: $ANNOTATE "tsc" npm run typecheck
+      - name: Dependency audit (npm, production dependencies)
+        run: $ANNOTATE "npm audit" npm audit --omit=dev --audit-level=high
       # The development environment has no npm registry access: when a
       # dependency is added, CI resolves the lockfile and (after every check
       # above passed) commits it to main. No-op when the lockfile is current.
@@ -138,14 +142,16 @@ jobs:
         run: $ANNOTATE "e2e final" bash scripts/ci/e2e-final.sh
       - name: Market intelligence in a real browser (Stage 8, pre-merge)
         run: $ANNOTATE "market browser" bash scripts/ci/market-browser.sh
+      - name: Security checks against the stack (headers, validation, secrets, rate limit)
+        run: $ANNOTATE "stack security" bash scripts/ci/security-stack.sh
       - name: Market screenshots (artifact)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: market-screenshots
           path: screenshots/market-*.png
-          if-no-files-found: ignore
-          retention-days: 7
+          if-no-files-found: warn
+          retention-days: 30
       - name: Worker executes a task via Redis
         run: >
           docker compose exec -T backend python -c

@@ -36,6 +36,12 @@ This audit was made by reading the code only. GitHub Actions is paused until the
 
 The live checks are in `scripts/live/acceptance.sh` step 11b (Basra, a second city, all of Iraq, and demo exclusion) and `scripts/live/browser_check.py` `market_intelligence` (1920 EN dark, 1440 AR light, 390 AR dark, 390 EN light; Basra and Baghdad; RTL and LTR; per-statement source, unavailable list, provenance and demo exclusion).
 
-## Checking the branch before merge
+## Verification gate (owner-approved; not weakened to make tests pass)
 
-Render deploys only `main`, so the branch cannot be checked on the live site before it is merged. The CI Docker stack job now runs `scripts/ci/market-browser.sh`. It seeds the national DEMO dataset, records today's snapshot and runs the same `market_intelligence` browser checks against the stack. The screenshots are uploaded as the `market-screenshots` artifact. After the merge, the Live site workflow repeats the checks against production, and `live-probe.yml` with `mode=market` re-runs them on demand.
+Stage 8 stays **UNVERIFIED** until every step below passes. It is never merged while GitHub Actions is unavailable.
+
+1. **Branch CI.** Backend: ruff (lint and format), mypy, pip-audit and pytest, including every Stage 8 audit test. Frontend: eslint, prettier, vitest, build, tsc and `npm audit` (production dependencies). On the Docker stack: the existing smoke and e2e suites, the browser matrix (`scripts/ci/market-browser.sh`) and stack security (`scripts/ci/security-stack.sh`: headers, input validation, no secrets in browser bundles, rate limit). Screenshots are kept as the `market-screenshots` artifact for 30 days.
+2. **Browser matrix.** 1920×1080, 1440×900 and 390×844 (mobile), each in dark and light, each in Arabic and English: 12 combinations. Each combination covers Basra and Baghdad with demo data on and off. It checks every statement's Fact / Observed label, the AI label, the source line under each statement, the provenance panel, unavailable metrics with reasons, RTL/LTR, theme, and no horizontal overflow. When an area has no listings for a setting, the honest empty state is expected, not invented statements. The check paces its own requests to stay under the market rate limit instead of relaxing it.
+3. **Merge** only if every required check passes.
+4. **Production.** Wait for Render to deploy, then run the Live site workflow (deployed commit, database audit, acceptance including step 11b, browser including the same matrix, `security.sh`, backup/restore). Then run `live-probe.yml` with `mode=market` against the production URL.
+5. **Completion.** Stage 8 is marked COMPLETE only after the production verification passes. Then the temporary daily Actions retry is removed, and only after that does Stage 9 start.

@@ -149,7 +149,11 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
       </header>
 
       {!report && <p className="text-ink-2">{dict.errors.UNKNOWN}</p>}
-      {report && empty && <p className="text-ink-2">{t.empty}</p>}
+      {report && empty && (
+        <p className="text-ink-2" data-testid="market-empty">
+          {t.empty}
+        </p>
+      )}
 
       {report && !empty && (
         <>
