@@ -33,7 +33,7 @@ places**, payments are **DEMO**, email/SMS/push are **mocked**.
    image labels collide with card badges; property page is a stack of bordered
    boxes; dashboards are link grids.
 4. **No email delivery** (SMTP not configured): new users cannot verify, so they
-   cannot send inquiries or create an agency profile.
+   cannot send inquiries, post listings or create an agency profile.
 
 > Update (Stages 1–2, live-verified): findings 1–3 are fixed; finding 4 is
 > now stated honestly in the UI and needs an owner SMTP sender (see ROADMAP-2.0).

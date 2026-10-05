@@ -83,8 +83,8 @@ unchanged. Email: no SMTP sender is configured on the free deployment
 (🔑 owner), so `/auth/capabilities` reports `email_delivery: false` and the
 UI says so instead of promising emails that never arrive. Consequence until
 the owner adds a free SMTP sender: new accounts can sign in, browse and save,
-but cannot send inquiries or create an agency profile (both require a
-confirmed email, enforced by the API and checked by the live acceptance test).
+but cannot send inquiries, list a property or create an agency profile (all
+require a confirmed email, enforced by the API and checked by the live acceptance test).
 
 - Routes: `/login`, `/register`, `/forgot-password`, `/reset-password`,
   `/verify-email` (paths match emailed links), redesigned auth shell.

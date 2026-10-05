@@ -28,7 +28,7 @@ const en: Dictionary = {
     errNameShort: "Enter your full name (at least 2 characters).",
     emailUnavailableTitle: "Email confirmation isn't available yet",
     emailUnavailable:
-      "This site doesn't send email at the moment. You can sign in, browse and save properties; sending inquiries and creating an agency profile need a confirmed email.",
+      "This site doesn't send email at the moment. You can sign in, browse and save properties; sending inquiries, listing a property and creating an agency profile need a confirmed email.",
     resetUnavailable:
       "Password reset emails aren't available on this site yet. Contact support if you've forgotten your password.",
     registeredNoEmail: "Your account is ready. You can sign in now.",
