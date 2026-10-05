@@ -275,8 +275,15 @@ def map_v2(browser) -> None:
         found = 0
     check(found > 0, f"homepage 'near you' lists nearby properties ({found})")
     page.goto(WEB + "/map", wait_until="load", timeout=120_000)
-    page.get_by_role("button", name="Near me").click()
-    page.wait_for_url(lambda u: "near_lat=" in u, timeout=30_000, wait_until="commit")
+    # Wait for hydration (the map reports its first render) before clicking.
+    page.wait_for_selector("[data-testid=map-canvas][data-bubbles]", timeout=60_000)
+    for _ in range(3):
+        page.get_by_role("button", name="Near me").click()
+        try:
+            page.wait_for_url(lambda u: "near_lat=" in u, timeout=15_000, wait_until="commit")
+            break
+        except Exception:  # noqa: BLE001 - retry a click that landed before hydration
+            continue
     check("radius_km=3" in page.url, "map 'near me' runs a 3 km radius search")
     ctx.close()
 
