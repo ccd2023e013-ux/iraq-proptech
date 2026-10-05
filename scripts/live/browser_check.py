@@ -191,7 +191,8 @@ def map_v2(browser) -> None:
     page.wait_for_timeout(3_000)
     bubbles = int(canvas.get_attribute("data-bubbles") or 0)
     clusters = int(canvas.get_attribute("data-clusters") or 0)
-    check(bubbles > 0, f"Basra shows price bubbles ({bubbles} bubbles, {clusters} clusters)")
+    zoom = canvas.get_attribute("data-zoom")
+    check(bubbles > 0, f"Basra shows price bubbles ({bubbles} bubbles, {clusters} clusters, z{zoom})")
     page.screenshot(path=str(OUT / "map-bubbles.png"))
 
     # Places layer: schools in Basra (OSM or demo).

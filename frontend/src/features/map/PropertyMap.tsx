@@ -46,6 +46,8 @@ export interface PropertyMapProps {
 }
 
 const EMPTY: FeatureCollection = { type: "FeatureCollection", features: [] };
+/** From this zoom (about a district) every listing is drawn as its own price bubble. */
+const BUBBLE_MIN_ZOOM = 10.5;
 let rtlPluginRequested = false;
 
 /** POI colours by category family (also used by the layers panel legend). */
@@ -120,14 +122,15 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
     );
   }
 
-  map.addSource("properties", {
+  // Two views of the same listings: grouped circles for country/region zoom and
+  // individual price bubbles from city zoom (layer zoom ranges decide which).
+  map.addSource("properties", { type: "geojson", data: EMPTY, promoteId: "id" });
+  map.addSource("properties-grouped", {
     type: "geojson",
     data: EMPTY,
     cluster: true,
-    // Group only at country/region zoom; from city zoom every price is shown.
     clusterRadius: 40,
-    clusterMaxZoom: 10,
-    promoteId: "id",
+    clusterMaxZoom: 22,
     clusterProperties: { total: ["+", ["coalesce", ["get", "point_count"], 1]] },
   });
   map.addSource("boundaries", { type: "geojson", data: EMPTY });
@@ -206,41 +209,56 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
     },
   });
 
+  const accentRgb = `rgb(${accent[0]} ${accent[1]} ${accent[2]})`;
+  const countOf = ["coalesce", ["get", "total"], ["get", "point_count"]];
+  // Grouped circles: client groups below bubble zoom, and server clusters (the
+  // API groups when a view holds more than its point limit) at any zoom.
+  for (const [suffix, source, range] of [
+    ["", "properties-grouped", { maxzoom: BUBBLE_MIN_ZOOM }],
+    ["-server", "properties", { minzoom: BUBBLE_MIN_ZOOM }],
+  ] as const) {
+    map.addLayer({
+      id: `clusters${suffix}`,
+      type: "circle",
+      source,
+      ...range,
+      filter: ["has", "point_count"],
+      paint: {
+        "circle-color": accentRgb,
+        "circle-opacity": 0.92,
+        "circle-stroke-color": "rgba(255,255,255,0.9)",
+        "circle-stroke-width": 2,
+        "circle-radius": ["step", countOf, 17, 10, 21, 50, 27, 200, 33] as never,
+      },
+    });
+    map.addLayer({
+      id: `cluster-count${suffix}`,
+      type: "symbol",
+      source,
+      ...range,
+      filter: ["has", "point_count"],
+      layout: {
+        "text-field": ["to-string", countOf] as never,
+        "text-size": 13,
+        "text-font": ["Noto Sans Bold"],
+        "text-allow-overlap": true,
+      },
+      paint: { "text-color": "#ffffff" },
+    });
+  }
+  // Single listings below bubble zoom: small dots (prices appear when zooming in).
   map.addLayer({
-    id: "clusters",
+    id: "points-dots",
     type: "circle",
-    source: "properties",
-    filter: ["has", "point_count"],
+    source: "properties-grouped",
+    maxzoom: BUBBLE_MIN_ZOOM,
+    filter: ["!", ["has", "point_count"]],
     paint: {
-      "circle-color": `rgb(${accent[0]} ${accent[1]} ${accent[2]})`,
-      "circle-opacity": 0.92,
-      "circle-stroke-color": "rgba(255,255,255,0.9)",
+      "circle-color": accentRgb,
+      "circle-radius": 6,
+      "circle-stroke-color": "#ffffff",
       "circle-stroke-width": 2,
-      "circle-radius": [
-        "step",
-        ["coalesce", ["get", "total"], ["get", "point_count"]],
-        17,
-        10,
-        21,
-        50,
-        27,
-        200,
-        33,
-      ],
     },
-  });
-  map.addLayer({
-    id: "cluster-count",
-    type: "symbol",
-    source: "properties",
-    filter: ["has", "point_count"],
-    layout: {
-      "text-field": ["to-string", ["coalesce", ["get", "total"], ["get", "point_count"]]],
-      "text-size": 13,
-      "text-font": ["Noto Sans Bold"],
-      "text-allow-overlap": true,
-    },
-    paint: { "text-color": "#ffffff" },
   });
   // Price bubbles: every listing shows its asking price on the map.
   const bubble = (id: string, image: string, color: string, filter: unknown) =>
@@ -248,6 +266,7 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
       id,
       type: "symbol",
       source: "properties",
+      minzoom: BUBBLE_MIN_ZOOM,
       filter: filter as never,
       layout: {
         "text-field": ["get", "price_label"],
@@ -327,6 +346,9 @@ export function PropertyMap(props: PropertyMapProps) {
         cleanups.push(() => observer.disconnect());
         cleanups.push(() => media.removeEventListener("change", onTheme));
 
+        map.on("click", ["clusters-server", "points-dots"], (event: MapMouseEvent) => {
+          map?.easeTo({ center: event.lngLat, zoom: (map?.getZoom() ?? 8) + 2, duration: 600 });
+        });
         map.on(
           "click",
           "clusters",
@@ -338,12 +360,16 @@ export function PropertyMap(props: PropertyMapProps) {
               map.fitBounds(serverBbox as LngLatBoundsLike, { padding: 40, maxZoom: 17 });
               return;
             }
-            const source = map.getSource("properties") as GeoJSONSource;
+            const source = map.getSource("properties-grouped") as GeoJSONSource;
             const zoom = await source.getClusterExpansionZoom(
               Number(feature.properties?.cluster_id),
             );
             const geometry = feature.geometry as Point;
-            map.easeTo({ center: geometry.coordinates as [number, number], zoom, duration: 600 });
+            map.easeTo({
+              center: geometry.coordinates as [number, number],
+              zoom: Math.max(zoom, map.getZoom() + 1.5),
+              duration: 600,
+            });
           },
         );
         map.on(
@@ -362,11 +388,11 @@ export function PropertyMap(props: PropertyMapProps) {
             return;
           }
           const hit = map?.queryRenderedFeatures(event.point, {
-            layers: ["price-bubbles", "clusters"],
+            layers: ["price-bubbles", "clusters", "clusters-server", "points-dots"],
           });
           if (!hit?.length) latest.current.onSelect(null);
         });
-        for (const layer of ["clusters", "price-bubbles"]) {
+        for (const layer of ["clusters", "clusters-server", "points-dots", "price-bubbles"]) {
           map.on("mouseenter", layer, () => map && (map.getCanvas().style.cursor = "pointer"));
           map.on("mouseleave", layer, () => map && (map.getCanvas().style.cursor = ""));
         }
@@ -385,8 +411,9 @@ export function PropertyMap(props: PropertyMapProps) {
           if (!map || !container.current || !map.getLayer("price-bubbles")) return;
           const count = (layers: string[]) => map!.queryRenderedFeatures({ layers }).length;
           container.current.dataset.bubbles = String(count(["price-bubbles"]));
-          container.current.dataset.clusters = String(count(["clusters"]));
+          container.current.dataset.clusters = String(count(["clusters", "clusters-server"]));
           container.current.dataset.pois = String(count(["poi-dots"]));
+          container.current.dataset.zoom = map.getZoom().toFixed(2);
         });
       } catch {
         if (!cancelled) setFailed(true);
@@ -406,6 +433,7 @@ export function PropertyMap(props: PropertyMapProps) {
     if (!ready || !map) return;
     const labelled = props.data ? withPriceLabels(props.data as FeatureCollection) : EMPTY;
     (map.getSource("properties") as GeoJSONSource | undefined)?.setData(labelled);
+    (map.getSource("properties-grouped") as GeoJSONSource | undefined)?.setData(labelled);
   }, [ready, styleVersion, props.data]);
 
   useEffect(() => {
