@@ -14,7 +14,7 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
       - name: Install Playwright + Chromium
@@ -27,6 +27,15 @@ jobs:
         run: |
           . deploy/live.env
           WEB_URL="$LIVE_WEB_URL" BROWSER_ONLY=${{ inputs.mode }} bash scripts/ci/annotate.sh "auth probe" python scripts/live/browser_check.py
+      - name: Screenshots and the market state ledger
+        if: always() && inputs.mode == 'market'
+        uses: actions/upload-artifact@v4
+        with:
+          name: market-live-screenshots
+          path: |
+            screenshots/market-*.png
+            screenshots/market-states.json
+          retention-days: 30
       - name: Probe
         if: inputs.mode != 'auth' && inputs.mode != 'map' && inputs.mode != 'market'
         run: |

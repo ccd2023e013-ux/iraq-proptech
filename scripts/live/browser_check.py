@@ -15,6 +15,7 @@ Screenshots go to ./screenshots.
 from __future__ import annotations
 
 import io
+import json
 import os
 import statistics
 import sys
@@ -99,12 +100,27 @@ def _market_pace() -> None:
 
 
 def _market_page(
-    page: Page, url: str, tag: str, label: str, lang: str, demo_on: bool
+    page: Page,
+    url: str,
+    tag: str,
+    label: str,
+    lang: str,
+    demo_on: bool,
+    theme: str,
+    area: tuple[str, str],
 ) -> None:
     """Checks one rendered market report (one area, one demo setting)."""
     _market_pace()
     page.goto(url, wait_until="load", timeout=120_000)
     where = f"[{tag}] {label}"
+    check(page.get_attribute("html", "data-theme") == theme, f"{where}: {theme} theme")
+    heading = (
+        page.locator("h1").first.inner_text() if page.locator("h1").count() else ""
+    )
+    check(
+        (area[0] if lang == "en" else area[1]) in heading,
+        f"{where}: the report is for {area[0]} ({heading!r})",
+    )
     check(
         page.get_attribute("html", "dir") == ("rtl" if lang == "ar" else "ltr"),
         f"{where}: direction {'RTL' if lang == 'ar' else 'LTR'}",
@@ -168,8 +184,10 @@ def _market_page(
 
 
 def market_intelligence(browser) -> None:
-    """Stage 8: 1920/1440/390 x dark/light x Arabic/English; Basra and Baghdad;
-    demo on and off; labels, provenance, unavailable states, RTL, overflow."""
+    """Stage 8 browser matrix: 12 UI combinations (1920/1440/390 x dark/light x
+    Arabic/English) x 2 areas (Basra, Baghdad) x 2 demo states = 48 states.
+    Every state is visited and checked on its own; a ledger proves it."""
+    ledger: list[dict] = []
     for width, height, theme, lang in MARKET_MATRIX:
         tag = f"{width}-{theme}-{lang}"
         phone = width < 600
@@ -188,10 +206,6 @@ def market_intelligence(browser) -> None:
         page = ctx.new_page()
         _market_pace()
         page.goto(WEB + "/market", wait_until="load", timeout=120_000)
-        check(
-            page.get_attribute("html", "data-theme") == theme,
-            f"[{tag}] {theme} theme applied",
-        )
         bg = page.evaluate("getComputedStyle(document.body).backgroundColor")
         rgb = [int(x) for x in bg[bg.index("(") + 1 : bg.index(")")].split(",")[:3]]
         luminance = sum(rgb) / 3
@@ -207,27 +221,56 @@ def market_intelligence(browser) -> None:
             check(option.count() > 0, f"[{tag}] {en_name} is in the area picker")
             if option.count():
                 ids[en_name] = option.first.get_attribute("value") or ""
-        for en_name, _ in MARKET_CITIES:
-            if not ids.get(en_name):
-                continue
-            city = ids[en_name]
-            _market_page(page, f"{WEB}/market?city_id={city}", tag, en_name, lang, True)
-            page.screenshot(
-                path=str(OUT / f"market-{tag}-{en_name.lower()}.png"), full_page=True
-            )
-            _market_page(
-                page,
-                f"{WEB}/market?city_id={city}&demo=0",
-                tag,
-                f"{en_name} demo off",
-                lang,
-                False,
-            )
-            page.screenshot(
-                path=str(OUT / f"market-{tag}-{en_name.lower()}-demo-off.png"),
-                full_page=True,
-            )
+        for area in MARKET_CITIES:
+            for demo_on in (True, False):
+                name = area[0]
+                label = f"{name} demo {'on' if demo_on else 'off'}"
+                shot = (
+                    f"market-{tag}-{name.lower()}-demo-{'on' if demo_on else 'off'}.png"
+                )
+                before = len(FAILURES)
+                city = ids.get(name)
+                if city:
+                    url = f"{WEB}/market?city_id={city}" + (
+                        "" if demo_on else "&demo=0"
+                    )
+                    _market_page(page, url, tag, label, lang, demo_on, theme, area)
+                    page.screenshot(path=str(OUT / shot), full_page=True)
+                else:
+                    url = None
+                    check(False, f"[{tag}] {label}: state not reachable (area missing)")
+                ledger.append(
+                    {
+                        "width": width,
+                        "height": height,
+                        "theme": theme,
+                        "language": lang,
+                        "area": name,
+                        "demo": "on" if demo_on else "off",
+                        "url": url,
+                        "screenshot": shot if city else None,
+                        "passed": len(FAILURES) == before,
+                        "failures": FAILURES[before:],
+                    }
+                )
         ctx.close()
+
+    states = {
+        (e["width"], e["theme"], e["language"], e["area"], e["demo"]) for e in ledger
+    }
+    visited = [e for e in ledger if e["url"]]
+    check(
+        len(ledger) == 48 and len(states) == 48 and len(visited) == 48,
+        f"market matrix exercised all 48 states ({len(visited)} visited, {len(states)} distinct)",
+    )
+    passed = sum(1 for e in ledger if e["passed"])
+    (OUT / "market-states.json").write_text(
+        json.dumps(
+            {"states": len(ledger), "passed": passed, "ledger": ledger}, indent=2
+        ),
+        encoding="utf-8",
+    )
+    print(f"MARKET MATRIX: {passed}/{len(ledger)} states passed", flush=True)
 
 
 def media_studio(browser) -> None:

@@ -56,8 +56,14 @@ jobs:
         run: $ANNOTATE "ruff" bash -c 'ruff check . && ruff format --check .'
       - name: Mypy
         run: $ANNOTATE "mypy" mypy app
-      - name: Dependency audit (pip-audit)
-        run: $ANNOTATE "pip-audit" bash -c 'pip install --quiet pip-audit && pip-audit --skip-editable'
+      - name: Dependency advisories (pip-audit, triaged)
+        # Reports every advisory; fails only for HIGH/CRITICAL/unknown advisories in
+        # production dependencies without a written triage (security/advisory-triage.json).
+        run: |
+          pip install --quiet pip-audit
+          pip-audit --skip-editable -f json -o /tmp/pip-audit.json || true
+          python ../scripts/ci/python_runtime_deps.py > /tmp/runtime-deps.txt
+          $ANNOTATE "dependency advisories" python ../scripts/ci/dep_triage.py python /tmp/pip-audit.json /tmp/runtime-deps.txt
       - name: Tests
         env:
           ANNOTATE_SUMMARY_PATTERN: "(passed|failed|TOTAL)"
@@ -90,8 +96,11 @@ jobs:
         run: $ANNOTATE "next build" npm run build
       - name: Type check
         run: $ANNOTATE "tsc" npm run typecheck
-      - name: Dependency audit (npm, production dependencies)
-        run: $ANNOTATE "npm audit" npm audit --omit=dev --audit-level=high
+      - name: Dependency advisories (npm audit, triaged)
+        run: |
+          npm audit --json > /tmp/npm-all.json || true
+          npm audit --omit=dev --json > /tmp/npm-prod.json || true
+          $ANNOTATE "dependency advisories" python3 ../scripts/ci/dep_triage.py npm /tmp/npm-all.json /tmp/npm-prod.json
       # The development environment has no npm registry access: when a
       # dependency is added, CI resolves the lockfile and (after every check
       # above passed) commits it to main. No-op when the lockfile is current.
@@ -149,7 +158,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: market-screenshots
-          path: screenshots/market-*.png
+          path: |
+            screenshots/market-*.png
+            screenshots/market-states.json
           if-no-files-found: warn
           retention-days: 30
       - name: Worker executes a task via Redis

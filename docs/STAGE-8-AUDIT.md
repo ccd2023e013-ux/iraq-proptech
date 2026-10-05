@@ -38,10 +38,35 @@ The live checks are in `scripts/live/acceptance.sh` step 11b (Basra, a second ci
 
 ## Verification gate (owner-approved; not weakened to make tests pass)
 
-Stage 8 stays **UNVERIFIED** until every step below passes. It is never merged while GitHub Actions is unavailable.
+`UNVERIFIED → CI → Security → Browser (48 states) → Merge → Render deploy → Production verification → Market live re-check → COMPLETE`
 
-1. **Branch CI.** Backend: ruff (lint and format), mypy, pip-audit and pytest, including every Stage 8 audit test. Frontend: eslint, prettier, vitest, build, tsc and `npm audit` (production dependencies). On the Docker stack: the existing smoke and e2e suites, the browser matrix (`scripts/ci/market-browser.sh`) and stack security (`scripts/ci/security-stack.sh`: headers, input validation, no secrets in browser bundles, rate limit). Screenshots are kept as the `market-screenshots` artifact for 30 days.
-2. **Browser matrix.** 1920×1080, 1440×900 and 390×844 (mobile), each in dark and light, each in Arabic and English: 12 combinations. Each combination covers Basra and Baghdad with demo data on and off. It checks every statement's Fact / Observed label, the AI label, the source line under each statement, the provenance panel, unavailable metrics with reasons, RTL/LTR, theme, and no horizontal overflow. When an area has no listings for a setting, the honest empty state is expected, not invented statements. The check paces its own requests to stay under the market rate limit instead of relaxing it.
-3. **Merge** only if every required check passes.
-4. **Production.** Wait for Render to deploy, then run the Live site workflow (deployed commit, database audit, acceptance including step 11b, browser including the same matrix, `security.sh`, backup/restore). Then run `live-probe.yml` with `mode=market` against the production URL.
-5. **Completion.** Stage 8 is marked COMPLETE only after the production verification passes. Then the temporary daily Actions retry is removed, and only after that does Stage 9 start.
+Stage 8 is never merged while GitHub Actions is unavailable. Stage 9 stays blocked until Stage 8 is COMPLETE.
+
+1. **CI (branch).**
+   - Backend: ruff (lint and format), mypy, pytest including every Stage 8 audit test.
+   - Frontend: eslint, prettier, vitest, build, tsc.
+   - Docker stack: the existing smoke and e2e suites.
+2. **Security (branch).**
+   - `scripts/ci/security-stack.sh` against the stack: headers, input validation, no secrets in browser bundles, rate limit.
+   - Dependency advisories through `scripts/ci/dep_triage.py`:
+     - Every advisory is reported in the job summary and annotations: severity, package, installed and fixed versions, whether the package ships in production, and the decision. Nothing is hidden.
+     - The job fails only for a HIGH, CRITICAL or unknown-severity advisory in a production dependency, unless `security/advisory-triage.json` holds a current written reason that it is not exploitable or not reachable in MAKAN. That file names the reviewer and a review date, and an expired entry stops applying.
+     - Dev- and build-only advisories, and low or moderate ones, are reported as warnings.
+3. **Browser: 48 states.** 12 UI combinations (1920×1080, 1440×900 and 390×844 mobile; dark and light; Arabic and English) × 2 areas (Basra, Baghdad) × 2 demo states (on, off).
+   - Each state is loaded on its own and checked for:
+     - theme, and that the report is for that area;
+     - RTL or LTR;
+     - every statement's Fact / Observed label, and the AI label;
+     - the source line under each statement and the provenance panel;
+     - unavailable metrics, each with a reason;
+     - demo labels when demo is on, none when it is off;
+     - no horizontal overflow.
+   - When an area has no listings for a setting, the honest empty state is expected.
+   - A ledger (`screenshots/market-states.json`) records every state, its URL, screenshot and result. The run fails unless all 48 distinct states were visited and passed.
+   - The check paces its requests to stay under the unchanged market rate limit.
+   - Screenshots and the ledger are kept as the `market-screenshots` CI artifact for 30 days.
+4. **Merge** only if every required check passes.
+5. **Render deploy.** Wait until production serves the merged commit.
+6. **Production verification.** The full Live site workflow: deployed commit, database audit, acceptance including step 11b, browser including the same 48 states, `security.sh`, backup/restore.
+7. **Market live re-check.** `live-probe.yml` with `mode=market` against the production URL (48 states, ledger and screenshots as the `market-live-screenshots` artifact).
+8. **COMPLETE.** Only after steps 6 and 7 pass. `STAGE8_STATUS` in docs/EXECUTION_STATE.md on main is then set to COMPLETE, which stops the daily Actions retry. Only after that may Stage 9 start.
