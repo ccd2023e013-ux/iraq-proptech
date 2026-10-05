@@ -38,6 +38,7 @@ class MarketSnapshot(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     currency: Mapped[str] = mapped_column(String(3), nullable=False)
     include_demo: Mapped[bool] = mapped_column(Boolean, nullable=False)
     active_listings: Mapped[int] = mapped_column(Integer, nullable=False)
+    demo_listings: Mapped[int] = mapped_column(Integer, nullable=False)
     priced_listings: Mapped[int] = mapped_column(Integer, nullable=False)
     median_price: Mapped[Decimal | None] = mapped_column(Numeric(18, 2))
     median_price_per_m2: Mapped[Decimal | None] = mapped_column(Numeric(18, 2))

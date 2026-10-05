@@ -38,6 +38,10 @@ export interface MarketStatement {
   text: string | null;
   sample: number | null;
   demo: boolean;
+  source: "listings" | "price_history" | "status_history" | "interest" | "snapshots" | "ai";
+  method: string;
+  period_from: string | null;
+  period_to: string | null;
 }
 
 export interface MarketUnavailable {
@@ -56,7 +60,9 @@ export interface MarketProvenance {
   demo_share: number;
   methodology: string[];
   confidence: "none" | "low" | "medium" | "high";
+  confidence_reasons: string[];
   last_update: string;
+  newest_listing: string | null;
 }
 
 export interface MarketSegmentRow {
@@ -94,6 +100,13 @@ export interface MarketReport {
   statements: MarketStatement[];
   segments: MarketSegmentRow[];
   areas: MarketAreaRow[];
+  areas_basis: {
+    property_type_code: string;
+    type_ar: string;
+    type_en: string;
+    purpose: string;
+    currency: "IQD" | "USD";
+  } | null;
   unavailable: MarketUnavailable[];
   supply_history: { day: string; active_listings: number }[];
   disclaimer: string;

@@ -100,9 +100,9 @@ export function renderMarketStatement(
         p25: money(p.p25, p.currency, locale),
         p75: money(p.p75, p.currency, locale),
       });
-    case "observed.price_per_m2_change": {
+    case "observed.initial_price_per_m2_change": {
       const change = Number(p.change_pct);
-      return fill(m["observed.price_per_m2_change"], {
+      return fill(m["observed.initial_price_per_m2_change"], {
         type,
         purpose: purposeText,
         change: `${change > 0 ? "+" : ""}${num(change, locale)}`,
@@ -116,20 +116,41 @@ export function renderMarketStatement(
         change: `${change > 0 ? "+" : ""}${num(change, locale)}`,
       });
     }
-    case "observed.median_days_on_market":
-      return fill(m["observed.median_days_on_market"], { days: num(p.days, locale) });
+    case "observed.median_days_to_marked_closed":
+      return fill(m["observed.median_days_to_marked_closed"], { days: num(p.days, locale) });
     case "observed.median_active_age":
       return fill(m["observed.median_active_age"], { days: num(p.days, locale) });
-    case "observed.supply_change":
-      return fill(m["observed.supply_change"], {
+    case "fact.supply_change":
+      return fill(m["fact.supply_change"], {
         from_count: num(p.from_count, locale),
         to_count: num(p.to_count, locale),
         from: day(p.from_day, locale),
         to: day(p.to_day, locale),
       });
-    case "observed.area_breakdown":
-      return fill(m["observed.area_breakdown"], { areas: num(p.areas, locale) });
+    case "fact.area_breakdown":
+      return fill(m["fact.area_breakdown"], { areas: num(p.areas, locale) });
     default:
       return null;
   }
+}
+
+/** "Source · period" line shown under every statement (its provenance). */
+export function provenanceLine(s: MarketStatement, dict: Dictionary, locale: Locale): string {
+  const t = dict.market;
+  const source = (t.sources as Record<string, string>)[s.source] ?? s.source;
+  const fmt = (d: string | null) =>
+    d
+      ? new Date(`${d}T00:00:00Z`).toLocaleDateString(
+          locale === "ar" ? "ar-IQ-u-nu-latn" : "en-GB",
+          { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" },
+        )
+      : null;
+  const from = fmt(s.period_from);
+  const to = fmt(s.period_to);
+  const period = from && to ? `${from} – ${to}` : to ? fill(t.asOf, { date: to }) : "";
+  return [source, period].filter(Boolean).join(" · ");
+}
+
+export function methodText(s: MarketStatement, dict: Dictionary): string {
+  return (dict.market.methods as Record<string, string>)[s.method] ?? s.method;
 }

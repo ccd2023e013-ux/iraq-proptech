@@ -1,4 +1,9 @@
-"""Record today's market snapshot (idempotent: re-running replaces today's rows)."""
+"""Record today's market snapshot (idempotent: re-running replaces today's rows).
+
+A snapshot describes the listings *as they are when it runs*, so it is always
+dated today: there is deliberately no way to write a snapshot for another day
+(that would be back-filled history).
+"""
 
 from __future__ import annotations
 
@@ -28,6 +33,7 @@ def _rows(db: Session, scope_col: Any, include_demo: bool) -> list[Any]:
         select(
             *keys,
             func.count(Property.id),
+            func.count(case((Property.is_demo.is_(True), 1))),
             func.count(case((priced, 1))),
             func.percentile_cont(0.5).within_group(case((priced, Property.price_amount))),
             func.percentile_cont(0.5).within_group(case((priced, per_m2))),
@@ -43,8 +49,12 @@ def _dec(value: Any) -> Decimal | None:
     return None if value is None else Decimal(value).quantize(Decimal("0.01"))
 
 
-def record_snapshot(db: Session, day: date | None = None) -> dict[str, Any]:
-    day = day or datetime.now(UTC).date()
+def _today() -> date:
+    return datetime.now(UTC).date()
+
+
+def record_snapshot(db: Session) -> dict[str, Any]:
+    day = _today()
     db.execute(delete(MarketSnapshot).where(MarketSnapshot.day == day))
     scopes = (
         ("iraq", None),
@@ -54,9 +64,17 @@ def record_snapshot(db: Session, day: date | None = None) -> dict[str, Any]:
     written = 0
     for include_demo in (True, False):
         for level, column in scopes:
-            for scope, type_code, purpose, currency, count, priced, median, median_m2 in _rows(
-                db, column, include_demo
-            ):
+            for (
+                scope,
+                type_code,
+                purpose,
+                currency,
+                count,
+                demos,
+                priced,
+                median,
+                median_m2,
+            ) in _rows(db, column, include_demo):
                 enough = priced >= MIN_SAMPLE
                 db.add(
                     MarketSnapshot(
@@ -67,6 +85,7 @@ def record_snapshot(db: Session, day: date | None = None) -> dict[str, Any]:
                         currency=currency,
                         include_demo=include_demo,
                         active_listings=int(count),
+                        demo_listings=int(demos),
                         priced_listings=int(priced),
                         median_price=_dec(median) if enough else None,
                         median_price_per_m2=_dec(median_m2) if enough else None,

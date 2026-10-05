@@ -27,6 +27,7 @@ def upgrade() -> None:
         sa.Column("currency", sa.String(3), nullable=False),
         sa.Column("include_demo", sa.Boolean(), nullable=False),
         sa.Column("active_listings", sa.Integer(), nullable=False),
+        sa.Column("demo_listings", sa.Integer(), nullable=False),
         sa.Column("priced_listings", sa.Integer(), nullable=False),
         sa.Column("median_price", sa.Numeric(18, 2), nullable=True),
         sa.Column("median_price_per_m2", sa.Numeric(18, 2), nullable=True),

@@ -22,6 +22,7 @@ from app.core.rate_limit import rate_limit
 from app.db.session import get_db
 from app.geo.models import City, Governorate
 from app.market import intelligence
+from app.market.intelligence import MIN_SAMPLE
 from app.properties.enums import PropertyStatus
 from app.properties.models import Property
 
@@ -97,6 +98,8 @@ def market_summary(
                 Property.purpose,
                 Property.currency,
                 func.count(Property.id),
+                func.count(case((priced, 1))),
+                func.count(case((priced & (func.coalesce(Property.area_m2, 0) > 0), 1))),
                 func.percentile_cont(0.5).within_group(case((priced, Property.price_amount))),
                 func.percentile_cont(0.5).within_group(case((priced, per_m2))),
                 func.bool_or(Property.is_demo),
@@ -109,22 +112,24 @@ def market_summary(
         .all()
     )
     response.headers["Cache-Control"] = CACHE
+    # Medians only with enough priced listings (same floor as the market report).
     segments = [
         {
             "property_type_code": type_code,
             "purpose": purpose,
             "currency": currency,
             "listings": count,
-            "median_price": _dec(median),
-            "median_price_per_m2": _dec(median_m2),
+            "median_price": _dec(median) if priced >= MIN_SAMPLE else None,
+            "median_price_per_m2": _dec(median_m2) if priced_m2 >= MIN_SAMPLE else None,
         }
-        for type_code, purpose, currency, count, median, median_m2, _ in rows
+        for type_code, purpose, currency, count, priced, priced_m2, median, median_m2, _ in rows
     ]
     return {
         "city_id": str(city_id) if city_id else None,
         "data_class": "platform",
         "basis": "asking prices of public listings (not transactions)",
-        "includes_demo": any(r[6] for r in rows),
+        "includes_demo": any(r[8] for r in rows),
+        "minimum_sample": MIN_SAMPLE,
         "listings": sum(s["listings"] for s in segments),
         "segments": segments,
         "generated_at": datetime.now(UTC).isoformat(),

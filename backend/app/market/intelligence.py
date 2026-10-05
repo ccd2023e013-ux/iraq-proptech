@@ -11,12 +11,16 @@ Every statement is one of:
 * ``SIMULATION``        scenario output (Stage 12; never mixed into this report).
 
 Rules: no number is produced below a minimum sample; nothing is extrapolated
-beyond the observation period; DEMO listings are flagged on every statement and
-can be excluded; asking prices are never presented as transaction prices.
+beyond the observation period or back-filled; DEMO listings are flagged on every
+statement whose data contains them and can be excluded; currencies are never
+mixed; asking prices are never presented as sold/transaction prices (MAKAN does
+not collect transaction prices, and says so). Every statement carries its own
+provenance (source, period, method); the report adds coverage and confidence.
 """
 
 from __future__ import annotations
 
+import re
 import statistics
 import uuid
 from datetime import UTC, date, datetime, timedelta
@@ -56,10 +60,24 @@ ALLOWED: dict[str, set[str]] = {
     "scenario": {"SIMULATION"},
 }
 
-MIN_SAMPLE = 5  # below this, medians are not reported
+MIN_SAMPLE = 5  # below this, no statistic is reported
 MIN_MONTH_SAMPLE = 5  # listings per month for a month to count in a trend
 DEMAND_WINDOW_DAYS = 30
-CLOSED_STATUSES = ("SOLD", "RENTED", "ARCHIVED", "EXPIRED")
+# Lister-reported outcomes only; ARCHIVED/EXPIRED are withdrawals, not sales.
+MARKED_CLOSED = ("SOLD", "RENTED")
+# Listings that were taken down or never went public stay out of every cohort.
+NEVER_PUBLIC = ("DRAFT", "PENDING_REVIEW", "REJECTED", "SUSPENDED")
+DUPLICATE_SCAN_LIMIT = 3000
+STALE_AFTER_DAYS = 90  # newest listing older than this lowers confidence
+
+MarketSource = Literal[
+    "listings",  # current listings (asking prices, counts)
+    "price_history",  # recorded asking-price changes
+    "status_history",  # lister-reported status changes (sold/rented)
+    "interest",  # views, saves, inquiries on MAKAN
+    "snapshots",  # daily market snapshots, recorded going forward
+    "ai",  # AI provider wording
+]
 
 
 class MarketStatement(BaseModel):
@@ -71,6 +89,11 @@ class MarketStatement(BaseModel):
     text: str | None = None
     sample: int | None = Field(default=None, description="Observations behind the statement")
     demo: bool = Field(description="True when DEMO listings are part of the data")
+    # per-statement provenance
+    source: MarketSource
+    method: str = Field(description="Method key, e.g. 'count', 'median', 'median_change'")
+    period_from: date | None = None
+    period_to: date | None = None
 
     @model_validator(mode="after")
     def _kind_matches_origin(self) -> MarketStatement:
@@ -78,8 +101,13 @@ class MarketStatement(BaseModel):
             raise ValueError(f"a statement from origin {self.origin!r} cannot be {self.kind}")
         if self.text is not None and self.origin != "ai":
             raise ValueError("free text is reserved for AI interpretations")
-        if self.kind == "OBSERVED" and not self.sample:
-            raise ValueError("observed statistics need their sample size")
+        if (self.origin == "ai") != (self.source == "ai"):
+            raise ValueError("only AI interpretations come from the AI source")
+        if self.kind == "OBSERVED":
+            if not self.sample or self.sample < MIN_SAMPLE:
+                raise ValueError(f"observed statistics need a sample of at least {MIN_SAMPLE}")
+            if self.period_from is None or self.period_to is None:
+                raise ValueError("observed statistics need their observation period")
         return self
 
 
@@ -99,7 +127,9 @@ class Provenance(BaseModel):
     demo_share: float
     methodology: list[str]
     confidence: Literal["none", "low", "medium", "high"]
+    confidence_reasons: list[str]
     last_update: datetime
+    newest_listing: date | None = None
 
 
 class SegmentRow(BaseModel):
@@ -126,6 +156,16 @@ class AreaRow(BaseModel):
     sample: int
 
 
+class AreaBasis(BaseModel):
+    """The one segment the area comparison uses, so bars are comparable."""
+
+    property_type_code: str
+    type_ar: str
+    type_en: str
+    purpose: str
+    currency: str
+
+
 class SupplyPoint(BaseModel):
     day: date
     active_listings: int
@@ -137,6 +177,7 @@ class MarketReport(BaseModel):
     statements: list[MarketStatement]
     segments: list[SegmentRow]
     areas: list[AreaRow]
+    areas_basis: AreaBasis | None = None
     unavailable: list[Unavailable]
     supply_history: list[SupplyPoint] = Field(default_factory=list)
     disclaimer: str
@@ -194,6 +235,101 @@ def _quartiles(values: list[Decimal]) -> tuple[Decimal, Decimal, Decimal]:
 
 # --- report
 
+# Words an AI interpretation may never use: forecasts, promises, advice, and any
+# claim that listing prices are sale/transaction prices. Matched case-insensitively
+# on the normalized text; a hit rejects the output and the template is used.
+AI_FORBIDDEN = (
+    # forecasts / predictions
+    "will rise",
+    "will fall",
+    "will increase",
+    "will decrease",
+    "will grow",
+    "expected to",
+    "forecast",
+    "predict",
+    "outlook",
+    "next year",
+    "next month",
+    "سيرتفع",
+    "سينخفض",
+    "سترتفع",
+    "ستنخفض",
+    "سيزداد",
+    "يتوقع",
+    "متوقع",
+    "توقعات",
+    "العام المقبل",
+    "الشهر المقبل",
+    # promises / advice
+    "guarantee",
+    "return on investment",
+    "roi",
+    "profit",
+    "good investment",
+    "best time to buy",
+    "you should buy",
+    "مضمون",
+    "ارباح",
+    "ربح",
+    "عائد",
+    "فرصه استثماريه",
+    "انصح",
+    # transaction-price claims
+    "sold for",
+    "sale price",
+    "transaction price",
+    "selling price",
+    "actual price",
+    "سعر البيع الفعلي",
+    "سعر الصفقه",
+    "بيعت",
+)
+
+
+def _forbidden_hits(text: str) -> list[str]:
+    """Latin phrases match whole words; Arabic ones match inside words (attached
+    prefixes such as و/ال/ب are common)."""
+    from app.ai.nlsearch import normalize
+
+    norm = normalize(text)
+    hits = []
+    for phrase in AI_FORBIDDEN:
+        p = normalize(phrase)
+        if p.isascii():
+            if re.search(rf"\b{re.escape(p)}\b", norm):
+                hits.append(phrase)
+        elif p in norm:
+            hits.append(phrase)
+    return hits
+
+
+def _ai_check(data: dict[str, Any]) -> list[str]:
+    errors = ai_service._require_str_fields("text")(data)
+    if errors:
+        return errors
+    return [f"forbidden_claim:{w}" for w in _forbidden_hits(str(data["text"]))]
+
+
+def _confidence(
+    n: int, demo_n: int, newest: datetime | None, now: datetime
+) -> tuple[Literal["none", "low", "medium", "high"], list[str]]:
+    """Confidence from sample size, data quality (demo share) and freshness."""
+    if n == 0:
+        return "none", ["no_listings"]
+    reasons: list[str] = []
+    level = 3 if n >= 200 else 2 if n >= 30 else 1
+    reasons.append("large_sample" if n >= 200 else "medium_sample" if n >= 30 else "small_sample")
+    if demo_n:
+        level = 1
+        reasons.append("demo_data")
+    if newest is None or (now - newest).days > STALE_AFTER_DAYS:
+        level = min(level, 1)
+        reasons.append("stale")
+    reasons.append("asking_prices_only")
+    levels: tuple[Literal["low", "medium", "high"], ...] = ("low", "medium", "high")
+    return levels[level - 1], reasons
+
 
 def build_report(
     db: Session,
@@ -214,6 +350,7 @@ def build_report(
         base.append(Property.is_demo.is_(False))
     active = [*base, Property.status == PropertyStatus.APPROVED]
     now = datetime.now(UTC)
+    today = now.date()
 
     rows = db.execute(
         select(
@@ -231,17 +368,48 @@ def build_report(
     n = len(rows)
     demo_n = sum(1 for r in rows if r.is_demo)
     demo = demo_n > 0
+    published = [r.published_at for r in rows if r.published_at]
+    oldest = min(published).date() if published else None
+    newest_at = max(published) if published else None
     statements: list[MarketStatement] = []
     unavailable: list[Unavailable] = []
 
-    def fact(section: MarketSection, key: str, **params: Any) -> None:
+    def fact(
+        section: MarketSection,
+        key: str,
+        *,
+        source: MarketSource = "listings",
+        method: str = "count",
+        period: tuple[date | None, date | None] = (None, today),
+        has_demo: bool | None = None,
+        **params: Any,
+    ) -> None:
         statements.append(
             MarketStatement(
-                kind="FACT", origin="platform", section=section, key=key, params=params, demo=demo
+                kind="FACT",
+                origin="platform",
+                section=section,
+                key=key,
+                params=params,
+                demo=demo if has_demo is None else has_demo,
+                source=source,
+                method=method,
+                period_from=period[0],
+                period_to=period[1],
             )
         )
 
-    def observed(section: MarketSection, key: str, sample: int, **params: Any) -> None:
+    def observed(
+        section: MarketSection,
+        key: str,
+        sample: int,
+        *,
+        source: MarketSource,
+        method: str,
+        period: tuple[date | None, date | None],
+        has_demo: bool | None = None,
+        **params: Any,
+    ) -> None:
         statements.append(
             MarketStatement(
                 kind="OBSERVED",
@@ -250,11 +418,18 @@ def build_report(
                 key=key,
                 params=params,
                 sample=sample,
-                demo=demo,
+                demo=demo if has_demo is None else has_demo,
+                source=source,
+                method=method,
+                period_from=period[0],
+                period_to=period[1],
             )
         )
 
-    # Supply (facts)
+    # MAKAN has no transaction data: say so every time, never imply it.
+    unavailable.append(Unavailable(metric="transaction_prices", reason="not_collected"))
+
+    # --- Supply (facts about current listings)
     fact("supply", "fact.active_listings", count=n, demo_count=demo_n)
     by_purpose: dict[str, int] = {}
     by_type: dict[str, int] = {}
@@ -265,26 +440,25 @@ def build_report(
         fact("supply", "fact.by_purpose", counts=by_purpose)
         fact("supply", "fact.by_type", counts=by_type)
     month_ago = now - timedelta(days=30)
-    new_30 = sum(1 for r in rows if r.published_at and r.published_at >= month_ago)
-    fact("supply", "fact.new_listings_30d", count=new_30)
+    new_30 = [r for r in rows if r.published_at and r.published_at >= month_ago]
+    fact(
+        "supply",
+        "fact.new_listings_30d",
+        period=(month_ago.date(), today),
+        has_demo=any(r.is_demo for r in new_30),
+        count=len(new_30),
+    )
 
-    # Prices by segment (observed)
+    # --- Asking prices by segment (type x purpose x currency; never mixed)
     types = {t.code: t for t in db.execute(select(PropertyType)).scalars()}
     groups: dict[tuple[str, str, str], list[Any]] = {}
     for r in rows:
         groups.setdefault((r.property_type_code, r.purpose, r.currency), []).append(r)
     segments: list[SegmentRow] = []
     for (code, purpose, currency), members in sorted(groups.items(), key=lambda kv: -len(kv[1])):
-        prices = [
-            Decimal(m.price_amount)
-            for m in members
-            if not m.price_on_request and m.price_amount is not None
-        ]
-        per_m2 = [
-            Decimal(m.price_amount) / Decimal(m.area_m2)
-            for m in members
-            if not m.price_on_request and m.price_amount is not None and m.area_m2
-        ]
+        priced = [m for m in members if not m.price_on_request and m.price_amount is not None]
+        prices = [Decimal(m.price_amount) for m in priced]
+        per_m2 = [Decimal(m.price_amount) / Decimal(m.area_m2) for m in priced if m.area_m2]
         t = types.get(code)
         row = SegmentRow(
             property_type_code=code,
@@ -301,10 +475,15 @@ def build_report(
         if len(prices) >= MIN_SAMPLE:
             p25, med, p75 = _quartiles(prices)
             row.median_price, row.p25_price, row.p75_price = _q(med), _q(p25), _q(p75)
+            dates = [m.published_at.date() for m in priced if m.published_at]
             observed(
                 "prices",
                 "observed.segment_median",
                 sample=len(prices),
+                source="listings",
+                method="median_quartiles_of_current_asking_prices",
+                period=(min(dates) if dates else today, today),
+                has_demo=any(m.is_demo for m in priced),
                 type_code=code,
                 type_ar=row.type_ar,
                 type_en=row.type_en,
@@ -320,47 +499,86 @@ def build_report(
     if not any(s.median_price for s in segments):
         unavailable.append(
             Unavailable(
-                metric="segment_medians",
-                reason="sample_too_small",
-                detail={"minimum": MIN_SAMPLE},
+                metric="segment_medians", reason="sample_too_small", detail={"minimum": MIN_SAMPLE}
             )
         )
 
-    # Trend: median asking price per m² by listing month, same segment, only with enough months
+    # --- Initial asking price per m², by publication month (one segment).
+    # Uses each listing's FIRST recorded asking price (the price when it was
+    # published), across every listing published in the scope — not today's price
+    # of the survivors — so a month's value is what was asked in that month.
     trend_done = False
     if groups:
-        (code, purpose, currency), members = max(groups.items(), key=lambda kv: len(kv[1]))
+        (code, purpose, currency), _ = max(groups.items(), key=lambda kv: len(kv[1]))
+        cohort = db.execute(
+            select(
+                Property.id,
+                Property.published_at,
+                Property.area_m2,
+                Property.is_demo,
+            ).where(
+                *base,
+                Property.published_at.is_not(None),
+                Property.status.notin_(NEVER_PUBLIC),
+                Property.property_type_code == code,
+                Property.purpose == purpose,
+            )
+        ).all()
+        first_price: dict[uuid.UUID, tuple[Decimal, str]] = {}
+        if cohort:
+            for pid, amount, cur in db.execute(
+                select(
+                    PropertyPriceHistory.property_id,
+                    PropertyPriceHistory.price_amount,
+                    PropertyPriceHistory.currency,
+                )
+                .where(
+                    PropertyPriceHistory.property_id.in_([c.id for c in cohort]),
+                    PropertyPriceHistory.price_amount.is_not(None),
+                )
+                .order_by(PropertyPriceHistory.property_id, PropertyPriceHistory.changed_at)
+            ).all():
+                first_price.setdefault(pid, (Decimal(amount), cur))
         months: dict[str, list[Decimal]] = {}
-        for m in members:
-            if (
-                m.published_at
-                and m.price_amount is not None
-                and m.area_m2
-                and not m.price_on_request
-            ):
-                key = m.published_at.strftime("%Y-%m")
-                months.setdefault(key, []).append(Decimal(m.price_amount) / Decimal(m.area_m2))
+        month_demo: dict[str, bool] = {}
+        for c in cohort:
+            initial = first_price.get(c.id)
+            if initial is None or initial[1] != currency or not c.area_m2:
+                continue  # no recorded initial price, other currency, or no area
+            key = c.published_at.strftime("%Y-%m")
+            months.setdefault(key, []).append(initial[0] / Decimal(c.area_m2))
+            month_demo[key] = month_demo.get(key, False) or bool(c.is_demo)
         usable = {k: v for k, v in sorted(months.items()) if len(v) >= MIN_MONTH_SAMPLE}
         if len(usable) >= 2:
             first_k, last_k = next(iter(usable)), list(usable)[-1]
             first_v = Decimal(statistics.median(usable[first_k]))
             last_v = Decimal(statistics.median(usable[last_k]))
-            change = float((last_v - first_v) / first_v * 100) if first_v else 0.0
-            observed(
-                "dynamics",
-                "observed.price_per_m2_change",
-                sample=sum(len(v) for v in usable.values()),
-                type_code=code,
-                type_ar=types[code].name_ar if code in types else code,
-                type_en=types[code].name_en if code in types else code,
-                purpose=purpose,
-                currency=currency,
-                from_month=first_k,
-                to_month=last_k,
-                months=len(usable),
-                change_pct=round(change, 1),
-            )
-            trend_done = True
+            if first_v:
+                change = float((last_v - first_v) / first_v * 100)
+                y, m = (int(x) for x in last_k.split("-"))
+                end = (date(y + (m == 12), m % 12 + 1, 1) - timedelta(days=1)).isoformat()
+                observed(
+                    "dynamics",
+                    "observed.initial_price_per_m2_change",
+                    sample=sum(len(v) for v in usable.values()),
+                    source="price_history",
+                    method="median_initial_asking_price_per_m2_by_publication_month",
+                    period=(
+                        date.fromisoformat(f"{first_k}-01"),
+                        min(date.fromisoformat(end), today),
+                    ),
+                    has_demo=any(month_demo[k] for k in usable),
+                    type_code=code,
+                    type_ar=types[code].name_ar if code in types else code,
+                    type_en=types[code].name_en if code in types else code,
+                    purpose=purpose,
+                    currency=currency,
+                    from_month=first_k,
+                    to_month=last_k,
+                    months=len(usable),
+                    change_pct=round(change, 1),
+                )
+                trend_done = True
         if not trend_done:
             unavailable.append(
                 Unavailable(
@@ -374,29 +592,55 @@ def build_report(
                 )
             )
 
-    # Price changes on listings (observed from price history)
+    # --- Asking-price changes on current listings (same currency only)
     ids = [r.id for r in rows]
+    demo_ids = {r.id for r in rows if r.is_demo}
     if ids:
         hist = db.execute(
-            select(PropertyPriceHistory.property_id, PropertyPriceHistory.price_amount)
+            select(
+                PropertyPriceHistory.property_id,
+                PropertyPriceHistory.price_amount,
+                PropertyPriceHistory.currency,
+                PropertyPriceHistory.changed_at,
+            )
             .where(
                 PropertyPriceHistory.property_id.in_(ids),
                 PropertyPriceHistory.price_amount.is_not(None),
             )
             .order_by(PropertyPriceHistory.property_id, PropertyPriceHistory.changed_at)
         ).all()
-        series: dict[uuid.UUID, list[Decimal]] = {}
-        for pid, amount in hist:
-            series.setdefault(pid, []).append(Decimal(amount))
-        changes = [
-            float((v[-1] - v[0]) / v[0] * 100) for v in series.values() if len(v) > 1 and v[0]
-        ]
-        fact("dynamics", "fact.listings_with_price_change", count=len(changes), of=n)
+        series: dict[uuid.UUID, list[tuple[Decimal, str, datetime]]] = {}
+        for pid, amount, cur, at in hist:
+            series.setdefault(pid, []).append((Decimal(amount), cur, at))
+        changes: list[float] = []
+        changed_ids: list[uuid.UUID] = []
+        stamps: list[datetime] = []
+        for pid, v in series.items():
+            first, last = v[0], v[-1]
+            # a change is only measured when both prices are in the same currency
+            if len(v) > 1 and first[1] == last[1] and first[0] and first[0] != last[0]:
+                changes.append(float((last[0] - first[0]) / first[0] * 100))
+                changed_ids.append(pid)
+                stamps += [first[2], last[2]]
+        period = (min(stamps).date(), max(stamps).date()) if stamps else (None, today)
+        fact(
+            "dynamics",
+            "fact.listings_with_price_change",
+            source="price_history",
+            period=period,
+            has_demo=any(i in demo_ids for i in changed_ids),
+            count=len(changes),
+            of=n,
+        )
         if len(changes) >= MIN_SAMPLE:
             observed(
                 "dynamics",
                 "observed.median_price_change",
                 sample=len(changes),
+                source="price_history",
+                method="median_change_first_to_latest_asking_price_same_currency",
+                period=period,
+                has_demo=any(i in demo_ids for i in changed_ids),
                 change_pct=round(statistics.median(changes), 1),
             )
         else:
@@ -408,35 +652,46 @@ def build_report(
                 )
             )
 
-    # Time on market: closed listings (approval → closing status)
+    # --- Days until the lister marked a listing sold/rented (lister-reported,
+    # not a verified transaction; withdrawn/expired listings are not counted)
     closed_rows = db.execute(
-        select(Property.id, Property.published_at, func.max(PropertyStatusHistory.changed_at))
+        select(
+            Property.id,
+            Property.published_at,
+            Property.is_demo,
+            func.max(PropertyStatusHistory.changed_at),
+        )
         .join(PropertyStatusHistory, PropertyStatusHistory.property_id == Property.id)
         .where(
             *base,
             Property.published_at.is_not(None),
-            PropertyStatusHistory.to_status.in_(CLOSED_STATUSES),
+            Property.status.in_(MARKED_CLOSED),
+            PropertyStatusHistory.to_status.in_(MARKED_CLOSED),
         )
-        .group_by(Property.id, Property.published_at)
+        .group_by(Property.id, Property.published_at, Property.is_demo)
     ).all()
-    durations = [
-        (closed - published).days
-        for _, published, closed in closed_rows
-        if closed and published and closed >= published
+    closed = [
+        (published, at, is_demo)
+        for _, published, is_demo, at in closed_rows
+        if at and published and at >= published
     ]
-    if len(durations) >= MIN_SAMPLE:
+    if len(closed) >= MIN_SAMPLE:
         observed(
             "dynamics",
-            "observed.median_days_on_market",
-            sample=len(durations),
-            days=int(statistics.median(durations)),
+            "observed.median_days_to_marked_closed",
+            sample=len(closed),
+            source="status_history",
+            method="median_days_published_to_marked_sold_or_rented",
+            period=(min(c[0] for c in closed).date(), max(c[1] for c in closed).date()),
+            has_demo=any(c[2] for c in closed),
+            days=int(statistics.median((at - published).days for published, at, _ in closed)),
         )
     else:
         unavailable.append(
             Unavailable(
                 metric="time_on_market",
                 reason="too_few_closed_listings",
-                detail={"closed_listings": len(durations), "minimum": MIN_SAMPLE},
+                detail={"closed_listings": len(closed), "minimum": MIN_SAMPLE},
             )
         )
     active_ages = [(now - r.published_at).days for r in rows if r.published_at]
@@ -445,20 +700,23 @@ def build_report(
             "dynamics",
             "observed.median_active_age",
             sample=len(active_ages),
+            source="listings",
+            method="median_days_since_publication",
+            period=(oldest, today),
             days=int(statistics.median(active_ages)),
         )
 
-    # Demand proxies (facts over the window)
+    # --- Interest on MAKAN (facts over a fixed window; not market demand)
     since = now - timedelta(days=DEMAND_WINDOW_DAYS)
     if ids:
+        from app.analytics.models import PropertyViewDaily
+
         inquiries = db.execute(
             select(func.count()).where(Inquiry.property_id.in_(ids), Inquiry.created_at >= since)
         ).scalar_one()
         favorites = db.execute(
             select(func.count()).where(Favorite.property_id.in_(ids), Favorite.created_at >= since)
         ).scalar_one()
-        from app.analytics.models import PropertyViewDaily
-
         views = db.execute(
             select(func.coalesce(func.sum(PropertyViewDaily.views), 0)).where(
                 PropertyViewDaily.property_id.in_(ids),
@@ -468,35 +726,44 @@ def build_report(
         fact(
             "demand",
             "fact.demand_30d",
+            source="interest",
+            period=(since.date(), today),
             views=int(views),
             inquiries=int(inquiries),
             favorites=int(favorites),
             days=DEMAND_WINDOW_DAYS,
         )
 
-    # Supply over time: only from recorded daily snapshots (never back-filled)
+    # --- Supply over time: only recorded daily snapshots (never back-filled,
+    # never inferred for districts)
     history: list[SupplyPoint] = []
     if scope["level"] == "district":
         unavailable.append(Unavailable(metric="supply_trend", reason="not_recorded_for_districts"))
     else:
         scope_key = "iraq" if scope["level"] == "iraq" else f"{scope['level']}:{scope['id']}"
-        history = [
-            SupplyPoint(day=day, active_listings=int(total))
-            for day, total in db.execute(
-                select(MarketSnapshot.day, func.sum(MarketSnapshot.active_listings))
-                .where(
-                    MarketSnapshot.scope_key == scope_key,
-                    MarketSnapshot.include_demo.is_(include_demo),
-                )
-                .group_by(MarketSnapshot.day)
-                .order_by(MarketSnapshot.day)
-            ).all()
-        ]
+        snap_rows = db.execute(
+            select(
+                MarketSnapshot.day,
+                func.sum(MarketSnapshot.active_listings),
+                func.sum(MarketSnapshot.demo_listings),
+            )
+            .where(
+                MarketSnapshot.scope_key == scope_key,
+                MarketSnapshot.include_demo.is_(include_demo),
+            )
+            .group_by(MarketSnapshot.day)
+            .order_by(MarketSnapshot.day)
+        ).all()
+        history = [SupplyPoint(day=d, active_listings=int(total)) for d, total, _ in snap_rows]
         if len(history) >= 2:
-            observed(
+            fact(
                 "supply",
-                "observed.supply_change",
-                sample=len(history),
+                "fact.supply_change",
+                source="snapshots",
+                method="recorded_daily_snapshots",
+                period=(history[0].day, history[-1].day),
+                has_demo=any(int(d or 0) for _, _, d in snap_rows),
+                days_recorded=len(history),
                 from_day=history[0].day.isoformat(),
                 to_day=history[-1].day.isoformat(),
                 from_count=history[0].active_listings,
@@ -514,8 +781,8 @@ def build_report(
                 )
             )
 
-    # Possible duplicate listings (same type/purpose/currency/price, area within 2%, < 200 m)
-    if ids and n <= 3000:
+    # --- Possible duplicates: a heuristic match, never a confirmed duplicate
+    if ids and n <= DUPLICATE_SCAN_LIMIT:
         a, b = aliased(Property), aliased(Property)
         geog = Geography(geometry_type="POINT", srid=4326)
         pairs = db.execute(
@@ -537,29 +804,60 @@ def build_report(
             )
             .where(a.id.in_(ids), b.id.in_(ids))
         ).scalar_one()
-        fact("quality", "fact.possible_duplicate_pairs", pairs=int(pairs))
+        fact(
+            "quality",
+            "fact.possible_duplicate_pairs",
+            method="heuristic_same_type_price_currency_area_2pct_within_200m",
+            pairs=int(pairs),
+        )
+    elif ids:
+        unavailable.append(
+            Unavailable(
+                metric="possible_duplicates",
+                reason="scope_too_large",
+                detail={"listings": n, "limit": DUPLICATE_SCAN_LIMIT},
+            )
+        )
 
-    # Area breakdown (observed per child area)
+    # --- Area comparison: ONE segment (most common sale type, its main currency)
     areas: list[AreaRow] = []
+    areas_basis: AreaBasis | None = None
     if child_level:
         model = District if child_level == "district" else City
         column = Property.district_id if child_level == "district" else Property.city_id
-        area_rows: dict[uuid.UUID, list[Any]] = {}
-        for r in db.execute(
-            select(
-                column,
-                Property.price_amount,
-                Property.area_m2,
-                Property.currency,
-                Property.price_on_request,
-            ).where(*active, column.is_not(None), Property.purpose == "SALE")
-        ).all():
-            area_rows.setdefault(r[0], []).append(r)
         counts = dict(
             db.execute(
                 select(column, func.count()).where(*active, column.is_not(None)).group_by(column)
             ).all()
         )
+        sale = [k for k in groups if k[1] == "SALE"]
+        if sale:
+            code, purpose, currency = max(sale, key=lambda k: len(groups[k]))
+            t = types.get(code)
+            areas_basis = AreaBasis(
+                property_type_code=code,
+                type_ar=t.name_ar if t else code,
+                type_en=t.name_en if t else code,
+                purpose=purpose,
+                currency=currency,
+            )
+        values_by_area: dict[uuid.UUID, list[Decimal]] = {}
+        area_demo: dict[uuid.UUID, bool] = {}
+        if areas_basis:
+            for area_id, price, m2, is_demo in db.execute(
+                select(column, Property.price_amount, Property.area_m2, Property.is_demo).where(
+                    *active,
+                    column.is_not(None),
+                    Property.property_type_code == areas_basis.property_type_code,
+                    Property.purpose == areas_basis.purpose,
+                    Property.currency == areas_basis.currency,
+                    Property.price_on_request.is_(False),
+                    Property.price_amount.is_not(None),
+                )
+            ).all():
+                if m2:
+                    values_by_area.setdefault(area_id, []).append(Decimal(price) / Decimal(m2))
+                    area_demo[area_id] = area_demo.get(area_id, False) or bool(is_demo)
         places = {
             p.id: p for p in db.execute(select(model).where(model.id.in_(list(counts)))).scalars()
         }
@@ -567,12 +865,7 @@ def build_report(
             place = places.get(area_id)
             if place is None:
                 continue
-            sale = area_rows.get(area_id, [])
-            by_cur: dict[str, list[Decimal]] = {}
-            for _, price, m2, cur, por in sale:
-                if price is not None and m2 and not por:
-                    by_cur.setdefault(cur, []).append(Decimal(price) / Decimal(m2))
-            cur, values = max(by_cur.items(), key=lambda kv: len(kv[1]), default=(None, []))
+            values = values_by_area.get(area_id, [])
             median = _q(statistics.median(values)) if len(values) >= MIN_SAMPLE else None
             areas.append(
                 AreaRow(
@@ -582,48 +875,45 @@ def build_report(
                     name_en=place.name_en,
                     active_listings=int(count),
                     median_price_per_m2=median,
-                    currency=cur if median else None,
+                    currency=areas_basis.currency if median and areas_basis else None,
                     sample=len(values),
                 )
             )
         if areas:
-            observed(
-                "areas",
-                "observed.area_breakdown",
-                sample=n,
-                level=child_level,
-                areas=len(areas),
-            )
+            fact("areas", "fact.area_breakdown", level=child_level, areas=len(areas))
 
-    # Provenance
-    published = [r.published_at for r in rows if r.published_at]
-    reported = [s for s in statements if s.kind == "OBSERVED"]
-    confidence: Literal["none", "low", "medium", "high"] = (
-        "none" if n == 0 else "low" if n < 30 or demo else "medium" if n < 200 else "high"
-    )
+    # --- Provenance and confidence
+    confidence, reasons = _confidence(n, demo_n, newest_at, now)
     provenance = Provenance(
         source="MAKAN platform listings (asking prices, not transaction prices)",
         coverage=f"{scope['level']}: {scope['name_en'] or scope['name_ar']}",
-        observation_from=min(published).date() if published else None,
-        observation_to=max(published).date() if published else None,
+        observation_from=oldest,
+        observation_to=newest_at.date() if newest_at else None,
         sample_listings=n,
         includes_demo=demo,
         demo_share=round(demo_n / n, 3) if n else 0.0,
         methodology=[
-            f"medians and quartiles only with at least {MIN_SAMPLE} listings",
+            f"no statistic with fewer than {MIN_SAMPLE} observations",
             "currencies are never converted or mixed",
-            "trend compares monthly medians of one segment, only months with "
-            f"{MIN_MONTH_SAMPLE}+ listings",
-            "demand proxies are platform views, saves and inquiries, not market demand",
+            "asking prices only; MAKAN collects no transaction prices",
+            "price trend: median initial asking price per m² by publication month, one "
+            f"segment, months with {MIN_MONTH_SAMPLE}+ listings",
+            "sold/rented timing is lister-reported, not verified",
+            "interest is views, saves and inquiries on MAKAN, not market demand",
             "supply over time comes from daily snapshots recorded going forward, never back-filled",
+            "possible duplicates are a heuristic match, not confirmed duplicates",
         ],
         confidence=confidence,
+        confidence_reasons=reasons,
         last_update=now,
+        newest_listing=newest_at.date() if newest_at else None,
     )
 
+    # --- AI interpretation: wording only, from the facts above, guarded
     provider: str | None = None
+    reported = [s for s in statements if s.kind == "OBSERVED"]
     if interpret and reported:
-        facts = {
+        facts: dict[str, Any] = {
             "scope_ar": scope["name_ar"],
             "scope_en": scope["name_en"],
             "active_listings": n,
@@ -646,19 +936,20 @@ def build_report(
                 feature="market.interpretation",
                 task="market.interpretation",
                 system=(
-                    "You describe Iraqi property market data. Use only the facts given. Say "
-                    "'based on the available data'. Never predict prices, never promise returns, "
-                    "never call listing prices transaction prices. If includes_demo is true, say "
-                    "the data is demonstration data."
+                    "You restate Iraqi property listing data in plain words. Use only the facts "
+                    "given; add no numbers, places or claims of your own. Begin with 'Based on "
+                    "the available data'. These are asking prices from listings, never sale or "
+                    "transaction prices. Never forecast, never advise, never promise returns. "
+                    "If includes_demo is true, say the figures include demonstration data."
                 ),
-                instructions="Two short sentences in plain words.",
+                instructions="At most three short sentences.",
                 facts=facts,
                 output_schema={
                     "type": "object",
                     "properties": {"text": {"type": "string"}},
                     "required": ["text"],
                 },
-                validate=ai_service._require_str_fields("text"),
+                validate=_ai_check,
                 language=language,
             )
         except AppError as exc:
@@ -673,8 +964,12 @@ def build_report(
                     origin="ai",
                     section="interpretation",
                     key="ai.text",
-                    text=str(data["text"])[:800],
+                    text=str(data["text"])[:600],
                     demo=demo,
+                    source="ai",
+                    method="restatement_of_observed_statistics",
+                    period_from=oldest,
+                    period_to=today,
                 )
             )
 
@@ -684,6 +979,7 @@ def build_report(
         statements=statements,
         segments=segments,
         areas=areas,
+        areas_basis=areas_basis,
         unavailable=unavailable,
         supply_history=history,
         disclaimer=(

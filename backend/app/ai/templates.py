@@ -332,7 +332,7 @@ def market_interpretation(f: dict[str, Any], lang: str) -> dict[str, Any]:
             parts.append(
                 f"الوسيط في الفئة الأكبر ({f['segment_type_ar']}) هو {f['segment_median']} "
                 f"{f['segment_currency']} لسعر الطلب من {f['segment_sample']} إعلانات، "
-                "وهو سعر معروض وليس سعر صفقة."
+                "وهي أسعار طلب معروضة في الإعلانات."
             )
         if f.get("includes_demo"):
             parts.append("تتضمن هذه الأرقام بيانات تجريبية للعرض فقط.")
@@ -342,7 +342,7 @@ def market_interpretation(f: dict[str, Any], lang: str) -> dict[str, Any]:
         parts.append(
             f"The median asking price in the largest segment ({f['segment_type_en']}) is "
             f"{f['segment_median']} {f['segment_currency']} across {f['segment_sample']} "
-            "listings; that is an asking price, not a sale price."
+            "listings; these are prices asked in listings."
         )
     if f.get("includes_demo"):
         parts.append("These figures include demonstration data.")

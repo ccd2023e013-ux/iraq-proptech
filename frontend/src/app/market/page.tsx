@@ -2,7 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { TrustBadge, type TrustKind } from "@/components/ui/TrustBadge";
-import { fill, num, renderMarketStatement } from "@/features/market/statements";
+import {
+  fill,
+  methodText,
+  num,
+  provenanceLine,
+  renderMarketStatement,
+} from "@/features/market/statements";
 import { getDictionary } from "@/i18n";
 import { getRequestLocale } from "@/i18n/server";
 import { serverApiFetch } from "@/lib/api/server";
@@ -66,7 +72,10 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
     bySection.set(s.section, [...(bySection.get(s.section) ?? []), { s, text }]);
   }
   const empty = report?.provenance.sample_listings === 0;
-  const bars = (report?.areas ?? []).filter((a) => a.median_price_per_m2 && a.currency === "IQD");
+  const basisCurrency = report?.areas_basis?.currency ?? "IQD";
+  const bars = (report?.areas ?? []).filter(
+    (a) => a.median_price_per_m2 && a.currency === basisCurrency,
+  );
   const maxBar = Math.max(1, ...bars.map((a) => Number(a.median_price_per_m2)));
   const p = report?.provenance;
   const date = (d: string | null) =>
@@ -158,6 +167,9 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
                 {ai.demo && <TrustBadge kind="demo">{dict.listing.demo}</TrustBadge>}
               </div>
               <p className="max-w-3xl text-lg text-ink">{ai.text}</p>
+              <p className="text-xs text-ink-3" title={methodText(ai, dict)}>
+                {provenanceLine(ai, dict, locale)}
+              </p>
             </section>
           )}
 
@@ -189,6 +201,13 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
                           ) : null}
                         </div>
                         <p className="text-ink">{text}</p>
+                        <p
+                          className="text-xs text-ink-3"
+                          title={methodText(s, dict)}
+                          data-testid="market-statement-provenance"
+                        >
+                          {provenanceLine(s, dict, locale)}
+                        </p>
                       </li>
                     ))}
                   </ul>
@@ -267,17 +286,30 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
               >
                 {t.areasTitle}
               </h2>
-              <p className="text-sm text-ink-3">{t.areasNote}</p>
+              {report.areas_basis && (
+                <p className="text-sm text-ink-3">
+                  {fill(t.areasBasis, {
+                    type: locale === "ar" ? report.areas_basis.type_ar : report.areas_basis.type_en,
+                    purpose:
+                      (dict.listing.purposes as Record<string, string>)[
+                        report.areas_basis.purpose
+                      ] ?? report.areas_basis.purpose,
+                    currency: report.areas_basis.currency,
+                  })}
+                </p>
+              )}
               <ul
                 className="flex flex-col divide-y divide-hairline border-y border-hairline"
                 data-testid="market-areas"
               >
                 {report.areas.map((a) => {
                   const value =
-                    a.median_price_per_m2 && a.currency === "IQD"
+                    a.median_price_per_m2 && a.currency === basisCurrency
                       ? Number(a.median_price_per_m2)
                       : null;
-                  const label = value ? formatPrice(a.median_price_per_m2, "IQD", locale) : null;
+                  const label = value
+                    ? formatPrice(a.median_price_per_m2, basisCurrency, locale)
+                    : null;
                   return (
                     <li
                       key={a.id}
@@ -366,7 +398,12 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
               [t.prov.period, `${date(p.observation_from)} – ${date(p.observation_to)}`],
               [t.prov.sample, fill(t.sample, { n: num(p.sample_listings, locale) })],
               [t.prov.demo, `${num(Math.round(p.demo_share * 100), locale)}%`],
-              [t.prov.confidence, t.confidence[p.confidence]],
+              [
+                t.prov.confidence,
+                `${t.confidence[p.confidence]} (${p.confidence_reasons
+                  .map((r) => (t.confidenceReasons as Record<string, string>)[r] ?? r)
+                  .join(locale === "ar" ? "، " : ", ")})`,
+              ],
               [t.prov.updated, date(p.last_update)],
             ].map(([k, v]) => (
               <div key={k} className="flex flex-col gap-0.5">

@@ -16,7 +16,13 @@ pytestmark = pytest.mark.db
 
 def test_summary_medians_by_segment_and_demo_flag(api: TestClient, db_session: Session) -> None:
     owner = make_user(db_session, roles=[Role.CUSTOMER, Role.PROPERTY_OWNER])
-    for price, area in (("100000000", "100"), ("200000000", "100"), ("400000000", "200")):
+    for price, area in (
+        ("100000000", "100"),
+        ("200000000", "100"),
+        ("400000000", "200"),
+        ("150000000", "100"),
+        ("300000000", "150"),
+    ):
         make_listing(db_session, owner, price_amount=Decimal(price), area_m2=Decimal(area))
     make_listing(db_session, owner, price_amount=Decimal("90000"), currency="USD", is_demo=True)
     make_listing(db_session, owner, price_amount=Decimal("999000000"), status="DRAFT")
@@ -24,11 +30,13 @@ def test_summary_medians_by_segment_and_demo_flag(api: TestClient, db_session: S
     body = api.get("/api/v1/market/summary").json()
     assert body["data_class"] == "platform" and body["includes_demo"] is True
     iqd = next(s for s in body["segments"] if s["currency"] == "IQD")
-    assert iqd["listings"] == 3  # the draft is not public
+    assert iqd["listings"] == 5  # the draft is not public
     assert iqd["median_price"] == "200000000.00"
     assert iqd["median_price_per_m2"] == "2000000.00"
     usd = next(s for s in body["segments"] if s["currency"] == "USD")
     assert usd["listings"] == 1  # currencies are never mixed
+    assert usd["median_price"] is None  # one listing: below the minimum sample
+    assert body["minimum_sample"] == 5
 
 
 def test_cities_ranked_by_public_listings(api: TestClient, db_session: Session) -> None:

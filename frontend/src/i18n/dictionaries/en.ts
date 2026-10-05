@@ -726,8 +726,8 @@ const en: Dictionary = {
     },
     sample: "{n} listings",
     m: {
-      "observed.supply_change":
-        "Active listings went from {from_count} on {from} to {to_count} on {to}",
+      "fact.supply_change":
+        "Recorded daily snapshots: {from_count} active listings on {from}, {to_count} on {to}",
       "fact.active_listings": "{count} active listings",
       "fact.active_listings_demo": "{count} active listings, {demo} of them demo",
       "fact.new_listings_30d": "{count} listings published in the last 30 days",
@@ -735,16 +735,17 @@ const en: Dictionary = {
       "fact.demand_30d":
         "In the last {days} days: {views} views, {favorites} saves and {inquiries} inquiries on MAKAN",
       "fact.possible_duplicate_pairs":
-        "{pairs} pairs of listings look alike (same type, price and size within 200 m) and may be duplicates",
+        "{pairs} pairs of listings look alike (same type, price and currency, similar size, within 200 m): possible duplicates, not confirmed",
       "observed.segment_median":
         "{type} {purpose}: median asking price {median}; the middle half asks {p25} to {p75}",
-      "observed.price_per_m2_change":
-        "{type} {purpose}: the median asking price per m² moved {change}% from {from} to {to}",
-      "observed.median_price_change": "Listings that changed price moved by a median of {change}%",
-      "observed.median_days_on_market":
-        "Listings that closed stayed online a median of {days} days",
+      "observed.initial_price_per_m2_change":
+        "{type} {purpose}: the median asking price per m² when listed moved {change}% from listings published in {from} to those published in {to}",
+      "observed.median_price_change":
+        "Listings that changed their asking price moved by a median of {change}%",
+      "observed.median_days_to_marked_closed":
+        "Listings their owners marked sold or rented had been online a median of {days} days (as reported by the lister, not a verified sale)",
       "observed.median_active_age": "Active listings have been online a median of {days} days",
-      "observed.area_breakdown": "{areas} areas compared below",
+      "fact.area_breakdown": "{areas} areas compared below",
     },
     segmentsTitle: "Asking prices by segment",
     segmentsNote:
@@ -758,12 +759,12 @@ const en: Dictionary = {
     },
     notEnough: "Not enough data",
     areasTitle: "Areas compared",
-    areasNote:
-      "Median asking price per m² for sale listings in IQD. Bars are drawn only where an area has at least 5 priced listings.",
     areaListings: "{n} active",
     openArea: "Open {name}",
     unavailableTitle: "Not available yet",
     metrics: {
+      transaction_prices: "Sold / transaction prices",
+      possible_duplicates: "Possible duplicates",
       supply_trend: "Supply over time",
       segment_medians: "Segment medians",
       price_trend: "Price trend over time",
@@ -772,6 +773,10 @@ const en: Dictionary = {
       ai_interpretation: "AI interpretation",
     },
     reasons: {
+      not_collected:
+        "MAKAN does not collect sale or transaction prices; every price here is an asking price.",
+      scope_too_large:
+        "Too many listings in this area to scan for duplicates; choose a smaller area.",
       snapshots_too_few:
         "Daily snapshots started recently ({days} recorded); a trend needs at least 2 days and is never back-filled.",
       not_recorded_for_districts:
@@ -789,6 +794,43 @@ const en: Dictionary = {
       "A trend compares monthly medians of one segment, using only months with 5 or more listings.",
       "Views, saves and inquiries are interest on MAKAN, not demand in the whole market.",
     ],
+    asOf: "as of {date}",
+    sources: {
+      listings: "Listings on MAKAN",
+      price_history: "Recorded asking-price changes",
+      status_history: "Status changes reported by listers",
+      interest: "Views, saves and inquiries on MAKAN",
+      snapshots: "Daily market snapshots",
+      ai: "AI wording of the figures above",
+    },
+    methods: {
+      count: "Count of records",
+      median_quartiles_of_current_asking_prices:
+        "Median and middle half of current asking prices (5 or more listings)",
+      median_initial_asking_price_per_m2_by_publication_month:
+        "Median of each listing's first recorded asking price per m², grouped by the month it was published",
+      median_change_first_to_latest_asking_price_same_currency:
+        "Median change from each listing's first to latest asking price, same currency only",
+      median_days_published_to_marked_sold_or_rented:
+        "Median days from publication until the lister marked it sold or rented",
+      median_days_since_publication: "Median days since each active listing was published",
+      recorded_daily_snapshots: "Totals from snapshots recorded each day; never back-filled",
+      heuristic_same_type_price_currency_area_2pct_within_200m:
+        "Pairs with the same type, purpose, price and currency, size within 2%, and less than 200 m apart",
+      restatement_of_observed_statistics:
+        "Restates the statistics above; checked for invented numbers and claims",
+    },
+    confidenceReasons: {
+      no_listings: "no listings",
+      small_sample: "fewer than 30 listings",
+      medium_sample: "30 to 199 listings",
+      large_sample: "200 or more listings",
+      demo_data: "includes demo data",
+      stale: "no listing published in the last 90 days",
+      asking_prices_only: "asking prices only",
+    },
+    areasBasis:
+      "Median asking price per m² for {type} {purpose}, in {currency}, so every bar compares the same kind of listing. Bars appear only where an area has at least 5 priced listings.",
     provenanceTitle: "Where this comes from",
     prov: {
       source: "Source",

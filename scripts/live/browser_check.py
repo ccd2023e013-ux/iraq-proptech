@@ -72,61 +72,110 @@ def future_iraq(browser) -> None:
     ctx.close()
 
 
+MARKET_MATRIX = (
+    # width, height, language, theme
+    (1920, 1080, "en", "dark"),
+    (1440, 900, "ar", "light"),
+    (390, 844, "ar", "dark"),
+    (390, 844, "en", "light"),
+)
+
+
 def market_intelligence(browser) -> None:
-    """Stage 8: every market statement is typed; gaps and provenance are shown."""
-    for viewport, locale in (
-        ({"width": 1440, "height": 900}, "en-US"),
-        ({"width": 390, "height": 844}, "ar-IQ"),
-    ):
-        ctx = browser.new_context(viewport=viewport, locale=locale)
+    """Stage 8: typed statements with provenance, honest gaps, demo exclusion,
+    at 1920/1440/390, dark and light, Arabic (RTL) and English, Basra and Baghdad."""
+    for width, height, lang, theme in MARKET_MATRIX:
+        tag = f"{width}-{lang}-{theme}"
+        phone = width < 600
+        ctx = browser.new_context(
+            viewport={"width": width, "height": height},
+            color_scheme=theme,
+            is_mobile=phone,
+            has_touch=phone,
+        )
+        ctx.add_cookies(
+            [
+                {"name": "locale", "value": lang, "url": WEB},
+                {"name": "theme", "value": theme, "url": WEB},
+            ]
+        )
         page = ctx.new_page()
-        tag = f"{viewport['width']}"
         page.goto(WEB + "/market", wait_until="load", timeout=120_000)
-        statements = page.locator("[data-testid=market-statement]")
-        count = statements.count()
-        check(count > 0, f"[{tag}] market report shows statements ({count})")
-        kinds = {statements.nth(i).get_attribute("data-kind") for i in range(count)}
         check(
-            kinds <= {"FACT", "OBSERVED"},
-            f"[{tag}] statements are typed FACT/OBSERVED ({kinds})",
+            page.get_attribute("html", "dir") == ("rtl" if lang == "ar" else "ltr"),
+            f"[{tag}] page direction matches the language",
         )
         check(
-            page.locator("[data-testid=market-provenance]").count() == 1,
-            f"[{tag}] provenance panel is shown",
+            page.get_attribute("html", "data-theme") == theme,
+            f"[{tag}] {theme} theme applied",
         )
-        demo_badges = page.locator(
-            "[data-testid=market-provenance] [data-trust=demo]"
-        ).count()
-        check(demo_badges >= 1, f"[{tag}] demo data is labelled in provenance")
+        bg = page.evaluate("getComputedStyle(document.body).backgroundColor")
+        rgb = [int(x) for x in bg[bg.index("(") + 1 : bg.index(")")].split(",")[:3]]
+        luminance = sum(rgb) / 3
         check(
-            no_horizontal_scroll(page), f"[{tag}] market page has no horizontal scroll"
+            luminance < 60 if theme == "dark" else luminance > 200,
+            f"[{tag}] background matches the theme ({bg})",
         )
-        page.screenshot(path=str(OUT / f"market-{tag}.png"), full_page=True)
-        # Basra: the city view breaks down by district
-        option = page.locator("select[name=city_id] option").filter(has_text="Basra")
-        if locale == "ar-IQ":
-            option = page.locator("select[name=city_id] option").filter(
-                has_text="البصرة"
-            )
-        if option.count():
+
+        for city_label in (("Basra", "البصرة"), ("Baghdad", "بغداد")):
+            name = city_label[0] if lang == "en" else city_label[1]
+            option = page.locator("select[name=city_id] option").filter(has_text=name)
+            check(option.count() > 0, f"[{tag}] {city_label[0]} is in the area picker")
+            if not option.count():
+                continue
             page.select_option(
                 "select[name=city_id]", value=option.first.get_attribute("value")
             )
             page.locator("[data-testid=market-controls] button[type=submit]").click()
             page.wait_for_url("**/market?city_id=*", timeout=60_000)
-            areas = page.locator("[data-testid=market-areas] li").count()
-            check(areas > 0, f"[{tag}] Basra market breaks down by district ({areas})")
+            page.wait_for_load_state("load")
+            statements = page.locator("[data-testid=market-statement]")
+            count = statements.count()
+            check(count > 0, f"[{tag}] {city_label[0]}: statements shown ({count})")
+            kinds = {statements.nth(k).get_attribute("data-kind") for k in range(count)}
+            check(
+                kinds <= {"FACT", "OBSERVED"},
+                f"[{tag}] {city_label[0]}: typed ({kinds})",
+            )
+            lines = page.locator("[data-testid=market-statement-provenance]").count()
+            check(
+                lines == count,
+                f"[{tag}] {city_label[0]}: every statement shows its source",
+            )
+            check(
+                page.locator("[data-testid=market-provenance]").count() == 1,
+                f"[{tag}] {city_label[0]}: provenance panel shown",
+            )
+            check(
+                page.locator("[data-testid=market-unavailable] li").count() >= 1,
+                f"[{tag}] {city_label[0]}: unavailable metrics listed with reasons",
+            )
+            check(
+                page.locator(
+                    "[data-testid=market-provenance] [data-trust=demo]"
+                ).count()
+                >= 1,
+                f"[{tag}] {city_label[0]}: demo data labelled",
+            )
             check(
                 no_horizontal_scroll(page),
-                f"[{tag}] Basra market has no horizontal scroll",
+                f"[{tag}] {city_label[0]}: no horizontal scroll",
             )
-            page.screenshot(path=str(OUT / f"market-basra-{tag}.png"), full_page=True)
-        # excluding demo listings must never show demo-labelled statements
+            page.screenshot(
+                path=str(OUT / f"market-{city_label[0].lower()}-{tag}.png"),
+                full_page=True,
+            )
+
+        # Excluding demo data must never show a demo label on a statement.
         page.goto(WEB + "/market?demo=0", wait_until="load")
         check(
             page.locator("[data-testid=market-statement] [data-trust=demo]").count()
             == 0,
             f"[{tag}] excluding demo data removes demo labels",
+        )
+        check(
+            page.locator("input[name=demo][type=checkbox]").is_checked() is False,
+            f"[{tag}] the demo toggle reflects the exclusion",
         )
         ctx.close()
 

@@ -225,18 +225,23 @@ classes kept separate: verified / platform / public / AI estimate. No
 back-filled history.
 - **Acceptance**: snapshot job + charts live; tests for class separation.
 
-**Status 🔶 — built on branch `stage-8-market`, not yet verified** (GitHub
-Actions blocked by billing on 2026-10-05; nothing is called done until CI and
-the Live site run pass).
+**Status 🔶 — built and statically audited on branch `stage-8-market`
+(docs/STAGE-8-AUDIT.md), not yet verified.** GitHub Actions is paused until the
+monthly allowance resets (repo stays private, no spending increase). Merge only
+after: full CI, browser checks at 1920/1440/390 in dark and light, Arabic and
+English, Basra and a second city, demo exclusion, provenance and gaps, security
+checks and the Live site run; then re-verify production.
 `GET /market/report?governorate_id|city_id|district_id&include_demo&language`
 returns statements typed FACT (platform counts) / OBSERVED (statistics with
 sample size) / AI_INTERPRETATION (labelled, number-guarded), kind bound to
 origin server-side. Supply (active, by purpose/type, new in 30 days); segment
-medians and quartiles (5+ priced listings, currencies never mixed); monthly
-price-per-m² change (2+ months with 5+ listings); price changes from price
-history; time on market from closed listings; median listing age; interest on
+medians and quartiles (5+ priced listings, currencies never mixed); change in
+the median *initial* asking price per m² by publication month (2+ months with
+5+ listings, from recorded price history only); same-currency asking-price
+changes; days until the lister marked a listing sold/rented (lister-reported); median listing age; interest on
 MAKAN (views, saves, inquiries, 30 days); possible duplicate pairs; child-area
-comparison. Every metric without enough data is listed under `unavailable`
+comparison on one stated segment. Every statement carries its source, method and
+period. Every metric without enough data is listed under `unavailable`
 with its reason. Provenance: source, coverage, observation period, sample,
 demo share, method, confidence, computed time. Daily snapshots
 (`market_snapshots`, migration 0017, job `market_snapshot`) record supply

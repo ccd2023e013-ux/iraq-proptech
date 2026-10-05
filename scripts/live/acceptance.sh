@@ -258,19 +258,33 @@ c=$(curl -s -o /dev/null -w '%{http_code}' -b "$(jar customer)" -X POST "$WEB/ap
 ok "customer/agent/admin boundaries hold; CSRF enforced"
 
 echo "11b. market intelligence (Stage 8): typed statements, gaps, provenance"
-m=$(anon "/market/report?city_id=$BASRA&language=en")
-echo "$m" | jq -e '
-  (.statements | length > 0)
-  and all(.statements[]; (.origin == "platform" and .kind == "FACT")
-                        or (.origin == "observed" and .kind == "OBSERVED" and .sample >= 5)
-                        or (.origin == "ai" and .kind == "AI_INTERPRETATION"))
-  and (.provenance.includes_demo == (.provenance.demo_share > 0))
-  and (.disclaimer | test("not transaction prices"))
-  and all(.segments[]; .median_price == null or .listings >= 5)' >/dev/null \
-  || fail "market report typing/provenance"
+market_ok() { # json -> exit status
+  jq -e '
+    (.statements | length > 0)
+    and all(.statements[]; (.origin == "platform" and .kind == "FACT")
+                          or (.origin == "observed" and .kind == "OBSERVED" and .sample >= 5
+                              and .period_from != null and .period_to != null)
+                          or (.origin == "ai" and .kind == "AI_INTERPRETATION" and .source == "ai"))
+    and all(.statements[]; .source != null and .method != null)
+    and ([.statements[] | select(.kind == "ESTIMATE" or .kind == "SIMULATION")] | length == 0)
+    and any(.unavailable[]; .metric == "transaction_prices" and .reason == "not_collected")
+    and (.provenance.includes_demo == (.provenance.demo_share > 0))
+    and (.provenance.confidence_reasons | length > 0)
+    and (.disclaimer | test("not transaction prices"))
+    and all(.segments[]; .median_price == null or .listings >= 5)
+    and (.areas_basis == null or all(.areas[]; .currency == null or .currency == $basis))' \
+    --arg basis "$(jq -r '.areas_basis.currency // ""' <<<"$1")" >/dev/null
+}
+for scope in "city_id=$BASRA" "city_id=${CITY_IDS[1]}" ""; do
+  m=$(anon "/market/report?$scope&language=en")
+  echo "$m" | market_ok "$m" || fail "market report typing/provenance ($scope)"
+done
+real=$(anon "/market/report?city_id=$BASRA&include_demo=false&interpret=false")
+echo "$real" | jq -e '.provenance.includes_demo == false and all(.statements[]; .demo == false)' >/dev/null \
+  || fail "market report include_demo=false still shows demo data"
 [ "$(curl -s -o /dev/null -w '%{http_code}' "$WEB/api/v1/market/report?city_id=$BASRA&governorate_id=$BASRA")" = 422 ] \
   || fail "market report accepted two scopes"
-ok "market report: every statement typed, samples >= 5, provenance and disclaimer present"
+ok "market report (Basra, a second city, Iraq): typed, samples >= 5, provenance, demo exclusion"
 
 echo "12. delete the test listing"
 api owner DELETE "/properties/$LISTING" >/dev/null || fail "delete"
