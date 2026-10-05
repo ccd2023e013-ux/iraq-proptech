@@ -12,8 +12,8 @@ Status legend: ✅ done (live-verified) · 🚧 in progress · ⏳ planned ·
 | # | Stage | Status |
 | --- | --- | --- |
 | 0 | Product audit | ✅ |
-| 1 | Premium design system | 🚧 |
-| 2 | Authentication and core UX | 🚧 |
+| 1 | Premium design system | ✅ |
+| 2 | Authentication and core UX | ✅ (email sending 🔑) |
 | 3 | Basra-first Map 2.0 | ⏳ |
 | 4 | Property Intelligence | ⏳ |
 | 5 | Development Intelligence ("Future Iraq") | ⏳ 🔑 |
@@ -56,7 +56,35 @@ themes; motion that explains navigation (never decoration).
   checks: no horizontal scroll, reduced motion respected, focus visible;
   live checks green.
 
+**Status ✅ — live-verified** (Live site run 37262946017 on `bdc731f`; screenshots
+light/dark, desktop/phone, Arabic/English). Delivered: semantic light/dark
+tokens with system default + cookie override and header toggle; radius,
+shadow, glass and motion tokens; reduced-motion overrides; Readex Pro display
+type; restyled Button/Card/Field/Alert/Badge plus Skeleton, EmptyState,
+TrustBadge (fact/source/estimate/ai/simulation/demo), PasswordField; glass
+header, mobile menu, footer; new homepage (intelligent search, river map with
+live counts, Basra first, labelled market reading, explore by city, honest
+"in development" modules); calmer property page with sticky price/contact
+panel; skeleton screens for search, property and map; `/market/cities` and
+`/market/summary` API. Deferred (tracked, not claimed): Toast/Sheet
+components, View Transitions API (a CSS page-enter transition is used),
+more realistic DEMO illustrations, a full restyle of dashboard/admin screens
+(they use the new tokens and work in dark mode, but keep their old layout).
+
 ## 2 — Authentication and core UX
+
+**Status ✅ — live-verified** (same run). The pages had never existed (404);
+they now work and are exercised in a real browser on every Live site run:
+phone/Arabic and desktop/English — field validation, registration, wrong
+password, sign-in back to the guarded page, HttpOnly+Secure session cookie,
+signed-in redirect away from /login, sign-out from the header menu, guarded
+page after sign-out, recovery page. CSRF (double-submit) and rate limits are
+unchanged. Email: no SMTP sender is configured on the free deployment
+(🔑 owner), so `/auth/capabilities` reports `email_delivery: false` and the
+UI says so instead of promising emails that never arrive. Consequence until
+the owner adds a free SMTP sender: new accounts can sign in, browse and save,
+but cannot send inquiries or create an agency profile (both require a
+confirmed email, enforced by the API and checked by the live acceptance test).
 
 - Routes: `/login`, `/register`, `/forgot-password`, `/reset-password`,
   `/verify-email` (paths match emailed links), redesigned auth shell.

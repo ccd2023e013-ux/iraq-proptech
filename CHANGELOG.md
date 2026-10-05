@@ -2,6 +2,18 @@
 
 All notable changes, newest first. Each entry lists the CI-verified commit.
 
+## 2.0 Stages 1–2: design system and working authentication (`bdc731f`)
+Light/dark/system themes on semantic tokens, new header/footer/components,
+new homepage (intelligent search, river map, Basra first, labelled market
+reading), calmer property page, skeleton screens, `/market/*` API. Sign-in,
+registration and recovery pages (previously 404) with validation, show/hide
+password and honest "email unavailable" messaging (`/auth/capabilities`).
+Live site workflow now runs the full auth journey and dark-mode checks in a
+real browser. Fixes found on the way: phone header wrapping, auth layout
+overflowing phones (and a width check that mobile zoom-out had hidden),
+smoke checks failing on streamed pages, deploy wait rejecting CI's lockfile
+commit.
+
 ## Online launch (`4ae902d`)
 Live at https://iraq-proptech-web.onrender.com (Render free + Supabase free).
 National Iraqi DEMO dataset (126 listings, 7 cities, generated DEMO images),

@@ -22,6 +22,14 @@ https://iraq-proptech-api.onrender.com). Verified by the Live site workflow
 run 37247712779 on `4ae902d` (all jobs green). Details and the issues fixed
 during launch: ONLINE-LAUNCH-STATUS.md.
 
+## 2.0 (docs/ROADMAP-2.0.md)
+
+Stages 0–2 done and live-verified (Live site run 37262946017 on `bdc731f`).
+Next: Stage 3 (Basra-first Map 2.0, starting with a map-provider evaluation).
+
+Helpers: `live-probe.yml` with `mode=auth` runs only the browser auth journey;
+`live-screenshots.yml` with `pages=` pushes JPEGs to `screenshots/run-<id>`.
+
 ## Next actions
 
 Owner options: free SMTP sender (public sign-ups), custom domain (+ web HSTS),
