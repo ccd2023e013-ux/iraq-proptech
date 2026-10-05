@@ -220,8 +220,10 @@ def map_v2(browser) -> None:
     cx, cy = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
     for dx, dy in ((-120, -90), (130, -80), (0, 120)):
         page.mouse.click(cx + dx, cy + dy)
-        page.wait_for_timeout(250)
-    page.locator("[data-testid=finish-area]").click()
+        page.wait_for_timeout(700)
+    finish = page.locator("[data-testid=finish-area]")
+    check(finish.is_enabled(), "three clicks add three points to the drawn area")
+    finish.click()
     page.wait_for_url(lambda u: "polygon=" in u, timeout=30_000, wait_until="commit")
     page.wait_for_load_state("load")
     page.wait_for_timeout(2_500)

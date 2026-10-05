@@ -522,6 +522,9 @@ export function PropertyMap(props: PropertyMapProps) {
       features,
     });
     map.getCanvas().style.cursor = props.drawing ? "crosshair" : "";
+    // Quick clicks while drawing add points; they must not zoom the map.
+    if (props.drawing) map.doubleClickZoom.disable();
+    else map.doubleClickZoom.enable();
   }, [ready, styleVersion, props.drawing, props.polygon]);
 
   // List ↔ map: the selected/hovered listing's bubble turns accent and rises.
