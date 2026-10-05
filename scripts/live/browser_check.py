@@ -182,6 +182,24 @@ def auth_flow(browser, *, phone: bool, locale: str) -> None:
     check("/login" not in page.url, f"[{tag}] signed-in visit to /login redirects ({page.url})")
     page.screenshot(path=str(OUT / f"signed-in-{tag}.png"))
 
+    # Stage 6: AI Property Vision (signed in) — labelled concept images.
+    if not phone:
+        page.goto(WEB + "/vision", wait_until="load", timeout=120_000)
+        label = page.locator("[data-testid=vision-label]")
+        check(
+            "NOT AN ENGINEERING OR GOVERNMENT APPROVAL" in label.inner_text(),
+            f"[{tag}] vision page shows the AI CONCEPT label",
+        )
+        with page.expect_response(lambda r: "/api/v1/vision/concepts" in r.url, timeout=90_000) as v:
+            page.locator("[data-testid=vision-generate]").click()
+        check(v.value.status == 201, f"[{tag}] concept created ({v.value.status})")
+        img = page.locator("[data-testid=vision-image-concept]")
+        img.wait_for(timeout=60_000)
+        page.wait_for_timeout(2_000)
+        loaded = page.evaluate("(el) => el.complete && el.naturalWidth > 0", img.element_handle())
+        check(bool(loaded), f"[{tag}] concept image loads for its owner")
+        page.screenshot(path=str(OUT / f"vision-{tag}.png"), full_page=True)
+
     # Sign out from the user menu.
     page.locator("header button[aria-haspopup=menu]").click()
     page.locator("header [role=menuitem]").last.click()

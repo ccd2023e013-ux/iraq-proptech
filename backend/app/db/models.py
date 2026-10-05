@@ -48,6 +48,7 @@ from app.rbac.models import RoleRecord
 from app.search.saved import SavedSearch
 from app.system.models import SystemSetting
 from app.users.models import User, UserRole
+from app.vision.models import VisionConcept
 
 __all__ = [
     "AIGeneration",
@@ -107,6 +108,7 @@ __all__ = [
     "User",
     "UserRole",
     "VerificationToken",
+    "VisionConcept",
     "WebhookDelivery",
     "WebhookEndpoint",
 ]

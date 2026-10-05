@@ -28,6 +28,7 @@ from app.system.dev_router import router as dev_router
 from app.system.jobs_router import router as jobs_router
 from app.system.router import router as system_router
 from app.users.router import router as users_router
+from app.vision.router import router as vision_router
 
 
 def build_api_router(settings: Settings) -> APIRouter:
@@ -48,6 +49,7 @@ def build_api_router(settings: Settings) -> APIRouter:
     api_router.include_router(map_router)
     api_router.include_router(market_router)
     api_router.include_router(development_router)
+    api_router.include_router(vision_router)
     api_router.include_router(saved_search_router)
     api_router.include_router(pois_router)
     api_router.include_router(money_router)

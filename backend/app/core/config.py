@@ -114,6 +114,10 @@ class Settings(BaseSettings):
     # AI: "mock" is deterministic, offline and free (default). Real providers need a key.
     ai_provider: Literal["mock", "claude", "openai", "gemini"] = "mock"
     ai_model: str | None = None  # provider default when unset
+    # AI Property Vision: "mock" draws massing illustrations offline (free).
+    vision_provider: Literal["mock", "openai"] = "mock"
+    vision_model: str | None = None
+    vision_daily_limit_per_user: int = Field(default=10, ge=0, le=1000)
     ai_timeout_seconds: float = Field(default=30, gt=0, le=120)
     ai_max_output_tokens: int = Field(default=1200, ge=64, le=8000)
     ai_daily_limit_per_user: int = Field(default=100, ge=0)  # generative calls; 0 = unlimited

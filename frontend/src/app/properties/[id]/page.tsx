@@ -227,6 +227,18 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
 
           <div className="flex flex-col gap-6 border-t border-hairline py-8">
             {property.status === "APPROVED" && (
+              <Link
+                href={`/vision?property_id=${property.id}`}
+                className="flex items-center justify-between gap-4 rounded-[var(--radius-card)] bg-fill px-5 py-4 transition hover:bg-fill-strong"
+                data-testid="vision-link"
+              >
+                <span>
+                  <span className="block font-semibold text-ink">{dict.vision.title}</span>
+                  <span className="text-sm text-ink-2">{dict.vision.subtitle}</span>
+                </span>
+              </Link>
+            )}
+            {property.status === "APPROVED" && (
               <IntelligencePanel dict={dict} locale={locale} propertyId={property.id} />
             )}
             {property.status === "APPROVED" && (
