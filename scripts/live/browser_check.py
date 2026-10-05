@@ -72,11 +72,73 @@ def future_iraq(browser) -> None:
     ctx.close()
 
 
+def market_intelligence(browser) -> None:
+    """Stage 8: every market statement is typed; gaps and provenance are shown."""
+    for viewport, locale in (
+        ({"width": 1440, "height": 900}, "en-US"),
+        ({"width": 390, "height": 844}, "ar-IQ"),
+    ):
+        ctx = browser.new_context(viewport=viewport, locale=locale)
+        page = ctx.new_page()
+        tag = f"{viewport['width']}"
+        page.goto(WEB + "/market", wait_until="load", timeout=120_000)
+        statements = page.locator("[data-testid=market-statement]")
+        count = statements.count()
+        check(count > 0, f"[{tag}] market report shows statements ({count})")
+        kinds = {statements.nth(i).get_attribute("data-kind") for i in range(count)}
+        check(
+            kinds <= {"FACT", "OBSERVED"},
+            f"[{tag}] statements are typed FACT/OBSERVED ({kinds})",
+        )
+        check(
+            page.locator("[data-testid=market-provenance]").count() == 1,
+            f"[{tag}] provenance panel is shown",
+        )
+        demo_badges = page.locator(
+            "[data-testid=market-provenance] [data-trust=demo]"
+        ).count()
+        check(demo_badges >= 1, f"[{tag}] demo data is labelled in provenance")
+        check(
+            no_horizontal_scroll(page), f"[{tag}] market page has no horizontal scroll"
+        )
+        page.screenshot(path=str(OUT / f"market-{tag}.png"), full_page=True)
+        # Basra: the city view breaks down by district
+        option = page.locator("select[name=city_id] option").filter(has_text="Basra")
+        if locale == "ar-IQ":
+            option = page.locator("select[name=city_id] option").filter(
+                has_text="البصرة"
+            )
+        if option.count():
+            page.select_option(
+                "select[name=city_id]", value=option.first.get_attribute("value")
+            )
+            page.locator("[data-testid=market-controls] button[type=submit]").click()
+            page.wait_for_url("**/market?city_id=*", timeout=60_000)
+            areas = page.locator("[data-testid=market-areas] li").count()
+            check(areas > 0, f"[{tag}] Basra market breaks down by district ({areas})")
+            check(
+                no_horizontal_scroll(page),
+                f"[{tag}] Basra market has no horizontal scroll",
+            )
+            page.screenshot(path=str(OUT / f"market-basra-{tag}.png"), full_page=True)
+        # excluding demo listings must never show demo-labelled statements
+        page.goto(WEB + "/market?demo=0", wait_until="load")
+        check(
+            page.locator("[data-testid=market-statement] [data-trust=demo]").count()
+            == 0,
+            f"[{tag}] excluding demo data removes demo labels",
+        )
+        ctx.close()
+
+
 def media_studio(browser) -> None:
     """Stage 7: a lister renders a real video in the browser and saves it."""
     password = os.environ.get("DEMO_ACCOUNT_PASSWORD")
     if not password:
-        check(False, "media studio: DEMO_ACCOUNT_PASSWORD not available to the browser job")
+        check(
+            False,
+            "media studio: DEMO_ACCOUNT_PASSWORD not available to the browser job",
+        )
         return
     ctx = browser.new_context(viewport={"width": 1366, "height": 900}, locale="en-US")
     page = ctx.new_page()
@@ -87,7 +149,10 @@ def media_studio(browser) -> None:
     page.wait_for_url(lambda u: "/studio" in u and "/login" not in u, timeout=60_000)
     page.wait_for_selector("[data-testid=studio-render]", timeout=60_000)
     page.locator("[data-testid=studio-quick]").check()
-    with page.expect_response(lambda r: "/api/v1/studio/jobs" in r.url and r.request.method == "POST", timeout=60_000) as job:
+    with page.expect_response(
+        lambda r: "/api/v1/studio/jobs" in r.url and r.request.method == "POST",
+        timeout=60_000,
+    ) as job:
         page.locator("[data-testid=studio-render]").click()
     check(job.value.status == 201, f"studio storyboard created ({job.value.status})")
     result = page.locator("[data-testid=studio-result]")
@@ -99,7 +164,9 @@ def media_studio(browser) -> None:
     check(rendered, "studio renders a video in the browser")
     if rendered:
         page.screenshot(path=str(OUT / "studio.png"), full_page=True)
-        with page.expect_response(lambda r: r.url.endswith("/output"), timeout=120_000) as up:
+        with page.expect_response(
+            lambda r: r.url.endswith("/output"), timeout=120_000
+        ) as up:
             page.locator("[data-testid=studio-save]").click()
         info = up.value
         check(info.status == 200, f"studio video saved ({info.status})")
@@ -115,7 +182,9 @@ def media_studio(browser) -> None:
 
 def themes(browser) -> None:
     """Dark mode follows the system by default; the toggle can force light."""
-    ctx = browser.new_context(viewport={"width": 1366, "height": 900}, color_scheme="dark")
+    ctx = browser.new_context(
+        viewport={"width": 1366, "height": 900}, color_scheme="dark"
+    )
     page = ctx.new_page()
     page.goto(WEB + "/", wait_until="load", timeout=120_000)
     bg = page.evaluate("getComputedStyle(document.body).backgroundColor")
@@ -135,12 +204,17 @@ def auth_flow(browser, *, phone: bool, locale: str) -> None:
     """register → wrong password → sign in → guarded redirect → sign out → recovery."""
     tag = f"{'phone' if phone else 'desktop'}-{locale}"
     opts = (
-        {"viewport": {"width": 390, "height": 844}, "is_mobile": True, "has_touch": True}
+        {
+            "viewport": {"width": 390, "height": 844},
+            "is_mobile": True,
+            "has_touch": True,
+        }
         if phone
         else {"viewport": {"width": 1366, "height": 900}}
     )
     ctx = browser.new_context(locale="ar-IQ" if locale == "ar" else "en-US", **opts)
     page = ctx.new_page()
+
     def on_auth(r: Response) -> None:
         if "/api/v1/auth/login" in r.url or "/api/v1/auth/register" in r.url:
             redacted = [
@@ -148,17 +222,31 @@ def auth_flow(browser, *, phone: bool, locale: str) -> None:
                 for h in r.headers_array()
                 if h["name"].lower() == "set-cookie"
             ]
-            print(f"  [{tag}] {r.status} {r.url[-24:]} set-cookie: {redacted}", flush=True)
+            print(
+                f"  [{tag}] {r.status} {r.url[-24:]} set-cookie: {redacted}", flush=True
+            )
 
     page.on("response", on_auth)
     email = f"e2e-browser-{int(time.time())}-{tag}@example.com"
     password = f"Live-{int(time.time())}-Check!"
 
     # Pages exist (they were 404 before 2.0).
-    for path in ("/login", "/register", "/forgot-password", "/reset-password", "/verify-email"):
+    for path in (
+        "/login",
+        "/register",
+        "/forgot-password",
+        "/reset-password",
+        "/verify-email",
+    ):
         r = page.goto(WEB + path, wait_until="load", timeout=120_000)
-        check(bool(r and r.status == 200), f"[{tag}] {path} renders ({r.status if r else '-'})")
-    check(page.get_attribute("html", "lang") == locale, f"[{tag}] page language is {locale}")
+        check(
+            bool(r and r.status == 200),
+            f"[{tag}] {path} renders ({r.status if r else '-'})",
+        )
+    check(
+        page.get_attribute("html", "lang") == locale,
+        f"[{tag}] page language is {locale}",
+    )
 
     # Register: client validation first, then a real account.
     page.goto(WEB + "/register", wait_until="load", timeout=120_000)
@@ -173,9 +261,13 @@ def auth_flow(browser, *, phone: bool, locale: str) -> None:
     page.fill("input[name=email]", email)
     page.fill("input[name=password]", password)
     page.screenshot(path=str(OUT / f"register-{tag}.png"), full_page=True)
-    with page.expect_response(lambda r: "/api/v1/auth/register" in r.url, timeout=90_000) as reg:
+    with page.expect_response(
+        lambda r: "/api/v1/auth/register" in r.url, timeout=90_000
+    ) as reg:
         page.locator("form button[type=submit]").click()
-    check(reg.value.status == 201, f"[{tag}] registration accepted ({reg.value.status})")
+    check(
+        reg.value.status == 201, f"[{tag}] registration accepted ({reg.value.status})"
+    )
     # On success the form is replaced by the confirmation.
     page.wait_for_selector("main form", state="detached", timeout=30_000)
     check(True, f"[{tag}] registration confirmation shown")
@@ -185,9 +277,13 @@ def auth_flow(browser, *, phone: bool, locale: str) -> None:
     page.goto(WEB + "/login?next=/favorites", wait_until="load", timeout=120_000)
     page.fill("input[name=email]", email)
     page.fill("input[name=password]", password + "x")
-    with page.expect_response(lambda r: "/api/v1/auth/login" in r.url, timeout=90_000) as bad:
+    with page.expect_response(
+        lambda r: "/api/v1/auth/login" in r.url, timeout=90_000
+    ) as bad:
         page.locator("form button[type=submit]").click()
-    check(bad.value.status == 401, f"[{tag}] wrong password rejected ({bad.value.status})")
+    check(
+        bad.value.status == 401, f"[{tag}] wrong password rejected ({bad.value.status})"
+    )
     alert = page.locator("form > [role=alert]").first
     alert.wait_for(timeout=60_000)
     expected = INVALID_CREDENTIALS_AR if locale == "ar" else INVALID_CREDENTIALS_EN
@@ -195,9 +291,14 @@ def auth_flow(browser, *, phone: bool, locale: str) -> None:
 
     # Correct password → back to the guarded page that asked for it.
     page.fill("input[name=password]", password)
-    with page.expect_response(lambda r: "/api/v1/auth/login" in r.url, timeout=90_000) as good:
+    with page.expect_response(
+        lambda r: "/api/v1/auth/login" in r.url, timeout=90_000
+    ) as good:
         page.locator("form button[type=submit]").click()
-    check(good.value.status == 200, f"[{tag}] correct password accepted ({good.value.status})")
+    check(
+        good.value.status == 200,
+        f"[{tag}] correct password accepted ({good.value.status})",
+    )
     page.wait_for_url(lambda u: "/favorites" in u and "/login" not in u, timeout=60_000)
     check(True, f"[{tag}] sign-in returns to the requested page (/favorites)")
     cookies = {c["name"]: c for c in ctx.cookies()}
@@ -213,14 +314,20 @@ def auth_flow(browser, *, phone: bool, locale: str) -> None:
     me_status = page.evaluate(
         "fetch('/api/v1/auth/me', {credentials: 'same-origin'}).then(r => r.status)"
     )
-    print(f"  [{tag}] browser GET /api/v1/auth/me → {me_status}; url={page.url}", flush=True)
+    print(
+        f"  [{tag}] browser GET /api/v1/auth/me → {me_status}; url={page.url}",
+        flush=True,
+    )
     session = cookies.get("access_token", {})
     check(
         bool(session.get("httpOnly")) and bool(session.get("secure")),
         f"[{tag}] session cookie is HttpOnly + Secure",
     )
     page.goto(WEB + "/login", wait_until="load", timeout=120_000)
-    check("/login" not in page.url, f"[{tag}] signed-in visit to /login redirects ({page.url})")
+    check(
+        "/login" not in page.url,
+        f"[{tag}] signed-in visit to /login redirects ({page.url})",
+    )
     page.screenshot(path=str(OUT / f"signed-in-{tag}.png"))
 
     # Stage 6: AI Property Vision (signed in) — labelled concept images.
@@ -231,13 +338,17 @@ def auth_flow(browser, *, phone: bool, locale: str) -> None:
             "NOT AN ENGINEERING OR GOVERNMENT APPROVAL" in label.inner_text(),
             f"[{tag}] vision page shows the AI CONCEPT label",
         )
-        with page.expect_response(lambda r: "/api/v1/vision/concepts" in r.url, timeout=90_000) as v:
+        with page.expect_response(
+            lambda r: "/api/v1/vision/concepts" in r.url, timeout=90_000
+        ) as v:
             page.locator("[data-testid=vision-generate]").click()
         check(v.value.status == 201, f"[{tag}] concept created ({v.value.status})")
         img = page.locator("[data-testid=vision-image-concept]")
         img.wait_for(timeout=60_000)
         page.wait_for_timeout(2_000)
-        loaded = page.evaluate("(el) => el.complete && el.naturalWidth > 0", img.element_handle())
+        loaded = page.evaluate(
+            "(el) => el.complete && el.naturalWidth > 0", img.element_handle()
+        )
         check(bool(loaded), f"[{tag}] concept image loads for its owner")
         page.screenshot(path=str(OUT / f"vision-{tag}.png"), full_page=True)
 
@@ -253,7 +364,10 @@ def auth_flow(browser, *, phone: bool, locale: str) -> None:
     page.goto(WEB + "/forgot-password", wait_until="load", timeout=120_000)
     has_form = page.locator("form input[name=email]").count() == 1
     has_notice = page.locator("main [role=status]").count() >= 1
-    check(has_form or has_notice, f"[{tag}] password recovery is usable or honestly unavailable")
+    check(
+        has_form or has_notice,
+        f"[{tag}] password recovery is usable or honestly unavailable",
+    )
     page.screenshot(path=str(OUT / f"forgot-{tag}.png"))
     ctx.close()
 
@@ -267,11 +381,15 @@ def map_v2(browser) -> None:
     seen: list[str] = []
     page.on(
         "response",
-        lambda r: seen.append(f"{r.status} {r.url.split('/api/v1/')[-1][:90]}")
-        if "/api/v1/pois" in r.url or "/api/v1/map/" in r.url
-        else None,
+        lambda r: (
+            seen.append(f"{r.status} {r.url.split('/api/v1/')[-1][:90]}")
+            if "/api/v1/pois" in r.url or "/api/v1/map/" in r.url
+            else None
+        ),
     )
-    page.goto(WEB + "/map?bbox=47.70,30.40,47.92,30.62", wait_until="load", timeout=120_000)
+    page.goto(
+        WEB + "/map?bbox=47.70,30.40,47.92,30.62", wait_until="load", timeout=120_000
+    )
     canvas = page.locator("[data-testid=map-canvas]")
     page.wait_for_selector("[data-testid=map-canvas][data-bubbles]", timeout=60_000)
     bubbles = 0
@@ -282,7 +400,10 @@ def map_v2(browser) -> None:
         page.wait_for_timeout(1_000)
     clusters = int(canvas.get_attribute("data-clusters") or 0)
     zoom = canvas.get_attribute("data-zoom")
-    check(bubbles > 0, f"Basra shows price bubbles ({bubbles} bubbles, {clusters} clusters, z{zoom})")
+    check(
+        bubbles > 0,
+        f"Basra shows price bubbles ({bubbles} bubbles, {clusters} clusters, z{zoom})",
+    )
     page.screenshot(path=str(OUT / "map-bubbles.png"))
 
     # Places layer: schools in Basra (OSM or demo).
@@ -294,9 +415,14 @@ def map_v2(browser) -> None:
             pois_ok = True
             break
         page.wait_for_timeout(1_000)
-    check(pois_ok, f"places layer toggles on ({canvas.get_attribute('data-pois')} places)")
+    check(
+        pois_ok, f"places layer toggles on ({canvas.get_attribute('data-pois')} places)"
+    )
     print(f"  map requests: {seen[-6:]}", flush=True)
-    print(f"::notice title=map diagnostics::warnings={warnings[:5]} zoom={zoom}", flush=True)
+    print(
+        f"::notice title=map diagnostics::warnings={warnings[:5]} zoom={zoom}",
+        flush=True,
+    )
     page.screenshot(path=str(OUT / "map-places.png"))
     page.locator("[data-testid=map-layers] summary").click()
 
@@ -316,7 +442,10 @@ def map_v2(browser) -> None:
     page.wait_for_load_state("load")
     page.wait_for_timeout(2_500)
     after = page.locator("[data-testid=map-total]").inner_text()
-    check("polygon=" in page.url, f"draw-area search filters by polygon ({before!r} → {after!r})")
+    check(
+        "polygon=" in page.url,
+        f"draw-area search filters by polygon ({before!r} → {after!r})",
+    )
     page.screenshot(path=str(OUT / "map-drawn.png"))
     ctx.close()
 
@@ -343,7 +472,9 @@ def map_v2(browser) -> None:
     for _ in range(3):
         page.get_by_role("button", name="Near me").click()
         try:
-            page.wait_for_url(lambda u: "near_lat=" in u, timeout=15_000, wait_until="commit")
+            page.wait_for_url(
+                lambda u: "near_lat=" in u, timeout=15_000, wait_until="commit"
+            )
             break
         except Exception:  # noqa: BLE001 - retry a click that landed before hydration
             continue
@@ -354,12 +485,17 @@ def map_v2(browser) -> None:
 def main() -> int:
     with sync_playwright() as p:
         browser = p.chromium.launch(
-            args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
+            args=[
+                "--use-gl=angle",
+                "--use-angle=swiftshader",
+                "--enable-unsafe-swiftshader",
+            ]
         )
 
         if os.environ.get("BROWSER_ONLY") == "map":
             map_v2(browser)
             future_iraq(browser)
+            market_intelligence(browser)
             browser.close()
             print("MAP-ONLY RESULT: " + ("OK" if not FAILURES else "; ".join(FAILURES)))
             return 1 if FAILURES else 0
@@ -368,7 +504,9 @@ def main() -> int:
             auth_flow(browser, phone=True, locale="ar")
             auth_flow(browser, phone=False, locale="en")
             browser.close()
-            print("AUTH-ONLY RESULT: " + ("OK" if not FAILURES else "; ".join(FAILURES)))
+            print(
+                "AUTH-ONLY RESULT: " + ("OK" if not FAILURES else "; ".join(FAILURES))
+            )
             return 1 if FAILURES else 0
 
         # 1. Phone, Arabic default.
@@ -388,10 +526,14 @@ def main() -> int:
         phone.close()
 
         # 2. Desktop: language switch.
-        desktop = browser.new_context(viewport={"width": 1366, "height": 900}, locale="ar-IQ")
+        desktop = browser.new_context(
+            viewport={"width": 1366, "height": 900}, locale="ar-IQ"
+        )
         page = desktop.new_page()
         errors: list[str] = []
-        page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
+        page.on(
+            "console", lambda m: errors.append(m.text) if m.type == "error" else None
+        )
         page.goto(WEB + "/", wait_until="load", timeout=120_000)
         page.locator('header button[lang="en"]').first.click()
         # Selector waits, not wait_for_function: the site's CSP forbids eval.
@@ -440,7 +582,10 @@ def main() -> int:
         print(f"  map element diagnostics: {info}", flush=True)
         page.screenshot(path=str(OUT / "map-page.png"), full_page=True)
         box = page.locator("[data-testid=map-canvas]").bounding_box()
-        check(bool(box and box["width"] > 100 and box["height"] > 100), f"map has a size ({box})")
+        check(
+            bool(box and box["width"] > 100 and box["height"] > 100),
+            f"map has a size ({box})",
+        )
         if not box or box["width"] < 10 or box["height"] < 10:
             raise SystemExit(f"BROWSER CHECK FAILED: map element not visible: {info}")
         shot = page.screenshot(clip=box)
@@ -449,7 +594,10 @@ def main() -> int:
         spread = statistics.pstdev(gray.getdata())
         check(len(tiles) > 0, f"map tiles loaded ({len(tiles)} tile responses)")
         check(spread > 8, f"map canvas is drawn, not blank (pixel spread {spread:.1f})")
-        check(bool(features) and max(features) > 0, f"map received properties ({features[-3:]})")
+        check(
+            bool(features) and max(features) > 0,
+            f"map received properties ({features[-3:]})",
+        )
         cards = page.locator('a[href^="/properties/"]')
         check(cards.count() > 0, f"map list shows {cards.count()} properties")
         if cards.count() > 0:
@@ -463,12 +611,16 @@ def main() -> int:
         page.wait_for_load_state("load")
         img = page.locator("img[src*='/api/v1/media/']").first
         img.wait_for(timeout=30_000)
-        loaded = page.evaluate("(el) => el.complete && el.naturalWidth > 0", img.element_handle())
+        loaded = page.evaluate(
+            "(el) => el.complete && el.naturalWidth > 0", img.element_handle()
+        )
         check(bool(loaded), "property photo loaded")
         page.get_by_role("button", name="لخّص هذا العقار").click()
         summary = page.locator("[data-testid=ai-summary]")
         summary.wait_for(timeout=60_000)
-        provider = summary.locator("[data-ai-provider]").first.get_attribute("data-ai-provider")
+        provider = summary.locator("[data-ai-provider]").first.get_attribute(
+            "data-ai-provider"
+        )
         check(provider == "mock", f"AI summary shown and labelled ({provider})")
         check(len(summary.inner_text()) > 40, "AI summary has content")
         # Stage 4: property intelligence — typed statements and the buyer assistant.
@@ -477,7 +629,9 @@ def main() -> int:
         report.wait_for(timeout=90_000)
         kinds = {
             k
-            for k in report.locator("[data-kind]").evaluate_all("els => els.map(e => e.dataset.kind)")
+            for k in report.locator("[data-kind]").evaluate_all(
+                "els => els.map(e => e.dataset.kind)"
+            )
         }
         check(
             {"FACT", "ESTIMATE", "AI_INTERPRETATION"} <= kinds,
@@ -485,14 +639,20 @@ def main() -> int:
         )
         page.fill("#intel-question", "كم سعر هذا العقار؟")
         page.locator("[data-testid=intelligence-ask]").click()
-        answers = page.locator("[data-testid=intelligence-answers] [data-kind=AI_INTERPRETATION]")
+        answers = page.locator(
+            "[data-testid=intelligence-answers] [data-kind=AI_INTERPRETATION]"
+        )
         answers.first.wait_for(timeout=60_000)
-        check(answers.count() >= 1, "buyer assistant answers, labelled as AI interpretation")
+        check(
+            answers.count() >= 1,
+            "buyer assistant answers, labelled as AI interpretation",
+        )
         page.screenshot(path=str(OUT / "property.png"), full_page=True)
 
         # 5. Stage 1/2 (2.0): themes and the authentication journey; Stage 3 map.
         map_v2(browser)
         future_iraq(browser)
+        market_intelligence(browser)
         media_studio(browser)
         themes(browser)
         auth_flow(browser, phone=True, locale="ar")

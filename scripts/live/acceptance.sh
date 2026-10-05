@@ -257,6 +257,21 @@ c=$(curl -s -o /dev/null -w '%{http_code}' -b "$(jar customer)" -X POST "$WEB/ap
 [ "$c" = 403 ] || fail "cookie request without CSRF token accepted ($c)"
 ok "customer/agent/admin boundaries hold; CSRF enforced"
 
+echo "11b. market intelligence (Stage 8): typed statements, gaps, provenance"
+m=$(anon "/market/report?city_id=$BASRA&language=en")
+echo "$m" | jq -e '
+  (.statements | length > 0)
+  and all(.statements[]; (.origin == "platform" and .kind == "FACT")
+                        or (.origin == "observed" and .kind == "OBSERVED" and .sample >= 5)
+                        or (.origin == "ai" and .kind == "AI_INTERPRETATION"))
+  and (.provenance.includes_demo == (.provenance.demo_share > 0))
+  and (.disclaimer | test("not transaction prices"))
+  and all(.segments[]; .median_price == null or .listings >= 5)' >/dev/null \
+  || fail "market report typing/provenance"
+[ "$(curl -s -o /dev/null -w '%{http_code}' "$WEB/api/v1/market/report?city_id=$BASRA&governorate_id=$BASRA")" = 422 ] \
+  || fail "market report accepted two scopes"
+ok "market report: every statement typed, samples >= 5, provenance and disclaimer present"
+
 echo "12. delete the test listing"
 api owner DELETE "/properties/$LISTING" >/dev/null || fail "delete"
 [ "$(curl -s -o /dev/null -w '%{http_code}' "$WEB/api/v1/properties/$LISTING")" = 404 ] || fail "deleted listing visible"

@@ -696,6 +696,115 @@ const en: Dictionary = {
     history: "Your recent concepts",
     error: "The concept could not be created. Try again.",
   },
+  market: {
+    nav: "Market",
+    title: "Market intelligence",
+    subtitle:
+      "What listings on MAKAN say about an area: supply, asking prices, how listings move, and what people look at.",
+    honesty:
+      "Every line says what kind of statement it is. Asking prices are what sellers ask, not what buyers paid. Where there is not enough data, we say so instead of guessing.",
+    area: "Area",
+    allIraq: "All of Iraq",
+    includeDemo: "Include demo listings",
+    show: "Show",
+    scopeIraq: "Iraq",
+    kinds: {
+      FACT: "Fact",
+      OBSERVED: "Observed statistic",
+      ESTIMATE: "Estimate",
+      AI_INTERPRETATION: "AI interpretation",
+      SIMULATION: "Simulation",
+    },
+    sections: {
+      supply: "Supply",
+      prices: "Asking prices",
+      dynamics: "How listings move",
+      demand: "Interest on MAKAN",
+      quality: "Data quality",
+      areas: "Areas",
+      interpretation: "Interpretation",
+    },
+    sample: "{n} listings",
+    m: {
+      "observed.supply_change":
+        "Active listings went from {from_count} on {from} to {to_count} on {to}",
+      "fact.active_listings": "{count} active listings",
+      "fact.active_listings_demo": "{count} active listings, {demo} of them demo",
+      "fact.new_listings_30d": "{count} listings published in the last 30 days",
+      "fact.listings_with_price_change": "{count} of {of} listings have changed their asking price",
+      "fact.demand_30d":
+        "In the last {days} days: {views} views, {favorites} saves and {inquiries} inquiries on MAKAN",
+      "fact.possible_duplicate_pairs":
+        "{pairs} pairs of listings look alike (same type, price and size within 200 m) and may be duplicates",
+      "observed.segment_median":
+        "{type} {purpose}: median asking price {median}; the middle half asks {p25} to {p75}",
+      "observed.price_per_m2_change":
+        "{type} {purpose}: the median asking price per m² moved {change}% from {from} to {to}",
+      "observed.median_price_change": "Listings that changed price moved by a median of {change}%",
+      "observed.median_days_on_market":
+        "Listings that closed stayed online a median of {days} days",
+      "observed.median_active_age": "Active listings have been online a median of {days} days",
+      "observed.area_breakdown": "{areas} areas compared below",
+    },
+    segmentsTitle: "Asking prices by segment",
+    segmentsNote:
+      "Medians appear only for segments with at least 5 priced listings. Currencies are never converted.",
+    cols: {
+      segment: "Segment",
+      listings: "Listings",
+      median: "Median",
+      range: "Middle half",
+      perM2: "Median per m²",
+    },
+    notEnough: "Not enough data",
+    areasTitle: "Areas compared",
+    areasNote:
+      "Median asking price per m² for sale listings in IQD. Bars are drawn only where an area has at least 5 priced listings.",
+    areaListings: "{n} active",
+    openArea: "Open {name}",
+    unavailableTitle: "Not available yet",
+    metrics: {
+      supply_trend: "Supply over time",
+      segment_medians: "Segment medians",
+      price_trend: "Price trend over time",
+      price_changes: "Typical price changes",
+      time_on_market: "Time on market",
+      ai_interpretation: "AI interpretation",
+    },
+    reasons: {
+      snapshots_too_few:
+        "Daily snapshots started recently ({days} recorded); a trend needs at least 2 days and is never back-filled.",
+      not_recorded_for_districts:
+        "Daily snapshots are recorded for cities and governorates, not districts.",
+      sample_too_small: "Too few listings to compute this honestly.",
+      observation_period_too_short:
+        "Needs at least 2 months with 5 or more listings each; we have {months}.",
+      too_few_closed_listings: "Only {closed} listings have closed so far; at least 5 are needed.",
+      ai_quota_reached: "Your daily AI limit is reached; the numbers above are unaffected.",
+    },
+    sourceText: "Listings published on MAKAN (asking prices, not transaction prices)",
+    methodLines: [
+      "Medians and quartiles only with at least 5 listings.",
+      "Currencies are never converted or mixed.",
+      "A trend compares monthly medians of one segment, using only months with 5 or more listings.",
+      "Views, saves and inquiries are interest on MAKAN, not demand in the whole market.",
+    ],
+    provenanceTitle: "Where this comes from",
+    prov: {
+      source: "Source",
+      coverage: "Coverage",
+      period: "Observation period",
+      sample: "Sample",
+      demo: "Demo share",
+      confidence: "Confidence",
+      updated: "Computed",
+      methodology: "Method",
+    },
+    confidence: { none: "None (no data)", low: "Low", medium: "Medium", high: "High" },
+    empty: "No active listings in this area yet, so there is nothing to report.",
+    seeArea: "Market in this area",
+    homeLink: "Open market intelligence",
+  },
   future: {
     title: "Future Iraq",
     subtitle:

@@ -22,6 +22,7 @@ from app.development.models import DevelopmentEvidence, DevelopmentProject, Deve
 from app.favorites import Favorite
 from app.geo.models import City, District, Governorate, Neighborhood
 from app.geo.pois import PointOfInterest
+from app.market.models import MarketSnapshot
 from app.moderation.models import ErrorEvent, Report
 from app.money import ExchangeRate
 from app.notifications.models import (
@@ -79,6 +80,7 @@ __all__ = [
     "Lead",
     "LeadActivity",
     "LeadStatus",
+    "MarketSnapshot",
     "MediaJob",
     "Message",
     "Neighborhood",

@@ -31,6 +31,12 @@ def _expire_subscriptions(db: Session) -> dict[str, Any]:
     return expire_subscriptions(db)
 
 
+def _market_snapshot(db: Session) -> dict[str, Any]:
+    from app.market.snapshots import record_snapshot
+
+    return record_snapshot(db)
+
+
 def _deliver(db: Session) -> dict[str, Any]:
     return {
         "notifications": service.process_deliveries(db),
@@ -47,6 +53,7 @@ JOBS: dict[str, JobFn] = {
     "expire_listings": jobs.expire_listings,
     "expire_subscriptions": _expire_subscriptions,
     "purge_analytics_visitors": _purge_visitors,
+    "market_snapshot": _market_snapshot,
 }
 
 # Safe to run on every external tick (each is due-aware or cheap).
@@ -59,6 +66,7 @@ FREQUENT = [
     "expire_listings",
     "expire_subscriptions",
     "purge_analytics_visitors",
+    "market_snapshot",
 ]
 
 

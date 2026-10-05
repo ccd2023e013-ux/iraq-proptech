@@ -19,7 +19,7 @@ Status legend: ✅ done (live-verified) · 🚧 in progress · ⏳ planned ·
 | 5 | Development Intelligence ("Future Iraq") | ✅ first dataset (more sources ongoing) |
 | 6 | AI Property Vision | ✅ (image-model key 🔑 optional) |
 | 7 | Property Media Studio (+ drone workflow) | ✅ browser renderer (server/voice providers 🔑) |
-| 8 | Market Intelligence | ⏳ |
+| 8 | Market Intelligence | 🔶 built, awaiting CI + live verification |
 | 9 | Social / Meta authorized intelligence | ⏳ 🔑 ⚖️ |
 | 10 | Monetization (entitlements) | ⏳ |
 | 11 | Transactions / commissions | ⏳ ⚖️ |
@@ -224,6 +224,27 @@ time-on-market, price changes, duplicates) → trends per area/type. Data
 classes kept separate: verified / platform / public / AI estimate. No
 back-filled history.
 - **Acceptance**: snapshot job + charts live; tests for class separation.
+
+**Status 🔶 — built on branch `stage-8-market`, not yet verified** (GitHub
+Actions blocked by billing on 2026-10-05; nothing is called done until CI and
+the Live site run pass).
+`GET /market/report?governorate_id|city_id|district_id&include_demo&language`
+returns statements typed FACT (platform counts) / OBSERVED (statistics with
+sample size) / AI_INTERPRETATION (labelled, number-guarded), kind bound to
+origin server-side. Supply (active, by purpose/type, new in 30 days); segment
+medians and quartiles (5+ priced listings, currencies never mixed); monthly
+price-per-m² change (2+ months with 5+ listings); price changes from price
+history; time on market from closed listings; median listing age; interest on
+MAKAN (views, saves, inquiries, 30 days); possible duplicate pairs; child-area
+comparison. Every metric without enough data is listed under `unavailable`
+with its reason. Provenance: source, coverage, observation period, sample,
+demo share, method, confidence, computed time. Daily snapshots
+(`market_snapshots`, migration 0017, job `market_snapshot`) record supply
+going forward — never back-filled — so the supply trend appears only after
+two recorded days. `/market` page (area picker, include-demo toggle, typed
+statements, segments table, area bar list, gaps, provenance); links from the
+homepage market section, header and property pages. ESTIMATE and SIMULATION
+are reserved: no market estimates or forecasts are produced.
 
 ## 9 — Social / Meta authorized intelligence ⚖️ 🔑
 

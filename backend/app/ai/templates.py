@@ -321,7 +321,36 @@ def property_answer(f: dict[str, Any], lang: str) -> dict[str, Any]:
     return {"text": re.sub(r"\s+", " ", text).strip()}
 
 
+def market_interpretation(f: dict[str, Any], lang: str) -> dict[str, Any]:
+    """Two plain sentences restating the market facts; no forecasts, no promises."""
+    ar = lang == "ar"
+    scope = f.get("scope_ar") if ar else (f.get("scope_en") or f.get("scope_ar"))
+    count = f.get("active_listings", 0)
+    if ar:
+        parts = [f"بناءً على البيانات المتاحة، في {scope} {count} إعلانًا نشطًا على مكان."]
+        if f.get("segment_median"):
+            parts.append(
+                f"الوسيط في الفئة الأكبر ({f['segment_type_ar']}) هو {f['segment_median']} "
+                f"{f['segment_currency']} لسعر الطلب من {f['segment_sample']} إعلانات، "
+                "وهو سعر معروض وليس سعر صفقة."
+            )
+        if f.get("includes_demo"):
+            parts.append("تتضمن هذه الأرقام بيانات تجريبية للعرض فقط.")
+        return {"text": " ".join(parts)}
+    parts = [f"Based on the available data, {scope} has {count} active listings on MAKAN."]
+    if f.get("segment_median"):
+        parts.append(
+            f"The median asking price in the largest segment ({f['segment_type_en']}) is "
+            f"{f['segment_median']} {f['segment_currency']} across {f['segment_sample']} "
+            "listings; that is an asking price, not a sale price."
+        )
+    if f.get("includes_demo"):
+        parts.append("These figures include demonstration data.")
+    return {"text": " ".join(parts)}
+
+
 BUILDERS: dict[str, Builder] = {
+    "market.interpretation": market_interpretation,
     "property.interpretation": property_interpretation,
     "property.answer": property_answer,
     "listing.description": listing_description,

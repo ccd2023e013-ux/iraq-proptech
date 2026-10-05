@@ -50,6 +50,11 @@ def expire_subscriptions() -> dict[str, Any]:
     return _run("expire_subscriptions")
 
 
+@celery_app.task(name="jobs.market_snapshot")
+def market_snapshot() -> dict[str, Any]:
+    return _run("market_snapshot")
+
+
 celery_app.conf.beat_schedule = {
     "deliver-outbox": {"task": "notifications.deliver", "schedule": 60.0},
     "saved-search-instant": {
@@ -74,4 +79,5 @@ celery_app.conf.beat_schedule = {
     },
     "expire-subscriptions": {"task": "jobs.expire_subscriptions", "schedule": crontab(minute=20)},
     "expire-listings": {"task": "jobs.expire_listings", "schedule": crontab(minute=15)},
+    "market-snapshot": {"task": "jobs.market_snapshot", "schedule": crontab(hour=23, minute=40)},
 }

@@ -17,9 +17,11 @@ from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy import Numeric, case, cast, func, select
 from sqlalchemy.orm import Session
 
+from app.auth.deps import Principal, get_optional_principal
 from app.core.rate_limit import rate_limit
 from app.db.session import get_db
 from app.geo.models import City, Governorate
+from app.market import intelligence
 from app.properties.enums import PropertyStatus
 from app.properties.models import Property
 
@@ -127,3 +129,39 @@ def market_summary(
         "segments": segments,
         "generated_at": datetime.now(UTC).isoformat(),
     }
+
+
+@router.get(
+    "/market/report",
+    response_model=intelligence.MarketReport,
+    dependencies=[Depends(rate_limit("market-report", limit=30, window=60))],
+)
+def market_report(
+    response: Response,
+    governorate_id: uuid.UUID | None = Query(default=None),
+    city_id: uuid.UUID | None = Query(default=None),
+    district_id: uuid.UUID | None = Query(default=None),
+    include_demo: bool = Query(default=True),
+    interpret: bool = Query(default=True),
+    language: str = Query("ar", pattern="^(ar|en)$"),
+    principal: Principal | None = Depends(get_optional_principal),
+    db: Session = Depends(get_db),
+) -> intelligence.MarketReport:
+    """Typed market statements (FACT / OBSERVED / AI_INTERPRETATION) with provenance.
+
+    Metrics without enough data are listed under ``unavailable`` with the reason,
+    never filled in.
+    """
+    intelligence.ensure_scope_args(governorate_id, city_id, district_id)
+    report = intelligence.build_report(
+        db,
+        principal,
+        governorate_id=governorate_id,
+        city_id=city_id,
+        district_id=district_id,
+        include_demo=include_demo,
+        language=language,
+        interpret=interpret,
+    )
+    response.headers["Cache-Control"] = "private, max-age=120"
+    return report
