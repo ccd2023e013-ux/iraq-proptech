@@ -83,13 +83,13 @@ function styleFor(config: MapConfig, dark: boolean): string | StyleSpecification
  * `style.load`, because switching the basemap (theme) removes them.
  */
 function installOverlays(map: MapLibreMap, config: MapConfig): void {
-  const surface = parseHex(cssVar("--surface"), [255, 255, 255, 255]);
   const ink = cssVar("--ink").trim() || "#10201e";
   const accent = parseHex(cssVar("--accent-fill"), [18, 116, 107, 255]);
-  // High-contrast tags: dark ink pills on the light map, light pills on the dark map.
-  const tag = isDark() ? surface : parseHex(cssVar("--ink"), [16, 32, 30, 255]);
-  const tagText = isDark() ? ink : "#ffffff";
-  const edge: [number, number, number, number] = isDark() ? [0, 0, 0, 90] : [255, 255, 255, 230];
+  // High-contrast tags in both themes: the ink colour as fill (dark on the
+  // light map, light on the dark map) with surface-coloured text.
+  const tag = parseHex(cssVar("--ink"), [16, 32, 30, 255]);
+  const tagText = cssVar("--surface").trim() || "#ffffff";
+  const edge: [number, number, number, number] = isDark() ? [0, 0, 0, 110] : [255, 255, 255, 230];
   for (const [name, fill, stroke] of [
     ["iqp-price-tag", tag, edge],
     ["iqp-price-tag-active", accent, accent],
@@ -346,7 +346,11 @@ export function PropertyMap(props: PropertyMapProps) {
           style: styleFor(config, dark),
           bounds: latest.current.initialBbox as LngLatBoundsLike,
           fitBoundsOptions: { padding: 24 },
-          attributionControl: { compact: true, customAttribution: config.attribution },
+          attributionControl: {
+            compact: true,
+            // OpenFreeMap styles carry their own credits; avoid printing them twice.
+            customAttribution: config.provider === "openfreemap" ? undefined : config.attribution,
+          },
           maxZoom: 19,
         });
         mapRef.current = map;
