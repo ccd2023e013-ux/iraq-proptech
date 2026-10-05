@@ -31,9 +31,12 @@ jobs:
         run: |
           . deploy/live.env
           [ -n "$PAGES_INPUT" ] && export PAGES="$PAGES_INPUT"
-          WEB_URL="$LIVE_WEB_URL" python scripts/live/screenshots.py
+          curl -fsS -o /dev/null --retry 8 --retry-delay 15 --retry-all-errors --max-time 120 "$LIVE_WEB_URL/healthz"
+          curl -fsS -o /dev/null --retry 8 --retry-delay 15 --retry-all-errors --max-time 120 "$LIVE_API_URL/api/v1/health"
+          WEB_URL="$LIVE_WEB_URL" bash scripts/ci/annotate.sh "screenshots" python scripts/live/screenshots.py
       - name: Push to a screenshots branch
         run: |
+          set -x
           branch="screenshots/run-${{ github.run_id }}"
           mkdir -p /tmp/out && cp shots/* /tmp/out/
           git config user.name "github-actions[bot]"
