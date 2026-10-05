@@ -104,15 +104,21 @@ def auth_flow(browser, *, phone: bool, locale: str) -> None:
     page.fill("input[name=email]", email)
     page.fill("input[name=password]", password)
     page.screenshot(path=str(OUT / f"register-{tag}.png"), full_page=True)
-    page.locator("form button[type=submit]").click()
-    page.wait_for_selector('main a[href="/login"]', timeout=60_000)
-    check(True, f"[{tag}] registration succeeds")
+    with page.expect_response(lambda r: "/api/v1/auth/register" in r.url, timeout=90_000) as reg:
+        page.locator("form button[type=submit]").click()
+    check(reg.value.status == 201, f"[{tag}] registration accepted ({reg.value.status})")
+    # On success the form is replaced by the confirmation.
+    page.wait_for_selector("main form", state="detached", timeout=30_000)
+    check(True, f"[{tag}] registration confirmation shown")
+    page.screenshot(path=str(OUT / f"registered-{tag}.png"), full_page=True)
 
     # Wrong password → clear, localized error.
     page.goto(WEB + "/login?next=/favorites", wait_until="load", timeout=120_000)
     page.fill("input[name=email]", email)
     page.fill("input[name=password]", password + "x")
-    page.locator("form button[type=submit]").click()
+    with page.expect_response(lambda r: "/api/v1/auth/login" in r.url, timeout=90_000) as bad:
+        page.locator("form button[type=submit]").click()
+    check(bad.value.status == 401, f"[{tag}] wrong password rejected ({bad.value.status})")
     alert = page.locator("form > [role=alert]").first
     alert.wait_for(timeout=60_000)
     expected = INVALID_CREDENTIALS_AR if locale == "ar" else INVALID_CREDENTIALS_EN
@@ -120,8 +126,10 @@ def auth_flow(browser, *, phone: bool, locale: str) -> None:
 
     # Correct password → back to the guarded page that asked for it.
     page.fill("input[name=password]", password)
-    page.locator("form button[type=submit]").click()
-    page.wait_for_url("**/favorites", timeout=60_000)
+    with page.expect_response(lambda r: "/api/v1/auth/login" in r.url, timeout=90_000) as good:
+        page.locator("form button[type=submit]").click()
+    check(good.value.status == 200, f"[{tag}] correct password accepted ({good.value.status})")
+    page.wait_for_url(lambda u: "/favorites" in u and "/login" not in u, timeout=60_000)
     check(True, f"[{tag}] sign-in returns to the requested page (/favorites)")
     cookies = {c["name"]: c for c in ctx.cookies()}
     print(
