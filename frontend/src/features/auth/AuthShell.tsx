@@ -46,7 +46,7 @@ export function AuthShell({
         </p>
         <p className="mt-2 max-w-sm text-ink-2">{dict.auth.sideBody}</p>
         <div className="mx-auto mt-6 max-w-sm">
-          <RiverMap locale={locale} counts={{}} caption="" />
+          <RiverMap locale={locale} counts={{}} caption="" animate={false} />
         </div>
       </aside>
     </div>

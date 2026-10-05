@@ -12,10 +12,13 @@ export function RiverMap({
   locale,
   counts,
   caption,
+  animate = true,
 }: {
   locale: Locale;
   counts: Record<string, number>;
   caption: string;
+  /** Draw the rivers once on load (hero); static elsewhere. */
+  animate?: boolean;
 }) {
   return (
     <figure className="relative w-full">
@@ -37,7 +40,7 @@ export function RiverMap({
             key={river}
             d={smoothPath(RIVERS[river])}
             pathLength={1}
-            className="river-path"
+            className={animate ? "river-path" : undefined}
             fill="none"
             stroke="var(--ink-3)"
             strokeOpacity="0.55"
@@ -48,7 +51,7 @@ export function RiverMap({
         <path
           d={smoothPath(RIVERS.shatt)}
           pathLength={1}
-          className="river-path"
+          className={animate ? "river-path" : undefined}
           style={{ animationDelay: "1.6s" }}
           fill="none"
           stroke="var(--accent)"

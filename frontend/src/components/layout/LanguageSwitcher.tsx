@@ -21,9 +21,16 @@ export function LanguageSwitcher({ current, label }: { current: Locale; label: s
         document.cookie = `${LOCALE_COOKIE}=${next}; path=/; max-age=${ONE_YEAR_SECONDS}; samesite=lax`;
         startTransition(() => router.refresh());
       }}
-      className="h-9 rounded-full px-3 text-sm font-medium text-ink-2 transition hover:bg-fill hover:text-ink disabled:opacity-50"
+      aria-label={label}
+      className="h-9 rounded-full px-2.5 text-sm font-medium whitespace-nowrap text-ink-2 transition hover:bg-fill hover:text-ink disabled:opacity-50 sm:px-3"
     >
-      {label}
+      {/* Short form on phones so the header never wraps or overflows. */}
+      <span aria-hidden className="sm:hidden">
+        {next === "en" ? "EN" : "ع"}
+      </span>
+      <span aria-hidden className="hidden sm:inline">
+        {label}
+      </span>
     </button>
   );
 }

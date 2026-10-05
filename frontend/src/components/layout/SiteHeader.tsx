@@ -66,10 +66,10 @@ export function SiteHeader({
   return (
     <header className="sticky top-0 z-30 border-b border-hairline bg-glass backdrop-blur-xl backdrop-saturate-150">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
-        <div className="flex items-center gap-6">
+        <div className="flex min-w-0 items-center gap-6">
           <Link href="/" className="flex items-center gap-2.5" aria-label={dict.nav.home}>
             <BrandMark />
-            <span className="font-display text-[17px] font-semibold tracking-tight text-ink">
+            <span className="font-display text-[17px] font-semibold tracking-tight whitespace-nowrap text-ink max-[380px]:hidden">
               {locale === "ar" ? "عقار العراق" : "Iraq PropTech"}
             </span>
           </Link>
@@ -81,7 +81,7 @@ export function SiteHeader({
             ))}
           </nav>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
           {me && (
             <Link
               href="/dashboard/properties/new"
@@ -130,7 +130,7 @@ export function SiteHeader({
               </Link>
               <Link
                 href="/register"
-                className="inline-flex h-9 items-center rounded-full bg-accent-fill px-4 text-sm font-medium text-white shadow-soft transition hover:bg-accent-fill-hover"
+                className="inline-flex h-9 items-center rounded-full bg-accent-fill px-3.5 text-sm font-medium whitespace-nowrap text-white shadow-soft transition hover:bg-accent-fill-hover"
               >
                 {dict.nav.register}
               </Link>
