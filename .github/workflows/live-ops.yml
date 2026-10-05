@@ -5,12 +5,14 @@ name: Live operations
 #             trip, database contents — read-only except a temporary S3 probe object
 #   seed      run the idempotent national DEMO seed against the live database and
 #             bucket (needs S3_* secrets; same command the API runs at start-up)
+#   import-osm  import real named places for a city from OpenStreetMap (one Overpass
+#             request, ODbL attribution kept; idempotent refresh)
 on:
   workflow_dispatch:
     inputs:
       action:
         type: choice
-        options: [diagnose, seed]
+        options: [diagnose, seed, import-osm]
         default: diagnose
       s3_endpoint:
         description: "Optional S3 endpoint override (not secret), e.g. https://<ref>.storage.supabase.co/storage/v1/s3"
@@ -45,6 +47,11 @@ jobs:
             bash scripts/ci/annotate.sh "live seed" docker run --rm "${common[@]}" \
               -e STORAGE_BACKEND=s3 -e S3_BUCKET=media proptech-backend \
               python -m app.cli seed-demo-iraq --allow-production
+          elif [ "${{ inputs.action }}" = "import-osm" ]; then
+            out=$(bash scripts/ci/annotate.sh "live osm import" docker run --rm "${common[@]}" \
+              proptech-backend python -m app.cli import-osm-pois --city basra) || { echo "$out"; exit 1; }
+            echo "$out"
+            echo "::notice title=live osm import::$(tail -1 <<<"$out")"
           else
             bash scripts/ci/annotate.sh "live diagnose" docker run --rm "${common[@]}" \
               -v "$PWD/scripts/live:/live:ro" proptech-backend python /live/diagnose.py

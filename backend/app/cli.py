@@ -94,6 +94,14 @@ def main(argv: list[str] | None = None) -> int:
     iraq.add_argument("--per-city", type=int, default=18)
     iraq.add_argument("--no-images", action="store_true")
     iraq.add_argument("--allow-production", action="store_true")
+    osm = sub.add_parser(
+        "import-osm-pois",
+        help="Import named places (schools, hospitals, mosques…) for a city from "
+        "OpenStreetMap via one Overpass request (ODbL attribution kept)",
+    )
+    osm.add_argument("--city", default="basra")
+    osm.add_argument("--bbox", help="west,south,east,north (city-sized, inside Iraq)")
+    osm.add_argument("--dry-run", action="store_true")
     pf = sub.add_parser("preflight", help="Check configuration (and the database with --db)")
     pf.add_argument("--db", action="store_true", help="also check PostGIS and migrations")
     for name, text in (
@@ -122,6 +130,21 @@ def main(argv: list[str] | None = None) -> int:
         with get_sessionmaker()() as db:
             for result in registry.run(db, args.names or registry.FREQUENT):
                 print(f"{result['job']}: {result['status']} {result['detail'] or result['error']}")
+        return 0
+
+    if args.command == "import-osm-pois":
+        from app.geo import osm
+
+        bbox = None
+        if args.bbox:
+            w, s_, e, n = (float(v) for v in args.bbox.split(","))
+            bbox = (w, s_, e, n)
+        try:
+            with get_sessionmaker()() as db:
+                print(osm.import_places(db, city_slug=args.city, bbox=bbox, dry_run=args.dry_run))
+        except Exception as exc:
+            _record_cli_error("import-osm-pois", exc)
+            raise
         return 0
 
     if args.command == "preflight":
