@@ -26,7 +26,7 @@ export function AuthShell({
   footer?: ReactNode;
 }) {
   return (
-    <div className="mx-auto grid min-h-[calc(100dvh-4rem)] max-w-6xl items-center gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,28rem)_minmax(0,1fr)] lg:gap-16">
+    <div className="mx-auto grid min-h-[calc(100dvh-4rem)] max-w-6xl grid-cols-[minmax(0,1fr)] items-center gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,28rem)_minmax(0,1fr)] lg:gap-16">
       <section className="w-full max-w-md justify-self-center lg:justify-self-start">
         <h1 className="font-display text-3xl font-semibold tracking-tight text-ink">{title}</h1>
         {subtitle && <p className="mt-2 text-ink-2">{subtitle}</p>}

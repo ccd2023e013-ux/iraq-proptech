@@ -37,7 +37,10 @@ def check(condition: bool, message: str) -> None:
 
 
 def no_horizontal_scroll(page: Page) -> bool:
-    return page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1")
+    # Compare with the device width, not innerWidth: mobile browsers zoom out
+    # (and grow innerWidth) when content is wider than the screen.
+    width = (page.viewport_size or {"width": 0})["width"]
+    return page.evaluate(f"document.documentElement.scrollWidth <= {width} + 1")
 
 
 INVALID_CREDENTIALS_AR = "البريد الإلكتروني أو كلمة المرور غير صحيحة."
