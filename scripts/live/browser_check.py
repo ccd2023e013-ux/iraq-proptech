@@ -72,6 +72,47 @@ def future_iraq(browser) -> None:
     ctx.close()
 
 
+def media_studio(browser) -> None:
+    """Stage 7: a lister renders a real video in the browser and saves it."""
+    password = os.environ.get("DEMO_ACCOUNT_PASSWORD")
+    if not password:
+        check(False, "media studio: DEMO_ACCOUNT_PASSWORD not available to the browser job")
+        return
+    ctx = browser.new_context(viewport={"width": 1366, "height": 900}, locale="en-US")
+    page = ctx.new_page()
+    page.goto(WEB + "/login?next=/studio", wait_until="load", timeout=120_000)
+    page.fill("input[name=email]", "demo.agent@example.com")
+    page.fill("input[name=password]", password)
+    page.locator("form button[type=submit]").click()
+    page.wait_for_url(lambda u: "/studio" in u and "/login" not in u, timeout=60_000)
+    page.wait_for_selector("[data-testid=studio-render]", timeout=60_000)
+    page.locator("[data-testid=studio-quick]").check()
+    with page.expect_response(lambda r: "/api/v1/studio/jobs" in r.url and r.request.method == "POST", timeout=60_000) as job:
+        page.locator("[data-testid=studio-render]").click()
+    check(job.value.status == 201, f"studio storyboard created ({job.value.status})")
+    result = page.locator("[data-testid=studio-result]")
+    try:
+        result.wait_for(timeout=120_000)
+        rendered = True
+    except Exception:  # noqa: BLE001
+        rendered = False
+    check(rendered, "studio renders a video in the browser")
+    if rendered:
+        page.screenshot(path=str(OUT / "studio.png"), full_page=True)
+        with page.expect_response(lambda r: r.url.endswith("/output"), timeout=120_000) as up:
+            page.locator("[data-testid=studio-save]").click()
+        info = up.value
+        check(info.status == 200, f"studio video saved ({info.status})")
+        if info.status == 200:
+            body = info.json()
+            check(
+                body["status"] == "DONE" and (body["output_bytes"] or 0) > 10_000,
+                f"saved video is real ({body['output_type']}, {body['output_bytes']} bytes, "
+                f"{body['duration_ms']} ms)",
+            )
+    ctx.close()
+
+
 def themes(browser) -> None:
     """Dark mode follows the system by default; the toggle can force light."""
     ctx = browser.new_context(viewport={"width": 1366, "height": 900}, color_scheme="dark")
@@ -448,6 +489,7 @@ def main() -> int:
         # 5. Stage 1/2 (2.0): themes and the authentication journey; Stage 3 map.
         map_v2(browser)
         future_iraq(browser)
+        media_studio(browser)
         themes(browser)
         auth_flow(browser, phone=True, locale="ar")
         auth_flow(browser, phone=False, locale="en")

@@ -22,7 +22,7 @@ export const dynamic = "force-dynamic";
 const NEXT_MODULES = [
   { key: "future", icon: "M3 20h18M5 20V9l7-5 7 5v11M9 20v-6h6v6", href: "/future" },
   { key: "vision", icon: "M3 17l6-6 4 4 8-8M14 7h7v7", href: "/vision" },
-  { key: "studio", icon: "M4 6h11v12H4zM15 10l5-3v10l-5-3", href: null },
+  { key: "studio", icon: "M4 6h11v12H4zM15 10l5-3v10l-5-3", href: "/studio" },
   { key: "invest", icon: "M12 3v18M7 8h7a3 3 0 0 1 0 6H8a3 3 0 0 0 0 6h9", href: null },
 ] as const;
 

@@ -144,6 +144,7 @@ jobs:
       - name: Real-browser check
         env:
           WEB_URL: ${{ needs.config.outputs.web }}
+          DEMO_ACCOUNT_PASSWORD: ${{ secrets.DEMO_ACCOUNT_PASSWORD }}
         run: $ANNOTATE "live browser" python scripts/live/browser_check.py
       - uses: actions/upload-artifact@v4
         if: always()

@@ -350,6 +350,15 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             <ShareButton label={p.share} copied={p.copied} />
             {property.can_edit && (
               <Link
+                href={`/studio?property_id=${property.id}`}
+                className="inline-flex h-10 items-center rounded-full px-4 text-sm font-medium text-ink ring-1 ring-inset ring-hairline hover:bg-fill"
+                data-testid="studio-link"
+              >
+                {dict.studio.title}
+              </Link>
+            )}
+            {property.can_edit && (
+              <Link
                 href={`/dashboard/properties/${property.id}`}
                 className="inline-flex h-10 items-center rounded-full px-4 text-sm font-medium text-ink ring-1 ring-inset ring-hairline hover:bg-fill"
               >

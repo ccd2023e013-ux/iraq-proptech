@@ -24,6 +24,7 @@ from app.properties.router import router as properties_router
 from app.rbac.router import router as rbac_router
 from app.search.router import router as search_router
 from app.search.saved import router as saved_search_router
+from app.studio.router import router as studio_router
 from app.system.dev_router import router as dev_router
 from app.system.jobs_router import router as jobs_router
 from app.system.router import router as system_router
@@ -50,6 +51,7 @@ def build_api_router(settings: Settings) -> APIRouter:
     api_router.include_router(market_router)
     api_router.include_router(development_router)
     api_router.include_router(vision_router)
+    api_router.include_router(studio_router)
     api_router.include_router(saved_search_router)
     api_router.include_router(pois_router)
     api_router.include_router(money_router)

@@ -46,6 +46,7 @@ from app.properties.models import (
 )
 from app.rbac.models import RoleRecord
 from app.search.saved import SavedSearch
+from app.studio.models import MediaJob
 from app.system.models import SystemSetting
 from app.users.models import User, UserRole
 from app.vision.models import VisionConcept
@@ -78,6 +79,7 @@ __all__ = [
     "Lead",
     "LeadActivity",
     "LeadStatus",
+    "MediaJob",
     "Message",
     "Neighborhood",
     "Notification",

@@ -69,7 +69,13 @@ export async function apiRequest(path: string, options: ApiFetchOptions = {}): P
   const finalHeaders = new Headers(headers);
   finalHeaders.set("Accept", "application/json");
   if (locale) finalHeaders.set("Accept-Language", locale);
-  if (body !== undefined && !(body instanceof FormData)) {
+  const isBlob = typeof Blob !== "undefined" && body instanceof Blob;
+  if (isBlob) {
+    // Raw uploads (e.g. a rendered video) keep their own media type.
+    if (!finalHeaders.has("Content-Type")) {
+      finalHeaders.set("Content-Type", (body as Blob).type || "application/octet-stream");
+    }
+  } else if (body !== undefined && !(body instanceof FormData)) {
     finalHeaders.set("Content-Type", "application/json");
   }
   if (UNSAFE.has(method)) {
@@ -78,7 +84,7 @@ export async function apiRequest(path: string, options: ApiFetchOptions = {}): P
   }
 
   let payload: BodyInit | undefined;
-  if (body instanceof FormData) payload = body;
+  if (body instanceof FormData || isBlob) payload = body as BodyInit;
   else if (body !== undefined) payload = JSON.stringify(body);
 
   try {
