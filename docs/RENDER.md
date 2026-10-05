@@ -51,7 +51,7 @@ demo payments) are printed in the deploy log.
 | No free background workers / cron jobs | `NOTIFICATIONS_INLINE=true` delivers notifications after each commit in the API process; scheduled jobs run via `.github/workflows/scheduled-jobs.yml` calling the token-protected `POST /api/v1/internal/jobs/run` |
 | No free Redis in the blueprint | Rate limiting falls back to a per-process in-memory window; readiness reports Redis as `unavailable` (status `degraded`, still serving) |
 | Ephemeral disk | Media on Supabase Storage (`STORAGE_BACKEND=s3`) |
-| Free services cannot use the private network | The web service reaches the API over HTTPS; client IPs pass through two Render edges, hence `TRUSTED_PROXY_HOPS=2` |
+| Free services cannot use the private network | The web service reaches the API over HTTPS; a browser request reaches the API with six `X-Forwarded-For` entries (Cloudflare + load balancer on both hops, plus the web egress), hence `TRUSTED_PROXY_HOPS=6`; check with `GET /api/v1/admin/system` → `request_network` |
 
 Free-plan terms change over time; check Render's pricing page and never
 upgrade a service plan without deciding to pay.

@@ -68,7 +68,7 @@ class Settings(BaseSettings):
     rate_limit_enabled: bool = True
     # Reverse proxies in front of the frontend that append to X-Forwarded-For
     # (TLS proxy / tunnel / platform edge). 0 = never trust the header.
-    trusted_proxy_hops: int = Field(default=0, ge=0, le=5)
+    trusted_proxy_hops: int = Field(default=0, ge=0, le=10)
 
     # Notifications: "mock" logs messages and keeps them in an in-memory outbox.
     email_provider: Literal["mock", "smtp"] = "mock"

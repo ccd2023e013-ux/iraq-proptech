@@ -53,7 +53,7 @@ the header unchanged and does not count as a hop.
 | --- | --- |
 | Development (browser → Next.js proxy → API, no edge proxy) | `0` — the API uses the TCP peer (the frontend container); fine for one developer |
 | PC behind Cloudflare Tunnel or Caddy | `1` (production overlay default) |
-| Render (two edges) | `2` (set in `render.yaml`) |
+| Render (two hops, each Cloudflare + load balancer, plus the web egress) | `6` — measured live via `GET /api/v1/admin/system` → `request_network` (set in `render.yaml`) |
 
 Never set it higher than reality: the extra entries would be client-controlled.
 

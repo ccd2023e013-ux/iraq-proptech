@@ -117,3 +117,10 @@ def test_client_ip_trusts_only_configured_proxy_hops() -> None:
     assert resolve_client_ip("172.18.0.5", "not-an-ip", 1) == "172.18.0.5"
     assert resolve_client_ip("172.18.0.5", None, 1) == "172.18.0.5"
     assert resolve_client_ip(None, " 2001:db8::1 ", 1) == "2001:db8::1"
+    # Chain measured on the live Render deployment (browser → web → API):
+    render = (
+        "13.83.107.156, 172.69.22.175, 10.194.23.59,74.220.48.71, 172.68.175.62, 10.197.203.133"
+    )
+    assert resolve_client_ip("10.197.203.133", render, 6) == "13.83.107.156"
+    # A client-supplied X-Forwarded-For only adds entries on the left: ignored.
+    assert resolve_client_ip("10.197.203.133", "6.6.6.6, " + render, 6) == "13.83.107.156"

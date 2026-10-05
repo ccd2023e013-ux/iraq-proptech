@@ -27,9 +27,13 @@ services:
       # FRONTEND_URL / CORS_ORIGINS are optional here: the browser talks to the
       # API through the web service's same-origin proxy (no CORS), and email
       # links need FRONTEND_URL only once a real email provider is configured.
-      # Client → Render edge (web) → Next.js → Render edge (api): two appending proxies.
+      # Measured on the live site (GET /api/v1/admin/system → request_network): a browser
+      # request reaches the API with X-Forwarded-For
+      #   client, cloudflare, render-internal, web-egress, cloudflare, render-internal
+      # (Cloudflare + Render's load balancer on each of the two hops), so the client is
+      # the 6th entry from the right. The daily Live site security check verifies this.
       - key: TRUSTED_PROXY_HOPS
-        value: "2"
+        value: "6"
       - key: NOTIFICATIONS_INLINE    # no Celery worker on the free plan
         value: "true"
       - key: JOBS_TRIGGER_TOKEN      # copy into the GitHub secret JOBS_TRIGGER_TOKEN
