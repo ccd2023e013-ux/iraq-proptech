@@ -219,7 +219,7 @@ def map_v2(browser) -> None:
         page.mouse.click(cx + dx, cy + dy)
         page.wait_for_timeout(250)
     page.locator("[data-testid=finish-area]").click()
-    page.wait_for_url(lambda u: "polygon=" in u, timeout=30_000)
+    page.wait_for_url(lambda u: "polygon=" in u, timeout=30_000, wait_until="commit")
     page.wait_for_load_state("load")
     page.wait_for_timeout(2_500)
     after = page.locator("[data-testid=map-total]").inner_text()
