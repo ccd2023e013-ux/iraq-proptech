@@ -15,18 +15,17 @@ All phases (1–12), final audit, 16-step E2E. Online-launch preparation
 (national DEMO dataset, demo accounts from DEMO_ACCOUNT_PASSWORD, labelled AI,
 Live site workflow, docs/ONLINE-LAUNCH-STATUS.md) — CI green at `f5e2c47`.
 
-## In progress: ONLINE LAUNCH
+## Online launch: DONE
 
-Blocked on the owner creating the free Supabase project and Render Blueprint
-and adding GitHub secrets (SUPABASE_DB_URL, DEMO_ACCOUNT_PASSWORD,
-JOBS_TRIGGER_TOKEN). Instructions were sent; see ONLINE-LAUNCH-STATUS.md.
+Live at https://iraq-proptech-web.onrender.com (API
+https://iraq-proptech-api.onrender.com). Verified by the Live site workflow
+run 37247712779 on `4ae902d` (all jobs green). Details and the issues fixed
+during launch: ONLINE-LAUNCH-STATUS.md.
 
-## Next actions (in order)
+## Next actions
 
-1. Owner sends the two public URLs → write them to `deploy/live.env`, push.
-2. CI → Live site workflow (or dispatch it): fix failures until all jobs green.
-3. Tick the checklist in ONLINE-LAUNCH-STATUS.md, record URLs in README.
-4. Live deployment report.
+Owner options: free SMTP sender (public sign-ups), custom domain (+ web HSTS),
+production PC migration (MIGRATE-TO-LOCAL-PC.md).
 
 ## Local tooling notes
 

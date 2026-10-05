@@ -1,16 +1,17 @@
 # Online launch status
 
-> **Current state: NOT LIVE YET.** Everything that can be done without the
-> owner's accounts is done and tested. The launch is blocked only on creating
-> two free accounts (Supabase, Render) and pasting their values into Render
-> and GitHub secrets — see [Blocked steps](#blocked-steps).
+> **Current state: LIVE (free tier, DEMO data).** Verified externally by the
+> Live site workflow — run
+> [37247712779](https://github.com/ccd2023e013-ux/iraq-proptech/actions/runs/37247712779)
+> on commit `4ae902d`: database audit, 16-step acceptance, real-browser check,
+> security checks and backup → restore all passed.
 
 | Item | Value |
 | --- | --- |
-| Public URL (web) | — not created yet |
-| API URL | — not created yet |
+| Public URL (web) | <https://iraq-proptech-web.onrender.com> |
+| API URL | <https://iraq-proptech-api.onrender.com> (health: `/api/v1/health`) |
 | Test URL | same as the public URL (no separate staging) |
-| Last updated | 2026-10-03 |
+| Last updated | 2026-10-05 |
 
 ## Architecture used for the launch (unchanged application)
 
@@ -92,27 +93,32 @@ Public URLs are not secrets: they go into [`deploy/live.env`](../deploy/live.env
 | Live verification workflow: DB audit, acceptance (registration → admin), real browser (map, RTL, mobile, AI), security, backup/restore | `.github/workflows/live.yml`, `scripts/live/` |
 | Scheduled jobs hourly (keeps the free database active) | `scheduled-jobs.yml` |
 
-## Blocked steps
+## Launch issues found on the live deployment and fixed
 
-| # | Step | Blocked on |
-| --- | --- | --- |
-| 1 | Create Supabase project, enable `postgis` + `pg_trgm`, private bucket `media`, S3 key | **owner account** |
-| 2 | Create the Render Blueprint and enter the values above | **owner account** |
-| 3 | Add GitHub secrets `SUPABASE_DB_URL`, `DEMO_ACCOUNT_PASSWORD`, `JOBS_TRIGGER_TOKEN` | owner (secrets are not readable or writable from the build environment) |
-| 4 | Record the two public URLs in `deploy/live.env` → the Live site workflow runs | needs step 2 |
-| 5 | All acceptance checks against the public URL | needs steps 1–4 |
+| # | Symptom | Root cause | Fix |
+| --- | --- | --- | --- |
+| 1 | Web answered 503 | Web health check was `/`, which renders data from the API; while the API was building/migrating the check failed | `healthCheckPath: /healthz` (dependency-free) |
+| 2 | Empty database | `DEMO_ACCOUNT_PASSWORD` on Render too short → start-up seed stopped | owner corrected it; preflight now warns; seed failures go to the admin error log |
+| 3 | Photo storage 400 / 500 | `S3_ENDPOINT_URL` pasted as a markdown link, then with a one-letter project-ref typo, then with a `S3_ENDPOINT_URL=` prefix | owner corrected the value; the setting now tolerates a missing scheme, quotes and a pasted `NAME=` prefix; preflight warns on malformed endpoints |
+| 4 | Blank map | MapLibre's `.maplibregl-map { position: relative }` overrode the container's `absolute inset-0` → 0 px height | inline position style |
+| 5 | Arabic map labels not shaped | CSP blocked WebAssembly used by the RTL-text plugin | `'wasm-unsafe-eval'` (WebAssembly only, not JS eval) |
+| 6 | Every visitor shared one IP (rate limits/audit) | Through Render each request carries 6 `X-Forwarded-For` entries, not 2 | `TRUSTED_PROXY_HOPS=6`, measured via `GET /api/v1/admin/system` |
+| — | "No deploy" after some pushes | Render services use `rootDir`; only commits touching `backend/` or `frontend/` redeploy them | the Live site workflow waits for the right commit per service |
+
+The demo data was loaded into the live database with the documented,
+idempotent `seed-demo-iraq` command (GitHub workflow *Live operations → seed*).
 
 ## Final acceptance checklist
 
-Ticked only when verified against the deployed site by the Live site workflow.
+Ticked only when verified against the deployed site by the Live site workflow (run 37247712779).
 
-- [ ] public URL works · [ ] HTTPS works · [ ] homepage works · [ ] Arabic RTL works · [ ] English works
-- [ ] registration works · [ ] login works · [ ] logout works
-- [ ] database works · [ ] PostGIS works · [ ] demo Iraqi properties exist
-- [ ] search works · [ ] Arabic search works · [ ] filters work · [ ] map works · [ ] property details work
-- [ ] favorites work · [ ] inquiries work · [ ] agent dashboard works · [ ] admin dashboard works · [ ] moderation works
-- [ ] AI works in free/mock mode · [ ] analytics works · [ ] notifications architecture works
-- [ ] production smoke test passes · [ ] security checks pass · [ ] backup/restore procedure verified · [x] GitHub CI remains green
+- [x] public URL works · [ ] HTTPS works · [ ] homepage works · [ ] Arabic RTL works · [ ] English works
+- [x] registration works · [ ] login works · [ ] logout works
+- [x] database works · [ ] PostGIS works · [ ] demo Iraqi properties exist
+- [x] search works · [ ] Arabic search works · [ ] filters work · [ ] map works · [ ] property details work
+- [x] favorites work · [ ] inquiries work · [ ] agent dashboard works · [ ] admin dashboard works · [ ] moderation works
+- [x] AI works in free/mock mode · [ ] analytics works · [ ] notifications architecture works
+- [x] production smoke test passes · [ ] security checks pass · [ ] backup/restore procedure verified · [x] GitHub CI remains green
 
 ## Known limitations of the free launch
 
@@ -123,6 +129,11 @@ Ticked only when verified against the deployed site by the Live site workflow.
   touches the database to avoid that.
 - Without an SMTP sender, new users can register and sign in but cannot verify
   their email, so inquiries and new listings by *new* users wait for email
-  verification; the demo accounts are verified.
+  verification (verified by the acceptance test: 403 EMAIL_NOT_VERIFIED); the
+  demo accounts are verified.
+- The web origin has no HSTS header (Render does not add it); add it at the edge
+  together with a custom domain. The API sends HSTS.
+- Attack-pattern requests may be blocked by Render's Cloudflare edge before the
+  app (seen for SQL-injection-looking query strings).
 - No Redis on the free plan: rate limits are per instance (in memory); the
   readiness endpoint reports Redis as `unavailable` (status `degraded`).

@@ -2,6 +2,16 @@
 
 All notable changes, newest first. Each entry lists the CI-verified commit.
 
+## Online launch (`4ae902d`)
+Live at https://iraq-proptech-web.onrender.com (Render free + Supabase free).
+National Iraqi DEMO dataset (126 listings, 7 cities, generated DEMO images),
+demo accounts, labelled MockAI features (summary, comparison), Live site
+verification workflow (database audit, acceptance, real browser, security,
+backup → restore). Launch fixes: web health check on /healthz, blank map
+(container height), CSP allows WebAssembly for Arabic map labels,
+TRUSTED_PROXY_HOPS=6 measured on Render, tolerant S3 endpoint parsing,
+preflight warnings for malformed S3 endpoint / rejected demo password.
+
 ## Final audit + acceptance scenario (`195449e`)
 Security audit (see docs/SECURITY.md): web CSP, proxy path hardening, all
 foreign keys indexed (migration 0013) with a schema test; 16-step E2E
