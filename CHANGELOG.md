@@ -2,6 +2,11 @@
 
 All notable changes, newest first. Each entry lists the CI-verified commit.
 
+## 2.0 Stage 5: Development Intelligence — Future Iraq (`6236919`)
+Provenance model (sources, projects, evidence); five official-source Basra
+records; `/future` page with sources and dates; Future Iraq map layer;
+property intelligence cites nearby projects.
+
 ## 2.0 Stage 4: Property Intelligence (`e8d6fda`)
 "Is this a good property?" report with statements typed FACT / SOURCE /
 ESTIMATE / AI_INTERPRETATION (kind bound to origin server-side), sources and

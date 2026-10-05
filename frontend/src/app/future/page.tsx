@@ -102,7 +102,12 @@ export default async function FuturePage() {
                   <dt className="text-xs text-ink-3">{f.location}</dt>
                   <dd className="text-ink">
                     {f.precision[p.location_precision]}
-                    {p.location_note ? ` — ${p.location_note}` : ""}{" "}
+                    {p.location_note && (
+                      <>
+                        {" — "}
+                        <span dir="auto">{p.location_note}</span>
+                      </>
+                    )}{" "}
                     <Link
                       href={`/map?bbox=${[lon - d, lat - d, lon + d, lat + d].map((v) => v.toFixed(3)).join(",")}&layer=future`}
                       className="text-accent underline-offset-4 hover:underline"
@@ -128,7 +133,11 @@ export default async function FuturePage() {
                             {e.retrieved_at.slice(0, 10)}
                           </span>
                         </p>
-                        {e.excerpt && <p className="mt-1 text-ink-2">“{e.excerpt}”</p>}
+                        {e.excerpt && (
+                          <p className="mt-1 text-ink-2" dir="auto">
+                            <q>{e.excerpt}</q>
+                          </p>
+                        )}
                         <a
                           href={e.url}
                           target="_blank"

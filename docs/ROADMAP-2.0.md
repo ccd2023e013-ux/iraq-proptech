@@ -16,7 +16,7 @@ Status legend: ✅ done (live-verified) · 🚧 in progress · ⏳ planned ·
 | 2 | Authentication and core UX | ✅ (email sending 🔑) |
 | 3 | Basra-first Map 2.0 | ✅ (satellite 🔑) |
 | 4 | Property Intelligence | ✅ |
-| 5 | Development Intelligence ("Future Iraq") | ⏳ 🔑 |
+| 5 | Development Intelligence ("Future Iraq") | ✅ first dataset (more sources ongoing) |
 | 6 | AI Property Vision | ⏳ 🔑 |
 | 7 | Property Media Studio (+ drone workflow) | ⏳ 🔑 |
 | 8 | Market Intelligence | ⏳ |
@@ -161,6 +161,20 @@ Development signals are listed as a gap until Stage 5 data exists.
 - Never invent projects; empty state when no verified data. 🔑 (access/terms)
 - **Acceptance**: provenance required by the schema (tests); admin import +
   review; layer live with real, cited items or an honest empty state.
+
+**Status ✅ — live-verified** (Live site run 37300045153 on `6236919`).
+Provenance model (migration 0014: sources, projects, evidence) where a
+project is publishable only with evidence (https URL, organisation, published
+and retrieved dates, excerpt, what it supports); status and timelines are
+stored as published; positions carry precision + note. First curated Basra
+dataset from official publishers (GCPI: Al-Faw Grand Port, Faw–Umm Qasr
+tunnel, Al-Faw desalination plant; NIC: two undated housing opportunities,
+confidence LOW) imported live. `/future` page, Future Iraq map layer and
+property-intelligence citations of projects within 15 km; live browser
+check covers page and layer. Continuing: Ministry of Planning
+reconstruction platform and the NIC Investment Map need an export/API or
+manual curation (their data is not offered as an open feed); every addition
+goes through the same evidence rules.
 
 ## 6 — AI Property Vision
 
