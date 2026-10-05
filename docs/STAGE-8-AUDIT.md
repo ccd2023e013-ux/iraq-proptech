@@ -35,3 +35,7 @@ This audit was made by reading the code only. GitHub Actions is paused until the
 `backend/tests/test_market_intelligence.py` has one or more tests per rule above: kinds, sample and period validation, forbidden wording (8 phrasings), template cleanliness, word boundaries, confidence, gaps, provenance, currency separation, demo exclusion, initial-price trend, no invented trend, same-currency changes, sold/rented only, one-segment area comparison, district limits, possible duplicates, guarded AI (4 attempts) and today-only snapshots. `backend/tests/test_market.py` checks the summary floor.
 
 The live checks are in `scripts/live/acceptance.sh` step 11b (Basra, a second city, all of Iraq, and demo exclusion) and `scripts/live/browser_check.py` `market_intelligence` (1920 EN dark, 1440 AR light, 390 AR dark, 390 EN light; Basra and Baghdad; RTL and LTR; per-statement source, unavailable list, provenance and demo exclusion).
+
+## Checking the branch before merge
+
+Render deploys only `main`, so the branch cannot be checked on the live site before it is merged. The CI Docker stack job now runs `scripts/ci/market-browser.sh`. It seeds the national DEMO dataset, records today's snapshot and runs the same `market_intelligence` browser checks against the stack. The screenshots are uploaded as the `market-screenshots` artifact. After the merge, the Live site workflow repeats the checks against production, and `live-probe.yml` with `mode=market` re-runs them on demand.

@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "probe (HTTP), auth or map (real-browser checks only)"
+        description: "probe (HTTP), auth, map or market (real-browser checks only)"
         default: probe
 
 permissions:
@@ -18,17 +18,17 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Install Playwright + Chromium
-        if: inputs.mode == 'auth' || inputs.mode == 'map'
+        if: inputs.mode == 'auth' || inputs.mode == 'map' || inputs.mode == 'market'
         run: |
           python -m pip install --quiet playwright pillow
           python -m playwright install --with-deps chromium
       - name: Browser checks (${{ inputs.mode }})
-        if: inputs.mode == 'auth' || inputs.mode == 'map'
+        if: inputs.mode == 'auth' || inputs.mode == 'map' || inputs.mode == 'market'
         run: |
           . deploy/live.env
           WEB_URL="$LIVE_WEB_URL" BROWSER_ONLY=${{ inputs.mode }} bash scripts/ci/annotate.sh "auth probe" python scripts/live/browser_check.py
       - name: Probe
-        if: inputs.mode != 'auth' && inputs.mode != 'map'
+        if: inputs.mode != 'auth' && inputs.mode != 'map' && inputs.mode != 'market'
         run: |
           . deploy/live.env
           WEB_URL="$LIVE_WEB_URL" API_URL="$LIVE_API_URL" bash scripts/live/probe.sh

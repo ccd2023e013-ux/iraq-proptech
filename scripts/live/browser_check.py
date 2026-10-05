@@ -548,6 +548,11 @@ def main() -> int:
             browser.close()
             print("MAP-ONLY RESULT: " + ("OK" if not FAILURES else "; ".join(FAILURES)))
             return 1 if FAILURES else 0
+        if os.environ.get("BROWSER_ONLY") == "market":
+            market_intelligence(browser)
+            browser.close()
+            print("MARKET-ONLY RESULT: " + ("OK" if not FAILURES else "; ".join(FAILURES)))
+            return 1 if FAILURES else 0
         if os.environ.get("BROWSER_ONLY") == "auth":
             themes(browser)
             auth_flow(browser, phone=True, locale="ar")

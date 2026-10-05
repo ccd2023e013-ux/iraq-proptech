@@ -136,6 +136,16 @@ jobs:
         run: $ANNOTATE "map smoke" bash scripts/ci/smoke-map.sh
       - name: Final acceptance scenario (16 steps, agency/agent/customer/admin, mock AI)
         run: $ANNOTATE "e2e final" bash scripts/ci/e2e-final.sh
+      - name: Market intelligence in a real browser (Stage 8, pre-merge)
+        run: $ANNOTATE "market browser" bash scripts/ci/market-browser.sh
+      - name: Market screenshots (artifact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: market-screenshots
+          path: screenshots/market-*.png
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Worker executes a task via Redis
         run: >
           docker compose exec -T backend python -c
