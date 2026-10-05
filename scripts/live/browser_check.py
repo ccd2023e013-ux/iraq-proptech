@@ -375,6 +375,23 @@ def main() -> int:
         provider = summary.locator("[data-ai-provider]").first.get_attribute("data-ai-provider")
         check(provider == "mock", f"AI summary shown and labelled ({provider})")
         check(len(summary.inner_text()) > 40, "AI summary has content")
+        # Stage 4: property intelligence — typed statements and the buyer assistant.
+        page.locator("[data-testid=intelligence-analyze]").click()
+        report = page.locator("[data-testid=intelligence-report]")
+        report.wait_for(timeout=90_000)
+        kinds = {
+            k
+            for k in report.locator("[data-kind]").evaluate_all("els => els.map(e => e.dataset.kind)")
+        }
+        check(
+            {"FACT", "ESTIMATE", "AI_INTERPRETATION"} <= kinds,
+            f"intelligence report labels every statement ({sorted(kinds)})",
+        )
+        page.fill("#intel-question", "كم سعر هذا العقار؟")
+        page.locator("[data-testid=intelligence-ask]").click()
+        answers = page.locator("[data-testid=intelligence-answers] [data-kind=AI_INTERPRETATION]")
+        answers.first.wait_for(timeout=60_000)
+        check(answers.count() >= 1, "buyer assistant answers, labelled as AI interpretation")
         page.screenshot(path=str(OUT / "property.png"), full_page=True)
 
         # 5. Stage 1/2 (2.0): themes and the authentication journey; Stage 3 map.

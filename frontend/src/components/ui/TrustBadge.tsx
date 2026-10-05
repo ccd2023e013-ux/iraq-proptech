@@ -10,7 +10,7 @@ const STYLES: Record<TrustKind, string> = {
   fact: "bg-fill text-ink-2",
   source: "bg-accent-tint text-accent",
   estimate: "bg-gold-100 text-gold-700",
-  ai: "bg-accent-tint text-accent",
+  ai: "bg-ink text-surface",
   simulation: "bg-gold-100 text-gold-700",
   demo: "bg-gold-500 text-white",
 };

@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.ai import service
+from app.ai import intelligence, service
 from app.ai.models import AIGeneration
 from app.ai.schemas import (
     AIEnvelope,
@@ -204,6 +204,50 @@ def ai_neighborhood(
     db: Session = Depends(get_db),
 ) -> AIEnvelope:
     return service.neighborhood_analysis(db, principal, _visible(db, principal, property_id))
+
+
+# --- property intelligence (typed statements)
+
+_ask_limit = rate_limit("ai-ask", limit=30, window=3600)
+
+
+class AskIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    question: str = Field(min_length=2, max_length=300)
+    language: Literal["ar", "en"] = "ar"
+
+
+@router.get(
+    "/ai/properties/{property_id}/report",
+    response_model=intelligence.IntelligenceReport,
+    dependencies=[Depends(_public_limit)],
+)
+def ai_report(
+    property_id: uuid.UUID,
+    language: str = Query("ar", pattern="^(ar|en)$"),
+    principal: Principal | None = Depends(get_optional_principal),
+    db: Session = Depends(get_db),
+) -> intelligence.IntelligenceReport:
+    """ "Is this a good property?" — FACT / SOURCE / ESTIMATE / AI_INTERPRETATION statements."""
+    prop = _visible(db, principal, property_id)
+    return intelligence.build_report(db, principal, prop, language)
+
+
+@router.post(
+    "/ai/properties/{property_id}/ask",
+    response_model=intelligence.AnswerOut,
+    dependencies=[Depends(_ask_limit)],
+)
+def ai_ask(
+    property_id: uuid.UUID,
+    body: AskIn,
+    principal: Principal | None = Depends(get_optional_principal),
+    db: Session = Depends(get_db),
+) -> intelligence.AnswerOut:
+    """Buyer assistant: answers from the listing's facts and estimates only."""
+    prop = _visible(db, principal, property_id)
+    return intelligence.answer_question(db, principal, prop, body.question, body.language)
 
 
 class SimilarOut(BaseModel):

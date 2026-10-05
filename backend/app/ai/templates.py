@@ -205,7 +205,125 @@ def search_parse(f: dict[str, Any], lang: str) -> dict[str, Any]:
     return nlsearch.parse(str(f.get("query", "")), f.get("vocabulary") or {})
 
 
+_POSITION = {
+    "below_range": ("أقل من النطاق التقديري", "below the estimated range"),
+    "within_range": ("ضمن النطاق التقديري", "within the estimated range"),
+    "above_range": ("أعلى من النطاق التقديري", "above the estimated range"),
+}
+_NEAREST = {
+    "school": ("مدرسة", "school"),
+    "hospital": ("مستشفى", "hospital"),
+    "clinic": ("عيادة", "clinic"),
+    "market": ("سوق", "market"),
+    "mosque": ("جامع", "mosque"),
+}
+
+
+def _price_sentence(f: dict[str, Any], lang: str) -> str | None:
+    if not f.get("estimate_low"):
+        return None
+    pos = _POSITION.get(str(f.get("estimate_position")), (None, None))
+    if lang == "ar":
+        s = (
+            f"تقدير المنصة لسعر عقار مماثل بين {f['estimate_low']} و{f['estimate_high']} "
+            f"بناءً على {f['comparable_count']} إعلانات مشابهة"
+        )
+        return s + (f"، والسعر المطلوب {pos[0]}." if pos[0] else ".")
+    s = (
+        f"The platform's estimate for a similar property is {f['estimate_low']}–"
+        f"{f['estimate_high']}, based on {f['comparable_count']} comparable listings"
+    )
+    return s + (f"; the asking price is {pos[1]}." if pos[1] else ".")
+
+
+def _places_sentence(f: dict[str, Any], lang: str) -> str | None:
+    near = [
+        (names, f[f"nearest_{key}_m"])
+        for key, names in _NEAREST.items()
+        if f.get(f"nearest_{key}_m") is not None
+    ]
+    if not near and not f.get("places_within_1500m"):
+        return None
+    if lang == "ar":
+        parts = [f"أقرب {n[0]} على بعد {m} م تقريباً" for n, m in near[:2]]
+        head = (
+            f"يوجد {f['places_within_1500m']} مكاناً مسجلاً ضمن 1500 م"
+            if f.get("places_within_1500m")
+            else ""
+        )
+        return "، ".join(p for p in [head, *parts] if p) + "."
+    parts = [f"the nearest {n[1]} is about {m} m away" for n, m in near[:2]]
+    head = (
+        f"{f['places_within_1500m']} recorded places lie within 1500 m"
+        if f.get("places_within_1500m")
+        else ""
+    )
+    text = "; ".join(p for p in [head, *parts] if p)
+    return text[:1].upper() + text[1:] + "."
+
+
+def property_interpretation(f: dict[str, Any], lang: str) -> dict[str, Any]:
+    sentences = [property_summary(f, lang)["summary"] + "."]
+    for extra in (_price_sentence(f, lang), _places_sentence(f, lang)):
+        if extra:
+            sentences.append(extra)
+    if not f.get("verified"):
+        sentences.append(
+            "لم تتحقق المنصة من هذا الإعلان بعد، فراجع المستندات الرسمية قبل أي دفع."
+            if lang == "ar"
+            else "The platform has not checked this listing yet, so review the official documents "
+            "before paying anything."
+        )
+    return {"text": " ".join(sentences)}
+
+
+def property_answer(f: dict[str, Any], lang: str) -> dict[str, Any]:
+    topic = f.get("question_topic")
+    ar = lang == "ar"
+    text: str | None = None
+    if topic == "price":
+        price = f.get("price_text")
+        text = " ".join(
+            t
+            for t in [
+                (f"السعر المطلوب {price}." if ar else f"The asking price is {price}.")
+                if price
+                else ("السعر عند الطلب." if ar else "The price is on request."),
+                _price_sentence(f, lang),
+            ]
+            if t
+        )
+    elif topic in ("size", "rooms"):
+        rooms = _rooms(f, lang)
+        if rooms:
+            text = (_join_ar(rooms) if ar else _join_en(rooms)) + "."
+    elif topic == "places":
+        text = _places_sentence(f, lang)
+    elif topic == "trust":
+        text = (
+            ("الإعلان موثّق من المنصة." if ar else "The listing is verified by the platform.")
+            if f.get("verified")
+            else (
+                "لم تتحقق المنصة من هذا الإعلان بعد؛ اطلب المستندات الرسمية وراجعها قبل أي دفع."
+                if ar
+                else "The platform has not checked this listing yet; ask for the official "
+                "documents and review them before paying anything."
+            )
+        )
+    else:
+        text = property_summary(f, lang)["summary"] + "."
+    if not text:
+        text = (
+            "هذه المعلومة غير متوفرة في الإعلان؛ يمكنك سؤال المعلن."
+            if ar
+            else "That information isn't in the listing; you can ask the lister."
+        )
+    return {"text": re.sub(r"\s+", " ", text).strip()}
+
+
 BUILDERS: dict[str, Builder] = {
+    "property.interpretation": property_interpretation,
+    "property.answer": property_answer,
     "listing.description": listing_description,
     "listing.title": listing_title,
     "text.improve_ar": improve_arabic,

@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { TrustBadge } from "@/components/ui/TrustBadge";
 import { Insights } from "@/features/ai/Insights";
+import { IntelligencePanel } from "@/features/ai/IntelligencePanel";
 import { PropertySummary } from "@/features/ai/PropertySummary";
 import { ReportButton } from "@/features/admin/ReportButton";
 import { ViewBeacon } from "@/features/analytics/ViewBeacon";
@@ -225,6 +226,9 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
           </Section>
 
           <div className="flex flex-col gap-6 border-t border-hairline py-8">
+            {property.status === "APPROVED" && (
+              <IntelligencePanel dict={dict} locale={locale} propertyId={property.id} />
+            )}
             {property.status === "APPROVED" && (
               <PropertySummary dict={dict} locale={locale} propertyId={property.id} />
             )}
