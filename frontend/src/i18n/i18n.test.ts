@@ -4,6 +4,10 @@ import ar from "./dictionaries/ar";
 import en from "./dictionaries/en";
 import { directionOf, resolveLocale } from "./config";
 
+function leaves(obj: object): unknown[] {
+  return Object.values(obj).flatMap((v) => (v && typeof v === "object" ? leaves(v) : [v]));
+}
+
 function keyPaths(obj: object, prefix = ""): string[] {
   return Object.entries(obj).flatMap(([k, v]) =>
     v && typeof v === "object" ? keyPaths(v, `${prefix}${k}.`) : [`${prefix}${k}`],
@@ -24,9 +28,8 @@ describe("i18n", () => {
 
   it("has no empty translations", () => {
     for (const dict of [ar, en]) {
-      const values = keyPaths(dict).map((path) =>
-        path.split(".").reduce<unknown>((o, k) => (o as Record<string, unknown>)[k], dict),
-      );
+      // Message keys may contain dots (e.g. "fact.area"), so walk values directly.
+      const values = leaves(dict);
       expect(values.every((v) => typeof v === "string" && v.trim().length > 0)).toBe(true);
     }
   });
