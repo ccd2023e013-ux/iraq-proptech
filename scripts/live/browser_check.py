@@ -208,7 +208,7 @@ def map_v2(browser) -> None:
         page.wait_for_timeout(1_000)
     check(pois_ok, f"places layer toggles on ({canvas.get_attribute('data-pois')} places)")
     print(f"  map requests: {seen[-6:]}", flush=True)
-    print(f"  map warnings: {warnings[:5]}", flush=True)
+    print(f"::notice title=map diagnostics::warnings={warnings[:5]} zoom={zoom}", flush=True)
     page.screenshot(path=str(OUT / "map-places.png"))
     page.locator("[data-testid=map-layers] summary").click()
 
