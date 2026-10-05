@@ -174,12 +174,62 @@ def auth_flow(browser, *, phone: bool, locale: str) -> None:
     ctx.close()
 
 
+def map_v2(browser) -> None:
+    """Stage 3: price bubbles, places layer, draw-area search (Basra viewport)."""
+    ctx = browser.new_context(viewport={"width": 1366, "height": 900}, locale="en-US")
+    page = ctx.new_page()
+    page.goto(WEB + "/map?bbox=47.70,30.40,47.92,30.62", wait_until="load", timeout=120_000)
+    canvas = page.locator("[data-testid=map-canvas]")
+    page.wait_for_selector("[data-testid=map-canvas][data-bubbles]", timeout=60_000)
+    page.wait_for_timeout(3_000)
+    bubbles = int(canvas.get_attribute("data-bubbles") or 0)
+    clusters = int(canvas.get_attribute("data-clusters") or 0)
+    check(bubbles > 0, f"Basra shows price bubbles ({bubbles} bubbles, {clusters} clusters)")
+    page.screenshot(path=str(OUT / "map-bubbles.png"))
+
+    # Places layer: schools in Basra (OSM or demo).
+    page.locator("[data-testid=map-layers] summary").click()
+    page.locator("[data-place=SCHOOL]").click()
+    pois_ok = False
+    for _ in range(40):  # attribute polling: the site's CSP forbids eval-based waits
+        if int(canvas.get_attribute("data-pois") or 0) > 0:
+            pois_ok = True
+            break
+        page.wait_for_timeout(1_000)
+    check(pois_ok, f"places layer toggles on ({canvas.get_attribute('data-pois')} places)")
+    page.screenshot(path=str(OUT / "map-places.png"))
+    page.locator("[data-testid=map-layers] summary").click()
+
+    # Draw a triangle around the centre and search inside it.
+    before = page.locator("[data-testid=map-total]").inner_text()
+    page.locator("[data-testid=draw-area]").click()
+    box = canvas.bounding_box()
+    assert box is not None
+    cx, cy = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
+    for dx, dy in ((-120, -90), (130, -80), (0, 120)):
+        page.mouse.click(cx + dx, cy + dy)
+        page.wait_for_timeout(250)
+    page.locator("[data-testid=finish-area]").click()
+    page.wait_for_url(lambda u: "polygon=" in u, timeout=30_000)
+    page.wait_for_load_state("load")
+    page.wait_for_timeout(2_500)
+    after = page.locator("[data-testid=map-total]").inner_text()
+    check("polygon=" in page.url, f"draw-area search filters by polygon ({before!r} → {after!r})")
+    page.screenshot(path=str(OUT / "map-drawn.png"))
+    ctx.close()
+
+
 def main() -> int:
     with sync_playwright() as p:
         browser = p.chromium.launch(
             args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
         )
 
+        if os.environ.get("BROWSER_ONLY") == "map":
+            map_v2(browser)
+            browser.close()
+            print("MAP-ONLY RESULT: " + ("OK" if not FAILURES else "; ".join(FAILURES)))
+            return 1 if FAILURES else 0
         if os.environ.get("BROWSER_ONLY") == "auth":
             themes(browser)
             auth_flow(browser, phone=True, locale="ar")
@@ -290,7 +340,8 @@ def main() -> int:
         check(len(summary.inner_text()) > 40, "AI summary has content")
         page.screenshot(path=str(OUT / "property.png"), full_page=True)
 
-        # 5. Stage 1/2 (2.0): themes and the authentication journey.
+        # 5. Stage 1/2 (2.0): themes and the authentication journey; Stage 3 map.
+        map_v2(browser)
         themes(browser)
         auth_flow(browser, phone=True, locale="ar")
         auth_flow(browser, phone=False, locale="en")
@@ -306,7 +357,7 @@ def main() -> int:
     print(
         f"::notice title=live browser summary::{'OK' if not FAILURES else 'FAILED'}: "
         "RTL+mobile, EN switch, map tiles/properties/list, photo, AI summary, "
-        "dark mode, auth journey (phone AR + desktop EN)"
+        "dark mode, auth journey (phone AR + desktop EN), map bubbles/places/draw"
     )
     if FAILURES:
         print("BROWSER CHECK FAILED: " + "; ".join(FAILURES))

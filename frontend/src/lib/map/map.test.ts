@@ -8,7 +8,7 @@ import {
   polygonBbox,
   readBboxProperty,
 } from "./geo";
-import { IRAQ_BBOX, parseBbox, resolveMapConfig } from "./provider";
+import { IRAQ_BBOX, parseBbox, parseSatellite, resolveMapConfig } from "./provider";
 
 describe("map provider", () => {
   it("defaults to free OpenFreeMap tiles and the whole of Iraq", () => {
@@ -17,6 +17,23 @@ describe("map provider", () => {
     expect(config.style).toMatch(/^https:\/\/tiles\.openfreemap\.org\//);
     expect(config.defaultBbox).toEqual(IRAQ_BBOX);
     expect(config.attribution).toContain("OpenStreetMap");
+  });
+
+  it("follows the site theme with the OpenFreeMap dark style", () => {
+    expect(resolveMapConfig({}).darkStyle).toBe("https://tiles.openfreemap.org/styles/dark");
+    expect(resolveMapConfig({ MAP_PROVIDER: "osm-raster" }).darkStyle).toBeNull();
+  });
+
+  it("offers satellite only for an https XYZ source with attribution", () => {
+    expect(resolveMapConfig({}).satellite).toBeNull();
+    const tiles = "https://imagery.example/{z}/{x}/{y}.jpg?key=public";
+    expect(resolveMapConfig({ MAP_SATELLITE_TILES: tiles }).satellite).toBeNull();
+    expect(
+      resolveMapConfig({ MAP_SATELLITE_TILES: tiles, MAP_SATELLITE_ATTRIBUTION: "© Imagery Co" })
+        .satellite,
+    ).toEqual({ tiles, attribution: "© Imagery Co" });
+    expect(parseSatellite("http://x/{z}/{x}/{y}", "a")).toBeNull();
+    expect(parseSatellite("https://x/tiles", "a")).toBeNull();
   });
 
   it("uses a custom style URL when provided (self-hosting)", () => {
