@@ -6,6 +6,9 @@
 #   C. cloud → PC: a separate PostGIS server plays "Supabase"; export data only,
 #      import into a freshly migrated stack, verify counts match
 set -euo pipefail
+# Read the whole response: `grep -q` exits at the first match, which makes a
+# still-streaming curl fail with exit 23 under pipefail.
+grep_all() { grep "$@" >/dev/null; }
 cd "$(dirname "$0")/../.."
 export COMPOSE_FILES="-f docker-compose.yml -f docker-compose.production.yml"
 . scripts/ops/_lib.sh

@@ -7,6 +7,9 @@
 # it, an agent joins by invitation, the agent publishes a Basra listing.
 # Then the 16 required steps run in order and each one asserts its outcome.
 set -euo pipefail
+# Read the whole response: `grep -q` exits at the first match, which makes a
+# still-streaming curl fail with exit 23 under pipefail.
+grep_all() { grep "$@" >/dev/null; }
 
 WEB="${WEB_URL:-http://localhost:3000}"
 TMP="$(mktemp -d)"
@@ -72,7 +75,7 @@ new_listing() { # who title lat lon -> id (draft with one photo, submitted)
   png "$TMP/photo.png"
   curl -fsS -b "$(jar "$1")" -X POST "$WEB/api/v1/properties/$id/media" -H "X-CSRF-Token: $(csrf "$1")" \
     -F "file=@$TMP/photo.png;type=image/png" -F kind=IMAGE >/dev/null || fail "upload as $1"
-  api "$1" POST "/properties/$id/submit" | grep -q '"PENDING_REVIEW"' || fail "submit as $1"
+  api "$1" POST "/properties/$id/submit" | grep_all '"PENDING_REVIEW"' || fail "submit as $1"
   echo "$id"
 }
 
@@ -92,7 +95,7 @@ register "$OWNER" "صاحب مكتب الاختبار"; verify "$OWNER"; login o
 AGENCY=$(api owner POST /agencies "{\"name_ar\":\"مكتب الاختبار النهائي $STAMP\",\"phone\":\"07709998877\"}" | jq -r .id)
 [ -n "$AGENCY" ] && [ "$AGENCY" != "null" ] || fail "create agency"
 login owner "$OWNER" # pick up the AGENCY_OWNER role in a fresh session
-api admin POST "/agencies/$AGENCY/decision" '{"decision":"VERIFY"}' | grep -q '"VERIFIED"' || fail "verify agency"
+api admin POST "/agencies/$AGENCY/decision" '{"decision":"VERIFY"}' | grep_all '"VERIFIED"' || fail "verify agency"
 
 echo "S3. agent registers and joins by invitation"
 register "$AGENT" "وكيل الاختبار"; verify "$AGENT"
@@ -105,7 +108,7 @@ api agent GET /me/agency | jq -e --arg a "$AGENCY" '.id == $a' >/dev/null \
 
 echo "S4. agent publishes a listing (approved by the admin)"
 ID=$(new_listing agent "$TITLE" 30.515 47.820)
-api admin POST "/properties/$ID/moderate" '{"decision":"APPROVE"}' | grep -q '"APPROVED"' || fail "approve listing"
+api admin POST "/properties/$ID/moderate" '{"decision":"APPROVE"}' | grep_all '"APPROVED"' || fail "approve listing"
 listing=$(api agent GET "/properties/$ID")
 jq -e --arg a "$AGENCY" --arg u "$(api agent GET /auth/me | jq -r .user.id)" '.lister.agency_id == $a and .agent_id == $u and .lister.agency_verified == true' <<<"$listing" >/dev/null \
   || fail "listing not owned by the agency: $(jq -c .lister <<<"$listing")"
@@ -132,11 +135,11 @@ echo "5. open the property (API + server-rendered page)"
 detail=$(api customer GET "/properties/$ID")
 [ "$(jq -r .status <<<"$detail")" = "APPROVED" ] || fail "detail status"
 [ "$(jq -r .exact_location <<<"$detail")" = "null" ] || fail "exact location leaked to a customer"
-curl -fsS -b "$(jar customer)" "$WEB/properties/$ID" | grep -q "$TITLE" || fail "detail page"
+curl -fsS -b "$(jar customer)" "$WEB/properties/$ID" | grep_all "$TITLE" || fail "detail page"
 
 echo "6. favorite it"
 api customer PUT "/properties/$ID/favorite" >/dev/null
-api customer GET /me/favorites/ids | grep -q "$ID" || fail "favorite"
+api customer GET /me/favorites/ids | grep_all "$ID" || fail "favorite"
 
 echo "7. send an inquiry"
 api customer POST "/properties/$ID/inquiries" \
@@ -150,18 +153,18 @@ code=$(status_of customer GET "/crm/leads/$LEAD")
 
 echo "9. the agent updates the lead"
 api agent POST "/crm/leads/$LEAD/activities" '{"kind":"CALL","body":"اتصال أول مع الزبون"}' >/dev/null
-api agent PATCH "/crm/leads/$LEAD" '{"status_code":"QUALIFIED"}' | grep -q '"QUALIFIED"' || fail "lead update"
+api agent PATCH "/crm/leads/$LEAD" '{"status_code":"QUALIFIED"}' | grep_all '"QUALIFIED"' || fail "lead update"
 
 echo "10. the agency owner views the lead"
 owner_view=$(api owner GET "/crm/leads/$LEAD")
 [ "$(jq -r .status_code <<<"$owner_view")" = "QUALIFIED" ] || fail "owner view: $owner_view"
-api owner GET "/crm/leads/$LEAD/activities" | grep -q "اتصال أول مع الزبون" || fail "owner sees activities"
-curl -fsS -b "$(jar owner)" "$WEB/dashboard/crm/leads/$LEAD" | grep -q "اتصال أول مع الزبون" || fail "owner lead page"
+api owner GET "/crm/leads/$LEAD/activities" | grep_all "اتصال أول مع الزبون" || fail "owner sees activities"
+curl -fsS -b "$(jar owner)" "$WEB/dashboard/crm/leads/$LEAD" | grep_all "اتصال أول مع الزبون" || fail "owner lead page"
 
 echo "11. the admin moderates a property (second listing rejected with a reason)"
 ID2=$(new_listing agent "إعلان ثان للمراجعة $STAMP" 30.520 47.830)
 api admin POST "/properties/$ID2/moderate" '{"decision":"REJECT","reason_code":"POOR_PHOTOS","reason":"الصور غير واضحة"}' \
-  | grep -q '"REJECTED"' || fail "reject listing"
+  | grep_all '"REJECTED"' || fail "reject listing"
 code=$(curl -s -o /dev/null -w '%{http_code}' "$WEB/api/v1/properties/$ID2")
 [ "$code" = "404" ] || fail "rejected listing is public ($code)"
 

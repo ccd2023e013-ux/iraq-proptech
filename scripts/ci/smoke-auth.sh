@@ -3,6 +3,9 @@
 # through the frontend origin (same-origin API proxy + middleware), the way
 # a browser uses it. Requires APP_ENV != production (uses the mock outbox).
 set -euo pipefail
+# Read the whole response: `grep -q` exits at the first match, which makes a
+# still-streaming curl fail with exit 23 under pipefail.
+grep_all() { grep "$@" >/dev/null; }
 
 WEB="${WEB_URL:-http://localhost:3000}"
 JAR="$(mktemp)"
@@ -20,7 +23,7 @@ code=$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' "$WEB/dashboard")
 echo "2. register"
 curl -fsS -X POST "$WEB/api/v1/auth/register" -H 'Content-Type: application/json' \
   -d "{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\",\"full_name\":\"اختبار دخان\",\"phone\":\"0770 000 $((1000 + RANDOM % 8999))\"}" \
-  | json 'd["user"]["roles"]' | grep -q CUSTOMER || fail "register"
+  | json 'd["user"]["roles"]' | grep_all CUSTOMER || fail "register"
 
 echo "3. verification email in mock outbox"
 token=$(curl -fsS "$WEB/api/v1/dev/outbox" | python3 -c "
@@ -41,11 +44,11 @@ done
 grep -i "^set-cookie: access_token=" <<<"$headers" | grep -qi httponly || fail "access cookie not httpOnly"
 
 echo "5. /auth/me with cookies; email verified"
-curl -fsS -b "$JAR" "$WEB/api/v1/auth/me" | json 'd["user"]["email_verified"]' | grep -q True \
+curl -fsS -b "$JAR" "$WEB/api/v1/auth/me" | json 'd["user"]["email_verified"]' | grep_all True \
   || fail "me"
 
 echo "6. protected page renders for the signed-in user"
-curl -fsS -b "$JAR" "$WEB/dashboard" | grep -q "اختبار دخان" || fail "dashboard"
+curl -fsS -b "$JAR" "$WEB/dashboard" | grep_all "اختبار دخان" || fail "dashboard"
 
 echo "7. CSRF is enforced on cookie-authenticated mutations"
 code=$(curl -s -o /dev/null -w '%{http_code}' -b "$JAR" -X POST "$WEB/api/v1/auth/logout-all")

@@ -4,6 +4,9 @@
 # Usage: scripts/deploy/smoke.sh https://web.example [https://api.example]
 #   With only the web URL, API checks go through the frontend's /api proxy.
 set -euo pipefail
+# Read the whole response: `grep -q` exits at the first match, which makes a
+# still-streaming curl fail with exit 23 under pipefail.
+grep_all() { grep "$@" >/dev/null; }
 WEB="${1:?usage: smoke.sh <web-url> [api-url]}"; WEB="${WEB%/}"
 API="${2:-$WEB}"; API="${API%/}"
 fail() { echo "SMOKE FAIL: $*"; exit 1; }

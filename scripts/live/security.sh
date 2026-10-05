@@ -3,6 +3,9 @@
 # rate-limit check deliberately exhausts the login limit for this runner's IP.
 # Usage: WEB_URL=… API_URL=… DEMO_ACCOUNT_PASSWORD=… scripts/live/security.sh
 set -euo pipefail
+# Read the whole response: `grep -q` exits at the first match, which makes a
+# still-streaming curl fail with exit 23 under pipefail.
+grep_all() { grep "$@" >/dev/null; }
 
 WEB="${WEB_URL:?}"; WEB="${WEB%/}"
 API="${API_URL:?}"; API="${API%/}"

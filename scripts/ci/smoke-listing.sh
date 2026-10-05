@@ -5,6 +5,9 @@
 # sees it with an approximate location and can load the thumbnail; search,
 # favorites and the public pages find it.
 set -euo pipefail
+# Read the whole response: `grep -q` exits at the first match, which makes a
+# still-streaming curl fail with exit 23 under pipefail.
+grep_all() { grep "$@" >/dev/null; }
 
 WEB="${WEB_URL:-http://localhost:3000}"
 OWNER_JAR="$(mktemp)"; ADMIN_JAR="$(mktemp)"; BUYER_JAR="$(mktemp)"; IMG="$(mktemp --suffix=.png)"
@@ -67,7 +70,7 @@ THUMB=$(jq -r .thumbnail_url <<<"$media")
 
 echo "5. submit for review"
 curl -fsS -b "$OWNER_JAR" -X POST "$WEB/api/v1/properties/$ID/submit" \
-  -H "X-CSRF-Token: $(csrf "$OWNER_JAR")" | grep -q '"PENDING_REVIEW"' || fail "submit"
+  -H "X-CSRF-Token: $(csrf "$OWNER_JAR")" | grep_all '"PENDING_REVIEW"' || fail "submit"
 code=$(curl -s -o /dev/null -w '%{http_code}' "$WEB/api/v1/properties/$ID")
 [ "$code" = "404" ] || fail "pending listing visible publicly ($code)"
 
@@ -77,7 +80,7 @@ docker compose exec -T -e SUPERADMIN_PASSWORD="$PASSWORD" backend \
 login "$ADMIN_JAR" "$ADMIN"
 curl -fsS -b "$ADMIN_JAR" -X POST "$WEB/api/v1/properties/$ID/moderate" \
   -H 'Content-Type: application/json' -H "X-CSRF-Token: $(csrf "$ADMIN_JAR")" \
-  -d '{"decision":"APPROVE"}' | grep -q '"APPROVED"' || fail "approve"
+  -d '{"decision":"APPROVE"}' | grep_all '"APPROVED"' || fail "approve"
 
 echo "7. anonymous visitor: approximate location only, photo loads"
 public=$(curl -fsS "$WEB/api/v1/properties/$ID")
@@ -89,7 +92,7 @@ ctype=$(curl -fsS -o /dev/null -w '%{content_type}' "$WEB$THUMB")
 [ "$ctype" = "image/webp" ] || fail "thumbnail content type $ctype"
 
 echo "8. listing page renders server-side for the owner"
-curl -fsS -b "$OWNER_JAR" "$WEB/dashboard/properties" | grep -q "بيت تجريبي في العشار" || fail "dashboard list"
+curl -fsS -b "$OWNER_JAR" "$WEB/dashboard/properties" | grep_all "بيت تجريبي في العشار" || fail "dashboard list"
 
 echo "9. search: Arabic keyword with spelling variants + price filter finds it"
 # 'تجريبى' (alef maqsura) must match 'تجريبي' via normalize_ar.
@@ -101,12 +104,12 @@ jq -e --arg id "$ID" '[.items[].id] | index($id) == null' <<<"$none" >/dev/null 
 
 echo "10. favorite it and see it in /me/favorites"
 curl -fsS -b "$OWNER_JAR" -X PUT "$WEB/api/v1/properties/$ID/favorite" -H "X-CSRF-Token: $(csrf "$OWNER_JAR")" >/dev/null
-curl -fsS -b "$OWNER_JAR" "$WEB/api/v1/me/favorites/ids" | grep -q "$ID" || fail "favorite"
+curl -fsS -b "$OWNER_JAR" "$WEB/api/v1/me/favorites/ids" | grep_all "$ID" || fail "favorite"
 
 echo "11. public search and detail pages render server-side"
-curl -fsS "$WEB/properties?q=$q" | grep -q "بيت تجريبي في العشار" || fail "search page"
-curl -fsS "$WEB/properties/$ID" | grep -q "بيت تجريبي في العشار" || fail "detail page"
-curl -fsS -b "$OWNER_JAR" "$WEB/favorites" | grep -q "بيت تجريبي في العشار" || fail "favorites page"
+curl -fsS "$WEB/properties?q=$q" | grep_all "بيت تجريبي في العشار" || fail "search page"
+curl -fsS "$WEB/properties/$ID" | grep_all "بيت تجريبي في العشار" || fail "detail page"
+curl -fsS -b "$OWNER_JAR" "$WEB/favorites" | grep_all "بيت تجريبي في العشار" || fail "favorites page"
 
 echo "12. a customer registers, verifies and sends an inquiry"
 curl -fsS -X POST "$WEB/api/v1/auth/register" -H 'Content-Type: application/json' \
@@ -130,29 +133,29 @@ curl -fsS -b "$OWNER_JAR" -X POST "$WEB/api/v1/crm/leads/$LEAD/activities" \
   -d '{"kind":"CALL","body":"تم الاتصال"}' >/dev/null
 curl -fsS -b "$OWNER_JAR" -X PATCH "$WEB/api/v1/crm/leads/$LEAD" \
   -H 'Content-Type: application/json' -H "X-CSRF-Token: $(csrf "$OWNER_JAR")" \
-  -d '{"status_code":"QUALIFIED"}' | grep -q '"QUALIFIED"' || fail "lead update"
+  -d '{"status_code":"QUALIFIED"}' | grep_all '"QUALIFIED"' || fail "lead update"
 CONV=$(curl -fsS -b "$OWNER_JAR" "$WEB/api/v1/me/conversations" | jq -r '.[0].id')
 curl -fsS -b "$OWNER_JAR" -X POST "$WEB/api/v1/conversations/$CONV/messages" \
   -H 'Content-Type: application/json' -H "X-CSRF-Token: $(csrf "$OWNER_JAR")" \
   -d '{"body":"نعم، متاح يوم السبت"}' >/dev/null
 
 echo "14. the customer sees the reply; the CRM pages render for the owner"
-curl -fsS -b "$BUYER_JAR" "$WEB/api/v1/conversations/$CONV/messages" | grep -q "متاح يوم السبت" || fail "reply"
+curl -fsS -b "$BUYER_JAR" "$WEB/api/v1/conversations/$CONV/messages" | grep_all "متاح يوم السبت" || fail "reply"
 code=$(curl -s -o /dev/null -w '%{http_code}' -b "$BUYER_JAR" "$WEB/api/v1/crm/leads/$LEAD")
 [ "$code" = "403" ] || fail "customer could read the CRM ($code)"
-curl -fsS -b "$OWNER_JAR" "$WEB/dashboard/crm" | grep -q "زبون تجريبي" || fail "CRM page"
-curl -fsS -b "$OWNER_JAR" "$WEB/dashboard/crm/leads/$LEAD" | grep -q "تم الاتصال" || fail "lead page"
-curl -fsS -b "$BUYER_JAR" "$WEB/messages/$CONV" | grep -q "متاح يوم السبت" || fail "thread page"
+curl -fsS -b "$OWNER_JAR" "$WEB/dashboard/crm" | grep_all "زبون تجريبي" || fail "CRM page"
+curl -fsS -b "$OWNER_JAR" "$WEB/dashboard/crm/leads/$LEAD" | grep_all "تم الاتصال" || fail "lead page"
+curl -fsS -b "$BUYER_JAR" "$WEB/messages/$CONV" | grep_all "متاح يوم السبت" || fail "thread page"
 
 echo "15. the customer reports the listing; the admin sees and dismisses it"
 REPORT=$(curl -fsS -b "$BUYER_JAR" -X POST "$WEB/api/v1/reports" \
   -H 'Content-Type: application/json' -H "X-CSRF-Token: $(csrf "$BUYER_JAR")" \
   -d "{\"target_type\":\"PROPERTY\",\"target_id\":\"$ID\",\"reason\":\"INCORRECT\",\"details\":\"السعر غير صحيح\"}" | jq -r .id)
 [ -n "$REPORT" ] && [ "$REPORT" != "null" ] || fail "report"
-curl -fsS -b "$ADMIN_JAR" "$WEB/admin/reports" | grep -q "السعر غير صحيح" || fail "admin reports page"
+curl -fsS -b "$ADMIN_JAR" "$WEB/admin/reports" | grep_all "السعر غير صحيح" || fail "admin reports page"
 curl -fsS -b "$ADMIN_JAR" -X POST "$WEB/api/v1/admin/reports/$REPORT/resolve" \
   -H 'Content-Type: application/json' -H "X-CSRF-Token: $(csrf "$ADMIN_JAR")" \
-  -d '{"outcome":"DISMISSED","note":"تم التحقق من السعر"}' | grep -q '"DISMISSED"' || fail "resolve report"
+  -d '{"outcome":"DISMISSED","note":"تم التحقق من السعر"}' | grep_all '"DISMISSED"' || fail "resolve report"
 
 echo "16. admin pages render (overview, moderation, system, audit)"
 for page in /admin /admin/moderation /admin/system /admin/audit /admin/settings; do
@@ -173,7 +176,7 @@ jq -e '[.items[].kind] | index("inquiry.received") != null' /tmp/owner-notes.jso
 curl -fsS -b "$BUYER_JAR" "$WEB/api/v1/me/notifications" | jq -e '[.items[].kind] | index("report.closed") != null' >/dev/null \
   || fail "report.closed notification"
 curl -fsS -b "$OWNER_JAR" "$WEB/api/v1/me/notifications/unread-count" | jq -e '.unread >= 2' >/dev/null || fail "unread count"
-curl -fsS -b "$OWNER_JAR" "$WEB/notifications" | grep -q "تم نشر إعلانك" || fail "notifications page"
+curl -fsS -b "$OWNER_JAR" "$WEB/notifications" | grep_all "تم نشر إعلانك" || fail "notifications page"
 for page in /admin/webhooks /admin/jobs; do
   code=$(curl -s -o /dev/null -w '%{http_code}' -b "$ADMIN_JAR" "$WEB$page")
   [ "$code" = "200" ] || fail "admin page $page ($code)"
@@ -203,13 +206,13 @@ PAY=$(curl -fsS -b "$OWNER_JAR" -X POST "$WEB/api/v1/billing/checkout" \
   -H 'Content-Type: application/json' -H "X-CSRF-Token: $(csrf "$OWNER_JAR")" \
   -d "{\"plan_code\":\"smoke-feature-$STAMP\",\"property_id\":\"$ID\"}" | jq -r .payment.id)
 [ -n "$PAY" ] && [ "$PAY" != "null" ] || fail "checkout"
-curl -fsS -b "$OWNER_JAR" "$WEB/billing/demo/$PAY" | grep -q "محاكاة دفع ناجح" || fail "demo checkout page"
+curl -fsS -b "$OWNER_JAR" "$WEB/billing/demo/$PAY" | grep_all "محاكاة دفع ناجح" || fail "demo checkout page"
 curl -fsS -b "$OWNER_JAR" -X POST "$WEB/api/v1/billing/payments/$PAY/demo-complete" \
   -H 'Content-Type: application/json' -H "X-CSRF-Token: $(csrf "$OWNER_JAR")" \
   -d '{"outcome":"SUCCEEDED"}' | jq -e '.status == "SUCCEEDED" and .is_demo == true' >/dev/null || fail "demo payment"
 curl -fsS "$WEB/api/v1/properties/featured" | jq -e --arg id "$ID" 'map(.id) | index($id) != null' >/dev/null \
   || fail "listing not featured after payment"
-curl -fsS "$WEB/pricing" | grep -q "وضع الدفع التجريبي" || fail "pricing page demo banner"
+curl -fsS "$WEB/pricing" | grep_all "وضع الدفع التجريبي" || fail "pricing page demo banner"
 for page in /admin/billing /account/billing; do
   jar="$ADMIN_JAR"; [ "$page" = "/account/billing" ] && jar="$OWNER_JAR"
   code=$(curl -s -o /dev/null -w '%{http_code}' -b "$jar" "$WEB$page")

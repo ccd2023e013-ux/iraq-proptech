@@ -7,6 +7,9 @@
 #
 # Usage: WEB_URL=https://… API_URL=https://… DEMO_ACCOUNT_PASSWORD=… scripts/live/acceptance.sh
 set -euo pipefail
+# Read the whole response: `grep -q` exits at the first match, which makes a
+# still-streaming curl fail with exit 23 under pipefail.
+grep_all() { grep "$@" >/dev/null; }
 
 WEB="${WEB_URL:?WEB_URL}"; WEB="${WEB%/}"
 API="${API_URL:?API_URL}"; API="${API%/}"
@@ -148,7 +151,7 @@ curl -fsS -X POST "$WEB/api/v1/auth/register" -H 'Content-Type: application/json
 login newcust "$CUSTOMER" "$CUSTOMER_PASSWORD"
 api newcust GET /auth/me | jq -e --arg e "$CUSTOMER" '.user.email == $e' >/dev/null || fail "me"
 api newcust PUT "/properties/$PROP/favorite" >/dev/null || fail "favorite"
-api newcust GET /me/favorites/ids | grep -q "$PROP" || fail "favorite list"
+api newcust GET /me/favorites/ids | grep_all "$PROP" || fail "favorite list"
 api newcust DELETE "/properties/$PROP/favorite" >/dev/null
 code=$(code_of newcust POST "/properties/$PROP/inquiries" '{"name":"زبون","phone":"07701234567","message":"فحص"}')
 [ "$code" = "403" ] || fail "unverified inquiry answered $code (expected 403 EMAIL_NOT_VERIFIED)"
@@ -174,7 +177,7 @@ LEAD=$(api agent GET "/crm/leads?page_size=100" | jq -r --arg p "$APROP" '[.item
 api agent POST "/crm/leads/$LEAD/activities" "{\"kind\":\"NOTE\",\"body\":\"فحص مباشر $STAMP\"}" >/dev/null || fail "activity"
 api agent PATCH "/crm/leads/$LEAD" '{"status_code":"CONTACTED"}' | jq -e '.status_code == "CONTACTED"' >/dev/null \
   || fail "lead update"
-api agency GET "/crm/leads/$LEAD/activities" | grep -q "$STAMP" || fail "agency owner cannot see the lead"
+api agency GET "/crm/leads/$LEAD/activities" | grep_all "$STAMP" || fail "agency owner cannot see the lead"
 for page in /dashboard /dashboard/crm "/dashboard/crm/leads/$LEAD"; do
   [ "$(curl -s -o /dev/null -w '%{http_code}' -b "$(jar agent)" "$WEB$page")" = 200 ] || fail "agent page $page"
 done
@@ -207,7 +210,7 @@ code=$(curl -s -o /dev/null -w '%{http_code}' -b "$(jar owner)" -X POST "$WEB/ap
 api owner PATCH "/properties/$LISTING" '{"bedrooms":4}' | jq -e '.bedrooms == 4' >/dev/null || fail "edit"
 api owner POST "/properties/$LISTING/submit" | jq -e '.status == "PENDING_REVIEW"' >/dev/null || fail "submit"
 [ "$(curl -s -o /dev/null -w '%{http_code}' "$WEB/api/v1/properties/$LISTING")" = 404 ] || fail "pending listing public"
-api admin GET "/admin/moderation/queue?page_size=100" | grep -q "$LISTING" || fail "not in moderation queue"
+api admin GET "/admin/moderation/queue?page_size=100" | grep_all "$LISTING" || fail "not in moderation queue"
 api admin POST "/properties/$LISTING/moderate" '{"decision":"APPROVE"}' | jq -e '.status == "APPROVED"' >/dev/null \
   || fail "approve"
 anon "/properties/$LISTING" | jq -e '.status == "APPROVED"' >/dev/null || fail "approved listing not public"
