@@ -72,7 +72,7 @@ echo "6. path traversal, injection, reflected XSS"
 # the app itself must answer with a safe status.
 edge_blocked=0
 expect() { # url allowed-status-regex label  → sets $body
-  local h; h=$(curl -s -D - -o "$TMP/body" "$1" | tr -d '\r'); local c; c=$(head -1 <<<"$h" | awk '{print $2}')
+  local h; h=$(curl -s -D - -o "$TMP/body" "$1" | tr -d '\r'); local c; c=$(grep -E '^HTTP/' <<<"$h" | tail -1 | awk '{print $2}')  # final status (skip 103 Early Hints)
   body=$(cat "$TMP/body")
   if [ "$c" = 403 ] && ! grep -qi '^x-request-id:' <<<"$h"; then edge_blocked=$((edge_blocked + 1)); body=""; return 0; fi
   [[ "$c" =~ ^($2)$ ]] || fail "$3 answered $c"
