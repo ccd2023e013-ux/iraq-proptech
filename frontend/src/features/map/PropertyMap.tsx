@@ -126,7 +126,7 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
     cluster: true,
     // Group only at country/region zoom; from city zoom every price is shown.
     clusterRadius: 40,
-    clusterMaxZoom: 11,
+    clusterMaxZoom: 10,
     promoteId: "id",
     clusterProperties: { total: ["+", ["coalesce", ["get", "point_count"], 1]] },
   });
