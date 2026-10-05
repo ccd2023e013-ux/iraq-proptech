@@ -69,13 +69,16 @@ export function pillImage(fill: Rgba, stroke: Rgba, ratio = 2): PillImage {
     }
   }
   const mid = width / 2;
+  const midY = height / 2;
   return {
     width,
     height,
     data,
     pixelRatio: ratio,
     stretchX: [[mid - ratio, mid + ratio]],
-    stretchY: [],
+    // Both axes need a stretch zone: MapLibre divides by the stretchable
+    // height, so an empty list makes the fitted icon invisible.
+    stretchY: [[midY - ratio, midY + ratio]],
     content: [radius * 0.6, 4 * ratio, width - radius * 0.6, height - 4 * ratio],
   };
 }

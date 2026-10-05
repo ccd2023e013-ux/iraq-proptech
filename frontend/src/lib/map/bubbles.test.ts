@@ -48,6 +48,8 @@ describe("price bubbles", () => {
     expect(alpha(Math.floor(pill.width / 2), Math.floor(pill.height / 2))).toBe(255);
     const [[x1, x2]] = pill.stretchX as [[number, number]];
     expect(x1).toBeLessThan(x2);
+    const [[y1, y2]] = pill.stretchY as [[number, number]];
+    expect(y1).toBeLessThan(y2);
     expect(pill.content[0]).toBeLessThan(pill.content[2]);
   });
 });
