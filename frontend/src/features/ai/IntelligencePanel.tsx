@@ -3,6 +3,8 @@
 import { type FormEvent, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
+import { Icon } from "@/components/ui/Icon";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { TrustBadge } from "@/components/ui/TrustBadge";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
@@ -27,21 +29,48 @@ const SECTIONS: StatementSection[] = [
   "quality",
 ];
 
+const KIND_RAIL: Record<Statement["kind"], string> = {
+  FACT: "bg-ink-3",
+  SOURCE: "bg-accent-fill",
+  ESTIMATE: "bg-gold-500",
+  AI_INTERPRETATION: "bg-ink",
+  SIMULATION: "bg-gold-500",
+};
+
+/**
+ * One analysed statement: a thin rail in the colour of its kind, the words,
+ * then its label, source and — when known — a small confidence meter.
+ */
 function StatementRow({ s, dict, locale }: { s: Statement; dict: Dictionary; locale: Locale }) {
   const i = dict.intel;
+  const confidence = s.confidence != null ? Math.round(s.confidence * 100) : null;
   return (
-    <li className="flex flex-col gap-1 py-3" data-kind={s.kind}>
+    <li className="relative flex flex-col gap-1.5 py-3.5 ps-4" data-kind={s.kind}>
+      <span
+        aria-hidden
+        className={`absolute start-0 top-4 bottom-4 w-0.5 rounded-full opacity-70 ${KIND_RAIL[s.kind] ?? "bg-ink-3"}`}
+      />
       <p className={s.kind === "AI_INTERPRETATION" ? "leading-7 text-ink" : "text-ink"}>
         {renderStatement(s, dict, locale)}
       </p>
-      <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-3">
+      <p className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-ink-3">
         <TrustBadge kind={badgeKind(s.kind)}>{i.kinds[s.kind]}</TrustBadge>
         <span>
           {i.source}: {s.source}
         </span>
-        {s.confidence != null && (
-          <span className="tabular">
-            · {i.confidence} {Math.round(s.confidence * 100)}%
+        {confidence != null && (
+          <span className="inline-flex items-center gap-1.5 tabular">
+            {i.confidence}
+            <span
+              aria-hidden
+              className="relative h-1 w-14 overflow-hidden rounded-full bg-fill-strong"
+            >
+              <span
+                className="absolute inset-y-0 start-0 rounded-full bg-accent-fill"
+                style={{ width: `${confidence}%` }}
+              />
+            </span>
+            {confidence}%
           </span>
         )}
       </p>
@@ -110,19 +139,39 @@ export function IntelligencePanel({
   return (
     <section
       aria-labelledby="intel-heading"
-      className="rounded-[var(--radius-card)] bg-surface p-6 shadow-soft ring-1 ring-hairline"
+      className="surface-1 rounded-[var(--radius-card)] p-6"
       data-testid="intelligence"
     >
-      <h2 id="intel-heading" className="font-display text-xl font-semibold tracking-tight text-ink">
-        {i.title}
-      </h2>
-      <p className="mt-1 text-sm text-ink-2">{i.subtitle}</p>
+      <div className="flex items-start gap-3.5">
+        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-fill text-ink">
+          <Icon name="insight" className="size-5" />
+        </span>
+        <div>
+          <h2
+            id="intel-heading"
+            className="font-display text-xl font-semibold tracking-tight text-ink"
+          >
+            {i.title}
+          </h2>
+          <p className="mt-1 text-sm text-ink-2">{i.subtitle}</p>
+        </div>
+      </div>
 
       {!report && (
         <div className="mt-4">
           <Button onClick={analyze} loading={busy} data-testid="intelligence-analyze">
             {busy ? i.analyzing : i.analyze}
           </Button>
+        </div>
+      )}
+      {busy && !report && (
+        <div aria-hidden className="mt-5 flex flex-col gap-3">
+          {[0.92, 0.7, 0.84].map((w, n) => (
+            <div key={n} className="flex flex-col gap-2 ps-4">
+              <Skeleton className="h-3.5" style={{ width: `${w * 100}%` }} />
+              <Skeleton className="h-2.5 w-1/3" />
+            </div>
+          ))}
         </div>
       )}
       {error && <p className="mt-3 text-sm text-danger">{error}</p>}

@@ -1,64 +1,95 @@
 "use client";
 
-import { useState } from "react";
+import { type KeyboardEvent, useState } from "react";
 
+import { Icon } from "@/components/ui/Icon";
 import { SafeImage } from "@/components/ui/SafeImage";
 import type { Media } from "@/types/property";
 
-/** Accessible image gallery: large view + thumbnails (keyboard & touch friendly). */
+/**
+ * Immersive gallery: one large photograph that cross-fades between images,
+ * floating glass controls, keyboard arrows, and a thumbnail strip whose
+ * current item is lifted and outlined. Videos follow below.
+ */
 export function Gallery({
   media,
   title,
   emptyLabel,
+  labels = { prev: "‹", next: "›" },
 }: {
   media: Media[];
   title: string;
   emptyLabel: string;
+  labels?: { prev: string; next: string };
 }) {
   const images = media.filter((m) => m.kind !== "VIDEO");
   const videos = media.filter((m) => m.kind === "VIDEO");
   const [index, setIndex] = useState(0);
   const current = images[index];
+  const go = (step: number) => setIndex((i) => (i + step + images.length) % images.length);
+
+  function onKey(event: KeyboardEvent<HTMLDivElement>) {
+    if (images.length < 2) return;
+    const rtl = document.documentElement.dir === "rtl";
+    if (event.key === "ArrowRight") go(rtl ? -1 : 1);
+    else if (event.key === "ArrowLeft") go(rtl ? 1 : -1);
+    else return;
+    event.preventDefault();
+  }
 
   if (!images.length && !videos.length) {
     return (
-      <div className="grid aspect-[16/9] place-items-center rounded-[var(--radius-media)] bg-fill text-sand-500">
-        {emptyLabel}
+      <div className="relative isolate grid aspect-[16/9] place-items-center overflow-hidden rounded-[var(--radius-media)] bg-fill text-ink-3">
+        <div aria-hidden className="stage-grid absolute inset-0 -z-10" />
+        <span className="flex items-center gap-2 text-sm">
+          <Icon name="home" className="size-5" />
+          {emptyLabel}
+        </span>
       </div>
     );
   }
 
+  const control =
+    "press surface-float absolute top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-full text-ink opacity-90 transition-opacity hover:opacity-100 max-sm:size-9";
+
   return (
     <div className="flex flex-col gap-3">
       {current && (
-        <div className="relative overflow-hidden rounded-[var(--radius-media)] bg-fill">
+        <div
+          role="group"
+          aria-roledescription="carousel"
+          aria-label={title}
+          tabIndex={images.length > 1 ? 0 : -1}
+          onKeyDown={onKey}
+          className="group relative overflow-hidden rounded-[var(--radius-media)] bg-fill shadow-[inset_0_0_0_1px_var(--hairline)]"
+        >
           <SafeImage
             key={current.id}
             src={current.url}
             alt={current.caption ?? title}
             fallbackLabel={emptyLabel}
             loading="eager"
-            className="aspect-[4/3] w-full object-cover sm:aspect-[2/1]"
+            className="aspect-[4/3] w-full object-cover sm:aspect-[16/9] lg:aspect-[21/9]"
           />
           {images.length > 1 && (
             <>
               <button
                 type="button"
-                aria-label="‹"
-                onClick={() => setIndex((index - 1 + images.length) % images.length)}
-                className="absolute start-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-glass text-xl text-ink shadow-soft backdrop-blur-md"
+                aria-label={labels.prev}
+                onClick={() => go(-1)}
+                className={`${control} start-3 sm:start-4`}
               >
-                ‹
+                <Icon name="chevron" className="size-5 rotate-180" />
               </button>
               <button
                 type="button"
-                aria-label="›"
-                onClick={() => setIndex((index + 1) % images.length)}
-                className="absolute end-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-glass text-xl text-ink shadow-soft backdrop-blur-md"
+                aria-label={labels.next}
+                onClick={() => go(1)}
+                className={`${control} end-3 sm:end-4`}
               >
-                ›
+                <Icon name="chevron" className="size-5" />
               </button>
-              <span className="absolute bottom-3 end-3 rounded-full bg-black/55 px-2.5 backdrop-blur-md py-0.5 text-xs text-white tabular">
+              <span className="surface-float absolute end-4 bottom-4 rounded-full px-3 py-1 text-xs font-medium text-ink tabular">
                 {index + 1} / {images.length}
               </span>
             </>
@@ -66,14 +97,19 @@ export function Gallery({
         </div>
       )}
       {images.length > 1 && (
-        <ul className="flex gap-2 overflow-x-auto pb-1">
+        <ul className="quiet-scroll flex gap-2 overflow-x-auto px-0.5 pt-0.5 pb-1">
           {images.map((m, i) => (
-            <li key={m.id}>
+            <li key={m.id} className="shrink-0">
               <button
                 type="button"
                 onClick={() => setIndex(i)}
                 aria-current={i === index}
-                className={`block overflow-hidden rounded-xl ring-2 ${i === index ? "ring-accent" : "ring-transparent"}`}
+                aria-label={`${i + 1} / ${images.length}`}
+                className={`press block overflow-hidden rounded-xl transition-[opacity,box-shadow,translate] duration-[var(--duration-base)] ${
+                  i === index
+                    ? "-translate-y-0.5 opacity-100 shadow-[0_0_0_2px_var(--accent-fill)]"
+                    : "opacity-70 hover:opacity-100"
+                }`}
               >
                 <SafeImage
                   src={m.thumbnail_url ?? m.url}
@@ -109,9 +145,14 @@ export function ShareButton({ label, copied }: { label: string; copied: string }
     <button
       type="button"
       onClick={share}
-      className="inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-medium text-ink ring-1 ring-inset ring-hairline transition hover:bg-fill"
+      className="press surface-1 inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-medium text-ink"
     >
-      {done ? copied : label}
+      {done ? (
+        <Icon name="check" className="icon-swap size-4 text-accent" strokeWidth={2.2} />
+      ) : (
+        <Icon name="arrow" className="size-4 -rotate-45" />
+      )}
+      <span aria-live="polite">{done ? copied : label}</span>
     </button>
   );
 }

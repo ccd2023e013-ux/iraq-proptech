@@ -67,6 +67,17 @@ export function RiverMap({
           return (
             <g key={city.slug}>
               {basra && <circle cx={x} cy={y} r="42" fill="url(#basra-glow)" />}
+              {basra && animate && (
+                <circle
+                  cx={x}
+                  cy={y}
+                  r="10"
+                  fill="none"
+                  stroke="var(--spatial-fill)"
+                  strokeWidth="1.5"
+                  className="pulse-once"
+                />
+              )}
               <circle
                 cx={x}
                 cy={y}

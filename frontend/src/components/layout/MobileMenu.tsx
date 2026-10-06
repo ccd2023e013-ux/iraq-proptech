@@ -21,7 +21,7 @@ export function MobileMenu({
     <details ref={ref} className="relative md:hidden">
       <summary
         aria-label={label}
-        className="grid size-9 cursor-pointer list-none place-items-center rounded-full text-ink-2 hover:bg-fill [&::-webkit-details-marker]:hidden"
+        className="icon-btn size-9 cursor-pointer list-none [&::-webkit-details-marker]:hidden"
       >
         <svg
           aria-hidden
@@ -37,13 +37,13 @@ export function MobileMenu({
       </summary>
       <nav
         aria-label={label}
-        className="absolute end-0 top-11 z-40 flex w-56 animate-enter flex-col rounded-[var(--radius-card)] bg-surface p-2 text-sm shadow-float ring-1 ring-hairline"
+        className="surface-focus pop-in absolute end-0 top-12 z-40 flex w-60 origin-top flex-col rounded-[var(--radius-card)] p-1.5 text-sm"
       >
         {links.map((l) => (
           <Link
             key={l.href}
             href={l.href}
-            className="rounded-xl px-3 py-2.5 text-ink hover:bg-fill"
+            className="rounded-xl px-3 py-2.5 text-ink transition-colors hover:bg-fill"
           >
             {l.label}
           </Link>

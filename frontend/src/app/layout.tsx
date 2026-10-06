@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 
+import { MobileTabBar } from "@/components/layout/MobileTabBar";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { CompareBar } from "@/features/compare/CompareControls";
 import { getDictionary } from "@/i18n";
@@ -69,7 +70,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       data-theme={theme === "system" ? undefined : theme}
       suppressHydrationWarning
     >
-      <body className="flex min-h-dvh flex-col antialiased">
+      {/* Phones reserve room at the bottom for the floating tab bar. */}
+      <body className="flex min-h-dvh flex-col pb-[var(--tabbar-h)] antialiased">
         {announcement && (
           <div role="status" className="bg-gold-100 px-4 py-2 text-center text-sm text-gold-700">
             {announcement}
@@ -79,6 +81,18 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <main className="flex-1">{children}</main>
         <SiteFooter dict={dict} locale={locale} />
         <CompareBar dict={dict} />
+        <MobileTabBar
+          label={dict.nav.menu}
+          items={[
+            { href: "/", label: dict.nav.home, icon: "home" },
+            { href: "/map", label: dict.nav.map, icon: "map" },
+            { href: "/properties", label: dict.nav.properties, icon: "grid" },
+            { href: "/future", label: dict.future.title, icon: "future" },
+            me
+              ? { href: "/favorites", label: dict.nav.favorites, icon: "heart" }
+              : { href: "/login", label: dict.nav.login, icon: "user" },
+          ]}
+        />
       </body>
     </html>
   );

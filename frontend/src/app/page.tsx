@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
+import { Icon } from "@/components/ui/Icon";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { TrustBadge } from "@/components/ui/TrustBadge";
 import { IntelligentSearch } from "@/features/home/IntelligentSearch";
@@ -12,7 +14,7 @@ import type { Locale } from "@/i18n/config";
 import { getRequestLocale } from "@/i18n/server";
 import { serverApiFetch } from "@/lib/api/server";
 import { getCurrentUser } from "@/lib/auth/session";
-import { formatPrice } from "@/lib/format";
+import { stagger } from "@/lib/motion";
 import type { MarketCity, MarketSummary } from "@/types/market";
 import type { PropertyCard as Card, ReferenceItem } from "@/types/property";
 
@@ -40,7 +42,7 @@ function LeadListing({
   return (
     <Link
       href={`/properties/${card.id}`}
-      className="group relative block overflow-hidden rounded-[var(--radius-media)] bg-fill shadow-soft"
+      className="group relative block overflow-hidden rounded-[var(--radius-media)] bg-fill shadow-[inset_0_0_0_1px_var(--hairline),var(--shadow-soft)]"
     >
       <div className="aspect-[4/3] w-full lg:aspect-[16/11]">
         {card.cover_url ? (
@@ -54,7 +56,7 @@ function LeadListing({
           <div className="skeleton size-full" />
         )}
       </div>
-      <div className="absolute inset-x-3 bottom-3 rounded-[var(--radius-card)] bg-glass p-4 backdrop-blur-xl">
+      <div className="surface-float absolute inset-x-3 bottom-3 rounded-[var(--radius-card)] p-4 transition-transform duration-[var(--duration-base)] ease-[var(--ease-out-soft)] group-hover:-translate-y-0.5">
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-ink-2">
             {dict.listing.purposes[card.purpose]}
@@ -109,30 +111,55 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col">
-      {/* Hero: the river map is the one memorable moment of the page. */}
-      <section className="relative overflow-hidden">
-        <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 pt-10 pb-16 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:pt-16 lg:pb-24">
-          <div className="flex flex-col gap-6">
-            <h1 className="font-display text-4xl font-semibold tracking-tight text-ink sm:text-5xl lg:text-6xl">
+      {/* Hero stage: Iraq drawn by its rivers is the ground; the search floats
+          above it. On wide screens the stage runs under the floating header. */}
+      <section className="relative isolate overflow-hidden md:-mt-[var(--header-h)]">
+        <div aria-hidden className="stage-grid absolute inset-0 -z-10" />
+        <div
+          aria-hidden
+          className="absolute -z-10 size-[44rem] rounded-full bg-[radial-gradient(closest-side,var(--spatial-tint),transparent)] opacity-70 max-lg:hidden lg:end-[-10rem] lg:top-24"
+        />
+        <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 pt-10 pb-14 sm:px-6 md:pt-[calc(var(--header-h)+3.5rem)] lg:min-h-[min(88vh,56rem)] lg:grid-cols-[1.02fr_0.98fr] lg:gap-14 lg:pb-20">
+          <div className="relative z-10 flex flex-col gap-6">
+            <p
+              lang="en"
+              dir="ltr"
+              className="reveal flex w-fit items-center gap-2 self-start rounded-full bg-fill px-3 py-1 text-xs font-medium text-ink-2"
+            >
+              <span aria-hidden className="size-1.5 rounded-full bg-spatial-fill" />
+              Property · Spatial · Market Intelligence
+            </p>
+            <h1 className="reveal display-xl max-w-[14ch] text-ink" style={stagger(1)}>
               {h.heroTitle}
             </h1>
-            <p className="max-w-xl text-lg text-ink-2">{h.heroSubtitle}</p>
-            <IntelligentSearch
-              dict={dict}
-              cities={cities.map((c) => ({ value: c.city_id, label: name(c) }))}
-              types={types
-                .filter((t) => ["RESIDENTIAL", "LAND", "COMMERCIAL"].includes(t.category))
-                .map((t) => ({ value: t.code, label: name(t) }))}
-            />
+            <p className="reveal max-w-xl text-lg text-ink-2" style={stagger(2)}>
+              {h.heroSubtitle}
+            </p>
+            <div className="reveal" style={stagger(3)}>
+              <IntelligentSearch
+                dict={dict}
+                cities={cities.map((c) => ({ value: c.city_id, label: name(c) }))}
+                types={types
+                  .filter((t) => ["RESIDENTIAL", "LAND", "COMMERCIAL"].includes(t.category))
+                  .map((t) => ({ value: t.code, label: name(t) }))}
+              />
+            </div>
             {anyDemo && (
-              <p className="flex items-center gap-2 text-xs text-ink-3">
+              <p className="reveal flex items-center gap-2 text-xs text-ink-3" style={stagger(4)}>
                 <TrustBadge kind="demo">{dict.listing.demo}</TrustBadge>
                 {dict.footer.demoNotice}
               </p>
             )}
           </div>
-          <div className="mx-auto w-full max-w-lg lg:max-w-none">
+          <div className="fade-in relative mx-auto w-full max-w-lg lg:max-w-none">
             <RiverMap locale={locale} counts={counts} caption={h.mapCaption} />
+            <Link
+              href="/map"
+              className="press surface-float absolute end-2 bottom-8 inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-medium text-ink"
+            >
+              <Icon name="map" className="size-4 text-spatial" />
+              {h.basraMap}
+            </Link>
           </div>
         </div>
       </section>
@@ -142,10 +169,7 @@ export default async function HomePage() {
         {lead && basra && (
           <section aria-labelledby="basra-heading" className="grid gap-8 lg:grid-cols-[0.8fr_2fr]">
             <div className="flex flex-col gap-3 lg:pt-4">
-              <h2
-                id="basra-heading"
-                className="font-display text-3xl font-semibold tracking-tight text-ink"
-              >
+              <h2 id="basra-heading" className="display-md text-ink">
                 {h.basraTitle}
               </h2>
               <p className="text-ink-2">{h.basraBody}</p>
@@ -191,10 +215,7 @@ export default async function HomePage() {
         {basraMarket && basraMarket.listings > 0 && (
           <section aria-labelledby="market-heading" className="grid gap-8 lg:grid-cols-[0.8fr_2fr]">
             <div className="flex flex-col gap-3">
-              <h2
-                id="market-heading"
-                className="font-display text-3xl font-semibold tracking-tight text-ink"
-              >
+              <h2 id="market-heading" className="display-md text-ink">
                 {h.marketTitle}
               </h2>
               <p className="text-ink-2">{h.marketBody}</p>
@@ -205,7 +226,7 @@ export default async function HomePage() {
                 )}
               </div>
             </div>
-            <dl className="grid gap-px overflow-hidden rounded-[var(--radius-card)] bg-hairline sm:grid-cols-2">
+            <dl className="surface-1 grid gap-px overflow-hidden rounded-[var(--radius-card)] bg-hairline sm:grid-cols-2">
               {[
                 {
                   label: `${h.housesForSale} · ${h.medianPerM2}`,
@@ -218,10 +239,14 @@ export default async function HomePage() {
                   count: flats?.listings,
                 },
               ].map((stat) => (
-                <div key={stat.label} className="flex flex-col gap-2 bg-surface p-6 sm:p-8">
+                <div key={stat.label} className="flex flex-col gap-3 bg-surface p-6 sm:p-8">
                   <dt className="text-sm text-ink-2">{stat.label}</dt>
-                  <dd className="font-display text-3xl font-semibold tracking-tight text-ink tabular sm:text-4xl">
-                    {stat.value ? formatPrice(stat.value, "IQD", locale) : h.noData}
+                  <dd className="kpi text-4xl text-ink sm:text-5xl">
+                    {stat.value && Number.isFinite(Number(stat.value)) ? (
+                      <AnimatedNumber value={Number(stat.value)} as="price-iqd" locale={locale} />
+                    ) : (
+                      <span className="text-2xl text-ink-3">{h.noData}</span>
+                    )}
                   </dd>
                   {stat.count ? (
                     <dd className="text-xs text-ink-3">
@@ -237,10 +262,7 @@ export default async function HomePage() {
         {/* Explore by city */}
         {cities.length > 0 && (
           <section aria-labelledby="explore-heading" className="flex flex-col gap-6">
-            <h2
-              id="explore-heading"
-              className="font-display text-3xl font-semibold tracking-tight text-ink"
-            >
+            <h2 id="explore-heading" className="display-md text-ink">
               {h.exploreTitle}
             </h2>
             <ul className="grid divide-y divide-hairline border-y border-hairline sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4">
@@ -268,10 +290,7 @@ export default async function HomePage() {
         {/* In development — honest previews, no fake data. */}
         <section aria-labelledby="next-heading" className="grid gap-8 lg:grid-cols-[0.8fr_2fr]">
           <div className="flex flex-col gap-3">
-            <h2
-              id="next-heading"
-              className="font-display text-3xl font-semibold tracking-tight text-ink"
-            >
+            <h2 id="next-heading" className="display-md text-ink">
               {h.nextTitle}
             </h2>
             <p className="text-ink-2">{h.nextBody}</p>
@@ -279,7 +298,7 @@ export default async function HomePage() {
           <ul className="grid gap-x-10 gap-y-8 sm:grid-cols-2">
             {NEXT_MODULES.map((m) => (
               <li key={m.key} className="flex gap-4">
-                <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-accent-tint text-accent">
+                <span className="surface-1 grid size-11 shrink-0 place-items-center rounded-2xl text-accent">
                   <svg
                     aria-hidden
                     viewBox="0 0 24 24"

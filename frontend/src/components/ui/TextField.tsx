@@ -23,7 +23,7 @@ export function TextField({ label, hint, error, className = "", id, ...rest }: T
         id={inputId}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy || undefined}
-        className={`h-12 rounded-[var(--radius-control)] bg-fill px-4 text-ink ring-1 ring-inset transition duration-[var(--duration-quick)] placeholder:text-ink-3 focus:bg-surface focus:ring-2 focus:ring-accent focus:outline-none ${error ? "ring-danger" : "ring-transparent"}`}
+        className={`h-12 rounded-[var(--radius-control)] bg-fill px-4 text-ink ring-1 ring-inset transition-[background-color,box-shadow] duration-[var(--duration-quick)] placeholder:text-ink-3 hover:bg-fill-strong focus:bg-surface focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--accent-fill)_16%,transparent)] focus:ring-accent focus:outline-none ${error ? "ring-danger" : "ring-transparent"}`}
         {...rest}
       />
       {hint && !error && (

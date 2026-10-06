@@ -46,6 +46,8 @@ export interface PropertyMapProps {
   onViewportChange: (bbox: Bbox, zoom: number) => void;
   onSelect: (id: string | null, properties?: Record<string, unknown>) => void;
   onDrawPoint: (point: LonLat) => void;
+  /** Edge-to-edge (map-first stage): no rounded frame, no minimum height. */
+  bleed?: boolean;
 }
 
 const EMPTY: FeatureCollection = { type: "FeatureCollection", features: [] };
@@ -407,7 +409,12 @@ export function PropertyMap(props: PropertyMapProps) {
           maxZoom: 19,
         });
         mapRef.current = map;
-        map.addControl(new maplibre.NavigationControl({ showCompass: false }), "top-left");
+        // Zoom sits at the bottom of the end side, out of the way of floating panels.
+        const rtl = document.documentElement.dir === "rtl";
+        map.addControl(
+          new maplibre.NavigationControl({ showCompass: false }),
+          rtl ? "bottom-left" : "bottom-right",
+        );
         // Errors must not crash the page; non-tile errors are logged for diagnosis.
         map.on("error", (e) => {
           const message = e.error?.message ?? "";
@@ -469,6 +476,18 @@ export function PropertyMap(props: PropertyMapProps) {
             if (!feature || !map || latest.current.drawing !== null) return;
             const p = (feature.properties ?? {}) as Record<string, unknown>;
             latest.current.onSelect(String(p.id), p);
+            // Focus the camera on the chosen listing, centred in the open part of
+            // the map (beside the results rail on wide screens, above the card).
+            if (latest.current.bleed && feature.geometry.type === "Point") {
+              const wide = window.matchMedia("(min-width: 1024px)").matches;
+              const rtlDoc = document.documentElement.dir === "rtl";
+              const side = wide ? 208 : 0;
+              map.easeTo({
+                center: (feature.geometry as Point).coordinates as [number, number],
+                offset: [rtlDoc ? -side : side, wide ? -40 : -90],
+                duration: 700,
+              });
+            }
           },
         );
         map.on(
@@ -626,14 +645,19 @@ export function PropertyMap(props: PropertyMapProps) {
   }, [ready, props.focusBbox]);
 
   return (
-    <div className="relative h-full min-h-[420px] w-full overflow-hidden rounded-[var(--radius-media)] bg-fill">
+    <div
+      className={`relative h-full w-full overflow-hidden bg-fill ${props.bleed ? "" : "min-h-[420px] rounded-[var(--radius-media)]"}`}
+    >
       {/* Inline position: MapLibre adds .maplibregl-map { position: relative }, which
           overrides an `absolute` class and collapsed the map to 0px height. */}
       <div ref={container} style={{ position: "absolute", inset: 0 }} data-testid="map-canvas" />
       {!ready && !failed && (
-        <p className="absolute inset-0 grid place-items-center text-sm text-ink-3">
-          {props.dict.map.loading}
-        </p>
+        <div role="status" className="skeleton absolute inset-0 grid place-items-center">
+          <p className="surface-float flex items-center gap-2 rounded-full px-4 py-2 text-sm text-ink-2">
+            <span aria-hidden className="size-2 animate-pulse rounded-full bg-spatial-fill" />
+            {props.dict.map.loading}
+          </p>
+        </div>
       )}
       {failed && (
         <p role="alert" className="absolute inset-0 grid place-items-center text-sm text-danger">

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { Alert } from "@/components/ui/Alert";
+import { Icon, type IconName } from "@/components/ui/Icon";
 import { TrustBadge } from "@/components/ui/TrustBadge";
 import { Insights } from "@/features/ai/Insights";
 import { IntelligencePanel } from "@/features/ai/IntelligencePanel";
@@ -21,6 +22,7 @@ import { ApiError } from "@/lib/api/client";
 import { serverApiFetch } from "@/lib/api/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { formatArea, formatDate, formatPrice, placeName } from "@/lib/format";
+import { stagger } from "@/lib/motion";
 import type { Property, ReferenceItem } from "@/types/property";
 
 export const dynamic = "force-dynamic";
@@ -134,12 +136,12 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
   const shownFacts = facts.filter(([, value]) => value !== "");
 
   // The three numbers people scan first, shown large under the title.
-  const keyStats: [string, string][] = (
+  const keyStats: [string, string, IconName][] = (
     [
-      [dict.listing.area, formatArea(property.area_m2, locale) ?? ""],
-      [dict.listing.bedrooms, property.bedrooms?.toString() ?? ""],
-      [dict.listing.bathrooms, property.bathrooms?.toString() ?? ""],
-    ] as [string, string][]
+      [dict.listing.area, formatArea(property.area_m2, locale) ?? "", "area"],
+      [dict.listing.bedrooms, property.bedrooms?.toString() ?? "", "bed"],
+      [dict.listing.bathrooms, property.bathrooms?.toString() ?? "", "bath"],
+    ] as [string, string, IconName][]
   ).filter(([, v]) => v !== "");
 
   return (
@@ -149,18 +151,26 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
         <Alert tone="info">{dict.listing.statuses[property.status]}</Alert>
       )}
 
-      <Gallery media={property.media} title={title} emptyLabel={dict.listing.noImage} />
+      <div className="reveal">
+        <Gallery
+          media={property.media}
+          title={title}
+          emptyLabel={dict.listing.noImage}
+          labels={{ prev: p.prevPhoto, next: p.nextPhoto }}
+        />
+      </div>
 
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12">
         <div className="flex min-w-0 flex-col">
-          <header className="flex flex-col gap-3 pb-8">
+          <header className="reveal flex flex-col gap-3 pb-8" style={stagger(1)}>
             <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="rounded-full bg-accent-tint px-2.5 py-1 font-medium text-accent">
+              <span className="rounded-full bg-fill px-2.5 py-1 font-medium text-ink">
                 {dict.listing.purposes[property.purpose]}
               </span>
               {property.verified && (
-                <span className="rounded-full bg-success/15 px-2.5 py-1 font-medium text-success">
-                  ✓ {dict.listing.verified}
+                <span className="inline-flex items-center gap-1 rounded-full bg-accent-tint px-2.5 py-1 font-medium text-accent">
+                  <Icon name="check" className="size-3.5" strokeWidth={2.2} />
+                  {dict.listing.verified}
                 </span>
               )}
               {property.is_demo && <TrustBadge kind="demo">{dict.listing.demo}</TrustBadge>}
@@ -168,17 +178,23 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                 {property.reference_code}
               </span>
             </div>
-            <h1 className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
-              {title}
-            </h1>
-            <p className="text-ink-2">{where}</p>
+            <h1 className="display-lg text-ink">{title}</h1>
+            <p className="flex items-center gap-1.5 text-ink-2">
+              <Icon name="pin" className="size-4 shrink-0 text-spatial" />
+              {where}
+            </p>
             {property.is_demo && <p className="text-sm text-ink-3">{p.demoBanner}</p>}
             {keyStats.length > 0 && (
-              <dl className="mt-3 flex flex-wrap gap-x-10 gap-y-3">
-                {keyStats.map(([k, v]) => (
-                  <div key={k}>
-                    <dd className="font-display text-2xl font-semibold text-ink tabular">{v}</dd>
-                    <dt className="text-sm text-ink-3">{k}</dt>
+              <dl className="mt-4 flex flex-wrap gap-x-10 gap-y-4">
+                {keyStats.map(([k, v, icon]) => (
+                  <div key={k} className="flex items-center gap-3">
+                    <span className="surface-1 grid size-10 place-items-center rounded-xl text-ink-2">
+                      <Icon name={icon} className="size-5" />
+                    </span>
+                    <div>
+                      <dd className="kpi text-2xl text-ink">{v}</dd>
+                      <dt className="meta mt-1">{k}</dt>
+                    </div>
                   </div>
                 ))}
               </dl>
@@ -186,14 +202,23 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
           </header>
 
           <Section title={p.facts}>
-            <dl className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
-              {shownFacts.map(([k, v]) => (
-                <div key={k}>
-                  <dt className="text-xs text-ink-3">{k}</dt>
-                  <dd className="mt-0.5 font-medium text-ink tabular">{v}</dd>
+            {/* Progressive disclosure: the six most useful facts first. */}
+            <FactGrid facts={shownFacts.slice(0, 6)} />
+            {shownFacts.length > 6 && (
+              <details className="group mt-5">
+                <summary className="chip w-fit cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                  <span className="group-open:hidden">{p.moreFacts}</span>
+                  <span className="hidden group-open:inline">{p.fewerFacts}</span>
+                  <Icon
+                    name="chevron-down"
+                    className="size-3.5 transition-transform duration-[var(--duration-base)] group-open:rotate-180"
+                  />
+                </summary>
+                <div className="fade-in mt-5">
+                  <FactGrid facts={shownFacts.slice(6)} />
                 </div>
-              ))}
-            </dl>
+              </details>
+            )}
           </Section>
 
           {description && (
@@ -206,7 +231,11 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             <Section title={p.amenities}>
               <ul className="flex flex-wrap gap-2 text-sm">
                 {property.amenities.map((code) => (
-                  <li key={code} className="rounded-full bg-fill px-3 py-1.5 text-ink">
+                  <li
+                    key={code}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-fill px-3 py-1.5 text-ink"
+                  >
+                    <Icon name="check" className="size-3.5 text-accent" strokeWidth={2.2} />
                     {label(amenities, code)}
                   </li>
                 ))}
@@ -229,13 +258,20 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             {property.status === "APPROVED" && (
               <Link
                 href={`/vision?property_id=${property.id}`}
-                className="flex items-center justify-between gap-4 rounded-[var(--radius-card)] bg-fill px-5 py-4 transition hover:bg-fill-strong"
+                className="lift surface-1 group flex items-center gap-4 rounded-[var(--radius-card)] px-5 py-4"
                 data-testid="vision-link"
               >
-                <span>
+                <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent-tint text-accent">
+                  <Icon name="insight" className="size-5" />
+                </span>
+                <span className="min-w-0 flex-1">
                   <span className="block font-semibold text-ink">{dict.vision.title}</span>
                   <span className="text-sm text-ink-2">{dict.vision.subtitle}</span>
                 </span>
+                <Icon
+                  name="arrow"
+                  className="size-5 shrink-0 text-ink-3 transition-transform duration-[var(--duration-base)] group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5"
+                />
               </Link>
             )}
             {property.status === "APPROVED" && (
@@ -274,10 +310,8 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
         </div>
 
         <aside className="flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start">
-          <div className="rounded-[var(--radius-card)] bg-surface p-6 shadow-float ring-1 ring-hairline">
-            <p className="font-display text-3xl font-semibold tracking-tight text-ink tabular">
-              {price}
-            </p>
+          <div className="surface-focus reveal rounded-[var(--radius-card)] p-6" style={stagger(2)}>
+            <p className="kpi text-[2rem] text-ink">{price}</p>
             {property.negotiable && (
               <p className="mt-1 text-sm text-ink-3">{dict.listing.negotiable}</p>
             )}
@@ -296,7 +330,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
               <p className="font-semibold text-ink">
                 {property.lister.name}
                 {property.lister.kind === "agency" && property.lister.agency_verified && (
-                  <span className="ms-1 text-success">✓</span>
+                  <Icon name="check" className="ms-1 inline size-4 text-accent" strokeWidth={2.2} />
                 )}
               </p>
               <div className="mt-4 flex flex-col gap-2">
@@ -304,7 +338,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                   <a
                     href={`tel:${property.lister.phone}`}
                     dir="ltr"
-                    className="inline-flex h-12 items-center justify-center rounded-full bg-accent-fill px-5 font-medium text-on-accent transition hover:bg-accent-fill-hover"
+                    className="press inline-flex h-12 items-center justify-center gap-2 rounded-full bg-accent-fill px-5 font-medium text-on-accent shadow-[inset_0_1px_0_rgb(255_255_255/0.25)] hover:bg-accent-fill-hover"
                   >
                     {p.call} {property.lister.phone}
                   </a>
@@ -316,7 +350,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                     href={`https://wa.me/${property.lister.whatsapp.replace(/\D/g, "")}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex h-12 items-center justify-center rounded-full px-5 font-medium text-success ring-1 ring-inset ring-success/50 transition hover:bg-success/10"
+                    className="press inline-flex h-12 items-center justify-center rounded-full px-5 font-medium text-success ring-1 ring-inset ring-success/40 hover:bg-success/10"
                   >
                     {p.whatsapp}
                   </a>
@@ -351,7 +385,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             {property.can_edit && (
               <Link
                 href={`/studio?property_id=${property.id}`}
-                className="inline-flex h-10 items-center rounded-full px-4 text-sm font-medium text-ink ring-1 ring-inset ring-hairline hover:bg-fill"
+                className="press surface-1 inline-flex h-10 items-center rounded-full px-4 text-sm font-medium text-ink"
                 data-testid="studio-link"
               >
                 {dict.studio.title}
@@ -360,7 +394,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             {property.can_edit && (
               <Link
                 href={`/dashboard/properties/${property.id}`}
-                className="inline-flex h-10 items-center rounded-full px-4 text-sm font-medium text-ink ring-1 ring-inset ring-hairline hover:bg-fill"
+                className="press surface-1 inline-flex h-10 items-center rounded-full px-4 text-sm font-medium text-ink"
               >
                 {dict.myListings.edit}
               </Link>
@@ -372,7 +406,13 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
           )}
 
           <section className="rounded-[var(--radius-card)] bg-fill p-5">
-            <h2 className="text-sm font-semibold text-ink">{p.verification}</h2>
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-ink">
+              <Icon
+                name={property.verified ? "check" : "info"}
+                className={`size-4 ${property.verified ? "text-accent" : "text-ink-3"}`}
+              />
+              {p.verification}
+            </h2>
             <p className="mt-1 text-sm text-ink-2">
               {property.verified ? p.verifiedText : p.notVerifiedText}
             </p>
@@ -392,6 +432,19 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
         </aside>
       </div>
     </div>
+  );
+}
+
+function FactGrid({ facts }: { facts: [string, string][] }) {
+  return (
+    <dl className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-3">
+      {facts.map(([k, v]) => (
+        <div key={k}>
+          <dt className="meta">{k}</dt>
+          <dd className="mt-0.5 font-medium text-ink tabular">{v}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }
 

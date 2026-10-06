@@ -1,17 +1,42 @@
 import Link from "next/link";
 
+import { Icon } from "@/components/ui/Icon";
 import { getDictionary } from "@/i18n";
 import { getRequestLocale } from "@/i18n/server";
+import { stagger } from "@/lib/motion";
 
 export default async function NotFound() {
   const dict = getDictionary(await getRequestLocale());
   return (
-    <div className="mx-auto max-w-xl px-4 py-24 text-center">
-      <p className="mb-2 text-6xl font-bold text-brand-200 tabular">404</p>
-      <h1 className="mb-6 text-xl font-semibold text-brand-900">{dict.errors.NOT_FOUND}</h1>
-      <Link href="/" className="font-medium text-accent underline underline-offset-4">
-        {dict.nav.home}
-      </Link>
+    <div className="relative isolate mx-auto flex max-w-xl flex-col items-center px-4 py-24 text-center">
+      <div aria-hidden className="stage-grid absolute inset-0 -z-10" />
+      <div
+        aria-hidden
+        className="surface-1 reveal mb-6 grid size-14 place-items-center rounded-2xl"
+      >
+        <Icon name="pin" className="size-6 text-spatial" />
+      </div>
+      <p className="reveal kpi text-6xl text-ink-3" style={stagger(1)}>
+        404
+      </p>
+      <h1 className="reveal display-md mt-3 text-ink" style={stagger(2)}>
+        {dict.errors.NOT_FOUND}
+      </h1>
+      <div className="reveal mt-8 flex flex-wrap justify-center gap-2" style={stagger(3)}>
+        <Link
+          href="/"
+          className="press inline-flex h-11 items-center rounded-full bg-accent-fill px-5 font-medium text-on-accent hover:bg-accent-fill-hover"
+        >
+          {dict.nav.home}
+        </Link>
+        <Link
+          href="/map"
+          className="press surface-1 inline-flex h-11 items-center gap-2 rounded-full px-5 font-medium text-ink"
+        >
+          <Icon name="map" className="size-4 text-spatial" />
+          {dict.nav.map}
+        </Link>
+      </div>
     </div>
   );
 }

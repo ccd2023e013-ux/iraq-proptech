@@ -50,7 +50,7 @@ export function SafeImage({
       loading={loading}
       decoding="async"
       data-loaded={loaded || undefined}
-      className={`${className ?? ""} transition-opacity duration-[var(--duration-slow)] ${loaded ? "opacity-100" : "opacity-0"}`}
+      className={`${className ?? ""} transition-[opacity,scale] duration-[var(--duration-slow)] ease-[var(--ease-out-soft)] ${loaded ? "opacity-100" : "scale-[1.015] opacity-0"}`}
       onLoad={() => setLoaded(true)}
       onError={() => setFailed(true)}
     />

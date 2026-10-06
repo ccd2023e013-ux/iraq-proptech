@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Icon } from "@/components/ui/Icon";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { TrustBadge } from "@/components/ui/TrustBadge";
 import { priceLabel } from "@/features/properties/PropertyCard";
@@ -22,6 +24,7 @@ import {
 } from "@/lib/map/geo";
 import { PLACE_GROUPS, bboxAround, placesAllowed } from "@/lib/map/places";
 import { type MapConfig, parseBbox } from "@/lib/map/provider";
+import { stagger } from "@/lib/motion";
 import { type RawParams, first, toApiQuery, withParam } from "@/lib/search";
 import type { PropertyCard } from "@/types/property";
 
@@ -37,6 +40,8 @@ export interface MapSearchProps {
   total: number;
   boundaries: FeatureCollection | null;
   initialBbox: Bbox;
+  /** Search filters (server-rendered) shown in the results panel. */
+  filters?: ReactNode;
 }
 
 interface Poi {
@@ -65,6 +70,7 @@ export function MapSearch({
   total,
   boundaries,
   initialBbox,
+  filters,
 }: MapSearchProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -282,119 +288,174 @@ export function MapSearch({
     : Number.isFinite(nearLat) && Number.isFinite(nearLon) && nearActive
       ? bboxAround(nearLon, nearLat, Number(first(params.radius_km)) || 3)
       : (parseBbox(first(params.bbox)) ?? initialBbox);
-  const pill = (active: boolean) =>
-    `inline-flex h-9 items-center gap-2 rounded-full px-3.5 text-sm font-medium transition ${
-      active
-        ? "bg-accent-fill text-on-accent"
-        : "bg-surface text-ink-2 ring-1 ring-inset ring-hairline hover:text-ink"
-    }`;
+  const listOpen = view === "list";
+  const footnotes = (
+    <div className="flex flex-col gap-1 text-[11.5px] leading-relaxed text-ink-3">
+      {error && <p className="text-danger">{m.error}</p>}
+      {clustered && <p>{m.clustered}</p>}
+      <p>
+        {m.priceBubbles} {m.hiddenNotOnMap}
+      </p>
+      {pois && pois.features.length > 0 && (
+        <p>
+          {m.placesSource}. {m.placesDemoNote}
+        </p>
+      )}
+      {sources.length > 0 && (
+        <p>
+          {m.boundarySource}: {sources.join(" · ")}
+          {demoBoundary && <strong className="ms-1 text-warning">({m.demoBoundary})</strong>}
+        </p>
+      )}
+    </div>
+  );
 
+  // Map-first stage: the map fills the space; everything else floats above it.
+  //   start side  — results rail (desktop) / bottom sheet (phones, tablets)
+  //   end side    — map tools (layers, draw, near me) as a floating column
+  //   bottom      — the selected listing or project, centred in the open map
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <label className="flex items-center gap-2 text-sm text-ink-2">
-          <input
-            type="checkbox"
-            checked={followMap}
-            disabled={!!polygon || nearActive || !!drawing}
-            onChange={(e) => setFollowMap(e.target.checked)}
-            className="size-4 accent-[var(--accent)]"
-          />
-          {m.searchAsMove}
-        </label>
-        <div className="ms-auto flex flex-wrap items-center gap-2">
-          {drawing ? (
-            <>
-              <Button
-                onClick={finishDrawing}
-                disabled={drawing.length < 3}
-                data-testid="finish-area"
-              >
-                {m.finishDrawing}
-              </Button>
-              <Button variant="ghost" onClick={() => setDrawing(null)}>
-                {m.cancelDrawing}
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="secondary" onClick={() => setDrawing([])} data-testid="draw-area">
-                {m.drawArea}
-              </Button>
-              <Button variant="secondary" onClick={nearMe}>
-                {m.nearMe}
-              </Button>
-            </>
-          )}
-          {(polygon || nearActive) && !drawing && (
-            <Button variant="ghost" onClick={clearArea}>
-              {nearActive ? `${m.nearMeActive} · ${m.clearNear}` : m.clearArea}
-            </Button>
-          )}
-          <div className="flex rounded-full bg-fill p-1 lg:hidden" role="group">
-            {(["map", "list"] as const).map((v) => (
-              <button
-                key={v}
-                type="button"
-                aria-pressed={view === v}
-                onClick={() => setView(v)}
-                className={`h-8 rounded-full px-3 text-sm ${view === v ? "bg-surface text-ink shadow-soft" : "text-ink-2"}`}
-              >
-                {v === "map" ? m.showMap : m.showList}
-              </button>
-            ))}
-          </div>
-        </div>
+    <div className="relative size-full overflow-hidden">
+      <div className="absolute inset-0">
+        <PropertyMap
+          bleed
+          config={config}
+          dict={dict}
+          locale={locale}
+          initialBbox={startBbox}
+          data={data}
+          boundaries={boundaries}
+          showBoundaries={showAreas}
+          pois={pois}
+          satellite={satellite}
+          development={future ? projects : null}
+          onSelectProject={setProject}
+          polygon={polygon}
+          drawing={drawing}
+          highlightId={highlightId}
+          focusBbox={focusBbox}
+          onViewportChange={onViewportChange}
+          onSelect={onSelect}
+          onDrawPoint={(p) => setDrawing((d) => (d ? [...d, p] : d))}
+        />
       </div>
-      {drawing && <p className="text-sm text-gold-700">{m.drawHint}</p>}
-      {geoError && <p className="text-sm text-danger">{m.nearMeDenied}</p>}
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(320px,400px)_1fr]">
-        <section
-          aria-label={m.showList}
-          className={`flex max-h-[72vh] flex-col gap-3 overflow-y-auto pe-1 ${view === "map" ? "hidden lg:flex" : ""}`}
-        >
-          <p className="text-sm text-ink-2 tabular" data-testid="map-total">
-            {total} {m.inView}
+      {/* Status pills (drawing hint, location errors) float at the top centre. */}
+      {(drawing || geoError) && (
+        <div className="pointer-events-none absolute inset-x-4 top-[calc(var(--map-top)+0.75rem)] z-[var(--z-float)] flex justify-center">
+          <p
+            role="status"
+            className={`surface-float pop-in pointer-events-auto max-w-md rounded-full px-4 py-2 text-center text-[13px] ${geoError ? "text-danger" : "text-ink"}`}
+          >
+            {geoError ? m.nearMeDenied : m.drawHint}
           </p>
-          {items.length === 0 && (
-            <p className="rounded-[var(--radius-card)] bg-fill py-10 text-center text-sm text-ink-3">
-              {dict.search.noResults}
+        </div>
+      )}
+
+      {/* Results: a rail on wide screens, a bottom sheet on phones and tablets. */}
+      <section
+        aria-label={m.showList}
+        className={`surface-modal absolute z-[var(--z-float)] flex flex-col overflow-hidden transition-[height] duration-[var(--duration-spatial)] ease-[var(--ease-spring)] max-lg:inset-x-2 max-lg:bottom-2 max-lg:rounded-[1.5rem] lg:start-4 lg:top-[calc(var(--map-top)+0.75rem)] lg:bottom-4 lg:w-[392px] lg:rounded-[var(--radius-card)] ${
+          listOpen ? "max-lg:h-[72%]" : "max-lg:h-auto"
+        } ${selected || project ? "max-lg:hidden" : ""}`}
+      >
+        <header className="flex shrink-0 flex-col gap-2 px-4 pt-2 pb-3 lg:pt-4">
+          {/* Sheet handle (phones/tablets): tap to open or close the list. */}
+          <button
+            type="button"
+            onClick={() => setView(listOpen ? "map" : "list")}
+            aria-expanded={listOpen}
+            aria-label={listOpen ? m.showMap : m.showList}
+            className="mx-auto mb-1 flex h-5 w-full items-center justify-center lg:hidden"
+          >
+            <span aria-hidden className="h-1 w-10 rounded-full bg-hairline-strong" />
+          </button>
+          <div className="flex items-baseline justify-between gap-3">
+            <h1 className="font-display text-lg font-semibold tracking-tight text-ink">
+              {m.title}
+            </h1>
+            <p className="text-[13px] text-ink-3 tabular" data-testid="map-total">
+              <span className="font-semibold text-ink">{total}</span> {m.inView}
             </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="flex items-center gap-2 text-[13px] text-ink-2">
+              <input
+                type="checkbox"
+                checked={followMap}
+                disabled={!!polygon || nearActive || !!drawing}
+                onChange={(e) => setFollowMap(e.target.checked)}
+                className="size-4 accent-[var(--accent)]"
+              />
+              {m.searchAsMove}
+            </label>
+            {(polygon || nearActive) && !drawing && (
+              <button type="button" onClick={clearArea} className="chip ms-auto" data-active="true">
+                {nearActive ? `${m.nearMeActive} · ${m.clearNear}` : m.clearArea}
+                <Icon name="close" className="size-3.5" />
+              </button>
+            )}
+          </div>
+          {filters && (
+            <details className="group">
+              <summary className="chip w-fit cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                <Icon name="filter" className="size-4" />
+                {dict.search.filters}
+                <Icon
+                  name="chevron-down"
+                  className="size-3.5 transition-transform duration-[var(--duration-base)] group-open:rotate-180"
+                />
+              </summary>
+              <div className="fade-in quiet-scroll mt-3 max-h-[40vh] overflow-y-auto pe-1">
+                {filters}
+              </div>
+            </details>
           )}
-          <ul className="flex flex-col gap-1">
-            {items.map((card) => {
+        </header>
+
+        <div
+          className={`quiet-scroll flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto border-t border-hairline px-2 py-2 ${
+            listOpen ? "" : "max-lg:hidden"
+          }`}
+        >
+          {items.length === 0 && <EmptyState title={dict.search.noResults} glyph="map" />}
+          <ul className="flex flex-col">
+            {items.map((card, i) => {
               const title = locale === "en" && card.title_en ? card.title_en : card.title_ar;
               const active = highlightId === card.id;
               return (
-                <li key={card.id}>
+                <li key={card.id} className="reveal" style={stagger(i)}>
                   <a
                     href={`/properties/${card.id}`}
                     onMouseEnter={() => setHighlightId(card.id)}
                     onMouseLeave={() => setHighlightId(selected ? String(selected.id) : null)}
                     onFocus={() => setHighlightId(card.id)}
-                    className={`flex gap-3 rounded-[var(--radius-card)] p-2 transition ${active ? "bg-accent-tint" : "hover:bg-fill"}`}
+                    aria-current={active ? "true" : undefined}
+                    className={`flex gap-3 rounded-2xl p-2 transition-colors duration-[var(--duration-quick)] ${active ? "bg-accent-tint" : "hover:bg-fill"}`}
                   >
                     {card.cover_url ? (
                       <SafeImage
                         src={card.cover_url}
                         alt=""
                         fallbackLabel="—"
-                        className="h-20 w-24 shrink-0 rounded-xl bg-fill object-cover"
+                        className="h-[72px] w-24 shrink-0 rounded-xl bg-fill object-cover"
                       />
                     ) : (
-                      <div className="h-20 w-24 shrink-0 rounded-xl bg-fill" />
+                      <div className="h-[72px] w-24 shrink-0 rounded-xl bg-fill" />
                     )}
                     <div className="flex min-w-0 flex-col gap-0.5 text-sm">
-                      <span className="font-semibold text-ink tabular">
+                      <span className="font-display font-semibold tracking-tight text-ink tabular">
                         {priceLabel(card, dict, locale)}
                       </span>
-                      <span className="truncate text-ink">{title}</span>
-                      <span className="truncate text-xs text-ink-3">
-                        {[placeName(card.district ?? null, locale), placeName(card.city, locale)]
-                          .filter(Boolean)
-                          .join("، ")}
-                        {card.area_m2 ? ` · ${formatArea(card.area_m2, locale)}` : ""}
+                      <span className="truncate text-ink-2">{title}</span>
+                      <span className="flex min-w-0 items-center gap-1 text-xs text-ink-3">
+                        <Icon name="pin" className="size-3 shrink-0 text-spatial" />
+                        <span className="truncate">
+                          {[placeName(card.district ?? null, locale), placeName(card.city, locale)]
+                            .filter(Boolean)
+                            .join("، ")}
+                          {card.area_m2 ? ` · ${formatArea(card.area_m2, locale)}` : ""}
+                        </span>
                       </span>
                       {card.is_demo && (
                         <span>
@@ -410,158 +471,142 @@ export function MapSearch({
           {total > items.length && (
             <a
               href={`/properties?${toApiQuery(params)}`}
-              className="text-center text-sm font-medium text-accent"
+              className="press mx-auto inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-sm font-medium text-accent hover:bg-accent-tint"
             >
               {dict.landing.viewAll}
+              <Icon name="arrow" className="size-4" />
             </a>
           )}
-        </section>
+          <div className="mt-auto px-2 pt-3 pb-1">{footnotes}</div>
+        </div>
+      </section>
 
-        <section className={`flex flex-col gap-2 ${view === "list" ? "hidden lg:flex" : ""}`}>
-          <div className="relative h-[72vh]">
-            <PropertyMap
-              config={config}
-              dict={dict}
-              locale={locale}
-              initialBbox={startBbox}
-              data={data}
-              boundaries={boundaries}
-              showBoundaries={showAreas}
-              pois={pois}
-              satellite={satellite}
-              development={future ? projects : null}
-              onSelectProject={setProject}
-              polygon={polygon}
-              drawing={drawing}
-              highlightId={highlightId}
-              focusBbox={focusBbox}
-              onViewportChange={onViewportChange}
-              onSelect={onSelect}
-              onDrawPoint={(p) => setDrawing((d) => (d ? [...d, p] : d))}
-            />
-
-            <details className="group absolute end-3 top-3 z-10" data-testid="map-layers">
-              <summary className="flex h-9 cursor-pointer list-none items-center gap-2 rounded-full bg-glass px-3.5 text-sm font-medium text-ink shadow-soft ring-1 ring-hairline backdrop-blur-xl [&::-webkit-details-marker]:hidden">
-                <svg
-                  aria-hidden
-                  viewBox="0 0 20 20"
-                  className="size-4 text-spatial"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinejoin="round"
-                >
-                  <path d="m10 3 7 4-7 4-7-4 7-4Z" />
-                  <path d="m3 11 7 4 7-4" />
-                </svg>
-                {m.layers}
-              </summary>
-              <div className="mt-2 flex w-64 flex-col gap-3 rounded-[var(--radius-card)] bg-glass p-4 text-sm shadow-float ring-1 ring-hairline backdrop-blur-xl">
-                {config.satellite && (
-                  <div className="flex rounded-full bg-fill p-1" role="group">
-                    {[false, true].map((sat) => (
-                      <button
-                        key={String(sat)}
-                        type="button"
-                        aria-pressed={satellite === sat}
-                        onClick={() => setSatellite(sat)}
-                        className={`h-8 flex-1 rounded-full text-sm ${satellite === sat ? "bg-surface text-ink shadow-soft" : "text-ink-2"}`}
-                      >
-                        {sat ? m.satellite : m.streets}
-                      </button>
-                    ))}
-                  </div>
-                )}
-                <label className="flex items-center justify-between gap-2 text-ink">
-                  <span className="flex items-center gap-2">
-                    <span aria-hidden className="size-2.5 rounded-full bg-gold-500" />
-                    {dict.future.layer}
-                  </span>
-                  <input
-                    type="checkbox"
-                    data-layer="future"
-                    checked={future}
-                    onChange={(e) => {
-                      setFuture(e.target.checked);
-                      if (!e.target.checked) setProject(null);
-                    }}
-                    className="size-4 accent-[var(--accent)]"
-                  />
-                </label>
-                <label className="flex items-center justify-between gap-2 text-ink">
-                  {m.areas}
-                  <input
-                    type="checkbox"
-                    checked={showAreas}
-                    onChange={(e) => setShowAreas(e.target.checked)}
-                    className="size-4 accent-[var(--accent)]"
-                  />
-                </label>
-                <fieldset className="flex flex-col gap-2">
-                  <legend className="mb-1 text-xs font-medium text-ink-3">{m.places}</legend>
-                  <div className="flex flex-wrap gap-1.5">
-                    {PLACE_GROUPS.map((g) => (
-                      <button
-                        key={g.key}
-                        type="button"
-                        data-place={g.key}
-                        aria-pressed={placeGroups.has(g.key)}
-                        onClick={() => togglePlaces(g.key)}
-                        className={pill(placeGroups.has(g.key))}
-                      >
-                        <span
-                          aria-hidden
-                          className="size-2 rounded-full"
-                          style={{ background: POI_COLORS[g.key] }}
-                        />
-                        {dict.nearby.categories[g.key as keyof typeof dict.nearby.categories]}
-                      </button>
-                    ))}
-                  </div>
-                  {placeGroups.size > 0 && !placesAllowed(viewport) && (
-                    <p className="text-xs text-ink-3">{m.zoomInForPlaces}</p>
-                  )}
-                </fieldset>
+      {/* Map tools: a floating column on the end side. */}
+      <div className="absolute end-3 top-[calc(var(--map-top)+0.75rem)] z-[var(--z-float)] flex flex-col items-end gap-2 lg:end-4">
+        <details className="group relative" data-testid="map-layers">
+          <summary className="press surface-float flex h-10 cursor-pointer list-none items-center gap-2 rounded-full px-3.5 text-sm font-medium text-ink [&::-webkit-details-marker]:hidden">
+            <Icon name="layers" className="size-[18px] text-spatial" />
+            <span className="max-sm:sr-only">{m.layers}</span>
+          </summary>
+          <div className="surface-focus pop-in absolute end-0 top-12 flex w-72 origin-top-right flex-col gap-4 rounded-[var(--radius-card)] p-4 text-sm rtl:origin-top-left">
+            {config.satellite && (
+              <div className="seg w-full" role="group">
+                {[false, true].map((sat) => (
+                  <button
+                    key={String(sat)}
+                    type="button"
+                    aria-pressed={satellite === sat}
+                    onClick={() => setSatellite(sat)}
+                    className="flex-1"
+                  >
+                    {sat ? m.satellite : m.streets}
+                  </button>
+                ))}
               </div>
-            </details>
+            )}
+            <label className="flex items-center justify-between gap-2 text-ink">
+              <span className="flex items-center gap-2">
+                <span aria-hidden className="size-2.5 rounded-full bg-gold-500" />
+                {dict.future.layer}
+              </span>
+              <input
+                type="checkbox"
+                data-layer="future"
+                checked={future}
+                onChange={(e) => {
+                  setFuture(e.target.checked);
+                  if (!e.target.checked) setProject(null);
+                }}
+                className="size-4 accent-[var(--accent)]"
+              />
+            </label>
+            <label className="flex items-center justify-between gap-2 text-ink">
+              {m.areas}
+              <input
+                type="checkbox"
+                checked={showAreas}
+                onChange={(e) => setShowAreas(e.target.checked)}
+                className="size-4 accent-[var(--accent)]"
+              />
+            </label>
+            <fieldset className="flex flex-col gap-2 border-t border-hairline pt-3">
+              <legend className="meta mb-2 font-medium">{m.places}</legend>
+              <div className="flex flex-wrap gap-1.5">
+                {PLACE_GROUPS.map((g) => (
+                  <button
+                    key={g.key}
+                    type="button"
+                    data-place={g.key}
+                    aria-pressed={placeGroups.has(g.key)}
+                    onClick={() => togglePlaces(g.key)}
+                    className="chip chip-spatial"
+                  >
+                    <span
+                      aria-hidden
+                      className="size-2 rounded-full"
+                      style={{ background: POI_COLORS[g.key] }}
+                    />
+                    {dict.nearby.categories[g.key as keyof typeof dict.nearby.categories]}
+                  </button>
+                ))}
+              </div>
+              {placeGroups.size > 0 && !placesAllowed(viewport) && (
+                <p className="meta">{m.zoomInForPlaces}</p>
+              )}
+            </fieldset>
+          </div>
+        </details>
 
-            {project && (
-              <ProjectSheet
-                props={project}
-                dict={dict}
-                locale={locale}
-                onClose={() => setProject(null)}
-              />
-            )}
-            {selected && !project && (
-              <SelectionSheet
-                props={selected}
-                dict={dict}
-                locale={locale}
-                onClose={() => onSelect(null)}
-              />
-            )}
+        {drawing ? (
+          <div className="surface-float pop-in flex items-center gap-1 rounded-full p-1">
+            <Button
+              size="sm"
+              onClick={finishDrawing}
+              disabled={drawing.length < 3}
+              data-testid="finish-area"
+            >
+              <Icon name="check" className="size-4" />
+              {m.finishDrawing}
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setDrawing(null)}>
+              {m.cancelDrawing}
+            </Button>
           </div>
-          <div className="flex flex-col gap-1 text-xs text-ink-3">
-            {error && <p className="text-danger">{m.error}</p>}
-            {clustered && <p>{m.clustered}</p>}
-            <p>
-              {m.priceBubbles} {m.hiddenNotOnMap}
-            </p>
-            {pois && pois.features.length > 0 && (
-              <p>
-                {m.placesSource}. {m.placesDemoNote}
-              </p>
-            )}
-            {sources.length > 0 && (
-              <p>
-                {m.boundarySource}: {sources.join(" · ")}
-                {demoBoundary && <strong className="ms-1 text-warning">({m.demoBoundary})</strong>}
-              </p>
-            )}
-          </div>
-        </section>
+        ) : (
+          <>
+            <Button
+              variant="glass"
+              className="h-10"
+              onClick={() => setDrawing([])}
+              data-testid="draw-area"
+            >
+              <Icon name="draw" className="size-[18px] text-spatial" />
+              <span className="max-sm:sr-only">{m.drawArea}</span>
+            </Button>
+            <Button variant="glass" className="h-10" onClick={nearMe}>
+              <Icon name="locate" className="size-[18px] text-spatial" />
+              <span className="max-sm:sr-only">{m.nearMe}</span>
+            </Button>
+          </>
+        )}
       </div>
+
+      {project && (
+        <ProjectSheet
+          props={project}
+          dict={dict}
+          locale={locale}
+          onClose={() => setProject(null)}
+        />
+      )}
+      {selected && !project && (
+        <SelectionSheet
+          props={selected}
+          dict={dict}
+          locale={locale}
+          onClose={() => onSelect(null)}
+        />
+      )}
     </div>
   );
 }
@@ -595,27 +640,18 @@ function ProjectSheet({
       role="dialog"
       aria-label={name}
       data-testid="map-project"
-      className="absolute inset-x-3 bottom-3 z-10 animate-enter sm:inset-x-auto sm:end-3 sm:w-96"
+      className="pointer-events-none absolute inset-x-2 bottom-2 z-[var(--z-float)] flex justify-center lg:start-[calc(392px+2rem)] lg:end-4 lg:bottom-4"
     >
-      <div className="flex flex-col gap-2 rounded-[var(--radius-card)] bg-glass p-4 text-sm shadow-float ring-1 ring-hairline backdrop-blur-xl">
+      <div className="surface-focus pop-in pointer-events-auto flex w-full max-w-md flex-col gap-2.5 rounded-[var(--radius-card)] p-4 text-sm">
         <div className="flex items-start justify-between gap-3">
           <p className="font-display text-base font-semibold text-ink">{name}</p>
           <button
             type="button"
             onClick={onClose}
             aria-label={dict.map.close}
-            className="grid size-8 shrink-0 place-items-center rounded-full text-ink-2 hover:bg-fill"
+            className="icon-btn size-8 shrink-0"
           >
-            <svg
-              aria-hidden
-              viewBox="0 0 20 20"
-              className="size-4"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-            >
-              <path d="m5 5 10 10M15 5 5 15" />
-            </svg>
+            <Icon name="close" className="size-4" />
           </button>
         </div>
         <p className="flex flex-wrap gap-1.5">
@@ -669,22 +705,23 @@ function SelectionSheet({
       role="dialog"
       aria-label={title}
       data-testid="map-selection"
-      className="absolute inset-x-3 bottom-3 z-10 animate-enter sm:inset-x-auto sm:end-3 sm:w-80"
+      className="pointer-events-none absolute inset-x-2 bottom-2 z-[var(--z-float)] flex justify-center lg:start-[calc(392px+2rem)] lg:end-4 lg:bottom-4"
     >
-      <div className="flex gap-3 rounded-[var(--radius-card)] bg-glass p-3 shadow-float ring-1 ring-hairline backdrop-blur-xl">
-        {cover ? (
-          <SafeImage
-            src={cover}
-            alt=""
-            fallbackLabel="—"
-            className="size-24 shrink-0 rounded-xl bg-fill object-cover"
-          />
-        ) : (
-          <div className="size-24 shrink-0 rounded-xl bg-fill" />
-        )}
-        <div className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-          <p className="font-display text-base font-semibold text-ink tabular">{price}</p>
-          <p className="line-clamp-2 text-ink">{title}</p>
+      {/* Keyed by listing: choosing another property replays the arrival. */}
+      <div
+        key={id}
+        className="surface-focus pop-in pointer-events-auto flex w-full max-w-md gap-3.5 rounded-[var(--radius-card)] p-2.5"
+      >
+        <div className="relative size-28 shrink-0 overflow-hidden rounded-[calc(var(--radius-card)-0.5rem)] bg-fill">
+          {cover && (
+            <SafeImage src={cover} alt="" fallbackLabel="—" className="size-full object-cover" />
+          )}
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col gap-1 py-1 text-sm">
+          <p className="font-display text-lg font-semibold tracking-tight text-ink tabular">
+            {price}
+          </p>
+          <p className="line-clamp-2 leading-snug text-ink-2">{title}</p>
           <div className="flex flex-wrap gap-1">
             {props.is_demo === true && <TrustBadge kind="demo">{dict.listing.demo}</TrustBadge>}
             {props.approximate === true && (
@@ -693,27 +730,19 @@ function SelectionSheet({
           </div>
           <Link
             href={`/properties/${encodeURIComponent(id)}`}
-            className="mt-auto font-medium text-accent underline-offset-4 hover:underline"
+            className="press mt-auto inline-flex h-8 w-fit items-center gap-1.5 rounded-full bg-accent-fill px-3.5 text-[13px] font-medium text-on-accent hover:bg-accent-fill-hover"
           >
             {dict.map.openListing}
+            <Icon name="arrow" className="size-3.5" />
           </Link>
         </div>
         <button
           type="button"
           onClick={onClose}
           aria-label={dict.map.close}
-          className="grid size-8 shrink-0 place-items-center rounded-full text-ink-2 hover:bg-fill"
+          className="icon-btn size-8 shrink-0"
         >
-          <svg
-            aria-hidden
-            viewBox="0 0 20 20"
-            className="size-4"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-          >
-            <path d="m5 5 10 10M15 5 5 15" />
-          </svg>
+          <Icon name="close" className="size-4" />
         </button>
       </div>
     </div>
