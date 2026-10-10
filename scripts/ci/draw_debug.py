@@ -44,6 +44,40 @@ HOOK = r"""
       this[ST] = v;
     },
   });
+  // Every thenable React waits on gets `.then(ping, ping)` (the same function
+  // twice). Record those, with stacks, and whether they ever settled.
+  const pings = [];
+  const realThen = Promise.prototype.then;
+  Promise.prototype.then = function (a, b) {
+    if (armed && a && a === b && typeof a === 'function' && pings.length < 500) {
+      const rec = { kind: 'promise-ping', t: (performance.now() - t0r).toFixed(0), settled: false,
+        ctor: this.constructor && this.constructor.name, status: () => this[ST],
+        stack: (new Error().stack || '').split('\n').slice(2, 9).map((x) => x.trim()
+          .replace(location.origin, '').replace(/\/_next\/static\/chunks\//g, '')).join(' < ') };
+      pings.push(rec);
+      realThen.call(this, () => { rec.settled = 'fulfilled'; }, () => { rec.settled = 'rejected'; });
+    }
+    return realThen.call(this, a, b);
+  };
+  // Plain-object thenables (not Promise-derived): React marks them `status =
+  // 'pending'` when it suspends on them. An accessor on Object.prototype sees
+  // that first write and turns it into an ordinary own property.
+  Object.defineProperty(Object.prototype, 'status', {
+    configurable: true,
+    get() { return undefined; },
+    set(v) {
+      if (armed && v === 'pending' && typeof this.then === 'function' && !(this instanceof Promise) && pings.length < 500) {
+        pings.push({ kind: 'PLAIN-thenable', t: (performance.now() - t0r).toFixed(0), settled: false,
+          ctor: this.constructor && this.constructor.name, status: () => this.status,
+          keys: Object.keys(this).join(','), then: String(this.then).slice(0, 80),
+          stack: (new Error().stack || '').split('\n').slice(2, 9).map((x) => x.trim()
+            .replace(location.origin, '').replace(/\/_next\/static\/chunks\//g, '')).join(' < ') });
+      }
+      Object.defineProperty(this, 'status', { value: v, writable: true, enumerable: true, configurable: true });
+    },
+  });
+  window.__dbgPings = () => pings.map((r) => r.kind + ' t=' + r.t + ' settled=' + r.settled + ' status=' + r.status() +
+    ' ctor=' + r.ctor + (r.keys !== undefined ? ' keys=' + r.keys + ' then=' + r.then : '') + ' | ' + r.stack);
   const describe = (v) => {
     try {
       if (v === null || v === undefined) return String(v);
@@ -345,8 +379,10 @@ def attempt(
     page.wait_for_timeout(2_000)
     ok = ok and "polygon=" in page.url
     try:
-        for line in page.evaluate("() => window.__dbgPending ? window.__dbgPending() : ['no tracker']"):
-            log.append(f"[post] {line[:700]}")
+        for line in page.evaluate("() => window.__dbgPending ? window.__dbgPending() : ['no tracker']")[:3]:
+            log.append(f"[post] {line[:300]}")
+        for line in page.evaluate("() => window.__dbgPings ? window.__dbgPings() : ['no pings']")[:30]:
+            log.append(f"[post] {line[:900]}")
     except Exception as exc:  # noqa: BLE001 - diagnostics only
         log.append(f"[post] tracker failed: {exc}")
     if not ok and os.environ.get("LATE") == "1":

@@ -182,13 +182,7 @@ export function MapSearch({
   }, [future, projects, locale]);
 
   const navigate = useCallback(
-    (query: string) => {
-      const href = query ? `${pathname}?${query}` : pathname;
-      // EXPERIMENT (issue #4): an exact FULL prefetch entry, so the navigation
-      // does not take the aliased-prefetch + layout-router lazy-refetch path.
-      router.prefetch(href, { kind: "full" } as never);
-      router.replace(href, { scroll: false });
-    },
+    (query: string) => router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false }),
     [router, pathname],
   );
 
