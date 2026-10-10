@@ -1,5 +1,5 @@
 /**
- * Pure helpers for authentication routing (shared by middleware, route
+ * Pure helpers for authentication routing (shared by the proxy, route
  * handlers and pages; unit-tested).
  */
 
@@ -53,7 +53,7 @@ export type GuardDecision =
   | { action: "login"; next: string }
   | { action: "refresh"; next: string };
 
-/** Decide what middleware does for a request, from cookie presence only. */
+/** Decide what the proxy (src/proxy.ts) does for a request, from cookie presence only. */
 export function guardDecision(
   pathname: string,
   search: string,
