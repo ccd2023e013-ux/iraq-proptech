@@ -22,8 +22,14 @@ const value = (layer: string, property: string) =>
   basemapOverrides(layers, true).find((o) => o.layer === layer && o.property === property)?.value;
 
 describe("basemap tone", () => {
-  it("leaves the light basemap as designed", () => {
-    expect(basemapOverrides(layers, false)).toEqual([]);
+  it("tones the light basemap too: white roads on soft grey land, pale water", () => {
+    const light = (layer: string, property: string) =>
+      basemapOverrides(layers, false).find((o) => o.layer === layer && o.property === property)
+        ?.value;
+    expect(light("background", "background-color")).toBe("#f4f6f9");
+    expect(light("highway_minor", "line-color")).toBe("#ffffff");
+    expect(light("water", "fill-color")).toBe("#cce5ee");
+    expect(light("poi_label", "text-halo-color")).toBe("#ffffff");
   });
 
   it("puts land on the canvas, tints water, and steps roads by importance", () => {
