@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { MapPreview, type PreviewTone } from "@/features/map/MapPreview";
+import { resolveMapConfig } from "@/lib/map/provider";
+
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Icon } from "@/components/ui/Icon";
@@ -100,15 +103,25 @@ export default async function FuturePage() {
             )}
           </div>
           {projects.length > 0 && (
-            <ProjectPlot
-              points={projects.map(({ properties: p, geometry }) => ({
-                id: p.id,
-                name: (locale === "en" && p.name_en) || p.name_ar,
-                status: p.status,
-                lon: geometry.coordinates[0],
-                lat: geometry.coordinates[1],
-              }))}
-            />
+            <figure className="fade-in surface-1 relative rounded-[var(--radius-media)] p-2">
+              <MapPreview
+                config={resolveMapConfig(process.env)}
+                className="aspect-[4/3] h-auto"
+                label={projects
+                  .map(
+                    ({ properties: p }, i) =>
+                      `${i + 1}. ${(locale === "en" && p.name_en) || p.name_ar}`,
+                  )
+                  .join(" ")}
+                points={projects.map(({ properties: p, geometry }, i) => ({
+                  lon: geometry.coordinates[0],
+                  lat: geometry.coordinates[1],
+                  precision: p.location_precision === "EXACT" ? "exact" : "area",
+                  tone: PREVIEW_TONE[p.status] ?? "muted",
+                  label: String(i + 1),
+                }))}
+              />
+            </figure>
           )}
         </div>
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
@@ -241,72 +254,9 @@ const STATUS_DOT: Record<string, string> = {
   OPPORTUNITY: "bg-gold-500",
 };
 
-/**
- * The projects plotted by their recorded coordinates (equirectangular within
- * their own bounds): geographic context without pretending to be a map.
- */
-function ProjectPlot({
-  points,
-}: {
-  points: { id: string; name: string; status: string; lon: number; lat: number }[];
-}) {
-  const lons = points.map((p) => p.lon);
-  const lats = points.map((p) => p.lat);
-  const midLat = (Math.min(...lats) + Math.max(...lats)) / 2;
-  const kx = Math.cos((midLat * Math.PI) / 180);
-  const spanX = Math.max((Math.max(...lons) - Math.min(...lons)) * kx, 0.05);
-  const spanY = Math.max(Math.max(...lats) - Math.min(...lats), 0.05);
-  const W = 400;
-  const H = 300;
-  const pad = 36;
-  const scale = Math.min((W - pad * 2) / spanX, (H - pad * 2) / spanY);
-  const cx = (Math.min(...lons) + Math.max(...lons)) / 2;
-  const cy = (Math.min(...lats) + Math.max(...lats)) / 2;
-  const x = (lon: number) => W / 2 + (lon - cx) * kx * scale;
-  const y = (lat: number) => H / 2 - (lat - cy) * scale;
-  return (
-    <figure className="fade-in surface-1 relative overflow-hidden rounded-[var(--radius-media)] p-2">
-      <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" direction="ltr" role="img">
-        <title>{points.map((p) => p.name).join(" · ")}</title>
-        <defs>
-          <pattern id="plot-grid" width="25" height="25" patternUnits="userSpaceOnUse">
-            <path d="M25 0H0V25" fill="none" stroke="var(--grid-line)" strokeWidth="1" />
-          </pattern>
-        </defs>
-        <rect width={W} height={H} fill="url(#plot-grid)" />
-        {points.map((p, i) => (
-          <g key={p.id}>
-            <circle cx={x(p.lon)} cy={y(p.lat)} r="14" fill="var(--spatial-fill)" opacity="0.12" />
-            <circle
-              cx={x(p.lon)}
-              cy={y(p.lat)}
-              r="5"
-              className={STATUS_FILL[p.status] ?? "fill-ink-3"}
-              stroke="var(--surface)"
-              strokeWidth="2"
-            />
-            <text
-              x={x(p.lon) + 10}
-              y={y(p.lat) - 9}
-              fontSize="11"
-              fill="var(--ink-2)"
-              className="tabular"
-            >
-              {i + 1}
-            </text>
-          </g>
-        ))}
-      </svg>
-      <figcaption className="sr-only">
-        {points.map((p, i) => `${i + 1}. ${p.name}`).join(" ")}
-      </figcaption>
-    </figure>
-  );
-}
-
-const STATUS_FILL: Record<string, string> = {
-  UNDER_CONSTRUCTION: "fill-accent-fill",
-  TRIAL_OPERATION: "fill-accent-fill",
-  COMPLETED: "fill-ink-3",
-  OPPORTUNITY: "fill-gold-500",
+const PREVIEW_TONE: Record<string, PreviewTone> = {
+  UNDER_CONSTRUCTION: "accent",
+  TRIAL_OPERATION: "accent",
+  COMPLETED: "muted",
+  OPPORTUNITY: "gold",
 };

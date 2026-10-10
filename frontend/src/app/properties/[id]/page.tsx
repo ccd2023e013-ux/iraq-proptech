@@ -14,7 +14,7 @@ import { ViewBeacon } from "@/features/analytics/ViewBeacon";
 import { InquiryForm } from "@/features/crm/InquiryForm";
 import { FavoriteButton } from "@/features/properties/FavoriteButton";
 import { Gallery, ShareButton } from "@/features/properties/Gallery";
-import { LocationPreview } from "@/features/properties/LocationPreview";
+import { MapPreview } from "@/features/map/MapPreview";
 import { Nearby } from "@/features/properties/Nearby";
 import { favoriteIds } from "@/features/search/data";
 import { getDictionary } from "@/i18n";
@@ -251,11 +251,15 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
           <Section title={p.location}>
             {property.display_location && property.location_privacy !== "HIDDEN" && (
               <div className="mb-4 flex flex-col gap-3">
-                <LocationPreview
+                <MapPreview
                   config={mapConfig}
-                  lat={property.display_location.lat}
-                  lon={property.display_location.lon}
-                  approximate={property.location_privacy !== "EXACT"}
+                  points={[
+                    {
+                      lat: property.display_location.lat,
+                      lon: property.display_location.lon,
+                      precision: property.location_privacy === "EXACT" ? "exact" : "area",
+                    },
+                  ]}
                   label={`${p.location}: ${where}`}
                 />
                 <Link
