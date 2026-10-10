@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Alert } from "@/components/ui/Alert";
+import { Icon } from "@/components/ui/Icon";
 import { ProviderBadge } from "@/features/ai/ProviderBadge";
 import { PropertyCard } from "@/features/properties/PropertyCard";
 import { favoriteIds } from "@/features/search/data";
@@ -50,14 +51,22 @@ export default async function SmartSearchPage({
   const [me, favorites] = await Promise.all([getCurrentUser(), favoriteIds()]);
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6">
-      <h1 className="flex items-center gap-2 text-2xl font-bold text-brand-900">
-        {a.smartSearch}
-        <span className="rounded bg-brand-700 px-1.5 py-0.5 text-xs font-bold text-on-accent">
+    <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:px-6">
+      <header className="flex flex-col items-center gap-4 pt-6 text-center">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-spatial-tint px-3 py-1 text-xs font-medium text-spatial">
+          <Icon name="insight" className="size-3.5" />
           {a.badge}
         </span>
-      </h1>
-      <form method="get" action="/search/smart" role="search" className="flex gap-2">
+        <h1 className="display-lg text-ink">{a.smartSearch}</h1>
+        <p className="max-w-xl text-ink-2">{a.smartSearchIntro}</p>
+      </header>
+      <form
+        method="get"
+        action="/search/smart"
+        role="search"
+        className="surface-float mx-auto flex w-full max-w-3xl items-center gap-2 rounded-full p-1.5 ps-4 focus-within:shadow-[var(--edge),0_0_0_2px_var(--accent),var(--shadow-float)]"
+      >
+        <Icon name="search" className="size-5 shrink-0 text-ink-3" />
         <input
           name="q"
           defaultValue={q}
@@ -65,12 +74,29 @@ export default async function SmartSearchPage({
           aria-label={a.smartSearch}
           minLength={2}
           maxLength={300}
-          className="h-12 min-w-0 flex-1 rounded-lg border border-sand-200 bg-surface px-4"
+          className="h-11 min-w-0 flex-1 bg-transparent text-ink outline-none placeholder:text-ink-3"
         />
-        <button type="submit" className="rounded-lg bg-brand-700 px-5 font-medium text-on-accent">
+        <button
+          type="submit"
+          className="press inline-flex h-11 shrink-0 items-center rounded-full bg-accent-fill px-5 font-medium text-on-accent hover:bg-accent-fill-hover"
+        >
           {dict.landing.heroCta}
         </button>
       </form>
+      {!q && (
+        <ul className="mx-auto flex max-w-3xl flex-wrap justify-center gap-2">
+          {a.smartExamples.map((example) => (
+            <li key={example}>
+              <Link
+                href={`/search/smart?q=${encodeURIComponent(example)}`}
+                className="press inline-flex h-9 items-center gap-1.5 rounded-full px-3.5 text-sm text-ink-2 ring-1 ring-inset ring-hairline-strong hover:bg-fill hover:text-ink"
+              >
+                <span className="text-ink-3">{a.tryExample}:</span> {example}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
       {error && <Alert tone="error">{errorMessage(dict, error)}</Alert>}
       {data && (
         <>
@@ -83,8 +109,14 @@ export default async function SmartSearchPage({
             />
             <ul className="flex flex-wrap gap-2">
               {data.interpretation.result.understood.map((u, i) => (
-                <li key={i} className="rounded-full bg-brand-50 px-3 py-1 text-xs text-brand-800">
-                  «{u.phrase}» → {u.field}: {u.value}
+                <li
+                  key={i}
+                  className="inline-flex items-center overflow-hidden rounded-full text-xs ring-1 ring-inset ring-hairline-strong"
+                >
+                  <span className="bg-fill px-2.5 py-1 text-ink-2">«{u.phrase}»</span>
+                  <span className="px-2.5 py-1 text-ink">
+                    {u.field}: <strong className="font-semibold">{u.value}</strong>
+                  </span>
                 </li>
               ))}
             </ul>
@@ -100,9 +132,10 @@ export default async function SmartSearchPage({
             )}
             <Link
               href={`/properties?${filtersToQuery(data.interpretation.result.filters)}`}
-              className="text-sm font-medium text-accent"
+              className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-accent"
             >
-              {dict.search.filters} →
+              {dict.search.filters}
+              <Icon name="arrow" className="size-4" />
             </Link>
           </section>
           <p className="text-sm text-sand-700 tabular">

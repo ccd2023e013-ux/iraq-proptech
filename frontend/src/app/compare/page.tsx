@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Alert } from "@/components/ui/Alert";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { Card } from "@/components/ui/Card";
 import { ProviderBadge } from "@/features/ai/ProviderBadge";
 import { errorMessage, getDictionary } from "@/i18n";
@@ -53,8 +54,13 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
   const ids = (first(params.ids) ?? "").split(",").filter(Boolean);
   if (ids.length < 2) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-10">
-        <Alert tone="info">{c.needTwo}</Alert>
+      <div className="mx-auto max-w-3xl px-4 py-12">
+        <EmptyState
+          title={c.title}
+          body={c.needTwo}
+          glyph="grid"
+          action={{ href: "/properties", label: dict.nav.properties }}
+        />
       </div>
     );
   }

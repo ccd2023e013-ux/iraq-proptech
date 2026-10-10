@@ -1018,6 +1018,14 @@ const en: Dictionary = {
     smartSearch: "Smart search",
     smartSearchPlaceholder: "e.g. 3-bedroom house for sale in Basra under 200 million IQD",
     understood: "What we understood",
+    smartSearchIntro:
+      "Describe what you want the way you'd tell a friend: type, city, bedrooms, price. We turn it into filters you can check.",
+    smartExamples: [
+      "3-bedroom house for sale in Basra",
+      "apartment for rent in Al-Ashar",
+      "land for sale in Basra under 300 million IQD",
+    ],
+    tryExample: "Try",
     ambiguities: { currency_not_specified: "No currency given, so the price was not applied." },
     unparsed: "Not understood",
     replyDraft: "Suggest a reply",
