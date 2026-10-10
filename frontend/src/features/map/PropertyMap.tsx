@@ -52,7 +52,6 @@ export interface PropertyMapProps {
 const EMPTY: FeatureCollection = { type: "FeatureCollection", features: [] };
 /** From this zoom (about a district) every listing is drawn as its own price bubble. */
 const BUBBLE_MIN_ZOOM = 10.5;
-let rtlPluginRequested = false;
 
 /** POI colours by category family (also used by the layers panel legend). */
 export const POI_COLORS: Record<string, string> = {
@@ -391,11 +390,8 @@ export function PropertyMap(props: PropertyMapProps) {
         if (cancelled || !container.current) return;
         // Served by the site itself: the bundler does not ship MapLibre 6's worker.
         maplibre.setWorkerUrl(maplibreWorkerUrl(maplibre.getVersion()));
+        // No RTL text plugin: MapLibre 6 shapes Arabic labels natively.
         const { config } = latest.current;
-        if (config.rtlPluginUrl && !rtlPluginRequested) {
-          rtlPluginRequested = true;
-          maplibre.setRTLTextPlugin(config.rtlPluginUrl, true).catch(() => undefined);
-        }
         dark = isDark();
         map = new maplibre.Map({
           container: container.current,

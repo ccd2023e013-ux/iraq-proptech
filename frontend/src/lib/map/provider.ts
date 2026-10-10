@@ -9,11 +9,13 @@
  *   MAP_STYLE_URL    style JSON URL (required for `custom`; overrides others)
  *   MAP_ATTRIBUTION  extra attribution text for custom styles
  *   MAP_DEFAULT_BBOX initial view "west,south,east,north" (default: all of Iraq)
- *   MAP_RTL_PLUGIN_URL  Arabic shaping plugin for vector labels
  *   MAP_DARK_STYLE_URL  style used when the site is in dark mode (optional)
  *   MAP_SATELLITE_TILES https raster XYZ template with {z}/{x}/{y} (optional, keyed
  *                       providers only — see docs/MAP-PROVIDERS.md)
  *   MAP_SATELLITE_ATTRIBUTION  required with MAP_SATELLITE_TILES
+ *
+ * No RTL text plugin: MapLibre 6 shapes Arabic labels itself (the plugin is
+ * deprecated, and its worker would have to `eval` it, which the CSP forbids).
  */
 
 export type MapProvider = "openfreemap" | "osm-raster" | "custom";
@@ -28,7 +30,6 @@ export interface MapConfig {
   satellite: { tiles: string; attribution: string } | null;
   attribution: string;
   defaultBbox: [number, number, number, number];
-  rtlPluginUrl: string | null;
 }
 
 /** Iraq's extent (west, south, east, north). */
@@ -36,8 +37,6 @@ export const IRAQ_BBOX: [number, number, number, number] = [38.79, 29.06, 48.57,
 
 const OPENFREEMAP_STYLE = "https://tiles.openfreemap.org/styles/liberty";
 const OPENFREEMAP_DARK_STYLE = "https://tiles.openfreemap.org/styles/dark";
-const DEFAULT_RTL_PLUGIN =
-  "https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.3.0/dist/mapbox-gl-rtl-text.js";
 const OSM_ATTRIBUTION = "© OpenStreetMap contributors";
 
 function osmRasterStyle(): Record<string, unknown> {
@@ -85,8 +84,6 @@ export function parseSatellite(
 export function resolveMapConfig(env: Record<string, string | undefined>): MapConfig {
   const requested = (env.MAP_PROVIDER ?? "openfreemap") as MapProvider;
   const styleUrl = env.MAP_STYLE_URL?.trim();
-  const rtlPluginUrl =
-    env.MAP_RTL_PLUGIN_URL === "" ? null : (env.MAP_RTL_PLUGIN_URL ?? DEFAULT_RTL_PLUGIN);
   const defaultBbox = parseBbox(env.MAP_DEFAULT_BBOX) ?? IRAQ_BBOX;
   const satellite = parseSatellite(env.MAP_SATELLITE_TILES, env.MAP_SATELLITE_ATTRIBUTION);
   const darkOverride = env.MAP_DARK_STYLE_URL?.trim() || null;
@@ -99,7 +96,6 @@ export function resolveMapConfig(env: Record<string, string | undefined>): MapCo
       satellite,
       attribution: env.MAP_ATTRIBUTION ?? OSM_ATTRIBUTION,
       defaultBbox,
-      rtlPluginUrl,
     };
   }
   if (requested === "osm-raster") {
@@ -110,7 +106,6 @@ export function resolveMapConfig(env: Record<string, string | undefined>): MapCo
       satellite,
       attribution: OSM_ATTRIBUTION,
       defaultBbox,
-      rtlPluginUrl: null, // raster tiles have no client-rendered labels
     };
   }
   return {
@@ -120,6 +115,5 @@ export function resolveMapConfig(env: Record<string, string | undefined>): MapCo
     satellite,
     attribution: "OpenFreeMap © OpenMapTiles, data © OpenStreetMap contributors",
     defaultBbox,
-    rtlPluginUrl,
   };
 }

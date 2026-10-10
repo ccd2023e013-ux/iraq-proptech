@@ -50,11 +50,14 @@ describe("map provider", () => {
   it("supports a raster OSM fallback without RTL plugin", () => {
     const config = resolveMapConfig({ MAP_PROVIDER: "osm-raster" });
     expect(typeof config.style).toBe("object");
-    expect(config.rtlPluginUrl).toBeNull();
   });
 
-  it("can disable the RTL plugin", () => {
-    expect(resolveMapConfig({ MAP_RTL_PLUGIN_URL: "" }).rtlPluginUrl).toBeNull();
+  it("loads no RTL text plugin (MapLibre 6 shapes Arabic itself)", () => {
+    for (const env of [{}, { MAP_RTL_PLUGIN_URL: "https://unpkg.com/x/rtl.js" }]) {
+      const config = resolveMapConfig(env);
+      expect("rtlPluginUrl" in config).toBe(false);
+      expect(JSON.stringify(config)).not.toContain("unpkg");
+    }
   });
 
   it("rejects malformed bounding boxes", () => {

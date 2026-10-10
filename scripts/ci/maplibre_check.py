@@ -150,6 +150,15 @@ def state(browser: Browser, *, lang: str, scheme: str, phone: bool, errors: list
     # Diagnostics: what the map fetched (style, tiles, glyphs, worker) and what failed.
     fetched: list[str] = []
     worker_loads: list[dict] = []
+    third_party_scripts: list[str] = []
+    page.on(
+        "request",
+        lambda r: (
+            third_party_scripts.append(r.url[:120])
+            if "unpkg.com" in r.url or (r.resource_type == "script" and not r.url.startswith(WEB))
+            else None
+        ),
+    )
     page.on(
         "response",
         lambda r: (
@@ -210,6 +219,10 @@ def state(browser: Browser, *, lang: str, scheme: str, phone: bool, errors: list
         )
         print(f"  [{tag}] map element: {state_attrs}", flush=True)
         print(f"  [{tag}] map fetches: {fetched[:15]}", flush=True)
+    ok &= check(
+        not third_party_scripts,
+        f"[{tag}] no third-party script (no RTL plugin from unpkg) {third_party_scripts[:2]}",
+    )
     ok &= check(page.get_attribute("html", "data-theme") == scheme, f"[{tag}] theme is {scheme}")
     want_dir = "rtl" if lang == "ar" else "ltr"
     ok &= check(
