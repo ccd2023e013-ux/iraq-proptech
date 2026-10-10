@@ -104,6 +104,14 @@ export function MapSearch({
   const [geoError, setGeoError] = useState(false);
   const zoomRef = useRef(12);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Whether viewport moves may navigate. Kept in a ref and switched inside the
+  // click handlers themselves: a map 'moveend' can arrive between a click and
+  // React's commit (e.g. the end of a pan's inertia right after "Draw area"),
+  // and must already see the new mode.
+  const mode = useRef({ follow: followMap, drawing: false });
+  useLayoutEffect(() => {
+    mode.current = { follow: followMap, drawing: drawing !== null };
+  }, [followMap, drawing]);
   // Committed URL params for timers and event handlers (never a render that was
   // discarded or is still pending).
   const paramsRef = useRef(params);
@@ -209,12 +217,13 @@ export function MapSearch({
       setViewport(bbox);
       const zoomChanged = zoom !== zoomRef.current;
       zoomRef.current = zoom;
-      if (!followMap || drawing) {
+      if (!mode.current.follow || mode.current.drawing) {
         if (zoomChanged) void load(dataQuery, zoom);
         return;
       }
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => {
+        if (!mode.current.follow || mode.current.drawing) return;
         const next = withParam(paramsRef.current, "bbox", formatBbox(bbox));
         if (next === toApiQuery(paramsRef.current)) {
           if (zoomChanged) void load(dataQuery, zoom);
@@ -223,7 +232,7 @@ export function MapSearch({
         navigate(next);
       }, 450);
     },
-    [followMap, drawing, navigate, load, dataQuery],
+    [navigate, load, dataQuery],
   );
 
   useEffect(() => () => void (timer.current && clearTimeout(timer.current)), []);
@@ -238,7 +247,13 @@ export function MapSearch({
     // A pan just before "Draw area" must not move the URL to that viewport
     // while the user is drawing (or replace the area they then finish).
     cancelViewportUpdate();
+    mode.current = { ...mode.current, drawing: true };
     setDrawing([]);
+  }
+
+  function cancelDrawing() {
+    mode.current = { ...mode.current, drawing: false };
+    setDrawing(null);
   }
 
   function finishDrawing() {
@@ -246,6 +261,7 @@ export function MapSearch({
     cancelViewportUpdate();
     const next: RawParams = { ...paramsRef.current, polygon: formatPolygon(drawing) };
     for (const key of ["bbox", "page", "near_lat", "near_lon", "radius_km"]) delete next[key];
+    mode.current = { follow: false, drawing: false };
     setDrawing(null);
     setFollowMap(false);
     navigate(toApiQuery(next));
@@ -255,6 +271,7 @@ export function MapSearch({
     cancelViewportUpdate();
     const next: RawParams = { ...paramsRef.current };
     for (const key of ["polygon", "near_lat", "near_lon", "radius_km", "page"]) delete next[key];
+    mode.current = { ...mode.current, follow: true };
     setFollowMap(true);
     navigate(toApiQuery(next));
   }
@@ -275,6 +292,7 @@ export function MapSearch({
         };
         for (const key of ["bbox", "polygon", "page"]) delete next[key];
         cancelViewportUpdate();
+        mode.current = { ...mode.current, follow: false };
         setFollowMap(false);
         setFocusBbox(bboxAround(coords.longitude, coords.latitude, 3));
         navigate(toApiQuery(next));
@@ -412,7 +430,12 @@ export function MapSearch({
                 type="checkbox"
                 checked={followMap}
                 disabled={!!polygon || nearActive || !!drawing}
-                onChange={(e) => setFollowMap(e.target.checked)}
+                onChange={(e) => {
+                  const follow = e.target.checked;
+                  mode.current = { ...mode.current, follow };
+                  if (!follow) cancelViewportUpdate();
+                  setFollowMap(follow);
+                }}
                 className="size-4 accent-[var(--accent)]"
               />
               {m.searchAsMove}
@@ -598,7 +621,7 @@ export function MapSearch({
               <Icon name="check" className="size-4" />
               {m.finishDrawing}
             </Button>
-            <Button size="sm" variant="ghost" onClick={() => setDrawing(null)}>
+            <Button size="sm" variant="ghost" onClick={cancelDrawing}>
               {m.cancelDrawing}
             </Button>
           </div>
