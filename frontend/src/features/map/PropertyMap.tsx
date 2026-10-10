@@ -454,7 +454,14 @@ export function PropertyMap(props: PropertyMapProps) {
         map.on("style.load", () => {
           if (!map) return;
           if (latest.current.config.provider === "openfreemap") {
-            applyBasemapTone(map, map.getStyle().layers as LayerInfo[], isDark());
+            const m = map;
+            applyBasemapTone(
+              {
+                setPaintProperty: (l, prop, v) => m.setPaintProperty(l, prop as never, v as never),
+              },
+              m.getStyle().layers as LayerInfo[],
+              isDark(),
+            );
           }
           installOverlays(map, latest.current.config);
           setStyleVersion((v) => v + 1);
