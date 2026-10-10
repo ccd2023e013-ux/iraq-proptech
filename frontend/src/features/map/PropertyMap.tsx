@@ -17,6 +17,7 @@ import type { Locale } from "@/i18n/config";
 import { parseHex, pillImage, withPriceLabels } from "@/lib/map/bubbles";
 import { type Bbox, closedRing, type LonLat, readBboxProperty } from "@/lib/map/geo";
 import type { MapConfig } from "@/lib/map/provider";
+import { maplibreWorkerUrl } from "@/lib/map/worker";
 import type { Feature, FeatureCollection, Point } from "geojson";
 
 export interface MapFeatureCollection {
@@ -388,6 +389,8 @@ export function PropertyMap(props: PropertyMapProps) {
       try {
         const maplibre = await import("maplibre-gl");
         if (cancelled || !container.current) return;
+        // Served by the site itself: the bundler does not ship MapLibre 6's worker.
+        maplibre.setWorkerUrl(maplibreWorkerUrl(maplibre.getVersion()));
         const { config } = latest.current;
         if (config.rtlPluginUrl && !rtlPluginRequested) {
           rtlPluginRequested = true;

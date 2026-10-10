@@ -43,14 +43,20 @@ def check(condition: bool, message: str) -> bool:
 
 
 def poll_bubbles(page: Page, seconds: int = 60) -> int:
+    return poll_listings(page, seconds)[0]
+
+
+def poll_listings(page: Page, seconds: int = 60) -> tuple[int, int]:
+    """(price bubbles, clusters) the map reports once listings are drawn."""
     canvas = page.locator("[data-testid=map-canvas]")
-    bubbles = 0
+    bubbles = clusters = 0
     for _ in range(seconds):  # attribute polling: the site's CSP forbids eval-based waits
         bubbles = int(canvas.get_attribute("data-bubbles") or 0)
-        if bubbles > 0:
+        clusters = int(canvas.get_attribute("data-clusters") or 0)
+        if bubbles > 0 or clusters > 0:
             break
         page.wait_for_timeout(1_000)
-    return bubbles
+    return bubbles, clusters
 
 
 def no_horizontal_scroll(page: Page) -> bool:
@@ -106,6 +112,22 @@ def state(browser: Browser, *, lang: str, scheme: str, phone: bool, errors: list
     )
     # Diagnostics: what the map fetched (style, tiles, glyphs, worker) and what failed.
     fetched: list[str] = []
+    worker_loads: list[dict] = []
+    page.on(
+        "response",
+        lambda r: (
+            worker_loads.append(
+                {
+                    "url": r.url,
+                    "status": r.status,
+                    "type": r.headers.get("content-type", ""),
+                    "same_origin": r.url.startswith(WEB + "/"),
+                }
+            )
+            if "maplibre-gl-worker" in r.url
+            else None
+        ),
+    )
     page.on(
         "response",
         lambda r: (
@@ -126,9 +148,24 @@ def state(browser: Browser, *, lang: str, scheme: str, phone: bool, errors: list
             break
         page.wait_for_timeout(1_000)
     check(canvas_ok, f"[{tag}] MapLibre created its canvas")
-    bubbles = poll_bubbles(page) if canvas_ok else 0
-    ok = canvas_ok and check(
-        bubbles > 0, f"[{tag}] MapLibre canvas draws Basra price bubbles ({bubbles})"
+    bubbles, clusters = poll_listings(page) if canvas_ok else (0, 0)
+    if phone:
+        # On a 390 px screen Basra fits at a lower zoom, where listings are
+        # (correctly) clustered; what matters is that listings are drawn.
+        drawn = bubbles + clusters > 0
+        what = f"listings ({bubbles} bubbles, {clusters} clusters)"
+    else:
+        drawn = bubbles > 0
+        what = f"price bubbles ({bubbles})"
+    ok = canvas_ok and check(drawn, f"[{tag}] MapLibre canvas draws Basra {what}")
+    workers = [w for w in worker_loads if "/maplibre/maplibre-gl-worker-" in w["url"]]
+    ok &= check(
+        bool(workers)
+        and all(
+            w["same_origin"] and w["status"] == 200 and "javascript" in w["type"] for w in workers
+        ),
+        f"[{tag}] MapLibre worker served by the site itself (same origin, 200, JavaScript): "
+        f"{[(w['status'], w['type']) for w in workers][:1]}",
     )
     if not ok:
         state_attrs = page.locator("[data-testid=map-canvas]").evaluate(
@@ -163,6 +200,8 @@ def state(browser: Browser, *, lang: str, scheme: str, phone: bool, errors: list
         "state": tag,
         "url": WEB + BASRA,
         "bubbles": bubbles,
+        "clusters": clusters,
+        "worker": [w["url"].replace(WEB, "") for w in workers][:1],
         "screenshot": shot.name,
         "passed": bool(ok),
     }

@@ -35,3 +35,6 @@ backend/storage/
 .DS_Store
 .idea/
 *.swp
+
+# Generated at build time (scripts/copy-maplibre-worker.mjs)
+frontend/public/maplibre/

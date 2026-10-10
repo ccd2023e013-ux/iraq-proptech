@@ -10,6 +10,7 @@ import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
 import { apiFetch } from "@/lib/api/client";
 import type { MapConfig } from "@/lib/map/provider";
+import { maplibreWorkerUrl } from "@/lib/map/worker";
 
 interface PlaceSummary {
   id: string;
@@ -63,6 +64,7 @@ export function LocationPicker({
     (async () => {
       const maplibre = await import("maplibre-gl");
       if (cancelled || !container.current) return;
+      maplibre.setWorkerUrl(maplibreWorkerUrl(maplibre.getVersion()));
       const start = lat !== null && lon !== null;
       map = new maplibre.Map({
         container: container.current,
