@@ -11,6 +11,8 @@ const layers = [
   { id: "highway_motorway", type: "line", "source-layer": "transportation" },
   { id: "highway_primary", type: "line", "source-layer": "transportation" },
   { id: "highway_minor", type: "line", "source-layer": "transportation" },
+  { id: "highway_primary_casing", type: "line", "source-layer": "transportation" },
+  { id: "aeroway_runway", type: "line", "source-layer": "aeroway" },
   { id: "place_city", type: "symbol", "source-layer": "place" },
   { id: "poi_label", type: "symbol", "source-layer": "poi" },
   { id: "hillshade", type: "hillshade" },
@@ -35,6 +37,11 @@ describe("basemap tone", () => {
     const minor = lightness(String(value("highway_minor", "line-color")));
     expect(motorway).toBeGreaterThan(primary);
     expect(primary).toBeGreaterThan(minor);
+  });
+
+  it("hides road casings in the land and quiets runways", () => {
+    expect(value("highway_primary_casing", "line-color")).toBe("#0d121c");
+    expect(value("aeroway_runway", "line-color")).toBe("#151c29");
   });
 
   it("mutes labels but keeps place names brighter, with a canvas halo", () => {

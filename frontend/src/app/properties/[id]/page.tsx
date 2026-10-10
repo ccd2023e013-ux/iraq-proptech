@@ -14,6 +14,7 @@ import { ViewBeacon } from "@/features/analytics/ViewBeacon";
 import { InquiryForm } from "@/features/crm/InquiryForm";
 import { FavoriteButton } from "@/features/properties/FavoriteButton";
 import { Gallery, ShareButton } from "@/features/properties/Gallery";
+import { LocationPreview } from "@/features/properties/LocationPreview";
 import { Nearby } from "@/features/properties/Nearby";
 import { favoriteIds } from "@/features/search/data";
 import { getDictionary } from "@/i18n";
@@ -22,6 +23,9 @@ import { ApiError } from "@/lib/api/client";
 import { serverApiFetch } from "@/lib/api/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { formatArea, formatDate, formatPrice, placeName } from "@/lib/format";
+import { formatBbox } from "@/lib/map/geo";
+import { bboxAround } from "@/lib/map/places";
+import { resolveMapConfig } from "@/lib/map/provider";
 import { stagger } from "@/lib/motion";
 import type { Property, ReferenceItem } from "@/types/property";
 
@@ -77,6 +81,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
   const locale = await getRequestLocale();
   const dict = getDictionary(locale);
   const p = dict.property;
+  const mapConfig = resolveMapConfig(process.env);
   const property = await load(id);
   const [verifications, history, types, amenities, me, favorites] = await Promise.all([
     serverApiFetch<Verification[]>(`/api/v1/properties/${property.id}/verifications`),
@@ -244,6 +249,24 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
           )}
 
           <Section title={p.location}>
+            {property.display_location && property.location_privacy !== "HIDDEN" && (
+              <div className="mb-4 flex flex-col gap-3">
+                <LocationPreview
+                  config={mapConfig}
+                  lat={property.display_location.lat}
+                  lon={property.display_location.lon}
+                  approximate={property.location_privacy !== "EXACT"}
+                  label={`${p.location}: ${where}`}
+                />
+                <Link
+                  href={`/map?bbox=${formatBbox(bboxAround(property.display_location.lon, property.display_location.lat, 1.5))}`}
+                  className="press inline-flex h-9 w-fit items-center gap-2 rounded-full px-3.5 text-sm font-medium text-ink ring-1 ring-inset ring-hairline-strong hover:bg-fill"
+                >
+                  <Icon name="map" className="size-4 text-spatial" />
+                  {dict.future.showOnMap}
+                </Link>
+              </div>
+            )}
             <p className="font-medium text-ink">{where}</p>
             {property.street && <p className="text-sm text-ink-2">{property.street}</p>}
             {property.address_text && <p className="text-sm text-ink-2">{property.address_text}</p>}

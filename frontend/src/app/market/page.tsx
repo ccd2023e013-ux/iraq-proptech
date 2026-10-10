@@ -77,6 +77,14 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
     (a) => a.median_price_per_m2 && a.currency === basisCurrency,
   );
   const maxBar = Math.max(1, ...bars.map((a) => Number(a.median_price_per_m2)));
+  // Range bars share one scale per purpose + currency (sale vs rent, IQD vs USD
+  // are never drawn against each other).
+  const rangeMax = new Map<string, number>();
+  for (const seg of report?.segments ?? []) {
+    if (!seg.p75_price) continue;
+    const key = `${seg.purpose}-${seg.currency}`;
+    rangeMax.set(key, Math.max(rangeMax.get(key) ?? 0, Number(seg.p75_price)));
+  }
   const p = report?.provenance;
   const date = (d: string | null) =>
     d
@@ -268,6 +276,14 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
                           {s.p25_price && s.p75_price
                             ? `${formatPrice(s.p25_price, s.currency, locale)} – ${formatPrice(s.p75_price, s.currency, locale)}`
                             : "—"}
+                          {s.p25_price && s.p75_price && (
+                            <RangeBar
+                              low={Number(s.p25_price)}
+                              high={Number(s.p75_price)}
+                              mid={s.median_price ? Number(s.median_price) : null}
+                              max={rangeMax.get(`${s.purpose}-${s.currency}`) ?? 0}
+                            />
+                          )}
                         </td>
                         <td className="py-3 text-end tabular text-ink-2">
                           {s.median_price_per_m2
@@ -433,5 +449,38 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
         </section>
       )}
     </div>
+  );
+}
+
+/** The middle half of asking prices (P25–P75) with the median tick, on a shared scale. */
+function RangeBar({
+  low,
+  high,
+  mid,
+  max,
+}: {
+  low: number;
+  high: number;
+  mid: number | null;
+  max: number;
+}) {
+  if (!(max > 0) || !(high >= low)) return null;
+  const pct = (v: number) => `${Math.min(100, Math.max(0, (v / max) * 100))}%`;
+  return (
+    <span
+      aria-hidden
+      className="relative ms-auto mt-2 block h-1.5 w-full max-w-[12rem] rounded-full bg-fill"
+    >
+      <span
+        className="absolute inset-y-0 rounded-full bg-spatial-fill/55"
+        style={{ insetInlineStart: pct(low), width: `calc(${pct(high)} - ${pct(low)})` }}
+      />
+      {mid !== null && (
+        <span
+          className="absolute -inset-y-1 w-0.5 rounded-full bg-ink"
+          style={{ insetInlineStart: pct(mid) }}
+        />
+      )}
+    </span>
   );
 }

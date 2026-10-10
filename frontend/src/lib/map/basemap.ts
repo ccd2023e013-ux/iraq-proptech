@@ -33,9 +33,11 @@ const DARK = {
   water: "#0a2230",
   waterLine: "#0f3442",
   building: "#151c2a",
-  roadMinor: "#1a2232",
-  roadMajor: "#243047",
-  roadHighway: "#2d3c56",
+  roadMinor: "#161e2c",
+  roadMajor: "#1d2739",
+  roadHighway: "#263349",
+  casing: "#0d121c",
+  aeroway: "#151c29",
   rail: "#222b3b",
   boundary: "#3a4a63",
   label: "#7c879c",
@@ -64,6 +66,8 @@ export function basemapOverrides(layers: LayerInfo[], dark: boolean): PaintOverr
       case "fill":
         if (source === "water" || has(id, "water", "ocean", "sea", "lake", "river")) {
           set(layer.id, "fill-color", DARK.water);
+        } else if (source === "aeroway" || has(id, "aeroway", "runway")) {
+          set(layer.id, "fill-color", DARK.aeroway);
         } else if (source === "building" || has(id, "building")) {
           set(layer.id, "fill-color", DARK.building);
           set(layer.id, "fill-opacity", 0.9);
@@ -78,6 +82,11 @@ export function basemapOverrides(layers: LayerInfo[], dark: boolean): PaintOverr
           set(layer.id, "line-color", DARK.waterLine);
         } else if (source === "boundary" || has(id, "boundary", "admin")) {
           set(layer.id, "line-color", DARK.boundary);
+        } else if (has(id, "casing", "outline")) {
+          // Road edges disappear into the land: the network reads as one quiet mesh.
+          set(layer.id, "line-color", DARK.casing);
+        } else if (source === "aeroway" || has(id, "aeroway", "runway", "taxiway")) {
+          set(layer.id, "line-color", DARK.aeroway);
         } else if (has(id, "rail", "transit")) {
           set(layer.id, "line-color", DARK.rail);
         } else if (

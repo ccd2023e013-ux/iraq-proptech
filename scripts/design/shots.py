@@ -56,6 +56,12 @@ def context(browser: Browser, lang: str, theme: str, view: str):
         is_mobile=phone,
         has_touch=phone,
         locale="ar-IQ" if lang == "ar" else "en-US",
+        user_agent=(
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 "
+            "(KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1"
+        )
+        if phone
+        else None,
         color_scheme=theme,
     )
     ctx.add_cookies(
