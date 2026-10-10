@@ -34,6 +34,40 @@ OUT = Path("screenshots")
 OUT.mkdir(exist_ok=True)
 FAILURES: list[str] = []
 
+# Installed before any page script runs (via CDP, so the site's CSP does not
+# apply): logs what an uncaught error or unhandled rejection really was, since
+# Playwright reports non-Error reasons only as "Error" without a stack.
+DIAGNOSTIC_HOOK = """
+(() => {
+  const what = (v) => {
+    try {
+      if (v instanceof Error) {
+        const top = (v.stack || '').split('\\n').slice(0, 4).join(' | ');
+        return `${v.name}: ${v.message} @ ${top}`;
+      }
+      if (v instanceof Event) {
+        const t = v.target || {};
+        return `Event(${v.type}) target=${t.constructor && t.constructor.name} ` +
+          `src=${t.src || t.url || t.href || ''} msg=${v.message || ''}`;
+      }
+      return `${Object.prototype.toString.call(v)} ${JSON.stringify(v)}`.slice(0, 300);
+    } catch (e) { return String(v); }
+  };
+  addEventListener('unhandledrejection',
+    (e) => console.error('[diag] unhandledrejection ' + what(e.reason)));
+  addEventListener('error', (e) => console.error('[diag] error ' + what(e.error || e) +
+    ` file=${e.filename || ''}:${e.lineno || ''}:${e.colno || ''}`), true);
+})();
+"""
+
+
+def describe(error: Exception) -> str:
+    """Name, message and the top of the stack of an uncaught page error."""
+    name = getattr(error, "name", "") or type(error).__name__
+    message = getattr(error, "message", "") or str(error)
+    stack = (getattr(error, "stack", "") or "").replace("\n", " | ")
+    return f"{name}: {message!r} stack: {stack[:700]}"
+
 
 def check(condition: bool, message: str) -> bool:
     print(("  ✓ " if condition else "  ✗ ") + message, flush=True)
@@ -43,14 +77,20 @@ def check(condition: bool, message: str) -> bool:
 
 
 def poll_bubbles(page: Page, seconds: int = 60) -> int:
+    return poll_listings(page, seconds)[0]
+
+
+def poll_listings(page: Page, seconds: int = 60) -> tuple[int, int]:
+    """(price bubbles, clusters) the map reports once listings are drawn."""
     canvas = page.locator("[data-testid=map-canvas]")
-    bubbles = 0
+    bubbles = clusters = 0
     for _ in range(seconds):  # attribute polling: the site's CSP forbids eval-based waits
         bubbles = int(canvas.get_attribute("data-bubbles") or 0)
-        if bubbles > 0:
+        clusters = int(canvas.get_attribute("data-clusters") or 0)
+        if bubbles > 0 or clusters > 0:
             break
         page.wait_for_timeout(1_000)
-    return bubbles
+    return bubbles, clusters
 
 
 def no_horizontal_scroll(page: Page) -> bool:
@@ -94,18 +134,46 @@ def state(browser: Browser, *, lang: str, scheme: str, phone: bool, errors: list
             {"name": "theme", "value": scheme, "url": WEB},
         ]
     )
+    ctx.add_init_script(DIAGNOSTIC_HOOK)
     page = ctx.new_page()
-    page.on("pageerror", lambda e: errors.append(f"[{tag}] pageerror: {e}"))
+    page.on("pageerror", lambda e: errors.append(f"[{tag}] pageerror: {describe(e)}"))
     page.on(
         "console",
         lambda m: (
-            errors.append(f"[{tag}] console {m.type}: {m.text[:300]}")
+            errors.append(
+                f"[{tag}] console {m.type}: {m.text[: 2000 if '[diag]' in m.text else 300]}"
+            )
             if m.type in ("error", "warning") or "[map]" in m.text
             else None
         ),
     )
     # Diagnostics: what the map fetched (style, tiles, glyphs, worker) and what failed.
     fetched: list[str] = []
+    worker_loads: list[dict] = []
+    third_party_scripts: list[str] = []
+    page.on(
+        "request",
+        lambda r: (
+            third_party_scripts.append(r.url[:120])
+            if "unpkg.com" in r.url or (r.resource_type == "script" and not r.url.startswith(WEB))
+            else None
+        ),
+    )
+    page.on(
+        "response",
+        lambda r: (
+            worker_loads.append(
+                {
+                    "url": r.url,
+                    "status": r.status,
+                    "type": r.headers.get("content-type", ""),
+                    "same_origin": r.url.startswith(WEB + "/"),
+                }
+            )
+            if "maplibre-gl-worker" in r.url
+            else None
+        ),
+    )
     page.on(
         "response",
         lambda r: (
@@ -126,9 +194,24 @@ def state(browser: Browser, *, lang: str, scheme: str, phone: bool, errors: list
             break
         page.wait_for_timeout(1_000)
     check(canvas_ok, f"[{tag}] MapLibre created its canvas")
-    bubbles = poll_bubbles(page) if canvas_ok else 0
-    ok = canvas_ok and check(
-        bubbles > 0, f"[{tag}] MapLibre canvas draws Basra price bubbles ({bubbles})"
+    bubbles, clusters = poll_listings(page) if canvas_ok else (0, 0)
+    if phone:
+        # On a 390 px screen Basra fits at a lower zoom, where listings are
+        # (correctly) clustered; what matters is that listings are drawn.
+        drawn = bubbles + clusters > 0
+        what = f"listings ({bubbles} bubbles, {clusters} clusters)"
+    else:
+        drawn = bubbles > 0
+        what = f"price bubbles ({bubbles})"
+    ok = canvas_ok and check(drawn, f"[{tag}] MapLibre canvas draws Basra {what}")
+    workers = [w for w in worker_loads if "/maplibre/maplibre-gl-worker-" in w["url"]]
+    ok &= check(
+        bool(workers)
+        and all(
+            w["same_origin"] and w["status"] == 200 and "javascript" in w["type"] for w in workers
+        ),
+        f"[{tag}] MapLibre worker served by the site itself (same origin, 200, JavaScript): "
+        f"{[(w['status'], w['type']) for w in workers][:1]}",
     )
     if not ok:
         state_attrs = page.locator("[data-testid=map-canvas]").evaluate(
@@ -136,6 +219,10 @@ def state(browser: Browser, *, lang: str, scheme: str, phone: bool, errors: list
         )
         print(f"  [{tag}] map element: {state_attrs}", flush=True)
         print(f"  [{tag}] map fetches: {fetched[:15]}", flush=True)
+    ok &= check(
+        not third_party_scripts,
+        f"[{tag}] no third-party script (no RTL plugin from unpkg) {third_party_scripts[:2]}",
+    )
     ok &= check(page.get_attribute("html", "data-theme") == scheme, f"[{tag}] theme is {scheme}")
     want_dir = "rtl" if lang == "ar" else "ltr"
     ok &= check(
@@ -163,17 +250,76 @@ def state(browser: Browser, *, lang: str, scheme: str, phone: bool, errors: list
         "state": tag,
         "url": WEB + BASRA,
         "bubbles": bubbles,
+        "clusters": clusters,
+        "worker": [w["url"].replace(WEB, "") for w in workers][:1],
         "screenshot": shot.name,
         "passed": bool(ok),
     }
+
+
+DRAW_ATTEMPTS = 6
+
+
+def draw_area(browser: Browser) -> None:
+    """Draw-area search, repeated: finishing a drawn area must always land on a
+    polygon URL (a late viewport update must never replace it). Logs every URL
+    the page commits so a failure shows what overwrote what."""
+    passed = 0
+    for attempt in range(1, DRAW_ATTEMPTS + 1):
+        ctx = browser.new_context(viewport={"width": 1366, "height": 900}, locale="en-US")
+        ctx.add_init_script(DIAGNOSTIC_HOOK)
+        page = ctx.new_page()
+        urls: list[str] = []
+        page.on(
+            "framenavigated",
+            lambda f, urls=urls, page=page: (
+                urls.append(f.url.replace(WEB, "")[:140]) if f == page.main_frame else None
+            ),
+        )
+        page.goto(WEB + BASRA, wait_until="load", timeout=120_000)
+        if poll_bubbles(page) == 0:
+            check(False, f"[draw {attempt}] map drew no bubbles")
+            ctx.close()
+            continue
+        page.locator("[data-testid=draw-area]").click()
+        box = page.locator("[data-testid=map-canvas]").bounding_box()
+        if box is None:
+            check(False, f"[draw {attempt}] map has no bounding box")
+            ctx.close()
+            continue
+        cx, cy = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
+        for dx, dy in ((-120, -90), (130, -80), (0, 120)):
+            page.mouse.click(cx + dx, cy + dy)
+            page.wait_for_timeout(700)
+        page.locator("[data-testid=finish-area]").click()
+        landed = False
+        for _ in range(30):
+            if "polygon=" in page.url:
+                landed = True
+                break
+            page.wait_for_timeout(500)
+        page.wait_for_timeout(2_000)  # a late viewport update would replace it here
+        kept = "polygon=" in page.url
+        ok = landed and kept
+        passed += int(ok)
+        print(
+            f"  {'✓' if ok else '✗'} [draw {attempt}] landed={landed} kept={kept} urls={urls[-6:]}",
+            flush=True,
+        )
+        ctx.close()
+    check(
+        passed == DRAW_ATTEMPTS,
+        f"draw-area search lands on and keeps the polygon URL ({passed}/{DRAW_ATTEMPTS})",
+    )
 
 
 def theme_switch(browser: Browser, errors: list[str]) -> None:
     """Switching the site theme swaps the basemap (setStyle); overlays must return."""
     ctx = browser.new_context(viewport={"width": 1440, "height": 900}, color_scheme="light")
     ctx.add_cookies([{"name": "theme", "value": "light", "url": WEB}])
+    ctx.add_init_script(DIAGNOSTIC_HOOK)
     page = ctx.new_page()
-    page.on("pageerror", lambda e: errors.append(f"[theme] pageerror: {e}"))
+    page.on("pageerror", lambda e: errors.append(f"[theme] pageerror: {describe(e)}"))
     page.goto(WEB + BASRA, wait_until="load", timeout=120_000)
     check(page.get_attribute("html", "data-theme") == "light", "[theme] starts light")
     check(poll_bubbles(page) > 0, "[theme] bubbles before the switch")
@@ -208,6 +354,10 @@ def main() -> int:
             theme_switch(browser, errors)
         except Exception as exc:  # recorded, run continues
             check(False, f"[theme] crashed: {type(exc).__name__}: {exc}"[:300])
+        try:
+            draw_area(browser)
+        except Exception as exc:  # recorded, run continues
+            check(False, f"[draw] crashed: {type(exc).__name__}: {exc}"[:300])
         browser.close()
 
     csp = [e for e in errors if "Content Security Policy" in e or "Refused to" in e]
