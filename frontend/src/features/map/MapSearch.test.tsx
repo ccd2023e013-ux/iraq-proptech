@@ -62,6 +62,17 @@ describe("MapSearch viewport and draw-area navigation", () => {
     expect(lastUrl().searchParams.get("bbox")).toBe(PANNED.map((v) => v.toFixed(5)).join(","));
   });
 
+  it("ignores a pan that ends after 'Draw area' (stale handler from before the click)", () => {
+    renderMap();
+    // The handler the map holds before the click (a pan's inertia can end, and
+    // call it, before React has re-rendered with the drawing state).
+    const staleOnViewportChange = map.onViewportChange;
+    fireEvent.click(screen.getByTestId("draw-area"));
+    act(() => staleOnViewportChange(PANNED, 12));
+    act(() => void vi.advanceTimersByTime(2_000));
+    expect(replace).not.toHaveBeenCalled();
+  });
+
   it("drops a pending pan when drawing starts, then applies only the polygon", () => {
     renderMap();
     // Pan, then click "Draw area" inside the 450 ms debounce window.
