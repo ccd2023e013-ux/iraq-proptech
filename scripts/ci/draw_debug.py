@@ -245,7 +245,9 @@ HOOK = r"""
 """
 
 
-def attempt(browser, n: int, forced: bool) -> tuple[bool, list[str], bool]:
+def attempt(
+    browser, n: int, forced: bool, delay_ms: int | None = None
+) -> tuple[bool, list[str], bool]:
     ctx = browser.new_context(viewport={"width": 1366, "height": 900}, locale="en-US")
     ctx.add_init_script(HOOK)
     page = ctx.new_page()
@@ -275,6 +277,15 @@ def attempt(browser, n: int, forced: bool) -> tuple[bool, list[str], bool]:
             if "_rsc=" in r.url
             else None,
         )
+    if delay_ms is not None:
+        # Hold the polygon RSC response for delay_ms after the server answered.
+        def hold(route):
+            response = route.fetch()
+            time.sleep(delay_ms / 1000)
+            route.fulfill(response=response)
+            log.append(f"[pw] {stamp()} fulfilled polygon RSC after +{delay_ms}ms hold")
+
+        page.route(lambda url: "polygon=" in url and "_rsc=" in url, hold)
     page.goto(WEB + BASRA, wait_until="load", timeout=120_000)
     canvas = page.locator("[data-testid=map-canvas]")
     for _ in range(60):
@@ -313,7 +324,7 @@ def attempt(browser, n: int, forced: bool) -> tuple[bool, list[str], bool]:
             log.append(f"[post] {line[:700]}")
     except Exception as exc:  # noqa: BLE001 - diagnostics only
         log.append(f"[post] tracker failed: {exc}")
-    if not ok:
+    if not ok and os.environ.get("LATE") == "1":
         # Does the stuck navigation commit LATE? React holds a commit that waits on
         # suspensey resources (stylesheets) for up to 60 s before giving up.
         late_at = None
@@ -344,7 +355,35 @@ def attempt(browser, n: int, forced: bool) -> tuple[bool, list[str], bool]:
     return ok, log, bbox_during
 
 
+def sweep(delays: list[int], reps: int) -> int:
+    rows: list[str] = []
+    first_fail: tuple[str, list[str]] | None = None
+    with sync_playwright() as p:
+        browser = p.chromium.launch(
+            args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
+        )
+        for d in delays:
+            marks = []
+            for r in range(reps):
+                ok, log, _ = attempt(browser, r + 1, False, d)
+                marks.append("P" if ok else "F")
+                print(f"delay {d}ms rep {r + 1}: {'PASS' if ok else 'FAIL'}", flush=True)
+                if not ok and first_fail is None:
+                    first_fail = (f"{d}ms rep {r + 1}", log)
+            rows.append(f"{d}ms: {marks.count('P')}/{reps} {''.join(marks)}")
+        browser.close()
+    print("::notice title=draw debug delay sweep::" + " | ".join(rows), flush=True)
+    if first_fail:
+        i = max((k for k, line in enumerate(first_fail[1]) if "map ready" in line), default=0)
+        text = " ⏎ ".join(line.split(" | at ")[0] for line in first_fail[1][i:] if "tree>" not in line)
+        print(f"::notice title=draw debug sweep FAIL {first_fail[0]}::{text[:9000]}", flush=True)
+    return 0
+
+
 def main() -> int:
+    if os.environ.get("DELAYS"):
+        delays = [int(x) for x in os.environ["DELAYS"].split(",")]
+        return sweep(delays, int(os.environ.get("REPS", "6")))
     results: list[bool] = []
     fails: list[tuple[int, list[str]]] = []
     first_pass: tuple[int, list[str]] | None = None
