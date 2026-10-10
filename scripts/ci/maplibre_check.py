@@ -257,7 +257,7 @@ def state(browser: Browser, *, lang: str, scheme: str, phone: bool, errors: list
     }
 
 
-DRAW_ATTEMPTS = 6
+DRAW_ATTEMPTS = 10
 
 
 def draw_area(browser: Browser) -> None:
@@ -270,6 +270,15 @@ def draw_area(browser: Browser) -> None:
         ctx.add_init_script(DIAGNOSTIC_HOOK)
         page = ctx.new_page()
         urls: list[str] = []
+        console: list[str] = []
+        page.on(
+            "console",
+            lambda m, console=console: (
+                console.append(f"{m.type}: {m.text[:200]}")
+                if m.type in ("error", "warning")
+                else None
+            ),
+        )
         page.on(
             "framenavigated",
             lambda f, urls=urls, page=page: (
@@ -291,7 +300,9 @@ def draw_area(browser: Browser) -> None:
         for dx, dy in ((-120, -90), (130, -80), (0, 120)):
             page.mouse.click(cx + dx, cy + dy)
             page.wait_for_timeout(700)
-        page.locator("[data-testid=finish-area]").click()
+        finish = page.locator("[data-testid=finish-area]")
+        enabled_before = finish.is_enabled()
+        finish.click()
         landed = False
         for _ in range(30):
             if "polygon=" in page.url:
@@ -302,8 +313,19 @@ def draw_area(browser: Browser) -> None:
         kept = "polygon=" in page.url
         ok = landed and kept
         passed += int(ok)
+        detail = ""
+        if not ok:
+            # Did the click end draw mode? Did the search counter change?
+            detail = (
+                f" enabled_before={enabled_before}"
+                f" still_drawing={page.locator('[data-testid=finish-area]').count() > 0}"
+                f" draw_button={page.locator('[data-testid=draw-area]').count() > 0}"
+                f" total={page.locator('[data-testid=map-total]').inner_text()[:60]!r}"
+                f" console={console[-4:]}"
+            )
         print(
-            f"  {'✓' if ok else '✗'} [draw {attempt}] landed={landed} kept={kept} urls={urls[-6:]}",
+            f"  {'✓' if ok else '✗'} [draw {attempt}] landed={landed} kept={kept} "
+            f"urls={urls[-6:]}{detail}",
             flush=True,
         )
         ctx.close()
