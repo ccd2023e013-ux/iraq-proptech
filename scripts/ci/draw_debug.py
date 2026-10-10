@@ -22,6 +22,27 @@ BASRA = "/map?bbox=47.70,30.40,47.92,30.62"
 
 HOOK = r"""
 (() => {
+  const t0r = performance.now();
+  let armed = false, commits = 0;
+  const lanes = (n) => '0b' + (n >>> 0).toString(2);
+  window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = {
+    supportsFiber: true, isDisabled: false, renderers: new Map(),
+    inject(renderer) { const id = this.renderers.size + 1; this.renderers.set(id, renderer); return id; },
+    checkDCE() {}, onScheduleFiberRoot() {}, onCommitFiberUnmount() {}, onPostCommitFiberRoot() {},
+    onCommitFiberRoot(id, root) {
+      commits += 1;
+      if (armed && commits < 400) console.warn('[dbg] ' + (performance.now() - t0r).toFixed(0).padStart(5) +
+        ' react-commit #' + commits + ' pending=' + lanes(root.pendingLanes) +
+        ' suspended=' + lanes(root.suspendedLanes) + ' pinged=' + lanes(root.pingedLanes));
+    },
+  };
+  addEventListener('click', (e) => {
+    const el = e.target && e.target.closest && e.target.closest('[data-testid=finish-area]');
+    if (el) { armed = true; commits = 0; }
+  }, true);
+  setTimeout(() => {}, 0);
+})();
+(() => {
   const t0 = performance.now();
   const T = () => (performance.now() - t0).toFixed(0).padStart(5);
   const log = (...a) => console.warn('[dbg] ' + T() + ' ' + a.join(' '));
@@ -101,7 +122,13 @@ def attempt(browser, n: int, forced: bool) -> tuple[bool, list[str], bool]:
     log: list[str] = []
     start = time.monotonic()
     stamp = lambda: f"{(time.monotonic() - start) * 1000:6.0f}"  # noqa: E731
-    page.on("console", lambda m: log.append(m.text[:600]) if m.text.startswith("[dbg]") else None)
+    page.on(
+        "console",
+        lambda m: log.append(m.text[:600])
+        if m.text.startswith("[dbg]")
+        else (log.append(f"[con] {stamp()} {m.type}: {m.text[:300]}") if m.type in ("error", "warning") else None),
+    )
+    page.on("pageerror", lambda e: log.append(f"[pageerror] {stamp()} {str(e)[:300]}"))
     page.on(
         "framenavigated",
         lambda f: log.append(f"[pw] {stamp()} framenavigated {f.url.replace(WEB, '')[:100]}")
