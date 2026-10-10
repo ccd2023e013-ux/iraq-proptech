@@ -43,7 +43,7 @@ export function UserMenu({ dict, name }: { dict: Dictionary; name: string }) {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="flex h-9 items-center gap-2 rounded-full ps-1 pe-3 text-sm font-medium text-ink ring-1 ring-inset ring-hairline transition hover:bg-fill"
+        className="press flex h-9 items-center gap-2 rounded-full ps-1 pe-3 text-sm font-medium text-ink hover:bg-fill aria-expanded:bg-fill"
       >
         <span
           aria-hidden
@@ -56,13 +56,13 @@ export function UserMenu({ dict, name }: { dict: Dictionary; name: string }) {
       {open && (
         <div
           role="menu"
-          className="absolute end-0 z-40 mt-2 w-52 animate-enter overflow-hidden rounded-[var(--radius-card)] bg-surface p-1.5 shadow-float ring-1 ring-hairline"
+          className="surface-focus pop-in absolute end-0 z-40 mt-2 w-56 origin-top overflow-hidden rounded-[var(--radius-card)] p-1.5"
         >
           <Link
             role="menuitem"
             href="/dashboard"
             onClick={() => setOpen(false)}
-            className="block rounded-xl px-3 py-2 text-sm text-ink hover:bg-fill"
+            className="block rounded-xl px-3 py-2.5 text-sm text-ink transition-colors hover:bg-fill"
           >
             {dict.nav.dashboard}
           </Link>
@@ -70,7 +70,7 @@ export function UserMenu({ dict, name }: { dict: Dictionary; name: string }) {
             role="menuitem"
             href="/account"
             onClick={() => setOpen(false)}
-            className="block rounded-xl px-3 py-2 text-sm text-ink hover:bg-fill"
+            className="block rounded-xl px-3 py-2.5 text-sm text-ink transition-colors hover:bg-fill"
           >
             {dict.nav.account}
           </Link>
@@ -78,7 +78,7 @@ export function UserMenu({ dict, name }: { dict: Dictionary; name: string }) {
             role="menuitem"
             type="button"
             onClick={logout}
-            className="block w-full rounded-xl px-3 py-2 text-start text-sm text-danger hover:bg-fill"
+            className="mt-1 block w-full rounded-xl border-t border-hairline px-3 py-2.5 text-start text-sm text-danger transition-colors hover:bg-fill"
           >
             {dict.nav.logout}
           </button>

@@ -21,6 +21,8 @@ export function FavoriteButton({
   const router = useRouter();
   const [saved, setSaved] = useState(initial);
   const [busy, setBusy] = useState(false);
+  // Only a save made by the user pops the heart (not hearts that load already filled).
+  const [pop, setPop] = useState(false);
 
   async function toggle(event: MouseEvent) {
     event.preventDefault(); // the button sits inside a card link
@@ -32,6 +34,7 @@ export function FavoriteButton({
     setBusy(true);
     const next = !saved;
     setSaved(next); // optimistic
+    setPop(next);
     try {
       await apiFetch(`/api/v1/properties/${propertyId}/favorite`, {
         method: next ? "PUT" : "DELETE",
@@ -51,9 +54,9 @@ export function FavoriteButton({
         onClick={toggle}
         disabled={busy}
         aria-pressed={saved}
-        className="inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-medium text-ink ring-1 ring-inset ring-hairline-strong transition hover:bg-fill"
+        className="press surface-1 inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-medium text-ink"
       >
-        <Heart filled={saved} />
+        <Heart filled={saved} pop={pop} onDone={() => setPop(false)} />
         {saved ? labels.saved : labels.save}
       </button>
     );
@@ -66,22 +69,24 @@ export function FavoriteButton({
       aria-pressed={saved}
       aria-label={label}
       title={label}
-      className="grid size-9 place-items-center rounded-full bg-glass text-danger shadow-soft backdrop-blur-md transition hover:scale-105 active:scale-95"
+      className={`press surface-float grid size-9 place-items-center rounded-full ${saved ? "text-danger" : "text-ink"}`}
     >
-      <Heart filled={saved} />
+      <Heart filled={saved} pop={pop} onDone={() => setPop(false)} />
     </button>
   );
 }
 
-function Heart({ filled }: { filled: boolean }) {
+function Heart({ filled, pop, onDone }: { filled: boolean; pop: boolean; onDone: () => void }) {
   return (
     <svg
       aria-hidden
       viewBox="0 0 24 24"
-      className="size-5"
+      className={`size-[18px] transition-[fill] duration-[var(--duration-quick)] ${pop ? "heart-pop" : ""} ${filled ? "text-danger" : ""}`}
       fill={filled ? "currentColor" : "none"}
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="1.9"
+      strokeLinejoin="round"
+      onAnimationEnd={onDone}
     >
       <path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.5 3.4 5 7 5c2 0 3.4 1 5 3 1.6-2 3-3 5-3 3.6 0 5.8 3.5 4.5 6.8C19.5 16.4 12 21 12 21z" />
     </svg>

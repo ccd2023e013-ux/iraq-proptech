@@ -40,12 +40,14 @@ export function ThemeToggle({
       title={labels[choice]}
       aria-label={labels[choice]}
       data-theme-choice={choice}
-      className="grid size-9 place-items-center rounded-full text-ink-2 transition hover:bg-fill hover:text-ink"
+      className="icon-btn size-9"
     >
+      {/* Keyed by choice: the new glyph turns in when the theme changes. */}
       <svg
+        key={choice}
         aria-hidden
         viewBox="0 0 24 24"
-        className="size-[18px]"
+        className="icon-swap size-[18px]"
         fill={choice === "light" ? "none" : "currentColor"}
         stroke="currentColor"
         strokeWidth={choice === "light" ? 1.8 : 0}

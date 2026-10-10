@@ -1,13 +1,15 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
 
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
 import type { ThemeChoice } from "@/lib/theme";
 import type { Me } from "@/types/auth";
 
+import { Icon } from "@/components/ui/Icon";
+
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { MobileMenu } from "./MobileMenu";
+import { PrimaryNav } from "./PrimaryNav";
 import { ThemeToggle } from "./ThemeToggle";
 import { UserMenu } from "./UserMenu";
 
@@ -30,17 +32,6 @@ export function BrandMark({ className = "size-8" }: { className?: string }) {
       />
       <circle cx="16" cy="12" r="2" className="fill-accent-fill" />
     </svg>
-  );
-}
-
-function NavLink({ href, children }: { href: string; children: ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="rounded-full px-3 py-1.5 text-ink-2 transition hover:bg-fill hover:text-ink"
-    >
-      {children}
-    </Link>
   );
 }
 
@@ -71,29 +62,30 @@ export function SiteHeader({
       : []),
   ];
   return (
-    <header className="sticky top-0 z-30 border-b border-hairline bg-glass backdrop-blur-xl backdrop-saturate-150">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
-        <div className="flex min-w-0 items-center gap-6">
-          <Link href="/" className="flex items-center gap-2.5" aria-label={dict.nav.home}>
+    // Phones: a slim bar across the top. From md up: a floating bar inset from
+    // the page edges, hovering over the content as it scrolls underneath.
+    <header className="sticky top-0 z-[var(--z-header)] md:px-4 md:pt-3">
+      <div className="surface-float mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 max-md:rounded-none max-md:shadow-[0_1px_0_var(--hairline)] md:h-14 md:rounded-full md:ps-3 md:pe-2">
+        <div className="flex min-w-0 items-center gap-5">
+          <Link
+            href="/"
+            className="press flex items-center gap-2.5 rounded-full"
+            aria-label={dict.nav.home}
+          >
             <BrandMark />
             <span className="font-display text-[17px] font-semibold tracking-tight whitespace-nowrap text-ink max-[380px]:hidden">
               {locale === "ar" ? "مَكان" : "MAKAN"}
             </span>
           </Link>
-          <nav aria-label="primary" className="hidden items-center gap-1 text-sm md:flex">
-            {links.map((l) => (
-              <NavLink key={l.href} href={l.href}>
-                {l.label}
-              </NavLink>
-            ))}
-          </nav>
+          <PrimaryNav items={links} label="primary" />
         </div>
-        <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
+        <div className="flex shrink-0 items-center gap-1">
           {me && (
             <Link
               href="/dashboard/properties/new"
-              className="hidden h-9 items-center rounded-full px-3 text-sm font-medium text-accent ring-1 ring-inset ring-accent/40 transition hover:bg-accent-tint lg:inline-flex"
+              className="press hidden h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium text-accent hover:bg-accent-tint lg:inline-flex"
             >
+              <Icon name="plus" className="size-4" strokeWidth={2} />
               {dict.nav.addProperty}
             </Link>
           )}
@@ -103,21 +95,9 @@ export function SiteHeader({
             <Link
               href="/notifications"
               aria-label={`${dict.notifications.title}${unread ? ` (${unread})` : ""}`}
-              className="relative grid size-9 place-items-center rounded-full text-ink-2 transition hover:bg-fill hover:text-ink"
+              className="icon-btn relative size-9"
             >
-              <svg
-                aria-hidden
-                viewBox="0 0 24 24"
-                className="size-[18px]"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z" />
-                <path d="M10 20a2.2 2.2 0 0 0 4 0" />
-              </svg>
+              <Icon name="bell" className="size-[18px]" />
               {unread > 0 && (
                 <span className="absolute -end-0.5 -top-0.5 min-w-4 rounded-full bg-danger px-1 text-center text-[10px] font-bold leading-4 text-white tabular">
                   {unread > 99 ? "99+" : unread}
@@ -131,13 +111,13 @@ export function SiteHeader({
             <>
               <Link
                 href="/login"
-                className="hidden h-9 items-center rounded-full px-3 text-sm font-medium text-ink-2 transition hover:bg-fill hover:text-ink sm:inline-flex"
+                className="press hidden h-9 items-center rounded-full px-3 text-sm font-medium text-ink-2 hover:bg-fill hover:text-ink sm:inline-flex"
               >
                 {dict.nav.login}
               </Link>
               <Link
                 href="/register"
-                className="inline-flex h-9 items-center rounded-full bg-accent-fill px-3.5 text-sm font-medium whitespace-nowrap text-on-accent shadow-soft transition hover:bg-accent-fill-hover"
+                className="press inline-flex h-9 items-center rounded-full bg-accent-fill px-4 text-sm font-medium whitespace-nowrap text-on-accent shadow-[inset_0_1px_0_rgb(255_255_255/0.25)] hover:bg-accent-fill-hover"
               >
                 {dict.nav.register}
               </Link>

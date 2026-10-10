@@ -82,43 +82,41 @@ export default async function MapPage({ searchParams }: { searchParams: Promise<
     boundariesFor(params),
   ]);
 
+  const filters = (
+    <SearchFilters
+      dict={dict}
+      locale={locale}
+      params={params}
+      types={types}
+      governorates={governorates}
+      basePath="/map"
+    />
+  );
+
+  // Map-first stage. Phones: between the top bar and the tab bar. From md up the
+  // stage runs under the floating header, which hovers over the map;
+  // --map-top tells floating panels where the free space starts.
   return (
-    <div className="mx-auto grid max-w-[1600px] gap-4 px-4 py-4 sm:px-6 xl:grid-cols-[280px_1fr]">
-      <aside className="xl:sticky xl:top-20 xl:self-start">
-        <details className="rounded-[var(--radius-card)] border border-sand-200 bg-surface p-4">
-          <summary className="cursor-pointer text-sm font-semibold text-brand-900">
-            {dict.search.filters}
-          </summary>
-          <div className="mt-3">
-            <SearchFilters
-              dict={dict}
-              locale={locale}
-              params={params}
-              types={types}
-              governorates={governorates}
-              basePath="/map"
-            />
-          </div>
-        </details>
-      </aside>
-      <section className="flex flex-col gap-3">
-        <h1 className="text-xl font-bold text-brand-900">{dict.map.title}</h1>
-        {"error" in result ? (
+    <div className="relative h-[calc(100dvh-var(--header-h)-var(--tabbar-h))] min-h-[520px] [--map-top:0.5rem] md:-mt-[var(--header-h)] md:h-dvh md:[--map-top:var(--header-h)]">
+      {"error" in result ? (
+        <div className="mx-auto max-w-xl px-4 pt-[calc(var(--map-top)+1.5rem)]">
+          <h1 className="display-md mb-4 text-ink">{dict.map.title}</h1>
           <Alert tone="error">{errorMessage(dict, result.error)}</Alert>
-        ) : (
-          <MapSearch
-            key={`${first(params.governorate_id) ?? ""}:${first(params.city_id) ?? ""}`}
-            config={config}
-            dict={dict}
-            locale={locale}
-            params={params}
-            items={result.items}
-            total={result.total}
-            boundaries={boundaries}
-            initialBbox={initialBbox(config.defaultBbox, governorates, cities, params)}
-          />
-        )}
-      </section>
+        </div>
+      ) : (
+        <MapSearch
+          key={`${first(params.governorate_id) ?? ""}:${first(params.city_id) ?? ""}`}
+          config={config}
+          dict={dict}
+          locale={locale}
+          params={params}
+          items={result.items}
+          total={result.total}
+          boundaries={boundaries}
+          initialBbox={initialBbox(config.defaultBbox, governorates, cities, params)}
+          filters={filters}
+        />
+      )}
     </div>
   );
 }

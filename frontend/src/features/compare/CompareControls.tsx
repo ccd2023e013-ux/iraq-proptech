@@ -48,7 +48,7 @@ export function CompareBar({ dict }: { dict: Dictionary }) {
     <div
       role="region"
       aria-label={dict.compare.title}
-      className="fixed inset-x-3 bottom-3 z-40 mx-auto max-w-3xl rounded-full bg-glass px-5 py-2.5 shadow-float ring-1 ring-hairline backdrop-blur-xl"
+      className="surface-float pop-in fixed inset-x-3 bottom-[calc(var(--tabbar-h)+0.75rem)] z-40 mx-auto max-w-3xl rounded-full px-5 py-2.5"
     >
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3">
         <span className="text-sm text-sand-700 tabular">

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 
+import { Icon } from "@/components/ui/Icon";
 import type { Dictionary } from "@/i18n";
 import { toApiQuery } from "@/lib/search";
 
@@ -67,13 +68,13 @@ export function IntelligentSearch({
     <form
       onSubmit={onSubmit}
       role="search"
-      className="w-full rounded-[var(--radius-media)] bg-glass p-2 shadow-float ring-1 ring-hairline backdrop-blur-xl"
+      className="surface-float w-full rounded-[var(--radius-media)] p-2"
     >
       <div className="flex flex-wrap items-center justify-between gap-2 px-1 pt-1 pb-2">
         <div
           role="radiogroup"
           aria-label={dict.property.purpose}
-          className={`flex rounded-full bg-fill p-1 transition ${ai ? "pointer-events-none opacity-40" : ""}`}
+          className={`seg transition-opacity duration-[var(--duration-base)] ${ai ? "pointer-events-none opacity-40" : ""}`}
         >
           {PURPOSES.map((p) => (
             <button
@@ -82,7 +83,7 @@ export function IntelligentSearch({
               role="radio"
               aria-checked={purpose === p}
               onClick={() => setPurpose(p)}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition duration-[var(--duration-quick)] ${purpose === p ? "bg-surface text-ink shadow-soft" : "text-ink-2 hover:text-ink"}`}
+              className="hover:text-ink"
             >
               {dict.listing.purposes[p]}
             </button>
@@ -139,12 +140,13 @@ export function IntelligentSearch({
           onChange={(e) => setQ(e.target.value)}
           placeholder={ai ? h.aiPlaceholder : h.searchPlaceholder}
           aria-label={ai ? h.aiPlaceholder : h.searchPlaceholder}
-          className="h-11 min-w-0 flex-1 rounded-full bg-fill px-4 text-ink outline-none ring-accent transition placeholder:text-ink-3 focus-visible:ring-2"
+          className="h-11 min-w-0 flex-1 rounded-full bg-fill px-4 text-ink outline-none ring-accent transition-shadow placeholder:text-ink-3 focus-visible:ring-2"
         />
         <button
           type="submit"
-          className="h-11 rounded-full bg-accent-fill px-6 font-medium text-on-accent shadow-soft transition hover:bg-accent-fill-hover active:scale-[0.98]"
+          className="press inline-flex h-11 items-center justify-center gap-2 rounded-full bg-accent-fill px-6 font-medium text-on-accent shadow-[inset_0_1px_0_rgb(255_255_255/0.25)] hover:bg-accent-fill-hover"
         >
+          <Icon name="search" className="size-[18px]" strokeWidth={2} />
           {h.search}
         </button>
       </div>
