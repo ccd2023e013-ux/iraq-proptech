@@ -257,14 +257,19 @@ def state(browser: Browser, *, lang: str, scheme: str, phone: bool, errors: list
     }
 
 
-DRAW_ATTEMPTS = 10
+DRAW_ATTEMPTS = 20
 DRAW_AREA_ISSUE = "https://github.com/ccd2023e013-ux/iraq-proptech/issues/4"
 
 
 def draw_area(browser: Browser) -> None:
-    """Draw-area search, repeated: finishing a drawn area must always land on a
-    polygon URL (a late viewport update must never replace it). Logs every URL
-    the page commits so a failure shows what overwrote what."""
+    """Draw-area search, repeated (issue #4): finishing a drawn area must always
+    land on a polygon URL and keep it. Every attempt must pass.
+
+    Even attempts pan the map and click "Draw area" inside the 450 ms viewport
+    debounce: the pending viewport update must be dropped, so the URL must not
+    change at all while drawing (deterministic: before the fix every such
+    attempt navigated to the panned bbox mid-draw). Logs every URL the page
+    commits so a failure shows what overwrote what."""
     passed = 0
     sample: dict[bool, str] = {}  # first passing / first failing trace (issue #4)
     for attempt in range(1, DRAW_ATTEMPTS + 1):
@@ -318,17 +323,29 @@ def draw_area(browser: Browser) -> None:
             check(False, f"[draw {attempt}] map drew no bubbles")
             ctx.close()
             continue
-        page.locator("[data-testid=draw-area]").click()
         box = page.locator("[data-testid=map-canvas]").bounding_box()
         if box is None:
             check(False, f"[draw {attempt}] map has no bounding box")
             ctx.close()
             continue
+        pan_first = attempt % 2 == 0
+        if pan_first:
+            page.wait_for_timeout(1_500)  # let the load-time viewport update settle
+            x0, y0 = box["x"] + box["width"] * 0.7, box["y"] + box["height"] * 0.3
+            page.mouse.move(x0, y0)
+            page.mouse.down()
+            page.mouse.move(x0 - 40, y0 + 25, steps=6)
+            page.mouse.up()
+            page.wait_for_timeout(120)  # well inside the 450 ms debounce
+        urls_at_draw = len(urls)
+        page.locator("[data-testid=draw-area]").click()
         cx, cy = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
         for dx, dy in ((-120, -90), (130, -80), (0, 120)):
             page.mouse.click(cx + dx, cy + dy)
             page.wait_for_timeout(700)
         finish = page.locator("[data-testid=finish-area]")
+        page.wait_for_timeout(600)  # > debounce: a stale viewport update would land now
+        moved_while_drawing = urls[urls_at_draw:]
         enabled_before = finish.is_enabled()
         tracing[0] = True
         finish.click()
@@ -340,12 +357,12 @@ def draw_area(browser: Browser) -> None:
             page.wait_for_timeout(500)
         page.wait_for_timeout(2_000)  # a late viewport update would replace it here
         kept = "polygon=" in page.url
-        ok = landed and kept
+        ok = landed and kept and not moved_while_drawing
         passed += int(ok)
-        detail = ""
+        detail = f" pan_first={pan_first} moved_while_drawing={moved_while_drawing}"
         if not ok:
             # Did the click end draw mode? Did the search counter change?
-            detail = (
+            detail += (
                 f" enabled_before={enabled_before}"
                 f" still_drawing={page.locator('[data-testid=finish-area]').count() > 0}"
                 f" draw_button={page.locator('[data-testid=draw-area]').count() > 0}"
@@ -362,17 +379,11 @@ def draw_area(browser: Browser) -> None:
         ctx.close()
     for ok, text in sample.items():  # notices are kept even when the step passes
         print(f"::notice title=draw trace ({'pass' if ok else 'FAIL'})::{text[:3000]}", flush=True)
-    # Gating: drawing must work. The rate is measured, not gated: an intermittent
-    # pre-existing bug (Finish ends draw mode but the polygon navigation is never
-    # committed) also occurs on maplibre-gl 5 — tracked in DRAW_AREA_ISSUE.
-    check(passed > 0, f"draw-area search works ({passed}/{DRAW_ATTEMPTS} attempts)")
-    if passed < DRAW_ATTEMPTS:
-        print(
-            "::warning title=draw-area (known intermittent bug)::"
-            f"{DRAW_ATTEMPTS - passed}/{DRAW_ATTEMPTS} attempts never committed the polygon "
-            f"URL — see {DRAW_AREA_ISSUE}",
-            flush=True,
-        )
+    # Gating: every attempt must land on and keep the polygon (DRAW_AREA_ISSUE).
+    check(
+        passed == DRAW_ATTEMPTS,
+        f"draw-area search works ({passed}/{DRAW_ATTEMPTS} attempts) — see {DRAW_AREA_ISSUE}",
+    )
 
 
 def theme_switch(browser: Browser, errors: list[str]) -> None:
