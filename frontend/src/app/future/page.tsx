@@ -106,7 +106,7 @@ export default async function FuturePage() {
             <figure className="fade-in surface-1 relative rounded-[var(--radius-media)] p-2">
               <MapPreview
                 config={resolveMapConfig(process.env)}
-                className="aspect-[4/3] h-auto"
+                className="h-64 sm:h-80"
                 label={projects
                   .map(
                     ({ properties: p }, i) =>
