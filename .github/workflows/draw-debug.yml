@@ -1,0 +1,48 @@
+name: Draw-area debug on Next 16 (temporary, issue #4)
+
+# TEMPORARY diagnostic on the throwaway branch debug/issue-4 only. Builds the
+# same Docker stack as CI, seeds the same Basra DEMO data and runs
+# scripts/ci/draw_debug.py. Read-only, no secrets; gates nothing.
+
+on:
+  push:
+    branches: ["debug/issue-4-next16"]
+
+permissions: {}
+
+jobs:
+  debug:
+    if: github.ref == 'refs/heads/debug/issue-4-next16'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Build images
+        run: docker compose build
+      - name: Start stack
+        run: bash scripts/ci/wait-for-stack.sh
+      - name: Seed Basra DEMO data (as smoke-map.sh does)
+        run: docker compose exec -T backend python -m app.cli seed-demo --listings 30
+      - name: Playwright + Chromium
+        run: |
+          python -m pip install --quiet playwright
+          python -m playwright install --with-deps chromium >/dev/null
+      - name: Draw-area diagnostic (response-delay sweep)
+        run: WEB_URL=http://localhost:3000 DELAYS=0,15,40,80,150,300,600 REPS=6 python scripts/ci/draw_debug.py
+      - name: Draw-area diagnostic (natural + forced)
+        if: always()
+        run: WEB_URL=http://localhost:3000 ATTEMPTS=20 python scripts/ci/draw_debug.py
+      - name: Server-side view of /map renders and polygon searches
+        if: always()
+        run: |
+          docker compose logs --no-color frontend > /tmp/frontend.log 2>&1 || true
+          docker compose logs --no-color backend > /tmp/backend.log 2>&1 || true
+          errs=$(grep -ciE "error|abort|reset|EPIPE|ECONNRESET" /tmp/frontend.log || true)
+          ferr=$(grep -iE "error|abort|reset|EPIPE|ECONNRESET" /tmp/frontend.log | sort | uniq -c | sort -rn | head -8 | tr '\n' ' ' | cut -c1-1500)
+          poly=$(grep -c 'polygon' /tmp/backend.log || true)
+          slow=$(grep '"path": "/api/v1/search/properties"' /tmp/backend.log | grep -o '"duration_ms": [0-9.]*' | awk '{print $2}' | sort -n | tail -3 | tr '\n' ' ')
+          echo "::notice title=draw debug server::frontend error-like lines=$errs; backend lines mentioning polygon=$poly; slowest search_ms=$slow; frontend: $ferr"
