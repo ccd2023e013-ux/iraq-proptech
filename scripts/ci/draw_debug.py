@@ -380,7 +380,61 @@ def sweep(delays: list[int], reps: int) -> int:
     return 0
 
 
+def split_sweep(configs: list[str], reps: int) -> int:
+    """Run through rsc_split_proxy.py, streaming the polygon RSC in two timed parts."""
+    import subprocess
+    import urllib.request
+
+    global WEB
+    upstream = WEB
+    proxy = subprocess.Popen(
+        ["python", "scripts/ci/rsc_split_proxy.py", "--upstream", upstream, "--port", "3100"]
+    )
+    WEB = "http://localhost:3100"
+    try:
+        for _ in range(50):
+            try:
+                urllib.request.urlopen(WEB + "/__split", timeout=2).read()
+                break
+            except OSError:
+                time.sleep(0.2)
+        rows: list[str] = []
+        first_fail: tuple[str, list[str]] | None = None
+        with sync_playwright() as p:
+            browser = p.chromium.launch(
+                args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
+            )
+            for cfg in configs:
+                at, _, gap = cfg.partition("@")
+                urllib.request.urlopen(f"{WEB}/__split?at={at}&gap={gap or 0}&reset=1").read()
+                marks = []
+                for r in range(reps):
+                    ok, log, _ = attempt(browser, r + 1, False)
+                    marks.append("P" if ok else "F")
+                    print(f"split {cfg} rep {r + 1}: {'PASS' if ok else 'FAIL'}", flush=True)
+                    if not ok and first_fail is None:
+                        first_fail = (cfg, log)
+                hits = urllib.request.urlopen(f"{WEB}/__split").read().decode()
+                rows.append(f"{cfg}: {marks.count('P')}/{reps} {''.join(marks)} {hits}")
+            browser.close()
+        print("::notice title=draw debug split sweep::" + " | ".join(rows), flush=True)
+        if first_fail:
+            i = max((k for k, line in enumerate(first_fail[1]) if "map ready" in line), default=0)
+            text = " ⏎ ".join(
+                line if line.startswith("[post]") else line.split(" | at ")[0]
+                for line in first_fail[1][i:]
+                if "tree>" not in line and " Q." not in line
+            )
+            print(f"::notice title=draw debug split FAIL {first_fail[0]}::{text[:9000]}", flush=True)
+    finally:
+        proxy.terminate()
+        WEB = upstream
+    return 0
+
+
 def main() -> int:
+    if os.environ.get("SPLITS"):
+        return split_sweep(os.environ["SPLITS"].split(","), int(os.environ.get("REPS", "4")))
     if os.environ.get("DELAYS"):
         delays = [int(x) for x in os.environ["DELAYS"].split(",")]
         return sweep(delays, int(os.environ.get("REPS", "6")))
