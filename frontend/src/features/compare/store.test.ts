@@ -1,6 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { MAX_COMPARE, clearCompare, onCompareChange, readCompare, toggleCompare } from "./store";
+import {
+  MAX_COMPARE,
+  clearCompare,
+  compareServerSnapshot,
+  compareSnapshot,
+  onCompareChange,
+  readCompare,
+  toggleCompare,
+} from "./store";
 
 afterEach(() => {
   window.localStorage.clear();
@@ -34,5 +42,26 @@ describe("compare selection", () => {
       throw new Error("blocked");
     });
     expect(readCompare()).toEqual([]);
+  });
+
+  it("gives React a stable snapshot that changes only on writes", () => {
+    clearCompare();
+    const before = compareSnapshot();
+    expect(compareSnapshot()).toBe(before);
+    toggleCompare("z", before);
+    const after = compareSnapshot();
+    expect(after).toEqual(["z"]);
+    expect(after).not.toBe(before);
+    expect(compareSnapshot()).toBe(after);
+    expect(compareServerSnapshot()).toEqual([]);
+    expect(compareServerSnapshot()).toBe(compareServerSnapshot());
+  });
+
+  it("keeps the selection in memory when storage writes fail", () => {
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("blocked");
+    });
+    toggleCompare("m", []);
+    expect(compareSnapshot()).toEqual(["m"]);
   });
 });
