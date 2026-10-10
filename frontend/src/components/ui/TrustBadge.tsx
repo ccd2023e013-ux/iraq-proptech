@@ -13,7 +13,7 @@ const STYLES: Record<TrustKind, string> = {
   estimate: "bg-gold-100 text-gold-700",
   ai: "bg-ink text-surface",
   simulation: "bg-gold-100 text-gold-700",
-  demo: "bg-gold-500 text-white",
+  demo: "bg-gold-500 text-[#1d1405]", // dark text on gold: 6.9:1
 };
 
 export function TrustBadge({ kind, children }: { kind: TrustKind; children: ReactNode }) {

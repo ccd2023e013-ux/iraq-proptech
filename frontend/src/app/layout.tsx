@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 
+import { HideOnRoutes } from "@/components/layout/HideOnRoutes";
 import { MobileTabBar } from "@/components/layout/MobileTabBar";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { CompareBar } from "@/features/compare/CompareControls";
@@ -79,7 +80,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         )}
         <SiteHeader dict={dict} locale={locale} me={me} unread={unread} theme={theme} />
         <main className="flex-1">{children}</main>
-        <SiteFooter dict={dict} locale={locale} />
+        <HideOnRoutes routes={["/map"]}>
+          <SiteFooter dict={dict} locale={locale} />
+        </HideOnRoutes>
         <CompareBar dict={dict} />
         <MobileTabBar
           label={dict.nav.menu}

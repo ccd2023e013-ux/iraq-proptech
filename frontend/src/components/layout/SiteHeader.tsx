@@ -54,13 +54,14 @@ export function SiteHeader({
     { href: "/market", label: dict.market.nav },
     { href: "/future", label: dict.future.title },
     { href: "/pricing", label: dict.billing.pricingTitle },
-    ...(me
-      ? [
-          { href: "/favorites", label: dict.nav.favorites },
-          { href: "/saved-searches", label: dict.savedSearches.title },
-        ]
-      : []),
   ];
+  // Personal places live in the account menu on wide screens, in the menu on phones.
+  const personal = me
+    ? [
+        { href: "/favorites", label: dict.nav.favorites },
+        { href: "/saved-searches", label: dict.savedSearches.title },
+      ]
+    : [];
   return (
     // Phones: a slim bar across the top. From md up: a floating bar inset from
     // the page edges, hovering over the content as it scrolls underneath.
@@ -128,6 +129,7 @@ export function SiteHeader({
             links={[
               { href: "/", label: dict.nav.home },
               ...links,
+              ...personal,
               ...(me ? [] : [{ href: "/login", label: dict.nav.login }]),
             ]}
           />

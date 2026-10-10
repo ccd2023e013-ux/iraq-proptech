@@ -77,7 +77,9 @@ export function PropertyCard({
             className="size-full object-cover transition-transform duration-[900ms] ease-[var(--ease-out-soft)] group-hover:scale-[1.045]"
           />
         ) : (
-          <div className="grid size-full place-items-center text-sm text-ink-3">
+          <div className="relative isolate flex size-full flex-col items-center justify-center gap-2 text-[13px] text-ink-3">
+            <div aria-hidden className="stage-grid absolute inset-0 -z-10 opacity-80" />
+            <Icon name="home" className="size-6 text-ink-3/80" />
             {dict.listing.noImage}
           </div>
         )}
@@ -105,7 +107,7 @@ export function PropertyCard({
             </span>
           )}
           {card.is_demo && (
-            <span className="rounded-full bg-gold-500 px-2 py-0.5 text-[11px] font-semibold text-white">
+            <span className="rounded-full bg-gold-500 px-2 py-0.5 text-[11px] font-semibold text-[#1d1405]">
               {dict.listing.demo}
             </span>
           )}

@@ -2,7 +2,7 @@ import type { Dictionary } from "./ar";
 
 const en: Dictionary = {
   meta: {
-    title: "MAKAN — Property · Spatial · Market Intelligence",
+    title: "MAKAN — Property intelligence that understands place",
     description:
       "MAKAN — Property · Spatial · Market Intelligence for Iraq: properties on the map with their surroundings, market and nearby projects, starting in Basra.",
   },
@@ -1325,7 +1325,7 @@ const en: Dictionary = {
     listButton: "Add your property",
   },
   footer: {
-    tagline: "Property · Spatial · Market Intelligence",
+    tagline: "Property intelligence that understands place.",
     demoNotice:
       "All current listings are DEMO listings that demonstrate the platform, not real offers.",
     status: "System status",

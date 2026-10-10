@@ -51,7 +51,7 @@ export function UserMenu({ dict, name }: { dict: Dictionary; name: string }) {
         >
           {name.trim().charAt(0)}
         </span>
-        <span className="max-w-32 truncate">{name}</span>
+        <span className="max-w-32 truncate max-xl:sr-only">{name}</span>
       </button>
       {open && (
         <div
@@ -66,6 +66,20 @@ export function UserMenu({ dict, name }: { dict: Dictionary; name: string }) {
           >
             {dict.nav.dashboard}
           </Link>
+          {[
+            { href: "/favorites", label: dict.nav.favorites },
+            { href: "/saved-searches", label: dict.savedSearches.title },
+          ].map((item) => (
+            <Link
+              key={item.href}
+              role="menuitem"
+              href={item.href}
+              onClick={() => setOpen(false)}
+              className="block rounded-xl px-3 py-2.5 text-sm text-ink transition-colors hover:bg-fill"
+            >
+              {item.label}
+            </Link>
+          ))}
           <Link
             role="menuitem"
             href="/account"

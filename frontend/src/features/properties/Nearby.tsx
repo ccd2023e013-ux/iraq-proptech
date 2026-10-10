@@ -51,7 +51,7 @@ export async function Nearby({
   const meters = (m: number | null) =>
     m === null
       ? ""
-      : `${Math.round(m).toLocaleString(locale === "ar" ? "ar-IQ" : "en-US")} ${n.meters}`;
+      : `${Math.round(m).toLocaleString(locale === "ar" ? "ar-IQ-u-nu-latn" : "en-US")} ${n.meters}`;
 
   return (
     <>

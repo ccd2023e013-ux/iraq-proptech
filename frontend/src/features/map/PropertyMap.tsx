@@ -17,6 +17,7 @@ import type { Locale } from "@/i18n/config";
 import { parseHex, pillImage, withPriceLabels } from "@/lib/map/bubbles";
 import { type Bbox, closedRing, type LonLat, readBboxProperty } from "@/lib/map/geo";
 import type { MapConfig } from "@/lib/map/provider";
+import { type LayerInfo, applyBasemapTone } from "@/lib/map/basemap";
 import { maplibreWorkerUrl } from "@/lib/map/worker";
 import type { Feature, FeatureCollection, Point } from "geojson";
 
@@ -90,14 +91,19 @@ function styleFor(config: MapConfig, dark: boolean): string | StyleSpecification
 function installOverlays(map: MapLibreMap, config: MapConfig): void {
   const ink = cssVar("--ink").trim() || "#10201e";
   const accent = parseHex(cssVar("--accent-fill"), [18, 116, 107, 255]);
-  // High-contrast tags in both themes: the ink colour as fill (dark on the
-  // light map, light on the dark map) with surface-coloured text.
-  const tag = parseHex(cssVar("--ink"), [16, 32, 30, 255]);
-  const tagText = cssVar("--surface").trim() || "#ffffff";
-  const edge: [number, number, number, number] = isDark() ? [0, 0, 0, 110] : [255, 255, 255, 230];
+  // Price tags are small floating surfaces: the raised surface colour with a
+  // hairline edge and ink text, so they read as part of the interface (not as
+  // map labels). The selected listing turns emerald with dark text (contrast).
+  const dark = isDark();
+  const tag = parseHex(cssVar("--surface-raised"), dark ? [27, 37, 56, 255] : [255, 255, 255, 255]);
+  const tagText = ink;
+  const edge: [number, number, number, number] = dark ? [148, 163, 184, 90] : [15, 23, 42, 46];
+  const activeEdge: [number, number, number, number] = dark
+    ? [167, 243, 208, 255]
+    : [4, 120, 87, 255];
   for (const [name, fill, stroke] of [
     ["iqp-price-tag", tag, edge],
-    ["iqp-price-tag-active", accent, accent],
+    ["iqp-price-tag-active", accent, activeEdge],
   ] as const) {
     if (map.hasImage(name)) map.removeImage(name);
     const pill = pillImage(fill, stroke, 2);
@@ -281,12 +287,28 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
       filter: ["has", "point_count"],
       paint: {
         "circle-color": accentRgb,
-        "circle-opacity": 0.92,
-        "circle-stroke-color": "rgba(255,255,255,0.9)",
+        "circle-opacity": 0.94,
+        "circle-stroke-color": dark ? "rgba(11,15,23,0.9)" : "rgba(255,255,255,0.95)",
         "circle-stroke-width": 2,
         "circle-radius": ["step", countOf, 17, 10, 21, 50, 27, 200, 33] as never,
       },
     });
+    // A soft ring around each group: depth without a shadow, and a larger target.
+    map.addLayer(
+      {
+        id: `clusters-halo${suffix}`,
+        type: "circle",
+        source,
+        ...range,
+        filter: ["has", "point_count"],
+        paint: {
+          "circle-color": accentRgb,
+          "circle-opacity": 0.16,
+          "circle-radius": ["step", countOf, 25, 10, 30, 50, 37, 200, 44] as never,
+        },
+      },
+      `clusters${suffix}`,
+    );
     map.addLayer({
       id: `cluster-count${suffix}`,
       type: "symbol",
@@ -299,7 +321,7 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
         "text-font": ["Noto Sans Bold"],
         "text-allow-overlap": true,
       },
-      paint: { "text-color": "#ffffff" },
+      paint: { "text-color": "#03181d" }, // dark on cyan: 8:1 contrast
     });
   }
   // Single listings below bubble zoom: small dots (prices appear when zooming in).
@@ -311,8 +333,8 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
     filter: ["!", ["has", "point_count"]],
     paint: {
       "circle-color": accentRgb,
-      "circle-radius": 6,
-      "circle-stroke-color": "#ffffff",
+      "circle-radius": 5.5,
+      "circle-stroke-color": dark ? "#0b0f17" : "#ffffff",
       "circle-stroke-width": 2,
     },
   });
@@ -324,9 +346,10 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
     minzoom: BUBBLE_MIN_ZOOM,
     filter: ["!", ["has", "point_count"]],
     paint: {
-      "circle-color": `rgb(${tag[0]} ${tag[1]} ${tag[2]})`,
-      "circle-radius": 4,
-      "circle-stroke-color": "#ffffff",
+      // The exact spot under each tag (and the only mark when tags collide).
+      "circle-color": `rgb(${accent[0]} ${accent[1]} ${accent[2]})`,
+      "circle-radius": 3.5,
+      "circle-stroke-color": dark ? "#0b0f17" : "#ffffff",
       "circle-stroke-width": 1.5,
     },
   });
@@ -347,9 +370,13 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
         "text-field": ["get", "price_label"],
         "text-size": 12.5,
         "text-font": ["Noto Sans Bold"],
+        "text-letter-spacing": 0.02,
         "icon-image": image,
         "icon-text-fit": "both",
-        "icon-text-fit-padding": [3, 9, 3, 9],
+        "icon-text-fit-padding": [4, 10, 4, 10],
+        // Tags sit just above the exact spot, like a pin's head.
+        "text-anchor": "bottom",
+        "text-offset": [0, -0.7],
         // Overlapping tags give way (the dot below still marks every listing);
         // the active tag always shows.
         "icon-allow-overlap": allowOverlap,
@@ -365,7 +392,7 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
   bubble(
     "price-bubbles-active",
     "iqp-price-tag-active",
-    "#ffffff",
+    "#04130d",
     ["==", ["get", "id"], ""],
     true,
   );
@@ -426,6 +453,9 @@ export function PropertyMap(props: PropertyMapProps) {
 
         map.on("style.load", () => {
           if (!map) return;
+          if (latest.current.config.provider === "openfreemap") {
+            applyBasemapTone(map, map.getStyle().layers as LayerInfo[], isDark());
+          }
           installOverlays(map, latest.current.config);
           setStyleVersion((v) => v + 1);
           setReady(true);

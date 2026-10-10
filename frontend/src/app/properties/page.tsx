@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import Link from "next/link";
 
 import { Alert } from "@/components/ui/Alert";
@@ -32,13 +33,15 @@ export default async function PropertiesPage({
     getCurrentUser(),
     favoriteIds(),
   ]);
+  const phone = /Mobi|iPhone|Android/i.test((await headers()).get("user-agent") ?? "");
   const typeNames = new Map(types.map((t) => [t.code, locale === "ar" ? t.name_ar : t.name_en]));
   const s = dict.search;
 
   return (
     <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[300px_1fr]">
       <aside className="lg:sticky lg:top-[calc(var(--header-h)+1rem)] lg:self-start">
-        <details className="surface-1 rounded-[var(--radius-card)] p-4 lg:open:block" open>
+        {/* Phones start with the filters folded so results lead; desktops keep them open. */}
+        <details className="surface-1 rounded-[var(--radius-card)] p-4" open={!phone}>
           <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold text-ink lg:hidden [&::-webkit-details-marker]:hidden">
             <Icon name="filter" className="size-4 text-ink-2" />
             {s.filters}

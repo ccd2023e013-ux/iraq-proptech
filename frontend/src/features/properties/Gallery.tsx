@@ -39,8 +39,10 @@ export function Gallery({
 
   if (!images.length && !videos.length) {
     return (
-      <div className="relative isolate grid aspect-[16/9] place-items-center overflow-hidden rounded-[var(--radius-media)] bg-fill text-ink-3">
-        <div aria-hidden className="stage-grid absolute inset-0 -z-10" />
+      // No photos: a slim band instead of a large empty frame, so the facts
+      // (title, price, specs) lead the page.
+      <div className="relative isolate flex h-24 items-center justify-center overflow-hidden rounded-[var(--radius-card)] bg-fill text-ink-3 shadow-[inset_0_0_0_1px_var(--hairline)] sm:h-28">
+        <div aria-hidden className="stage-grid absolute inset-0 -z-10 opacity-70" />
         <span className="flex items-center gap-2 text-sm">
           <Icon name="home" className="size-5" />
           {emptyLabel}

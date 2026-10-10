@@ -85,7 +85,7 @@ export default async function HomePage() {
   const basra = cities.find((c) => c.slug === "basra");
   const [basraListings, basraMarket] = await Promise.all([
     basra
-      ? runSearch(`city_id=${basra.city_id}&sort=newest&page_size=5`)
+      ? runSearch(`city_id=${basra.city_id}&sort=newest&page_size=8`)
       : Promise.resolve({ error: "none" }),
     basra
       ? serverApiFetch<MarketSummary>(`/api/v1/market/summary?city_id=${basra.city_id}`).catch(
@@ -98,7 +98,15 @@ export default async function HomePage() {
   const typeNames = new Map(types.map((t) => [t.code, name(t)]));
   const counts = Object.fromEntries(cities.map((c) => [c.slug, c.listings]));
   const featured = "items" in basraListings ? basraListings.items : [];
-  const [lead, ...rest] = featured;
+  // The large lead tile needs a photograph; a listing without one goes in the grid.
+  const leadIndex = Math.max(
+    0,
+    featured.findIndex((c) => c.cover_url),
+  );
+  const lead = featured[leadIndex];
+  const rest = featured
+    .filter((_, i) => i !== leadIndex)
+    .sort((a, b) => Number(Boolean(b.cover_url)) - Number(Boolean(a.cover_url)));
   const anyDemo = cities.some((c) => c.includes_demo);
 
   const segment = (type: string, purpose: string) =>
@@ -121,14 +129,6 @@ export default async function HomePage() {
         />
         <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 pt-10 pb-14 sm:px-6 md:pt-[calc(var(--header-h)+3.5rem)] lg:min-h-[min(88vh,56rem)] lg:grid-cols-[1.02fr_0.98fr] lg:gap-14 lg:pb-20">
           <div className="relative z-10 flex flex-col gap-6">
-            <p
-              lang="en"
-              dir="ltr"
-              className="reveal flex w-fit items-center gap-2 self-start rounded-full bg-fill px-3 py-1 text-xs font-medium text-ink-2"
-            >
-              <span aria-hidden className="size-1.5 rounded-full bg-spatial-fill" />
-              Property · Spatial · Market Intelligence
-            </p>
             <h1 className="reveal display-xl max-w-[14ch] text-ink" style={stagger(1)}>
               {h.heroTitle}
             </h1>

@@ -140,7 +140,7 @@ export function IntelligentSearch({
           onChange={(e) => setQ(e.target.value)}
           placeholder={ai ? h.aiPlaceholder : h.searchPlaceholder}
           aria-label={ai ? h.aiPlaceholder : h.searchPlaceholder}
-          className="h-11 min-w-0 flex-1 rounded-full bg-fill px-4 text-ink outline-none ring-accent transition-shadow placeholder:text-ink-3 focus-visible:ring-2"
+          className="h-11 w-full min-w-0 shrink-0 rounded-full sm:w-auto sm:flex-1 bg-fill px-4 text-ink outline-none ring-accent transition-shadow placeholder:text-ink-3 focus-visible:ring-2"
         />
         <button
           type="submit"
