@@ -1,0 +1,670 @@
+[
+ {
+  "shot": "ar-dark-1440--home",
+  "path": "/",
+  "status": 200,
+  "seconds": 5.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--map",
+  "path": "/map",
+  "status": 200,
+  "seconds": 18.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--properties",
+  "path": "/properties",
+  "status": 200,
+  "seconds": 5.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--listing",
+  "path": "/properties/3413761c-cd2d-433c-807c-2ef733b79199",
+  "status": 200,
+  "seconds": 5.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "/api/v1/analytics/property-views/3413761c-cd2d-433c-807c-2ef733b79199 net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-dark-1440--future",
+  "path": "/future",
+  "status": 200,
+  "seconds": 2.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--market",
+  "path": "/market",
+  "status": 200,
+  "seconds": 1.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--pricing",
+  "path": "/pricing",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--login",
+  "path": "/login",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--register",
+  "path": "/register",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--smart",
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--compare",
+  "path": "/compare",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--notfound",
+  "path": "/this-page-does-not-exist",
+  "status": 404,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--home",
+  "path": "/",
+  "status": 200,
+  "seconds": 5.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--map",
+  "path": "/map",
+  "status": 200,
+  "seconds": 19.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--properties",
+  "path": "/properties",
+  "status": 200,
+  "seconds": 5.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--listing",
+  "path": "/properties/3413761c-cd2d-433c-807c-2ef733b79199",
+  "status": 200,
+  "seconds": 4.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "/api/v1/analytics/property-views/3413761c-cd2d-433c-807c-2ef733b79199 net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "en-dark-1440--future",
+  "path": "/future",
+  "status": 200,
+  "seconds": 2.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--market",
+  "path": "/market",
+  "status": 200,
+  "seconds": 1.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--pricing",
+  "path": "/pricing",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--login",
+  "path": "/login",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--register",
+  "path": "/register",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--smart",
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--compare",
+  "path": "/compare",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--notfound",
+  "path": "/this-page-does-not-exist",
+  "status": 404,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--home",
+  "path": "/",
+  "status": 200,
+  "seconds": 3.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--map",
+  "path": "/map",
+  "status": 200,
+  "seconds": 24.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--properties",
+  "path": "/properties",
+  "status": 200,
+  "seconds": 2.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--listing",
+  "path": "/properties/3413761c-cd2d-433c-807c-2ef733b79199",
+  "status": 200,
+  "seconds": 2.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "/api/v1/analytics/property-views/3413761c-cd2d-433c-807c-2ef733b79199 net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-dark-390--future",
+  "path": "/future",
+  "status": 200,
+  "seconds": 2.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--market",
+  "path": "/market",
+  "status": 200,
+  "seconds": 2.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--pricing",
+  "path": "/pricing",
+  "status": 200,
+  "seconds": 1.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--login",
+  "path": "/login",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--register",
+  "path": "/register",
+  "status": 200,
+  "seconds": 1.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--smart",
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--compare",
+  "path": "/compare",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--notfound",
+  "path": "/this-page-does-not-exist",
+  "status": 404,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--home",
+  "path": "/",
+  "status": 200,
+  "seconds": 2.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--map",
+  "path": "/map",
+  "status": 200,
+  "seconds": 24.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--properties",
+  "path": "/properties",
+  "status": 200,
+  "seconds": 2.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--listing",
+  "path": "/properties/3413761c-cd2d-433c-807c-2ef733b79199",
+  "status": 200,
+  "seconds": 2.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "/api/v1/analytics/property-views/3413761c-cd2d-433c-807c-2ef733b79199 net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "en-dark-390--future",
+  "path": "/future",
+  "status": 200,
+  "seconds": 2.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--market",
+  "path": "/market",
+  "status": 200,
+  "seconds": 2.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--pricing",
+  "path": "/pricing",
+  "status": 200,
+  "seconds": 1.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--login",
+  "path": "/login",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--register",
+  "path": "/register",
+  "status": 200,
+  "seconds": 1.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--smart",
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--compare",
+  "path": "/compare",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--notfound",
+  "path": "/this-page-does-not-exist",
+  "status": 404,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-1440--home",
+  "path": "/",
+  "status": 200,
+  "seconds": 5.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-1440--map",
+  "path": "/map",
+  "status": 200,
+  "seconds": 17.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-1440--properties",
+  "path": "/properties",
+  "status": 200,
+  "seconds": 5.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-1440--listing",
+  "path": "/properties/3413761c-cd2d-433c-807c-2ef733b79199",
+  "status": 200,
+  "seconds": 4.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "/api/v1/analytics/property-views/3413761c-cd2d-433c-807c-2ef733b79199 net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-light-1440--future",
+  "path": "/future",
+  "status": 200,
+  "seconds": 2.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1920--home",
+  "path": "/",
+  "status": 200,
+  "seconds": 5.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1920--map",
+  "path": "/map",
+  "status": 200,
+  "seconds": 24.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1920--properties",
+  "path": "/properties",
+  "status": 200,
+  "seconds": 5.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1920--listing",
+  "path": "/properties/3413761c-cd2d-433c-807c-2ef733b79199",
+  "status": 200,
+  "seconds": 4.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "/api/v1/analytics/property-views/3413761c-cd2d-433c-807c-2ef733b79199 net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-dark-1920--future",
+  "path": "/future",
+  "status": 200,
+  "seconds": 2.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_dashboard",
+  "path": "/dashboard",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_dashboard_properties",
+  "path": "/dashboard/properties",
+  "status": 200,
+  "seconds": 1.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_account",
+  "path": "/account",
+  "status": 200,
+  "seconds": 1.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_dashboard",
+  "path": "/dashboard",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_dashboard_properties",
+  "path": "/dashboard/properties",
+  "status": 200,
+  "seconds": 1.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_account",
+  "path": "/account",
+  "status": 200,
+  "seconds": 2.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin",
+  "path": "/admin",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_users",
+  "path": "/admin/users",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin",
+  "path": "/admin",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_users",
+  "path": "/admin/users",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--public-home",
+  "path": "/",
+  "status": 200,
+  "seconds": 3.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--public-map",
+  "path": "/map",
+  "status": 200,
+  "seconds": 24.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--public-home",
+  "path": "/",
+  "status": 200,
+  "seconds": 5.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--public-map",
+  "path": "/map",
+  "status": 200,
+  "seconds": 21.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ }
+]
