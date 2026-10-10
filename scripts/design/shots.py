@@ -205,8 +205,10 @@ def map_states(browser: Browser, lang: str, view: str) -> None:
                     break
             if found:
                 snap("selected")
-                page.keyboard.press("Escape")
-                page.mouse.click(box["x"] + 8, box["y"] + box["height"] - 8)
+                close = page.locator("[data-testid=map-selection] button").first
+                if close.count():
+                    close.click()
+                page.wait_for_timeout(400)
             else:
                 states["selected"] = "no tag hit"
         layers = page.locator("[data-testid=map-layers] summary")
@@ -216,7 +218,7 @@ def map_states(browser: Browser, lang: str, view: str) -> None:
             layers.first.click()
         if view == "390":
             handle = page.locator("section button[aria-expanded]").first
-            if handle.count():
+            if handle.count() and handle.is_visible():
                 handle.click()
                 snap("sheet-open")
                 handle.click()
