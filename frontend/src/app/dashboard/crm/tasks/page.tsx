@@ -29,7 +29,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
         <Link href="/dashboard/crm" className="text-sm text-accent">
           {c.dashboard}
         </Link>
-        <h1 className="text-2xl font-bold text-brand-900">{c.tasks}</h1>
+        <h1 className="display-md text-ink">{c.tasks}</h1>
       </div>
       <nav className="flex flex-wrap gap-2" aria-label={c.tasks}>
         {FILTERS.map((f) => (
@@ -43,7 +43,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
           </Link>
         ))}
       </nav>
-      <div className="rounded-[var(--radius-card)] border border-sand-200 bg-surface p-4">
+      <div className="surface-1 rounded-[var(--radius-card)] p-4">
         <TaskPanel
           dict={dict}
           locale={locale}

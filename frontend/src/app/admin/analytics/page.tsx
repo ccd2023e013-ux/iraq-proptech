@@ -21,7 +21,7 @@ export default async function PlatformAnalyticsPage({
   );
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold text-brand-900">{dict.analytics.platformTitle}</h1>
+      <h1 className="display-md text-ink">{dict.analytics.platformTitle}</h1>
       <RangeForm dict={dict} data={data} />
       <AnalyticsReport data={data} dict={dict} locale={locale} />
     </div>

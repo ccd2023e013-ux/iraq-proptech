@@ -64,7 +64,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
           <Link href="/dashboard/crm" className="text-sm text-accent">
             {c.dashboard}
           </Link>
-          <h1 className="text-2xl font-bold text-brand-900">{customer.full_name}</h1>
+          <h1 className="display-md text-ink">{customer.full_name}</h1>
           <p className="text-sm text-sand-500">
             {statusName(statuses, lead.status_code, locale)} · {c.sources[lead.source]} ·{" "}
             {formatDateTime(lead.created_at, locale)}

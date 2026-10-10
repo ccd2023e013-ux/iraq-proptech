@@ -44,7 +44,7 @@ export function ReplyForm({ dict, conversationId }: { dict: Dictionary; conversa
           aria-label={dict.messages.reply}
           rows={2}
           maxLength={4000}
-          className="flex-1 rounded-lg border border-sand-200 px-3 py-2 text-sm"
+          className="flex-1 field py-2 text-sm"
         />
         <Button type="submit" loading={busy}>
           {dict.messages.send}

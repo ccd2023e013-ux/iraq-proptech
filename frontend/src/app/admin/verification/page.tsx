@@ -29,7 +29,7 @@ export default async function VerificationPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold text-brand-900">{a.verification}</h1>
+      <h1 className="display-md text-ink">{a.verification}</h1>
       {me.permissions.includes("agencies.verify") && (
         <section className="flex flex-col gap-2">
           <h2 className="font-semibold">{dict.agency.title}</h2>
@@ -37,7 +37,7 @@ export default async function VerificationPage() {
           {queue.agencies.map((ag) => (
             <div
               key={ag.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-sand-200 bg-surface p-3 text-sm"
+              className="flex flex-wrap items-center justify-between gap-2 surface-1 rounded-2xl p-3 text-sm"
             >
               <span>{ag.name_ar}</span>
               <span className="flex gap-2">
@@ -67,7 +67,7 @@ export default async function VerificationPage() {
         {queue.listings.map((item) => (
           <div
             key={item.property_id}
-            className="flex flex-col gap-2 rounded-lg border border-sand-200 bg-surface p-3 text-sm"
+            className="flex flex-col gap-2 surface-1 rounded-2xl p-3 text-sm"
           >
             <Link
               href={`/properties/${item.property_id}`}

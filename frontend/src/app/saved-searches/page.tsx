@@ -30,7 +30,7 @@ export default async function SavedSearchesPage() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6">
-      <h1 className="text-2xl font-bold text-brand-900">{s.title}</h1>
+      <h1 className="display-md text-ink">{s.title}</h1>
       {rows.length === 0 ? (
         <p className="rounded-[var(--radius-card)] border border-dashed border-sand-200 py-12 text-center text-sand-500">
           {s.empty}
@@ -40,7 +40,7 @@ export default async function SavedSearchesPage() {
           {rows.map((row) => (
             <li
               key={row.id}
-              className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-sand-200 bg-surface p-4 sm:flex-row sm:items-center sm:justify-between"
+              className="flex flex-col gap-3 surface-1 rounded-[var(--radius-card)] p-4 sm:flex-row sm:items-center sm:justify-between"
             >
               <div className="flex flex-col gap-1">
                 <span className="font-semibold text-sand-900">

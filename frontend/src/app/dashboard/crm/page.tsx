@@ -49,15 +49,12 @@ export default async function CrmPage() {
   return (
     <div className="mx-auto flex max-w-[1500px] flex-col gap-6 px-4 py-8 sm:px-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold text-brand-900">{c.dashboard}</h1>
+        <h1 className="display-md text-ink">{c.dashboard}</h1>
         <nav className="flex flex-wrap gap-2 text-sm">
-          <Link
-            href="/dashboard/crm/tasks"
-            className="rounded-lg border border-sand-200 px-3 py-1.5"
-          >
+          <Link href="/dashboard/crm/tasks" className="field py-1.5">
             {c.tasks}
           </Link>
-          <Link href="/messages" className="rounded-lg border border-sand-200 px-3 py-1.5">
+          <Link href="/messages" className="field py-1.5">
             {dict.messages.title}
           </Link>
         </nav>
@@ -65,10 +62,7 @@ export default async function CrmPage() {
 
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {stats.map(([label, value, tone]) => (
-          <div
-            key={label}
-            className="rounded-[var(--radius-card)] border border-sand-200 bg-surface p-4"
-          >
+          <div key={label} className="surface-1 rounded-[var(--radius-card)] p-4">
             <dt className="text-xs text-sand-500">{label}</dt>
             <dd className={`text-2xl font-bold tabular ${tone || "text-brand-900"}`}>{value}</dd>
           </div>

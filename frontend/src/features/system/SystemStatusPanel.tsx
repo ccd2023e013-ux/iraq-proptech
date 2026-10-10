@@ -25,7 +25,7 @@ export function SystemStatusPanel({
   return (
     <section
       aria-labelledby="system-status-heading"
-      className="rounded-[var(--radius-card)] border border-sand-200 bg-surface p-5 shadow-sm"
+      className="surface-1 rounded-[var(--radius-card)] p-5 shadow-sm"
     >
       <h2 id="system-status-heading" className="mb-4 text-base font-semibold text-sand-900">
         {s.heading}

@@ -21,7 +21,7 @@ export default async function MyListingsPage() {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold text-brand-900">{m.title}</h1>
+        <h1 className="display-md text-ink">{m.title}</h1>
         <Link
           href="/dashboard/properties/new"
           className="rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-on-accent hover:bg-brand-600"

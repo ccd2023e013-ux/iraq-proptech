@@ -45,10 +45,10 @@ export default async function SystemPage() {
   ];
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold text-brand-900">{a.system}</h1>
+      <h1 className="display-md text-ink">{a.system}</h1>
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {rows.map(([k, v]) => (
-          <div key={k} className="rounded-lg border border-sand-200 bg-surface p-3">
+          <div key={k} className="surface-1 rounded-2xl p-3">
             <dt className="text-xs text-sand-500">{k}</dt>
             <dd
               className={`font-mono text-sm ${v === "error" || v === "unavailable" ? "text-danger" : ""}`}

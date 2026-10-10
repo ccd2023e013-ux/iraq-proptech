@@ -20,13 +20,10 @@ export default async function SettingsPage() {
   const settings = await serverApiFetch<Setting[]>("/api/v1/admin/settings");
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-bold text-brand-900">{a.settings}</h1>
+      <h1 className="display-md text-ink">{a.settings}</h1>
       <ul className="flex flex-col gap-3">
         {settings.map((s) => (
-          <li
-            key={s.key}
-            className="flex flex-col gap-2 rounded-lg border border-sand-200 bg-surface p-4"
-          >
+          <li key={s.key} className="flex flex-col gap-2 surface-1 rounded-2xl p-4">
             <p className="font-mono text-sm" dir="ltr">
               {s.key}
             </p>

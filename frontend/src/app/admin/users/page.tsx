@@ -31,7 +31,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-bold text-brand-900">
+      <h1 className="display-md text-ink">
         {a.users}{" "}
         <span className="text-base font-normal text-sand-500 tabular">({users.total})</span>
       </h1>
@@ -41,10 +41,10 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
           defaultValue={q}
           placeholder={a.searchUsers}
           aria-label={a.searchUsers}
-          className="h-10 min-w-0 flex-1 rounded-lg border border-sand-200 px-3 text-sm"
+          className="h-10 min-w-0 flex-1 field text-sm"
         />
       </form>
-      <div className="overflow-x-auto rounded-[var(--radius-card)] border border-sand-200 bg-surface">
+      <div className="overflow-x-auto surface-1 rounded-[var(--radius-card)]">
         <table className="w-full min-w-[720px] text-sm">
           <tbody>
             {users.items.map((u) => (

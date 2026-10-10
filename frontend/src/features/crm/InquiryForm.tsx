@@ -117,7 +117,7 @@ export function InquiryForm({
           minLength={5}
           maxLength={3000}
           rows={4}
-          className="rounded-lg border border-sand-200 px-3 py-2 text-sm text-sand-900"
+          className="field py-2 text-sm text-sand-900"
         />
       </label>
       <label className="flex flex-col gap-1 text-sm font-medium text-sand-700">
@@ -125,7 +125,7 @@ export function InquiryForm({
         <select
           value={preferred}
           onChange={(e) => setPreferred(e.target.value as (typeof PREFERENCES)[number])}
-          className="h-10 rounded-lg border border-sand-200 bg-surface px-3 text-sm"
+          className="h-10 surface-1 rounded-2xl px-3 text-sm"
         >
           {PREFERENCES.map((p) => (
             <option key={p} value={p}>

@@ -24,7 +24,7 @@ export default async function AgencyPage() {
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6">
-      <h1 className="text-2xl font-bold text-brand-900">{a.title}</h1>
+      <h1 className="display-md text-ink">{a.title}</h1>
       <PendingInvitations dict={dict} invitations={invitations} />
       {agency ? (
         <>

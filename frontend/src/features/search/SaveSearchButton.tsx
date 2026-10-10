@@ -51,7 +51,7 @@ export function SaveSearchButton({
         type="button"
         onClick={save}
         disabled={state !== "idle"}
-        className="rounded-lg border border-sand-200 bg-surface px-3 py-1.5 text-sm font-medium text-accent hover:border-brand-300 disabled:opacity-60"
+        className="surface-1 rounded-2xl px-3 py-1.5 text-sm font-medium text-accent hover:border-brand-300 disabled:opacity-60"
       >
         {state === "saved" ? `✓ ${s.saved}` : signedIn ? s.save : s.loginToSave}
       </button>

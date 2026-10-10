@@ -27,12 +27,12 @@ export default async function JobsPage() {
   ]);
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold text-brand-900">{a.jobs}</h1>
+      <h1 className="display-md text-ink">{a.jobs}</h1>
       <section>
         <h2 className="mb-2 font-semibold">{a.deliveryCounts}</h2>
         <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {Object.entries(deliveries.counts).map(([k, v]) => (
-            <div key={k} className="rounded-lg border border-sand-200 bg-surface p-3">
+            <div key={k} className="surface-1 rounded-2xl p-3">
               <dt className="font-mono text-xs text-sand-500">{k}</dt>
               <dd className="text-lg font-semibold">{v}</dd>
             </div>

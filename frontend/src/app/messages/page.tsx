@@ -18,13 +18,13 @@ export default async function MessagesPage() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6">
-      <h1 className="text-2xl font-bold text-brand-900">{m.title}</h1>
+      <h1 className="display-md text-ink">{m.title}</h1>
       {conversations.length === 0 ? (
         <p className="rounded-[var(--radius-card)] border border-dashed border-sand-200 py-12 text-center text-sand-500">
           {m.empty}
         </p>
       ) : (
-        <ul className="flex flex-col divide-y divide-sand-100 rounded-[var(--radius-card)] border border-sand-200 bg-surface">
+        <ul className="flex flex-col divide-y divide-sand-100 surface-1 rounded-[var(--radius-card)]">
           {conversations.map((c) => {
             const counterpart = c.role === "customer" ? c.lister : c.customer;
             const title = c.property

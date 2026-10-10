@@ -37,7 +37,7 @@ export default async function NotificationsPage() {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold text-brand-900">{n.title}</h1>
+        <h1 className="display-md text-ink">{n.title}</h1>
         {unread && (
           <ActionButton
             dict={dict}
@@ -51,7 +51,7 @@ export default async function NotificationsPage() {
           {n.empty}
         </p>
       ) : (
-        <ul className="flex flex-col divide-y divide-sand-100 rounded-[var(--radius-card)] border border-sand-200 bg-surface">
+        <ul className="flex flex-col divide-y divide-sand-100 surface-1 rounded-[var(--radius-card)]">
           {page.items.map((item) => {
             const title = locale === "en" ? item.title_en : item.title_ar;
             const body = locale === "en" ? item.body_en : item.body_ar;

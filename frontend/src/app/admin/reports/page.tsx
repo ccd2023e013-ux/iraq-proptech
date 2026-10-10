@@ -39,7 +39,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-bold text-brand-900">{a.reports}</h1>
+      <h1 className="display-md text-ink">{a.reports}</h1>
       <nav className="flex flex-wrap gap-2">
         {STATUSES.map((s) => (
           <Link
@@ -60,7 +60,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
           return (
             <li
               key={r.id}
-              className="flex flex-col gap-2 rounded-[var(--radius-card)] border border-sand-200 bg-surface p-4 text-sm"
+              className="flex flex-col gap-2 surface-1 rounded-[var(--radius-card)] p-4 text-sm"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="font-semibold">

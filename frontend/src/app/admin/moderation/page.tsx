@@ -41,7 +41,7 @@ export default async function ModerationPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-bold text-brand-900">
+      <h1 className="display-md text-ink">
         {a.moderation}{" "}
         <span className="text-base font-normal text-sand-500 tabular">({queue.total})</span>
       </h1>
@@ -52,7 +52,7 @@ export default async function ModerationPage() {
           return (
             <li
               key={item.property_id}
-              className="flex flex-col gap-2 rounded-[var(--radius-card)] border border-sand-200 bg-surface p-4"
+              className="flex flex-col gap-2 surface-1 rounded-[var(--radius-card)] p-4"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <Link

@@ -27,7 +27,7 @@ export default async function FavoritesPage() {
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6">
-      <h1 className="text-2xl font-bold text-brand-900">{dict.favorites.title}</h1>
+      <h1 className="display-md text-ink">{dict.favorites.title}</h1>
       {page.items.length === 0 ? (
         <p className="rounded-[var(--radius-card)] border border-dashed border-sand-200 py-16 text-center text-sand-500">
           {dict.favorites.empty}

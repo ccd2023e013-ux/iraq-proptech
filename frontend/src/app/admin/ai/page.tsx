@@ -22,8 +22,8 @@ export default async function AiUsagePage() {
   const rows = await serverApiFetch<Usage[]>("/api/v1/admin/ai/usage?days=30");
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-bold text-brand-900">{a.aiUsage}</h1>
-      <div className="overflow-x-auto rounded-[var(--radius-card)] border border-sand-200 bg-surface">
+      <h1 className="display-md text-ink">{a.aiUsage}</h1>
+      <div className="overflow-x-auto surface-1 rounded-[var(--radius-card)]">
         <table className="w-full min-w-[640px] text-sm">
           <thead>
             <tr className="border-b border-sand-200 text-xs text-sand-500">

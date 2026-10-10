@@ -7,7 +7,7 @@ import { type AnalyticsOverview, percent } from "./types";
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-lg border border-sand-200 bg-surface p-3">
+    <div className="surface-1 rounded-2xl p-3">
       <dt className="text-xs text-sand-500">{label}</dt>
       <dd className="text-xl font-semibold text-brand-900">{value}</dd>
     </div>
@@ -19,7 +19,7 @@ function DailyChart({ data, dict }: { data: AnalyticsOverview; dict: Dictionary 
   const t = dict.analytics;
   const max = Math.max(1, ...data.series.map((d) => d.views));
   return (
-    <section className="rounded-lg border border-sand-200 bg-surface p-4">
+    <section className="surface-1 rounded-2xl p-4">
       <h2 className="mb-3 font-semibold">{t.perDay}</h2>
       <div className="flex h-32 items-end gap-px" aria-hidden="true" dir="ltr">
         {data.series.map((d) => (
@@ -73,7 +73,7 @@ function DailyChart({ data, dict }: { data: AnalyticsOverview; dict: Dictionary 
 function Bars({ title, rows }: { title: string; rows: [string, number][] }) {
   const max = Math.max(1, ...rows.map(([, n]) => n));
   return (
-    <section className="rounded-lg border border-sand-200 bg-surface p-4">
+    <section className="surface-1 rounded-2xl p-4">
       <h2 className="mb-3 font-semibold">{title}</h2>
       <ul className="flex flex-col gap-2 text-sm">
         {rows.map(([label, n]) => (
@@ -118,7 +118,7 @@ export function AnalyticsReport({
       <DailyChart data={data} dict={dict} />
 
       {data.top_listings && (
-        <section className="rounded-lg border border-sand-200 bg-surface p-4">
+        <section className="surface-1 rounded-2xl p-4">
           <h2 className="mb-3 font-semibold">{t.topListings}</h2>
           {data.top_listings.length === 0 ? (
             <p className="text-sm text-sand-500">{t.noData}</p>
@@ -156,7 +156,7 @@ export function AnalyticsReport({
       )}
 
       {data.agents && data.agents.length > 0 && (
-        <section className="rounded-lg border border-sand-200 bg-surface p-4">
+        <section className="surface-1 rounded-2xl p-4">
           <h2 className="mb-3 font-semibold">{t.agents}</h2>
           <table className="w-full text-sm">
             <thead>

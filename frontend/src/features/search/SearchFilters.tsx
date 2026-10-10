@@ -104,7 +104,7 @@ export function SearchFilters({
     );
   }
 
-  const input = "h-10 w-full rounded-lg border border-sand-200 bg-surface px-3 text-sm";
+  const input = "h-10 w-full surface-1 rounded-2xl px-3 text-sm";
   const label = "flex flex-col gap-1 text-xs font-medium text-sand-700";
 
   return (
@@ -307,7 +307,7 @@ export function SortSelect({
       <select
         value={current}
         onChange={(e) => router.push(`${basePath}?${withParam(params, "sort", e.target.value)}`)}
-        className="h-9 rounded-lg border border-sand-200 bg-surface px-2 text-sm"
+        className="h-9 surface-1 rounded-2xl px-2 text-sm"
       >
         {SORTS.filter((sort) => sort !== "relevance" || first(params.q)).map((sort) => (
           <option key={sort} value={sort}>

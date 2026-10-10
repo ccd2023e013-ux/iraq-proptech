@@ -171,7 +171,7 @@ export function DocumentManager({
         <select
           value={docType}
           onChange={(e) => setDocType(e.target.value)}
-          className="h-10 rounded-lg border border-sand-200 bg-surface px-3 text-sm"
+          className="h-10 surface-1 rounded-2xl px-3 text-sm"
         >
           {Object.entries(dict.listing.docTypes).map(([code, label]) => (
             <option key={code} value={code}>

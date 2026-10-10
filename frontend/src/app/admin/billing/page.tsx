@@ -28,7 +28,7 @@ export default async function AdminBillingPage() {
   ]);
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold text-brand-900">{dict.admin.billing}</h1>
+      <h1 className="display-md text-ink">{dict.admin.billing}</h1>
       <p className="font-mono text-xs" dir="ltr">
         PAYMENT_PROVIDER={config.provider} · enabled={String(config.enabled)}
       </p>
@@ -36,10 +36,7 @@ export default async function AdminBillingPage() {
 
       <section className="grid gap-3 sm:grid-cols-3">
         {summary.revenue.map((r) => (
-          <div
-            key={`${r.currency}-${r.is_demo}`}
-            className="rounded-lg border border-sand-200 bg-surface p-3"
-          >
+          <div key={`${r.currency}-${r.is_demo}`} className="surface-1 rounded-2xl p-3">
             <p className="text-xs text-sand-500">
               {b.revenue} · {r.is_demo ? b.demoRevenue : b.realRevenue}
             </p>
@@ -47,13 +44,13 @@ export default async function AdminBillingPage() {
             <p className="text-xs text-sand-500">{r.payments}</p>
           </div>
         ))}
-        <div className="rounded-lg border border-sand-200 bg-surface p-3">
+        <div className="surface-1 rounded-2xl p-3">
           <p className="text-xs text-sand-500">{b.activeSubscriptions}</p>
           <p className="text-lg font-semibold">{summary.active_subscriptions}</p>
         </div>
       </section>
 
-      <section className="rounded-lg border border-sand-200 bg-surface p-4">
+      <section className="surface-1 rounded-2xl p-4">
         <h2 className="mb-3 font-semibold">{b.plans}</h2>
         <ul className="flex flex-col gap-2 text-sm">
           {plans.map((p) => (
@@ -78,12 +75,12 @@ export default async function AdminBillingPage() {
         </ul>
       </section>
 
-      <section className="rounded-lg border border-sand-200 bg-surface p-4">
+      <section className="surface-1 rounded-2xl p-4">
         <h2 className="mb-3 font-semibold">{b.newPlan}</h2>
         <PlanForm dict={dict} />
       </section>
 
-      <section className="rounded-lg border border-sand-200 bg-surface p-4">
+      <section className="surface-1 rounded-2xl p-4">
         <h2 className="mb-3 font-semibold">{b.payments}</h2>
         {payments.items.length === 0 ? (
           <p className="text-sm text-sand-500">{b.noPayments}</p>

@@ -26,7 +26,7 @@ export default async function PricingPage() {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6">
       <div>
-        <h1 className="text-2xl font-bold text-brand-900">{b.pricingTitle}</h1>
+        <h1 className="display-md text-ink">{b.pricingTitle}</h1>
         <p className="mt-1 text-sand-600">{b.pricingIntro}</p>
       </div>
       {!config.enabled && <Alert tone="info">{b.disabled}</Alert>}

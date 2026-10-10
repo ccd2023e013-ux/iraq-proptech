@@ -28,7 +28,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
   );
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-bold text-brand-900">{a.audit}</h1>
+      <h1 className="display-md text-ink">{a.audit}</h1>
       <form method="get">
         <input
           name="action"
@@ -36,10 +36,10 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
           placeholder="property.moderation.approve"
           aria-label={a.action}
           dir="ltr"
-          className="h-10 w-full max-w-md rounded-lg border border-sand-200 px-3 text-sm"
+          className="h-10 w-full max-w-md field text-sm"
         />
       </form>
-      <div className="overflow-x-auto rounded-[var(--radius-card)] border border-sand-200 bg-surface">
+      <div className="overflow-x-auto surface-1 rounded-[var(--radius-card)]">
         <table className="w-full min-w-[800px] text-xs">
           <thead>
             <tr className="border-b border-sand-200 text-sand-500">
