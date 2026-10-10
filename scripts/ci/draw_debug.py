@@ -25,11 +25,62 @@ HOOK = r"""
   const t0r = performance.now();
   let armed = false, commits = 0;
   const lanes = (n) => '0b' + (n >>> 0).toString(2);
+  const qlog = (...a) => console.warn('[dbg] ' + (performance.now() - t0r).toFixed(0).padStart(5) + ' ' + a.join(' '));
+  const pageSeg = (tree) => {
+    // Walk children slots down to the leaf page segment.
+    try {
+      let t = tree, path = [];
+      for (let i = 0; i < 12 && t; i++) {
+        path.push(typeof t[0] === 'string' ? t[0] : JSON.stringify(t[0]));
+        t = t[1] && t[1].children;
+      }
+      return path.join('/').slice(0, 160);
+    } catch (e) { return '?'; }
+  };
+  const node = (n) => n ? (n.payload.type + (n.discarded ? '(discarded)' : '')) : 'null';
+  // Next 15's app-router action queue is a prop of the AppRouter component; wrap
+  // its dispatch/action to see every router action, the queue state, and results.
+  const findQueue = (fiber) => {
+    const stack = [fiber];
+    let seen = 0;
+    while (stack.length && seen < 5000) {
+      const f = stack.pop(); seen++;
+      const q = f && f.memoizedProps && f.memoizedProps.actionQueue;
+      if (q && typeof q.dispatch === 'function' && typeof q.action === 'function') {
+        window.__dbgQueue = q;
+        let id = 0;
+        const dispatch = q.dispatch;
+        q.dispatch = (payload, setState) => {
+          const url = payload.url ? String(payload.url).replace(location.origin, '').slice(0, 70) : '';
+          qlog('Q.dispatch', payload.type, url, '| pending=' + node(q.pending), 'last=' + node(q.last),
+               'lastIsPending=' + (q.last === q.pending));
+          return dispatch(payload, setState);
+        };
+        const action = q.action;
+        q.action = (state, payload) => {
+          const n = ++id;
+          qlog('Q.run#' + n, payload.type, 'from tree=' + pageSeg(state.tree));
+          const r = action(state, payload);
+          Promise.resolve(r).then(
+            (s) => qlog('Q.done#' + n, payload.type, s === state ? 'UNCHANGED-STATE' : 'new-state',
+                        'tree=' + pageSeg(s && s.tree), 'url=' + (s && s.canonicalUrl || '').slice(0, 60),
+                        '| pending=' + node(q.pending)),
+            (e) => qlog('Q.fail#' + n, payload.type, String(e).slice(0, 120)));
+          return r;
+        };
+        qlog('action queue wrapped');
+        return;
+      }
+      if (f.sibling) stack.push(f.sibling);
+      if (f.child) stack.push(f.child);
+    }
+  };
   window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = {
     supportsFiber: true, isDisabled: false, renderers: new Map(),
     inject(renderer) { const id = this.renderers.size + 1; this.renderers.set(id, renderer); return id; },
     checkDCE() {}, onScheduleFiberRoot() {}, onCommitFiberUnmount() {}, onPostCommitFiberRoot() {},
     onCommitFiberRoot(id, root) {
+      if (!window.__dbgQueue) findQueue(root.current);
       commits += 1;
       if (armed && commits < 400) console.warn('[dbg] ' + (performance.now() - t0r).toFixed(0).padStart(5) +
         ' react-commit #' + commits + ' pending=' + lanes(root.pendingLanes) +
@@ -243,7 +294,10 @@ def main() -> int:
 
     def tail(log: list[str]) -> str:
         i = max((k for k, line in enumerate(log) if "map ready" in line), default=0)
-        return " ⏎ ".join(log[i:])[:6000]
+        early = [line for line in log[:i] if " Q." in line or "router." in line or "queue" in line]
+        late = [line for line in log[i:] if "tree>" not in line and " body " not in line]
+        text = " ⏎ ".join(line.split(" | at ")[0] for line in early + ["----"] + late)
+        return text[:9000]
 
     if first_pass:
         print(f"::notice title=draw debug PASS #{first_pass[0]}::{tail(first_pass[1])}", flush=True)
