@@ -80,6 +80,13 @@ def settle(page: Page, path: str) -> None:
             if canvas.count() == 0 or int(canvas.first.get_attribute("data-bubbles") or 0) > 0:
                 break
             page.wait_for_timeout(500)
+    previews = page.locator("[data-testid=map-preview]")
+    for _ in range(30):  # quiet preview maps draw their basemap (up to 15 s)
+        if previews.count() == 0 or all(
+            previews.nth(i).get_attribute("data-ready") == "1" for i in range(previews.count())
+        ):
+            break
+        page.wait_for_timeout(500)
     page.wait_for_timeout(1_200)  # entrance motion and image decode
 
 
@@ -116,9 +123,16 @@ def shoot(page: Page, name: str, path: str, tag: str) -> None:
     except Exception as exc:  # recorded, the run continues
         errors.append(f"capture failed: {type(exc).__name__}: {str(exc)[:200]}")
         overflow = None
+    previews_ready = None
+    try:
+        pv = page.locator("[data-testid=map-preview]")
+        previews_ready = [pv.nth(i).get_attribute("data-ready") for i in range(pv.count())]
+    except Exception:
+        pass
     REPORT.append(
         {
             "shot": f"{tag}--{name}",
+            "map_previews_ready": previews_ready,
             "path": path,
             "status": status,
             "seconds": round(time.monotonic() - t0, 1),

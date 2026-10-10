@@ -149,6 +149,7 @@ export function MapPreview({
       role="img"
       aria-label={label}
       data-testid="map-preview"
+      data-ready={ready ? "1" : "0"}
       className={`w-full overflow-hidden rounded-[var(--radius-card)] bg-fill shadow-[inset_0_0_0_1px_var(--hairline)] transition-opacity duration-[var(--duration-slow)] ease-[var(--ease-out-soft)] ${ready ? "opacity-100" : "opacity-50"} ${className}`}
     />
   );
