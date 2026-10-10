@@ -22,7 +22,10 @@ export function SectionNav({
   const current = (href: string) =>
     href === root ? pathname === root : pathname === href || pathname.startsWith(`${href}/`);
   return (
-    <nav aria-label={title} className="flex flex-col gap-2 lg:sticky lg:top-24 lg:self-start">
+    <nav
+      aria-label={title}
+      className="flex min-w-0 flex-col gap-2 lg:sticky lg:top-24 lg:self-start"
+    >
       <p className="meta font-medium max-lg:sr-only">{title}</p>
       <ul className="quiet-scroll -mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 lg:mx-0 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:px-0">
         {items.map(({ href, label }) => {

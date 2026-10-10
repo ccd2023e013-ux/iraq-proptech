@@ -31,7 +31,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   if (sections.length === 0) redirect("/dashboard?denied=1");
 
   return (
-    <div className="mx-auto grid max-w-[1400px] gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[220px_1fr] lg:gap-10">
+    <div className="mx-auto grid max-w-[1400px] grid-cols-[minmax(0,1fr)] gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10">
       <SectionNav
         title={dict.admin.title}
         root="/admin"

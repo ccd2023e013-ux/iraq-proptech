@@ -108,7 +108,9 @@ def shoot(page: Page, name: str, path: str, tag: str) -> None:
         status = resp.status if resp else None
         settle(page, path)
         overflow = page.evaluate(
-            "() => document.documentElement.scrollWidth - window.innerWidth"
+            "() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth,"
+            " document.querySelector('main') ? document.querySelector('main').scrollWidth : 0)"
+            " - window.innerWidth"
         )
         height = page.evaluate("() => document.documentElement.scrollHeight")
         file = OUT / f"{tag}--{name}.jpg"
