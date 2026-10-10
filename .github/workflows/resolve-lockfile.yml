@@ -1,0 +1,44 @@
+name: Resolve lockfile (temporary)
+
+# TEMPORARY — exists only on deps/maplibre-6 and is deleted in the commit that
+# adds the resolved lockfile. The development environment cannot reach the npm
+# registry, so the lockfile for a changed package.json is resolved here, on a
+# standard GitHub-hosted runner, and handed back as an artifact. Read-only: no
+# secrets, no write permission, no push.
+
+on:
+  push:
+    branches: ["deps/maplibre-6"]
+    paths:
+      - ".github/workflows/resolve-lockfile.yml"
+      - "frontend/package.json"
+
+permissions: {}
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+      - name: Resolve package-lock.json from package.json
+        run: |
+          npm --version
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          git diff --stat -- package-lock.json
+          node -e "const l=require('./package-lock.json');console.log('maplibre-gl', l.packages['node_modules/maplibre-gl'].version)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: package-lock
+          path: frontend/package-lock.json
+          retention-days: 3
