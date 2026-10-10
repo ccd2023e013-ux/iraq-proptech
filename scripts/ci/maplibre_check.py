@@ -265,11 +265,14 @@ def draw_area(browser: Browser) -> None:
     """Draw-area search, repeated (issue #4): finishing a drawn area must always
     land on a polygon URL and keep it. Every attempt must pass.
 
-    Even attempts pan the map and click "Draw area" inside the 450 ms viewport
-    debounce: the pending viewport update must be dropped, so the URL must not
-    change at all while drawing (deterministic: before the fix every such
-    attempt navigated to the panned bbox mid-draw). Logs every URL the page
-    commits so a failure shows what overwrote what."""
+    Even attempts first let the page settle, then pan the map and click "Draw
+    area" inside the 450 ms viewport debounce: the pending viewport update must
+    be dropped, so the URL must not change at all while drawing (deterministic:
+    before the fix every such attempt navigated to the panned bbox mid-draw).
+    Odd attempts draw as soon as the map shows bubbles, so a viewport
+    navigation already in flight may still commit while drawing; they only
+    check the outcome. Logs every URL the page commits so a failure shows what
+    overwrote what."""
     passed = 0
     sample: dict[bool, str] = {}  # first passing / first failing trace (issue #4)
     for attempt in range(1, DRAW_ATTEMPTS + 1):
@@ -345,7 +348,7 @@ def draw_area(browser: Browser) -> None:
             page.wait_for_timeout(700)
         finish = page.locator("[data-testid=finish-area]")
         page.wait_for_timeout(600)  # > debounce: a stale viewport update would land now
-        moved_while_drawing = urls[urls_at_draw:]
+        moved_while_drawing = urls[urls_at_draw:] if pan_first else []
         enabled_before = finish.is_enabled()
         tracing[0] = True
         finish.click()
@@ -371,6 +374,13 @@ def draw_area(browser: Browser) -> None:
             )
         detail += f" trace={trace[:14]}"
         sample.setdefault(ok, f"attempt {attempt}: {trace[:24]}")
+        if not ok:  # each failure as a notice: the job log is not always retrievable
+            print(
+                f"::notice title=draw attempt {attempt} FAILED::landed={landed} kept={kept} "
+                f"pan_first={pan_first} moved_while_drawing={moved_while_drawing} "
+                f"urls={urls[-6:]} trace={trace[:14]}"[:3000],
+                flush=True,
+            )
         print(
             f"  {'✓' if ok else '✗'} [draw {attempt}] landed={landed} kept={kept} "
             f"urls={urls[-6:]}{detail}",
