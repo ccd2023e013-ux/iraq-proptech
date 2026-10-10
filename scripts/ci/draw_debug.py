@@ -19,6 +19,7 @@ from playwright.sync_api import sync_playwright
 WEB = os.environ.get("WEB_URL", "http://localhost:3000").rstrip("/")
 ATTEMPTS = int(os.environ.get("ATTEMPTS", "30"))
 BASRA = "/map?bbox=47.70,30.40,47.92,30.62"
+INSTANT_CACHE: dict[str, tuple[int, dict[str, str], bytes]] = {}
 
 HOOK = r"""
 (() => {
@@ -277,6 +278,24 @@ def attempt(
             if "_rsc=" in r.url
             else None,
         )
+    if os.environ.get("INSTANT") == "1":
+        # Serve the polygon RSC from a cache filled by the first attempt: the
+        # response is available immediately (faster than any real round trip).
+        def instant(route):
+            key = route.request.url.split("&_rsc=")[0]
+            hit = INSTANT_CACHE.get(key)
+            if hit is None:
+                response = route.fetch()
+                hit = (response.status, dict(response.headers), response.body())
+                INSTANT_CACHE[key] = hit
+                log.append(f"[pw] {stamp()} polygon RSC fetched for cache ({len(hit[2])}B)")
+            else:
+                log.append(f"[pw] {stamp()} polygon RSC served instantly from cache")
+            status, headers, body = hit
+            headers = {k: v for k, v in headers.items() if k.lower() not in ("content-length", "content-encoding", "transfer-encoding")}
+            route.fulfill(status=status, headers=headers, body=body)
+
+        page.route(lambda url: "polygon=" in url and "_rsc=" in url, instant)
     if delay_ms is not None:
         # Hold the polygon RSC response for delay_ms after the server answered.
         def hold(route):
