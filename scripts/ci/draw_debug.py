@@ -53,6 +53,23 @@ HOOK = r"""
       return typeof v + ' ' + String(v).slice(0, 60);
     } catch (e) { return '?'; }
   };
+  // Every <link>/<style> React (Float) inserts after Finish, with load/error events.
+  new MutationObserver((records) => {
+    if (!armed) return;
+    for (const r of records) for (const n of r.addedNodes) {
+      if (!(n instanceof Element) || !/^(LINK|STYLE)$/.test(n.tagName)) continue;
+      const d = n.tagName + ' rel=' + n.getAttribute('rel') + ' prec=' + n.getAttribute('data-precedence') +
+        ' href=' + String(n.getAttribute('href') || '').slice(-60) + ' media=' + n.getAttribute('media');
+      qlog('dom+', d);
+      n.addEventListener('load', () => qlog('dom-load', d));
+      n.addEventListener('error', () => qlog('dom-error', d));
+    }
+  }).observe(document, { childList: true, subtree: true });
+  window.__dbgSheets = () => Array.from(document.querySelectorAll('link[rel=stylesheet],link[rel=preload][as=style],style[data-precedence]'))
+    .map((n) => 'sheet ' + n.tagName + ' rel=' + n.getAttribute('rel') + ' prec=' + n.getAttribute('data-precedence') +
+      ' href=' + String(n.getAttribute('href') || n.getAttribute('data-href') || '').slice(-60) +
+      ' loaded=' + !!(n.sheet) + ' media=' + n.getAttribute('media') +
+      ' react=' + Object.keys(n).filter((k) => k.startsWith('_')).join(','));
   window.__dbgPending = () => {
     const r = window.__dbgRoot;
     const out = ['root pending=' + (r ? lanes(r.pendingLanes) : '?') + ' suspended=' + (r ? lanes(r.suspendedLanes) : '?') +
@@ -296,6 +313,22 @@ def attempt(browser, n: int, forced: bool) -> tuple[bool, list[str], bool]:
             log.append(f"[post] {line[:700]}")
     except Exception as exc:  # noqa: BLE001 - diagnostics only
         log.append(f"[post] tracker failed: {exc}")
+    if not ok:
+        # Does the stuck navigation commit LATE? React holds a commit that waits on
+        # suspensey resources (stylesheets) for up to 60 s before giving up.
+        late_at = None
+        for k in range(160):
+            if "polygon=" in page.url:
+                late_at = k * 0.5
+                break
+            page.wait_for_timeout(500)
+        log.append(f"[post] late commit after extra wait: {late_at}s" if late_at is not None
+                   else "[post] still not committed after +80s")
+        try:
+            for line in page.evaluate("() => window.__dbgSheets ? window.__dbgSheets() : []"):
+                log.append(f"[post] {line[:500]}")
+        except Exception as exc:  # noqa: BLE001
+            log.append(f"[post] sheets failed: {exc}")
     skeleton = page.locator("[role=status][aria-busy]").count()
     map_alive = page.locator("[data-testid=map-canvas]").count()
     log.append(
