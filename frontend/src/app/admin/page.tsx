@@ -41,7 +41,7 @@ export default async function AdminOverview() {
   ];
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-bold text-brand-900">{a.overview}</h1>
+      <h1 className="display-md text-ink">{a.overview}</h1>
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
         {tiles.map(([label, value, alert]) => (
           <div
@@ -49,11 +49,7 @@ export default async function AdminOverview() {
             className="rounded-[var(--radius-card)] border border-sand-200 bg-surface p-4"
           >
             <dt className="text-xs text-sand-500">{label}</dt>
-            <dd
-              className={`text-2xl font-bold tabular ${alert ? "text-danger" : "text-brand-900"}`}
-            >
-              {value}
-            </dd>
+            <dd className={`kpi mt-1 text-3xl ${alert ? "text-danger" : "text-ink"}`}>{value}</dd>
           </div>
         ))}
       </dl>

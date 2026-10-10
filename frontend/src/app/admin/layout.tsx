@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { SectionNav } from "@/components/layout/SectionNav";
 import { getDictionary } from "@/i18n";
 import { getRequestLocale } from "@/i18n/server";
 import { requireUser } from "@/lib/auth/guard";
@@ -31,22 +31,12 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   if (sections.length === 0) redirect("/dashboard?denied=1");
 
   return (
-    <div className="mx-auto grid max-w-[1400px] gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[220px_1fr]">
-      <nav
-        aria-label={dict.admin.title}
-        className="flex flex-col gap-1 lg:sticky lg:top-20 lg:self-start"
-      >
-        <p className="mb-2 text-sm font-bold text-brand-900">{dict.admin.title}</p>
-        {sections.map(([href, key]) => (
-          <Link
-            key={href}
-            href={href}
-            className="rounded-md px-3 py-2 text-sm text-sand-700 hover:bg-sand-100"
-          >
-            {dict.admin[key]}
-          </Link>
-        ))}
-      </nav>
+    <div className="mx-auto grid max-w-[1400px] gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[220px_1fr] lg:gap-10">
+      <SectionNav
+        title={dict.admin.title}
+        root="/admin"
+        items={sections.map(([href, key]) => ({ href, label: dict.admin[key] }))}
+      />
       <div className="min-w-0">{children}</div>
     </div>
   );
