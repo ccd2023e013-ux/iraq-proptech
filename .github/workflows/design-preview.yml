@@ -127,6 +127,14 @@ jobs:
           python -m pip install --quiet playwright
           python -m playwright install --with-deps chromium >/dev/null
           WEB_URL=http://localhost:3000 PUBLIC_URL="$URL" OUT=/tmp/shots python scripts/design/shots.py
+          # The pre-merge MapLibre check (8 states, worker/CSP, theme switch, 20 draw
+          # attempts) against this preview's stack; its full output goes with the shots.
+          mkdir -p /tmp/mlc && cd /tmp/mlc
+          set +e
+          WEB_URL=http://localhost:3000 python "$GITHUB_WORKSPACE/scripts/ci/maplibre_check.py" > /tmp/shots/maplibre_check.txt 2>&1
+          echo "exit=$?" >> /tmp/shots/maplibre_check.txt
+          set -e
+          tail -3 /tmp/shots/maplibre_check.txt
 
       - name: Push screenshots to screenshots/design-${{ github.run_id }}-${{ github.run_attempt }}
         continue-on-error: true
