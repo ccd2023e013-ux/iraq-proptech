@@ -434,7 +434,10 @@ export function PropertyMap(props: PropertyMapProps) {
         cleanups.push(() => observer.disconnect());
         cleanups.push(() => media.removeEventListener("change", onTheme));
 
+        // While drawing, a click on any layer is a polygon vertex (the general
+        // click handler below), never a zoom into a cluster.
         map.on("click", ["clusters-server", "points-dots"], (event: MapMouseEvent) => {
+          if (latest.current.drawing !== null) return;
           map?.easeTo({ center: event.lngLat, zoom: (map?.getZoom() ?? 8) + 2, duration: 600 });
         });
         map.on(
@@ -442,7 +445,7 @@ export function PropertyMap(props: PropertyMapProps) {
           "clusters",
           async (event: MapMouseEvent & { features?: MapGeoJSONFeature[] }) => {
             const feature = event.features?.[0];
-            if (!feature || !map) return;
+            if (!feature || !map || latest.current.drawing !== null) return;
             const serverBbox = readBboxProperty(feature.properties?.bbox);
             if (serverBbox) {
               map.fitBounds(serverBbox as LngLatBoundsLike, { padding: 40, maxZoom: 17 });
