@@ -257,6 +257,20 @@ def state(browser: Browser, *, lang: str, scheme: str, phone: bool, errors: list
     }
 
 
+# Draw-area tracing (issue #4): every history change the App Router makes.
+HISTORY_HOOK = """
+(() => {
+  for (const name of ['pushState', 'replaceState']) {
+    const original = history[name].bind(history);
+    history[name] = (state, title, url) => {
+      console.warn(`[hist] ${name} ${String(url).replace(location.origin, '').slice(0, 160)}`);
+      return original(state, title, url);
+    };
+  }
+})();
+"""
+
+
 DRAW_ATTEMPTS = 10
 DRAW_AREA_ISSUE = "https://github.com/ccd2023e013-ux/iraq-proptech/issues/4"
 
@@ -269,9 +283,42 @@ def draw_area(browser: Browser) -> None:
     for attempt in range(1, DRAW_ATTEMPTS + 1):
         ctx = browser.new_context(viewport={"width": 1366, "height": 900}, locale="en-US")
         ctx.add_init_script(DIAGNOSTIC_HOOK)
+        ctx.add_init_script(HISTORY_HOOK)
         page = ctx.new_page()
         urls: list[str] = []
         console: list[str] = []
+        trace: list[str] = []  # router activity after Finish (issue #4)
+        tracing = [False]
+        page.on(
+            "console",
+            lambda m, trace=trace, tracing=tracing: (
+                trace.append(m.text[:170]) if tracing[0] and "[hist]" in m.text else None
+            ),
+        )
+        page.on(
+            "request",
+            lambda r, trace=trace, tracing=tracing: (
+                trace.append(f"rsc> {r.url.replace(WEB, '')[:120]}")
+                if tracing[0] and "_rsc=" in r.url
+                else None
+            ),
+        )
+        page.on(
+            "requestfinished",
+            lambda r, trace=trace, tracing=tracing: (
+                trace.append(f"rsc< {r.url.replace(WEB, '')[:60]}… done")
+                if tracing[0] and "_rsc=" in r.url
+                else None
+            ),
+        )
+        page.on(
+            "requestfailed",
+            lambda r, trace=trace, tracing=tracing: (
+                trace.append(f"rsc✗ {r.url.replace(WEB, '')[:60]}… {r.failure}")
+                if tracing[0] and "_rsc=" in r.url
+                else None
+            ),
+        )
         page.on(
             "console",
             lambda m, console=console: (
@@ -303,6 +350,7 @@ def draw_area(browser: Browser) -> None:
             page.wait_for_timeout(700)
         finish = page.locator("[data-testid=finish-area]")
         enabled_before = finish.is_enabled()
+        tracing[0] = True
         finish.click()
         landed = False
         for _ in range(30):
@@ -324,6 +372,7 @@ def draw_area(browser: Browser) -> None:
                 f" total={page.locator('[data-testid=map-total]').inner_text()[:60]!r}"
                 f" console={console[-4:]}"
             )
+        detail += f" trace={trace[:14]}"
         print(
             f"  {'✓' if ok else '✗'} [draw {attempt}] landed={landed} kept={kept} "
             f"urls={urls[-6:]}{detail}",
