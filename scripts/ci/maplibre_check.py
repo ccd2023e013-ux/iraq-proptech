@@ -260,6 +260,32 @@ def state(browser: Browser, *, lang: str, scheme: str, phone: bool, errors: list
 # Draw-area tracing (issue #4): every history change the App Router makes.
 HISTORY_HOOK = """
 (() => {
+  const short = (u) => String(u).replace(location.origin, '').slice(0, 90);
+  const realFetch = window.fetch.bind(window);
+  window.fetch = (input, init) => {
+    const url = typeof input === 'string' ? input : (input && input.url) || '';
+    const headers = init && init.headers ? JSON.stringify(init.headers) : '';
+    if (url.includes('_rsc=') || headers.includes('RSC')) {
+      const signal = init && init.signal;
+      console.warn(`[hist] fetch ${short(url)} signal=${!!signal}`);
+      const why = () => String(signal.reason).slice(0, 80);
+      if (signal) signal.addEventListener('abort', () =>
+        console.warn(`[hist] fetch aborted ${short(url)} reason=${why()}`));
+      return realFetch(input, init).then(
+        (r) => { console.warn(`[hist] fetch ${r.status} ${short(url)}`); return r; },
+        (e) => {
+          console.warn(`[hist] fetch error ${short(url)} ${String(e).slice(0, 80)}`);
+          throw e;
+        });
+    }
+    return realFetch(input, init);
+  };
+  const realAbort = AbortController.prototype.abort;
+  AbortController.prototype.abort = function (reason) {
+    const where = (new Error().stack || '').split('\\n').slice(2, 5).join(' < ').slice(0, 260);
+    console.warn(`[hist] abort() reason=${String(reason).slice(0, 60)} at ${where}`);
+    return realAbort.call(this, reason);
+  };
   for (const name of ['pushState', 'replaceState']) {
     const original = history[name].bind(history);
     history[name] = (state, title, url) => {
@@ -374,7 +400,7 @@ def draw_area(browser: Browser) -> None:
                 f" console={console[-4:]}"
             )
         detail += f" trace={trace[:14]}"
-        sample.setdefault(ok, f"attempt {attempt}: {trace[:14]}")
+        sample.setdefault(ok, f"attempt {attempt}: {trace[:24]}")
         print(
             f"  {'✓' if ok else '✗'} [draw {attempt}] landed={landed} kept={kept} "
             f"urls={urls[-6:]}{detail}",
@@ -382,7 +408,7 @@ def draw_area(browser: Browser) -> None:
         )
         ctx.close()
     for ok, text in sample.items():  # notices are kept even when the step passes
-        print(f"::notice title=draw trace ({'pass' if ok else 'FAIL'})::{text[:900]}", flush=True)
+        print(f"::notice title=draw trace ({'pass' if ok else 'FAIL'})::{text[:3000]}", flush=True)
     # Gating: drawing must work. The rate is measured, not gated: an intermittent
     # pre-existing bug (Finish ends draw mode but the polygon navigation is never
     # committed) also occurs on maplibre-gl 5 — tracked in DRAW_AREA_ISSUE.
