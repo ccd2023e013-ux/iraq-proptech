@@ -118,6 +118,8 @@ jobs:
             | openssl pkeyutl -encrypt -pubin -inkey /tmp/reviewer.pub \
                 -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256 | base64 -w0)
           echo "::notice title=Design preview demo logins (encrypted)::$enc"
+          # Also with the screenshots (annotations only appear when the job ends).
+          mkdir -p /tmp/shots && echo "$enc" > /tmp/shots/logins.enc
 
       - name: Design review screenshots
         continue-on-error: true
