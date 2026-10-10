@@ -66,18 +66,31 @@ HOOK = r"""
     configurable: true,
     get() { return undefined; },
     set(v) {
-      if (armed && v === 'pending' && typeof this.then === 'function' && !(this instanceof Promise) && pings.length < 500) {
-        pings.push({ kind: 'PLAIN-thenable', t: (performance.now() - t0r).toFixed(0), settled: false,
-          ctor: this.constructor && this.constructor.name, status: () => this.status,
-          keys: Object.keys(this).join(','), then: String(this.then).slice(0, 80),
-          stack: (new Error().stack || '').split('\n').slice(2, 9).map((x) => x.trim()
-            .replace(location.origin, '').replace(/\/_next\/static\/chunks\//g, '')).join(' < ') });
+      const self = this;
+      if (v === 'pending' && typeof self.then === 'function' && !(self instanceof Promise)) {
+        // Seen at any time (also before Finish): wrap its then() so every later
+        // React ping listener on it is recorded.
+        const firstSeen = (performance.now() - t0r).toFixed(0);
+        const firstStack = (new Error().stack || '').split('\n').slice(2, 9).map((x) => x.trim()
+          .replace(location.origin, '').replace(/\/_next\/static\/chunks\//g, '')).join(' < ');
+        const origThen = self.then;
+        self.then = function (a, b) {
+          if (armed && a && a === b && pings.length < 500) {
+            pings.push({ kind: 'PLAIN-thenable-ping', t: (performance.now() - t0r).toFixed(0), settled: 'n/a',
+              ctor: self.constructor && self.constructor.name, status: () => self.status,
+              keys: 'firstSeen=' + firstSeen + ' then=' + String(origThen).slice(0, 60),
+              then: firstStack,
+              stack: (new Error().stack || '').split('\n').slice(2, 9).map((x) => x.trim()
+                .replace(location.origin, '').replace(/\/_next\/static\/chunks\//g, '')).join(' < ') });
+          }
+          return origThen.call(this, a, b);
+        };
       }
-      Object.defineProperty(this, 'status', { value: v, writable: true, enumerable: true, configurable: true });
+      Object.defineProperty(self, 'status', { value: v, writable: true, enumerable: true, configurable: true });
     },
   });
   window.__dbgPings = () => pings.map((r) => r.kind + ' t=' + r.t + ' settled=' + r.settled + ' status=' + r.status() +
-    ' ctor=' + r.ctor + (r.keys !== undefined ? ' keys=' + r.keys + ' then=' + r.then : '') + ' | ' + r.stack);
+    ' ctor=' + r.ctor + (r.keys !== undefined ? ' ' + r.keys + ' firstStack=' + r.then : '') + ' | ' + r.stack);
   const describe = (v) => {
     try {
       if (v === null || v === undefined) return String(v);
