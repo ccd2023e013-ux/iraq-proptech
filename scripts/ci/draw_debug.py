@@ -94,7 +94,7 @@ HOOK = r"""
 """
 
 
-def attempt(browser, n: int) -> tuple[bool, list[str]]:
+def attempt(browser, n: int, forced: bool) -> tuple[bool, list[str], bool]:
     ctx = browser.new_context(viewport={"width": 1366, "height": 900}, locale="en-US")
     ctx.add_init_script(HOOK)
     page = ctx.new_page()
@@ -124,9 +124,19 @@ def attempt(browser, n: int) -> tuple[bool, list[str]]:
         if int(canvas.get_attribute("data-bubbles") or 0) > 0:
             break
         page.wait_for_timeout(1_000)
-    log.append(f"[pw] {stamp()} ---- map ready, start drawing")
-    page.locator("[data-testid=draw-area]").click()
     box = canvas.bounding_box()
+    if forced:
+        # Pan the map (moveend schedules the 450 ms viewport update), then start
+        # drawing inside that window — the race seen in the failing natural run.
+        page.wait_for_timeout(1_500)
+        x0, y0 = box["x"] + box["width"] * 0.7, box["y"] + box["height"] * 0.3
+        page.mouse.move(x0, y0)
+        page.mouse.down()
+        page.mouse.move(x0 - 40, y0 + 25, steps=6)
+        page.mouse.up()
+        page.wait_for_timeout(120)
+    log.append(f"[pw] {stamp()} ---- map ready, start drawing (forced={forced})")
+    page.locator("[data-testid=draw-area]").click()
     cx, cy = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
     for dx, dy in ((-120, -90), (130, -80), (0, 120)):
         page.mouse.click(cx + dx, cy + dy)
@@ -141,9 +151,19 @@ def attempt(browser, n: int) -> tuple[bool, list[str]]:
         page.wait_for_timeout(500)
     page.wait_for_timeout(2_000)
     ok = ok and "polygon=" in page.url
-    log.append(f"[pw] {stamp()} ---- end url={page.url.replace(WEB, '')[:80]} ok={ok}")
+    skeleton = page.locator("[role=status][aria-busy]").count()
+    map_alive = page.locator("[data-testid=map-canvas]").count()
+    log.append(
+        f"[pw] {stamp()} ---- end url={page.url.replace(WEB, '')[:80]} ok={ok}"
+        f" loading_skeleton={skeleton} map_element={map_alive}"
+    )
+    # Did a bbox navigation start after the draw-area click?
+    drew = next((i for i, line in enumerate(log) if "click draw-area" in line), None)
+    bbox_during = drew is not None and any(
+        "router.replace /map?bbox" in line for line in log[drew:]
+    )
     ctx.close()
-    return ok, log
+    return ok, log, bbox_during
 
 
 def main() -> int:
@@ -154,14 +174,24 @@ def main() -> int:
         browser = p.chromium.launch(
             args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
         )
+        table: list[str] = []
         for n in range(1, ATTEMPTS + 1):
-            ok, log = attempt(browser, n)
+            forced = n > ATTEMPTS // 2
+            ok, log, bbox_during = attempt(browser, n, forced)
             results.append(ok)
-            print(f"attempt {n}: {'PASS' if ok else 'FAIL'}", flush=True)
+            table.append(
+                f"{n}{'f' if forced else 'n'}:{'P' if ok else 'F'}{'+B' if bbox_during else ''}"
+            )
+            print(f"attempt {n}: {'PASS' if ok else 'FAIL'} forced={forced} bbox_during={bbox_during}", flush=True)
             if not ok:
                 fails.append((n, log))
             elif first_pass is None:
                 first_pass = (n, log)
+        print(
+            "::notice title=draw debug correlation::n=natural f=forced; P/F=pass/fail; "
+            "+B=a bbox navigation started after the draw click — " + " ".join(table),
+            flush=True,
+        )
         browser.close()
     summary = " ".join(f"{i}:{'P' if r else 'F'}" for i, r in enumerate(results, 1))
     print(
