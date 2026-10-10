@@ -150,3 +150,78 @@ Durations are `quick` 140ms, `base` 240ms, `spatial` 420ms and `slow` 560ms. `--
 - Keyboard navigation end to end.
 
 **Expected merge conflicts with `stage-8-market`:** `src/app/page.tsx` (market section badge), `src/components/ui/TrustBadge.tsx`, `src/i18n/dictionaries/*`, and `scripts/live/browser_check.py` is unaffected. Resolve them after Stage 8 is complete.
+
+---
+
+# Premium redesign pass (branch `design/premium-redesign`)
+
+This branch merges the latest work and then verifies and extends the master pass in a real browser:
+- `stage-8-market`;
+- `deps/next-16`, which brings Next 16, MapLibre 6 and the issue #4 fixes;
+- `security/public-release`;
+- `ui-master-pass`.
+
+Every change below was reviewed on screenshots of the running app. The screenshots cover Arabic RTL and English LTR, dark and light themes, and 1920, 1440 and 390 px widths. They are pushed by the preview workflow to `screenshots/design-<run>` branches.
+
+## Cartography (`lib/map/basemap.ts`)
+
+The basemap is context and MAKAN's data is the figure. This follows the usual map-design hierarchy (Mapbox map-design process).
+
+When the provider is OpenFreeMap, the style is re-toned on load:
+
+| Element | Dark | Light |
+| --- | --- | --- |
+| Land | `#0d121c` (≈ canvas) | `#f4f6f9` |
+| Water | `#0a2230` (low-chroma cyan) | `#cce5ee` |
+| Roads | step up in lightness by class; casings melt into the land | white on soft land |
+| Labels | muted slate (`#7c879c`), places brighter (`#a3aec2`), canvas halo | slate, white halo |
+
+The function is pure and unit-tested (`basemap.test.ts`). A layer that lacks a paint property is left as designed.
+
+## Markers
+
+- **Price tags** are small raised surfaces (surface colour, hairline edge, ink text). Each sits just above an emerald dot marking the exact spot. The dot stays visible when tags collide.
+- **Selection** is emerald with dark text (contrast).
+- **Groups** are cyan discs with a soft halo and dark count text (8:1 on cyan).
+
+## MapPreview (`features/map/MapPreview.tsx`)
+
+MapPreview is a quiet, non-interactive map for places that matter but don't need exploring:
+- the listing location;
+- the Future Iraq header.
+
+How a position is drawn:
+- **Exact positions:** pin-head dots, numbered when keyed to a list.
+- **Approximate or area positions:** a soft disc, with only the key number and never a site dot.
+- **Hidden locations:** no preview.
+
+The real basemap replaces the abstract dot plot on `/future`.
+
+## Layout and components
+
+- `/map` is a full-screen app surface: no footer (`HideOnRoutes`), and no page scroll.
+- **Listings without photos:**
+  - the listing page shows a slim band, so the facts lead;
+  - cards, the map rail and the selection card show a designed placeholder glyph.
+- **DEMO badges:** dark text on gold (6.9:1). White on gold was 2.9:1.
+- **Header:** favourites and saved searches moved to the account menu on wide screens, and stay in the phone menu.
+- **Admin:** a `SectionNav` with a current-page marker on wide screens, and a chip row on phones.
+- **Dashboard:** quick links are icon tiles.
+- **Smart search:** an intro, one search surface and example queries. "Understood" chips no longer use arrows, which pointed the wrong way in RTL.
+- **Compare:** the empty state invites the next step.
+- **Market:** P25–P75 range bars with a median tick on a shared scale per purpose and currency. The values come from the report, and the text is unchanged.
+- **Digits:** Latin everywhere (`ar-IQ-u-nu-latn`). Nearby distances were Arabic-Indic.
+
+## Preview (`.github/workflows/design-preview.yml`)
+
+Every push to the branch:
+1. builds the same Docker stack as CI on a standard runner, seeds DEMO data, and exposes only the web app through a Cloudflare quick tunnel;
+2. publishes the URL as the commit status `design-preview`;
+3. takes the design screenshots, runs the MapLibre browser check, and pushes both to a `screenshots/design-*` branch.
+
+Isolation:
+- no repository secrets are used;
+- JWT, database and demo passwords are generated per run;
+- production is never contacted.
+
+Demo passwords are published only encrypted to the reviewer's key. A preview lives up to about 5½ hours. Re-run the job for a new one.
