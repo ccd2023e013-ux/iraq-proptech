@@ -140,7 +140,9 @@ def state(browser: Browser, *, lang: str, scheme: str, phone: bool, errors: list
     page.on(
         "console",
         lambda m: (
-            errors.append(f"[{tag}] console {m.type}: {m.text[:300]}")
+            errors.append(
+                f"[{tag}] console {m.type}: {m.text[: 2000 if '[diag]' in m.text else 300]}"
+            )
             if m.type in ("error", "warning") or "[map]" in m.text
             else None
         ),
