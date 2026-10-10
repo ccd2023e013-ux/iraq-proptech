@@ -35,6 +35,14 @@ OUT.mkdir(exist_ok=True)
 FAILURES: list[str] = []
 
 
+def describe(error: Exception) -> str:
+    """Name, message and the top of the stack of an uncaught page error."""
+    name = getattr(error, "name", "") or type(error).__name__
+    message = getattr(error, "message", "") or str(error)
+    stack = (getattr(error, "stack", "") or "").replace("\n", " | ")
+    return f"{name}: {message!r} stack: {stack[:700]}"
+
+
 def check(condition: bool, message: str) -> bool:
     print(("  ✓ " if condition else "  ✗ ") + message, flush=True)
     if not condition:
@@ -101,7 +109,7 @@ def state(browser: Browser, *, lang: str, scheme: str, phone: bool, errors: list
         ]
     )
     page = ctx.new_page()
-    page.on("pageerror", lambda e: errors.append(f"[{tag}] pageerror: {e}"))
+    page.on("pageerror", lambda e: errors.append(f"[{tag}] pageerror: {describe(e)}"))
     page.on(
         "console",
         lambda m: (
@@ -212,7 +220,7 @@ def theme_switch(browser: Browser, errors: list[str]) -> None:
     ctx = browser.new_context(viewport={"width": 1440, "height": 900}, color_scheme="light")
     ctx.add_cookies([{"name": "theme", "value": "light", "url": WEB}])
     page = ctx.new_page()
-    page.on("pageerror", lambda e: errors.append(f"[theme] pageerror: {e}"))
+    page.on("pageerror", lambda e: errors.append(f"[theme] pageerror: {describe(e)}"))
     page.goto(WEB + BASRA, wait_until="load", timeout=120_000)
     check(page.get_attribute("html", "data-theme") == "light", "[theme] starts light")
     check(poll_bubbles(page) > 0, "[theme] bubbles before the switch")
