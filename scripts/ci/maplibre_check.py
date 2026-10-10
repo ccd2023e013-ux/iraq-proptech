@@ -99,15 +99,43 @@ def state(browser: Browser, *, lang: str, scheme: str, phone: bool, errors: list
     page.on(
         "console",
         lambda m: (
-            errors.append(f"[{tag}] console {m.type}: {m.text[:200]}")
-            if m.type == "error" or "[map]" in m.text
+            errors.append(f"[{tag}] console {m.type}: {m.text[:300]}")
+            if m.type in ("error", "warning") or "[map]" in m.text
             else None
         ),
     )
+    # Diagnostics: what the map fetched (style, tiles, glyphs, worker) and what failed.
+    fetched: list[str] = []
+    page.on(
+        "response",
+        lambda r: (
+            fetched.append(f"{r.status} {r.request.resource_type} {r.url[:110]}")
+            if "openfreemap" in r.url or "worker" in r.url.lower() or r.status >= 400
+            else None
+        ),
+    )
+    page.on(
+        "requestfailed",
+        lambda r: errors.append(f"[{tag}] requestfailed {r.url[:120]} {r.failure}"),
+    )
     page.goto(WEB + BASRA, wait_until="load", timeout=120_000)
-    page.wait_for_selector("[data-testid=map-canvas] canvas.maplibregl-canvas", timeout=60_000)
-    bubbles = poll_bubbles(page)
-    ok = check(bubbles > 0, f"[{tag}] MapLibre canvas draws Basra price bubbles ({bubbles})")
+    canvas_ok = False
+    for _ in range(60):
+        if page.locator("[data-testid=map-canvas] canvas.maplibregl-canvas").count() > 0:
+            canvas_ok = True
+            break
+        page.wait_for_timeout(1_000)
+    check(canvas_ok, f"[{tag}] MapLibre created its canvas")
+    bubbles = poll_bubbles(page) if canvas_ok else 0
+    ok = canvas_ok and check(
+        bubbles > 0, f"[{tag}] MapLibre canvas draws Basra price bubbles ({bubbles})"
+    )
+    if not ok:
+        state_attrs = page.locator("[data-testid=map-canvas]").evaluate(
+            "el => ({cls: el.className, data: {...el.dataset}, text: el.innerText.slice(0, 200)})"
+        )
+        print(f"  [{tag}] map element: {state_attrs}", flush=True)
+        print(f"  [{tag}] map fetches: {fetched[:15]}", flush=True)
     ok &= check(page.get_attribute("html", "data-theme") == scheme, f"[{tag}] theme is {scheme}")
     want_dir = "rtl" if lang == "ar" else "ltr"
     ok &= check(
@@ -168,10 +196,18 @@ def main() -> int:
         for lang in ("ar", "en"):
             for scheme in ("light", "dark"):
                 for phone in (False, True):
-                    ledger.append(
-                        state(browser, lang=lang, scheme=scheme, phone=phone, errors=errors)
-                    )
-        theme_switch(browser, errors)
+                    try:
+                        ledger.append(
+                            state(browser, lang=lang, scheme=scheme, phone=phone, errors=errors)
+                        )
+                    except Exception as exc:  # recorded as a failed state, run continues
+                        tag = f"{lang}-{scheme}-{'390' if phone else '1440'}"
+                        check(False, f"[{tag}] state crashed: {type(exc).__name__}: {exc}"[:300])
+                        ledger.append({"state": tag, "passed": False, "error": type(exc).__name__})
+        try:
+            theme_switch(browser, errors)
+        except Exception as exc:  # recorded, run continues
+            check(False, f"[theme] crashed: {type(exc).__name__}: {exc}"[:300])
         browser.close()
 
     csp = [e for e in errors if "Content Security Policy" in e or "Refused to" in e]
@@ -181,7 +217,8 @@ def main() -> int:
     check(not worker, f"no worker errors ({worker[:2]})")
     check(not page_errors, f"no uncaught page errors ({page_errors[:2]})")
     if errors:
-        print("  console (informational):", errors[:8], flush=True)
+        for line in errors[:60]:
+            print("  console:", line, flush=True)
     check(
         len(ledger) == 8 and len({e["state"] for e in ledger}) == 8,
         f"all 8 MapLibre states visited ({len(ledger)})",

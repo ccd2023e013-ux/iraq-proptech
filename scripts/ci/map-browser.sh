@@ -20,8 +20,13 @@ echo "2. Playwright + Chromium"
 python -m pip install --quiet playwright pillow
 python -m playwright install --with-deps chromium >/dev/null
 
-echo "3. map checks (bubbles, places, drawing, near me, Future Iraq)"
-WEB_URL="$WEB" BROWSER_ONLY=map python scripts/live/browser_check.py
+# Both checks always run (the first one prints console/network diagnostics);
+# the step fails at the end if either failed.
+status=0
+echo "3. MapLibre: 8 states, attribution, CSP/worker, theme switch"
+WEB_URL="$WEB" python scripts/ci/maplibre_check.py || status=1
 
-echo "4. MapLibre: 8 states, attribution, CSP/worker, theme switch"
-WEB_URL="$WEB" python scripts/ci/maplibre_check.py
+echo "4. map checks (bubbles, places, drawing, near me, Future Iraq)"
+WEB_URL="$WEB" BROWSER_ONLY=map python scripts/live/browser_check.py || status=1
+
+exit "$status"
