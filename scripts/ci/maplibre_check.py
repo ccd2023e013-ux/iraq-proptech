@@ -257,47 +257,7 @@ def state(browser: Browser, *, lang: str, scheme: str, phone: bool, errors: list
     }
 
 
-# Draw-area tracing (issue #4): every history change the App Router makes.
-HISTORY_HOOK = """
-(() => {
-  const short = (u) => String(u).replace(location.origin, '').slice(0, 90);
-  const realFetch = window.fetch.bind(window);
-  window.fetch = (input, init) => {
-    const url = typeof input === 'string' ? input : (input && input.url) || '';
-    const headers = init && init.headers ? JSON.stringify(init.headers) : '';
-    if (url.includes('_rsc=') || headers.includes('RSC')) {
-      const signal = init && init.signal;
-      console.warn(`[hist] fetch ${short(url)} signal=${!!signal}`);
-      const why = () => String(signal.reason).slice(0, 80);
-      if (signal) signal.addEventListener('abort', () =>
-        console.warn(`[hist] fetch aborted ${short(url)} reason=${why()}`));
-      return realFetch(input, init).then(
-        (r) => { console.warn(`[hist] fetch ${r.status} ${short(url)}`); return r; },
-        (e) => {
-          console.warn(`[hist] fetch error ${short(url)} ${String(e).slice(0, 80)}`);
-          throw e;
-        });
-    }
-    return realFetch(input, init);
-  };
-  const realAbort = AbortController.prototype.abort;
-  AbortController.prototype.abort = function (reason) {
-    const where = (new Error().stack || '').split('\\n').slice(2, 5).join(' < ').slice(0, 260);
-    console.warn(`[hist] abort() reason=${String(reason).slice(0, 60)} at ${where}`);
-    return realAbort.call(this, reason);
-  };
-  for (const name of ['pushState', 'replaceState']) {
-    const original = history[name].bind(history);
-    history[name] = (state, title, url) => {
-      console.warn(`[hist] ${name} ${String(url).replace(location.origin, '').slice(0, 160)}`);
-      return original(state, title, url);
-    };
-  }
-})();
-"""
-
-
-DRAW_ATTEMPTS = 16
+DRAW_ATTEMPTS = 10
 DRAW_AREA_ISSUE = "https://github.com/ccd2023e013-ux/iraq-proptech/issues/4"
 
 
@@ -310,18 +270,11 @@ def draw_area(browser: Browser) -> None:
     for attempt in range(1, DRAW_ATTEMPTS + 1):
         ctx = browser.new_context(viewport={"width": 1366, "height": 900}, locale="en-US")
         ctx.add_init_script(DIAGNOSTIC_HOOK)
-        ctx.add_init_script(HISTORY_HOOK)
         page = ctx.new_page()
         urls: list[str] = []
         console: list[str] = []
         trace: list[str] = []  # router activity after Finish (issue #4)
         tracing = [False]
-        page.on(
-            "console",
-            lambda m, trace=trace, tracing=tracing: (
-                trace.append(m.text[:170]) if tracing[0] and "[hist]" in m.text else None
-            ),
-        )
         page.on(
             "request",
             lambda r, trace=trace, tracing=tracing: (
