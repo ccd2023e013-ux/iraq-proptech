@@ -26,3 +26,89 @@ export interface MarketSummary {
   segments: MarketSegment[];
   generated_at: string;
 }
+
+export type MarketKind = "FACT" | "OBSERVED" | "ESTIMATE" | "AI_INTERPRETATION" | "SIMULATION";
+
+export interface MarketStatement {
+  kind: MarketKind;
+  origin: "platform" | "observed" | "model" | "ai" | "scenario";
+  section: "supply" | "prices" | "dynamics" | "demand" | "areas" | "quality" | "interpretation";
+  key: string;
+  params: Record<string, unknown>;
+  text: string | null;
+  sample: number | null;
+  demo: boolean;
+  source: "listings" | "price_history" | "status_history" | "interest" | "snapshots" | "ai";
+  method: string;
+  period_from: string | null;
+  period_to: string | null;
+}
+
+export interface MarketUnavailable {
+  metric: string;
+  reason: string;
+  detail: Record<string, unknown>;
+}
+
+export interface MarketProvenance {
+  source: string;
+  coverage: string;
+  observation_from: string | null;
+  observation_to: string | null;
+  sample_listings: number;
+  includes_demo: boolean;
+  demo_share: number;
+  methodology: string[];
+  confidence: "none" | "low" | "medium" | "high";
+  confidence_reasons: string[];
+  last_update: string;
+  newest_listing: string | null;
+}
+
+export interface MarketSegmentRow {
+  property_type_code: string;
+  type_ar: string;
+  type_en: string;
+  purpose: string;
+  currency: "IQD" | "USD";
+  listings: number;
+  median_price: string | null;
+  p25_price: string | null;
+  p75_price: string | null;
+  median_price_per_m2: string | null;
+}
+
+export interface MarketAreaRow {
+  level: "city" | "district";
+  id: string;
+  name_ar: string;
+  name_en: string | null;
+  active_listings: number;
+  median_price_per_m2: string | null;
+  currency: "IQD" | "USD" | null;
+  sample: number;
+}
+
+export interface MarketReport {
+  scope: {
+    level: "iraq" | "governorate" | "city" | "district";
+    id: string | null;
+    name_ar: string;
+    name_en: string | null;
+  };
+  provenance: MarketProvenance;
+  statements: MarketStatement[];
+  segments: MarketSegmentRow[];
+  areas: MarketAreaRow[];
+  areas_basis: {
+    property_type_code: string;
+    type_ar: string;
+    type_en: string;
+    purpose: string;
+    currency: "IQD" | "USD";
+  } | null;
+  unavailable: MarketUnavailable[];
+  supply_history: { day: string; active_listings: number }[];
+  disclaimer: string;
+  provider: string | null;
+}

@@ -4,10 +4,11 @@ import type { ReactNode } from "react";
  * What kind of statement the user is looking at. Used everywhere data is not a
  * plain declared fact: demo content, estimates, AI output, simulations.
  */
-export type TrustKind = "fact" | "source" | "estimate" | "ai" | "simulation" | "demo";
+export type TrustKind = "fact" | "observed" | "source" | "estimate" | "ai" | "simulation" | "demo";
 
 const STYLES: Record<TrustKind, string> = {
   fact: "bg-fill text-ink-2",
+  observed: "bg-accent-tint text-accent",
   source: "bg-accent-tint text-accent",
   estimate: "bg-gold-100 text-gold-700",
   ai: "bg-ink text-surface",

@@ -253,6 +253,21 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
               />
             )}
             <Nearby propertyId={property.id} dict={dict} locale={locale} />
+            <Link
+              href={
+                property.district
+                  ? `/market?district_id=${property.district.id}&city_id=${property.city.id}`
+                  : `/market?city_id=${property.city.id}`
+              }
+              className="self-start text-sm font-medium text-accent underline-offset-4 hover:underline"
+              data-testid="area-market-link"
+            >
+              {dict.market.seeArea}:{" "}
+              {(locale === "en" && property.district?.name_en) ||
+                property.district?.name_ar ||
+                (locale === "en" && property.city.name_en) ||
+                property.city.name_ar}
+            </Link>
           </div>
 
           {history.length > 1 && (

@@ -689,6 +689,153 @@ const ar = {
     history: "تصوّراتك الأخيرة",
     error: "تعذّر إنشاء التصوّر. حاول مرة أخرى.",
   },
+  market: {
+    nav: "السوق",
+    title: "ذكاء السوق",
+    subtitle:
+      "ما تقوله إعلانات مَكان عن كل منطقة: العرض، وأسعار الطلب، وحركة الإعلانات، وما يهتم به الناس.",
+    honesty:
+      "كل سطر يذكر نوعه. أسعار الطلب هي ما يطلبه البائع وليست ما دفعه المشتري. وحين لا تكفي البيانات نقول ذلك بدل التخمين.",
+    area: "المنطقة",
+    allIraq: "العراق كله",
+    includeDemo: "تضمين الإعلانات التجريبية",
+    show: "عرض",
+    scopeIraq: "العراق",
+    kinds: {
+      FACT: "حقيقة",
+      OBSERVED: "إحصاء مرصود",
+      ESTIMATE: "تقدير",
+      AI_INTERPRETATION: "تفسير بالذكاء الاصطناعي",
+      SIMULATION: "محاكاة",
+    },
+    sections: {
+      supply: "العرض",
+      prices: "أسعار الطلب",
+      dynamics: "حركة الإعلانات",
+      demand: "الاهتمام على مَكان",
+      quality: "جودة البيانات",
+      areas: "المناطق",
+      interpretation: "التفسير",
+    },
+    sample: "{n} إعلانًا",
+    m: {
+      "fact.supply_change":
+        "اللقطات اليومية المسجّلة: {from_count} إعلانًا نشطًا في {from}، و{to_count} في {to}",
+      "fact.active_listings": "{count} إعلانًا نشطًا",
+      "fact.active_listings_demo": "{count} إعلانًا نشطًا، منها {demo} تجريبية",
+      "fact.new_listings_30d": "{count} إعلانًا نُشرت خلال آخر 30 يومًا",
+      "fact.listings_with_price_change": "{count} من {of} إعلانًا غيّرت سعر الطلب",
+      "fact.demand_30d":
+        "خلال آخر {days} يومًا: {views} مشاهدة و{favorites} حفظًا و{inquiries} استفسارًا على مَكان",
+      "fact.possible_duplicate_pairs":
+        "{pairs} أزواج من الإعلانات متشابهة (النوع والسعر والعملة نفسها ومساحة متقاربة ضمن 200 م): تكرار محتمل وغير مؤكد",
+      "observed.segment_median":
+        "{type} {purpose}: وسيط سعر الطلب {median}، والنصف الأوسط يطلب بين {p25} و{p75}",
+      "observed.initial_price_per_m2_change":
+        "{type} {purpose}: تغيّر وسيط سعر الطلب للمتر المربع عند النشر بنسبة {change}% بين إعلانات {from} وإعلانات {to}",
+      "observed.median_price_change": "الإعلانات التي غيّرت سعر الطلب تغيّر سعرها بوسيط {change}%",
+      "observed.median_days_to_marked_closed":
+        "الإعلانات التي أشار أصحابها إلى بيعها أو تأجيرها بقيت معروضة بوسيط {days} يومًا (بحسب المعلن، لا صفقة موثّقة)",
+      "observed.median_active_age": "الإعلانات النشطة معروضة منذ {days} يومًا (الوسيط)",
+      "fact.area_breakdown": "مقارنة {areas} مناطق أدناه",
+    },
+    segmentsTitle: "أسعار الطلب حسب الفئة",
+    segmentsNote:
+      "يظهر الوسيط فقط للفئات التي فيها 5 إعلانات مسعّرة على الأقل. لا تُحوَّل العملات.",
+    cols: {
+      segment: "الفئة",
+      listings: "الإعلانات",
+      median: "الوسيط",
+      range: "النصف الأوسط",
+      perM2: "الوسيط للمتر",
+    },
+    notEnough: "بيانات غير كافية",
+    areasTitle: "مقارنة المناطق",
+    areaListings: "{n} نشطة",
+    openArea: "افتح {name}",
+    unavailableTitle: "غير متاح بعد",
+    metrics: {
+      transaction_prices: "أسعار البيع / الصفقات",
+      possible_duplicates: "التكرار المحتمل",
+      supply_trend: "العرض عبر الزمن",
+      segment_medians: "وسيط الفئات",
+      price_trend: "اتجاه الأسعار عبر الزمن",
+      price_changes: "التغيّر المعتاد في الأسعار",
+      time_on_market: "مدة البقاء في السوق",
+      ai_interpretation: "تفسير الذكاء الاصطناعي",
+    },
+    reasons: {
+      not_collected: "لا يجمع مَكان أسعار البيع أو الصفقات؛ كل سعر هنا سعر طلب.",
+      scope_too_large: "عدد الإعلانات في هذه المنطقة كبير جدًا لفحص التكرار؛ اختر منطقة أصغر.",
+      snapshots_too_few:
+        "بدأ تسجيل اللقطات اليومية حديثًا ({days} مسجّلة)؛ يحتاج الاتجاه يومين على الأقل ولا يُملأ بأثر رجعي.",
+      not_recorded_for_districts: "تُسجَّل اللقطات اليومية للمدن والمحافظات، لا للأحياء.",
+      sample_too_small: "عدد الإعلانات قليل جدًا لحساب هذا بأمانة.",
+      observation_period_too_short:
+        "يحتاج شهرين على الأقل في كل منهما 5 إعلانات أو أكثر؛ لدينا {months}.",
+      too_few_closed_listings: "أُغلق {closed} إعلانات فقط حتى الآن؛ نحتاج 5 على الأقل.",
+      ai_quota_reached: "بلغت حدّك اليومي للذكاء الاصطناعي؛ الأرقام أعلاه لا تتأثر.",
+    },
+    sourceText: "الإعلانات المنشورة على مَكان (أسعار طلب، لا أسعار صفقات)",
+    methodLines: [
+      "الوسيط والربيعيات فقط مع 5 إعلانات على الأقل.",
+      "لا تُحوَّل العملات ولا تُخلط.",
+      "الاتجاه يقارن وسيط شهرين أو أكثر لفئة واحدة، فقط للأشهر التي فيها 5 إعلانات أو أكثر.",
+      "المشاهدات والحفظ والاستفسارات اهتمام على مَكان، وليست طلب السوق كله.",
+    ],
+    asOf: "حتى {date}",
+    sources: {
+      listings: "الإعلانات على مَكان",
+      price_history: "تغييرات سعر الطلب المسجّلة",
+      status_history: "تغييرات الحالة التي أبلغ عنها المعلنون",
+      interest: "المشاهدات والحفظ والاستفسارات على مَكان",
+      snapshots: "اللقطات اليومية للسوق",
+      ai: "صياغة الذكاء الاصطناعي للأرقام أعلاه",
+    },
+    methods: {
+      count: "عدّ السجلات",
+      median_quartiles_of_current_asking_prices:
+        "وسيط أسعار الطلب الحالية ونصفها الأوسط (5 إعلانات أو أكثر)",
+      median_initial_asking_price_per_m2_by_publication_month:
+        "وسيط أول سعر طلب مسجّل للمتر المربع لكل إعلان، مجمّعًا حسب شهر النشر",
+      median_change_first_to_latest_asking_price_same_currency:
+        "وسيط التغيّر من أول سعر طلب إلى آخره لكل إعلان، بالعملة نفسها فقط",
+      median_days_published_to_marked_sold_or_rented:
+        "وسيط الأيام من النشر حتى أشار المعلن إلى البيع أو التأجير",
+      median_days_since_publication: "وسيط الأيام منذ نشر كل إعلان نشط",
+      recorded_daily_snapshots: "مجاميع من لقطات تُسجَّل يوميًا؛ لا تُملأ بأثر رجعي",
+      heuristic_same_type_price_currency_area_2pct_within_200m:
+        "أزواج بالنوع والغرض والسعر والعملة نفسها، ومساحة ضمن 2%، وعلى بعد أقل من 200 م",
+      restatement_of_observed_statistics:
+        "يعيد صياغة الإحصاءات أعلاه؛ ويُفحص من الأرقام والادعاءات المختلقة",
+    },
+    confidenceReasons: {
+      no_listings: "لا إعلانات",
+      small_sample: "أقل من 30 إعلانًا",
+      medium_sample: "من 30 إلى 199 إعلانًا",
+      large_sample: "200 إعلان أو أكثر",
+      demo_data: "تتضمن بيانات تجريبية",
+      stale: "لم يُنشر أي إعلان خلال آخر 90 يومًا",
+      asking_prices_only: "أسعار طلب فقط",
+    },
+    areasBasis:
+      "وسيط سعر الطلب للمتر المربع لفئة {type} {purpose} بعملة {currency}، لتقارن كل الأشرطة النوع نفسه من الإعلانات. يظهر الشريط فقط للمناطق التي فيها 5 إعلانات مسعّرة على الأقل.",
+    provenanceTitle: "مصدر هذه القراءة",
+    prov: {
+      source: "المصدر",
+      coverage: "النطاق",
+      period: "فترة الرصد",
+      sample: "العيّنة",
+      demo: "نسبة البيانات التجريبية",
+      confidence: "الثقة",
+      updated: "وقت الحساب",
+      methodology: "المنهجية",
+    },
+    confidence: { none: "لا توجد (لا بيانات)", low: "منخفضة", medium: "متوسطة", high: "عالية" },
+    empty: "لا توجد إعلانات نشطة في هذه المنطقة بعد، فلا شيء للإبلاغ عنه.",
+    seeArea: "السوق في هذه المنطقة",
+    homeLink: "افتح ذكاء السوق",
+  },
   future: {
     title: "العراق المستقبلي",
     subtitle: "مشاريع مخطط لها وقيد التنفيذ قد تغيّر المنطقة — كل مشروع مع المصدر الذي نشره.",

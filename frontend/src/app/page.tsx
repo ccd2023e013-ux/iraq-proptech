@@ -199,11 +199,17 @@ export default async function HomePage() {
               </h2>
               <p className="text-ink-2">{h.marketBody}</p>
               <div className="flex gap-2">
-                <TrustBadge kind="estimate">{dict.ai.estimate}</TrustBadge>
+                <TrustBadge kind="observed">{dict.market.kinds.OBSERVED}</TrustBadge>
                 {basraMarket.includes_demo && (
                   <TrustBadge kind="demo">{dict.listing.demo}</TrustBadge>
                 )}
               </div>
+              <Link
+                href={basra ? `/market?city_id=${basra.city_id}` : "/market"}
+                className="self-start text-sm font-medium text-accent underline-offset-4 hover:underline"
+              >
+                {dict.market.homeLink}
+              </Link>
             </div>
             <dl className="grid gap-px overflow-hidden rounded-[var(--radius-card)] bg-hairline sm:grid-cols-2">
               {[

@@ -1,0 +1,4 @@
+{
+  "_doc": "Written triage for dependency advisories that would otherwise block CI (HIGH/CRITICAL/unknown in a production dependency). Each entry needs: id (as reported), package, decision (not_exploitable | not_reachable | accepted_temporarily), reason (why it cannot affect MAKAN in production), reviewed_by, review_by (YYYY-MM-DD; expired entries stop applying). Entries are added by a person after review, never automatically.",
+  "advisories": []
+}
