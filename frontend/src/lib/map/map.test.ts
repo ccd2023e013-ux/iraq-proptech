@@ -50,11 +50,14 @@ describe("map provider", () => {
   it("supports a raster OSM fallback without RTL plugin", () => {
     const config = resolveMapConfig({ MAP_PROVIDER: "osm-raster" });
     expect(typeof config.style).toBe("object");
-    expect(config.rtlPluginUrl).toBeNull();
   });
 
-  it("can disable the RTL plugin", () => {
-    expect(resolveMapConfig({ MAP_RTL_PLUGIN_URL: "" }).rtlPluginUrl).toBeNull();
+  it("loads no RTL text plugin (MapLibre 6 shapes Arabic itself)", () => {
+    for (const env of [{}, { MAP_RTL_PLUGIN_URL: "https://unpkg.com/x/rtl.js" }]) {
+      const config = resolveMapConfig(env);
+      expect("rtlPluginUrl" in config).toBe(false);
+      expect(JSON.stringify(config)).not.toContain("unpkg");
+    }
   });
 
   it("rejects malformed bounding boxes", () => {
@@ -96,5 +99,12 @@ describe("geo helpers", () => {
     expect(readBboxProperty("[47.1,30.1,47.9,30.9]")).toEqual([47.1, 30.1, 47.9, 30.9]);
     expect(readBboxProperty([1, 2, 3, 4])).toEqual([1, 2, 3, 4]);
     expect(readBboxProperty("nope")).toBeNull();
+  });
+
+  it("reads bbox properties in MapLibre 6's tagged nested-value form", () => {
+    expect(readBboxProperty("__$json__[47.1,30.1,47.9,30.9]")).toEqual([47.1, 30.1, 47.9, 30.9]);
+    expect(readBboxProperty("__$json__nope")).toBeNull();
+    expect(readBboxProperty("__$json__[1,2,3]")).toBeNull();
+    expect(readBboxProperty({ bbox: [1, 2, 3, 4] })).toBeNull();
   });
 });

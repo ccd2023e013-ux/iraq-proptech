@@ -67,7 +67,7 @@ The basemap is configuration read by the frontend server at request time
 | `MAP_STYLE_URL` | — | Any MapLibre style JSON; overrides `MAP_PROVIDER`. Use this for self-hosted tiles (e.g. Protomaps PMTiles) on the production PC. |
 | `MAP_ATTRIBUTION` | OSM attribution | Attribution for custom styles |
 | `MAP_DEFAULT_BBOX` | all of Iraq | Initial viewport `w,s,e,n` (`.env.example` sets Basra) |
-| `MAP_RTL_PLUGIN_URL` | MapLibre/Mapbox RTL text plugin on unpkg | Arabic shaping for vector labels; empty disables |
+| ~~`MAP_RTL_PLUGIN_URL`~~ | removed | MapLibre 6 shapes Arabic labels itself; no plugin is loaded (ignored if set) |
 | `MAP_DARK_STYLE_URL` | OpenFreeMap `dark` | Basemap used when the site is in dark mode |
 | `MAP_SATELLITE_TILES` / `MAP_SATELLITE_ATTRIBUTION` | — | Optional https XYZ imagery (keyed provider); both required, otherwise no satellite toggle |
 

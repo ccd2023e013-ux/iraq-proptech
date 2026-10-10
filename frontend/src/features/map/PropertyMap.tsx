@@ -17,6 +17,7 @@ import type { Locale } from "@/i18n/config";
 import { parseHex, pillImage, withPriceLabels } from "@/lib/map/bubbles";
 import { type Bbox, closedRing, type LonLat, readBboxProperty } from "@/lib/map/geo";
 import type { MapConfig } from "@/lib/map/provider";
+import { maplibreWorkerUrl } from "@/lib/map/worker";
 import type { Feature, FeatureCollection, Point } from "geojson";
 
 export interface MapFeatureCollection {
@@ -51,7 +52,6 @@ export interface PropertyMapProps {
 const EMPTY: FeatureCollection = { type: "FeatureCollection", features: [] };
 /** From this zoom (about a district) every listing is drawn as its own price bubble. */
 const BUBBLE_MIN_ZOOM = 10.5;
-let rtlPluginRequested = false;
 
 /** POI colours by category family (also used by the layers panel legend). */
 export const POI_COLORS: Record<string, string> = {
@@ -388,11 +388,10 @@ export function PropertyMap(props: PropertyMapProps) {
       try {
         const maplibre = await import("maplibre-gl");
         if (cancelled || !container.current) return;
+        // Served by the site itself: the bundler does not ship MapLibre 6's worker.
+        maplibre.setWorkerUrl(maplibreWorkerUrl(maplibre.getVersion()));
+        // No RTL text plugin: MapLibre 6 shapes Arabic labels natively.
         const { config } = latest.current;
-        if (config.rtlPluginUrl && !rtlPluginRequested) {
-          rtlPluginRequested = true;
-          maplibre.setRTLTextPlugin(config.rtlPluginUrl, true).catch(() => undefined);
-        }
         dark = isDark();
         map = new maplibre.Map({
           container: container.current,
@@ -435,7 +434,10 @@ export function PropertyMap(props: PropertyMapProps) {
         cleanups.push(() => observer.disconnect());
         cleanups.push(() => media.removeEventListener("change", onTheme));
 
+        // While drawing, a click on any layer is a polygon vertex (the general
+        // click handler below), never a zoom into a cluster.
         map.on("click", ["clusters-server", "points-dots"], (event: MapMouseEvent) => {
+          if (latest.current.drawing !== null) return;
           map?.easeTo({ center: event.lngLat, zoom: (map?.getZoom() ?? 8) + 2, duration: 600 });
         });
         map.on(
@@ -443,7 +445,7 @@ export function PropertyMap(props: PropertyMapProps) {
           "clusters",
           async (event: MapMouseEvent & { features?: MapGeoJSONFeature[] }) => {
             const feature = event.features?.[0];
-            if (!feature || !map) return;
+            if (!feature || !map || latest.current.drawing !== null) return;
             const serverBbox = readBboxProperty(feature.properties?.bbox);
             if (serverBbox) {
               map.fitBounds(serverBbox as LngLatBoundsLike, { padding: 40, maxZoom: 17 });
