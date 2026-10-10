@@ -20,40 +20,48 @@ on:
         required: false
         default: ""
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   run:
+    # Production secrets: only code on main may run with them.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - name: Build the backend image
         run: docker build -q -t proptech-backend backend
       - name: ${{ inputs.action }}
         env:
+          ACTION: ${{ inputs.action }}
           DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
           DEMO_ACCOUNT_PASSWORD: ${{ secrets.DEMO_ACCOUNT_PASSWORD }}
+          DEMO_ADMIN_PASSWORD: ${{ secrets.DEMO_ADMIN_PASSWORD }}
           S3_ENDPOINT_URL: ${{ inputs.s3_endpoint || secrets.S3_ENDPOINT_URL }}
           S3_REGION: ${{ secrets.S3_REGION }}
           S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
           S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
         run: |
-          common=(-e DATABASE_URL -e DEMO_ACCOUNT_PASSWORD -e S3_ENDPOINT_URL -e S3_REGION
+          common=(-e DATABASE_URL -e DEMO_ACCOUNT_PASSWORD -e DEMO_ADMIN_PASSWORD
+                  -e S3_ENDPOINT_URL -e S3_REGION
                   -e S3_ACCESS_KEY_ID -e S3_SECRET_ACCESS_KEY -e APP_ENV=production
                   -e JWT_SECRET="$(openssl rand -hex 32)" -e PREFLIGHT=0)
-          if [ "${{ inputs.action }}" = "seed" ]; then
+          if [ "$ACTION" = "seed" ]; then
             [ -n "$S3_ACCESS_KEY_ID" ] || { echo "::error::S3_* secrets are required to seed images"; exit 1; }
             bash scripts/ci/annotate.sh "live seed" docker run --rm "${common[@]}" \
               -e STORAGE_BACKEND=s3 -e S3_BUCKET=media proptech-backend \
               python -m app.cli seed-demo-iraq --allow-production
-          elif [ "${{ inputs.action }}" = "import-development" ]; then
+          elif [ "$ACTION" = "import-development" ]; then
             out=$(bash scripts/ci/annotate.sh "live development import" docker run --rm "${common[@]}" \
               proptech-backend python -m app.cli import-development --dataset basra) || { echo "$out"; exit 1; }
             echo "$out"
             echo "::notice title=live development import::$(tail -1 <<<"$out")"
-          elif [ "${{ inputs.action }}" = "import-osm" ]; then
+          elif [ "$ACTION" = "import-osm" ]; then
             out=$(bash scripts/ci/annotate.sh "live osm import" docker run --rm "${common[@]}" \
               proptech-backend python -m app.cli import-osm-pois --city basra) || { echo "$out"; exit 1; }
             echo "$out"

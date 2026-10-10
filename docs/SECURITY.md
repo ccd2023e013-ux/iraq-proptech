@@ -55,6 +55,41 @@ impact × exploitability for this deployment.
 
 No critical issues were found. All high and medium findings are fixed.
 
+## CI and production secrets
+
+Production secrets (`SUPABASE_DB_URL`, `S3_*`, `DEMO_ACCOUNT_PASSWORD`,
+`DEMO_ADMIN_PASSWORD`, `JOBS_*`) exist only as GitHub secrets and Render
+environment values. Rules for the workflows that use them:
+
+- **Only code on `main` runs with them.** `live.yml` admits a `workflow_run`
+  only when CI ran for a `push` to `main` of this repository
+  (`workflow_run.event`, `head_branch` and `head_repository.full_name` are all
+  checked — a branch filter alone is not enough, because a fork pull request
+  can come from a branch called `main` and CI runs for pull requests). Schedule
+  and manual runs, and the manual `live-ops`, `live-screenshots` and
+  `scheduled-jobs` workflows, run their secret-bearing job only on
+  `refs/heads/main`.
+- **The gate runs trusted code.** `live.yml`'s `config` job checks out `main`,
+  never the commit named in the event, proves that commit is already on `main`
+  (`git merge-base --is-ancestor`), and reads `deploy/live.env` as data (no
+  `source`); the URLs must be plain `https://` origins.
+- **Least privilege.** Workflows default to `permissions: {}`; each job asks for
+  `contents: read` (only `live-screenshots` may write, to push its screenshot
+  branch). Secret-bearing jobs check out with `persist-credentials: false`.
+  Workflow inputs reach shell scripts through environment variables, not
+  `${{ }}` interpolation.
+- `ci.yml` (which runs for pull requests, including from forks) uses no secrets.
+
+Demo accounts: the shared `DEMO_ACCOUNT_PASSWORD` is never an admin password.
+In production the demo admin exists only with its own `DEMO_ADMIN_PASSWORD`
+(policy-checked, different from the shared one); without it, the start-up seed
+creates no demo admin and disables an existing one (ADMIN role removed,
+password replaced, account deactivated, sessions revoked).
+
+Live checks register throw-away accounts on the deployed site with random
+per-run credentials (CSPRNG; never printed or passed on a command line) and
+suspend them through the demo admin when the run ends, on success or failure.
+
 ## Residual risks and operator duties
 
 - `'unsafe-inline'` scripts are allowed because Next.js hydration uses inline

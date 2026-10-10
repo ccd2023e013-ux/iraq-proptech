@@ -17,17 +17,21 @@ on:
     - cron: "17 */3 * * *"
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   trigger:
+    # The jobs token is a production secret: only code on main may use it.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
         with:
           sparse-checkout: deploy
+          persist-credentials: false
       - name: Run jobs
         env:
           API_SECRET: ${{ secrets.JOBS_API_URL }}

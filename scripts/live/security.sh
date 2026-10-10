@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Security checks against the DEPLOYED site. Runs on its own runner because the
 # rate-limit check deliberately exhausts the login limit for this runner's IP.
-# Usage: WEB_URL=… API_URL=… DEMO_ACCOUNT_PASSWORD=… scripts/live/security.sh
+# Usage: WEB_URL=… API_URL=… DEMO_ACCOUNT_PASSWORD=… DEMO_ADMIN_PASSWORD=… scripts/live/security.sh
 set -euo pipefail
 # Read the whole response: `grep -q` exits at the first match, which makes a
 # still-streaming curl fail with exit 23 under pipefail.
@@ -10,7 +10,11 @@ grep_all() { grep "$@" >/dev/null; }
 WEB="${WEB_URL:?}"; WEB="${WEB%/}"
 API="${API_URL:?}"; API="${API%/}"
 PASSWORD="${DEMO_ACCOUNT_PASSWORD:?}"
+# The demo admin has its own password (never the shared one in production).
+ADMIN_PASSWORD="${DEMO_ADMIN_PASSWORD:?DEMO_ADMIN_PASSWORD (the demo admin password)}"
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
+# Login body on stdin: passwords never appear in a process's arguments.
+creds() { E="$1" P="$2" jq -nc '{email: env.E, password: env.P}'; }
 fail() { echo "SECURITY FAIL: $*" >&2; exit 1; }
 ok() { echo "  ✓ $*"; }
 hdr() { curl -sS -D - -o /dev/null --max-time 90 "$@" | tr -d '\r'; }
@@ -48,8 +52,9 @@ pre=$(hdr -X OPTIONS -H "Origin: https://evil.example" -H "Access-Control-Reques
 ok "no CORS grant for foreign origins"
 
 echo "4. session cookies"
-login_h=$(curl -sS -D - -o /dev/null -X POST "$WEB/api/v1/auth/login" -H 'Content-Type: application/json' \
-  -d "{\"email\":\"demo.customer@example.com\",\"password\":\"$PASSWORD\"}" | tr -d '\r')
+login_h=$(creds demo.customer@example.com "$PASSWORD" \
+  | curl -sS -D - -o /dev/null -X POST "$WEB/api/v1/auth/login" -H 'Content-Type: application/json' \
+    --data-binary @- | tr -d '\r')
 grep -i '^set-cookie: access_token=' <<<"$login_h" | grep -qi 'httponly' || fail "access cookie not HttpOnly"
 for c in access_token refresh_token csrf_token; do
   line=$(grep -i "^set-cookie: $c=" <<<"$login_h") || fail "cookie $c missing"
@@ -109,8 +114,9 @@ since=$(date -u -d '-10 seconds' +%Y-%m-%dT%H:%M:%SZ)
 curl -s -o /dev/null -X POST "$WEB/api/v1/auth/login" -H 'Content-Type: application/json' \
   -d "{\"email\":\"$probe\",\"password\":\"wrong-password-123\"}"
 rm -f "$TMP/admin.jar"
-curl -fsS -c "$TMP/admin.jar" -o /dev/null -X POST "$WEB/api/v1/auth/login" -H 'Content-Type: application/json' \
-  -d "{\"email\":\"demo.admin@example.com\",\"password\":\"$PASSWORD\"}"
+creds demo.admin@example.com "$ADMIN_PASSWORD" \
+  | curl -fsS -c "$TMP/admin.jar" -o /dev/null -X POST "$WEB/api/v1/auth/login" \
+    -H 'Content-Type: application/json' --data-binary @-
 # Failed-login audit rows deliberately do not store the email: take the newest
 # failure since just before the probe (this runner is the only client then).
 seen=$(curl -fsS -b "$TMP/admin.jar" "$WEB/api/v1/admin/audit-logs?action=auth.login_failed&since=$since&page_size=5" \

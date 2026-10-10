@@ -14,12 +14,16 @@ Screenshots go to ./screenshots.
 
 from __future__ import annotations
 
+import http.cookiejar
 import io
 import json
 import os
+import secrets
 import statistics
 import sys
-import time
+import time  # noqa: F401 — kept: stage-8-market's market matrix paces requests with it
+import urllib.parse
+import urllib.request
 from pathlib import Path
 
 from PIL import Image
@@ -29,12 +33,85 @@ WEB = os.environ["WEB_URL"].rstrip("/")
 OUT = Path("screenshots")
 OUT.mkdir(exist_ok=True)
 FAILURES: list[str] = []
+# Throw-away accounts this run registered on the live site (suspended at exit).
+CREATED_ACCOUNTS: list[str] = []
 
 
 def check(condition: bool, message: str) -> None:
     print(("  ✓ " if condition else "  ✗ ") + message, flush=True)
     if not condition:
         FAILURES.append(message)
+
+
+def suspend_throwaway_accounts() -> None:
+    """Suspend the accounts this run registered, through the public web origin.
+
+    There is no self-service account deletion, so the demo admin suspends them:
+    a suspended account cannot sign in and its sessions are revoked. Problems
+    are reported as warnings (cleanup is not part of what the run verifies) and
+    never print a password, a cookie or a server message.
+    """
+    if not CREATED_ACCOUNTS:
+        return
+    admin_password = os.environ.get("DEMO_ADMIN_PASSWORD")
+    if not admin_password:
+        print(
+            "::warning title=live browser cleanup::DEMO_ADMIN_PASSWORD not set — "
+            f"{len(CREATED_ACCOUNTS)} throw-away account(s) not suspended "
+            "(their random passwords were never printed)",
+            flush=True,
+        )
+        return
+    if not WEB.startswith("https://"):
+        # The admin password only ever goes to the deployed site over HTTPS.
+        print("::warning title=live browser cleanup::WEB_URL is not https — skipped", flush=True)
+        return
+    jar = http.cookiejar.CookieJar()
+    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+
+    def call(method: str, path: str, body: dict | None = None, csrf: str = "") -> dict:
+        data = json.dumps(body).encode() if body is not None else None
+        url = WEB + "/api/v1" + path  # https only (checked above)
+        request = urllib.request.Request(url, data=data, method=method)  # noqa: S310
+        if data is not None:
+            request.add_header("Content-Type", "application/json")
+        if csrf:
+            request.add_header("X-CSRF-Token", csrf)
+        with opener.open(request, timeout=90) as response:
+            return json.loads(response.read() or b"{}")
+
+    suspended = never_registered = 0
+    try:
+        call("POST", "/auth/login", {"email": "demo.admin@example.com", "password": admin_password})
+        csrf = next((c.value for c in jar if c.name == "csrf_token"), "") or ""
+        for email in CREATED_ACCOUNTS:
+            listing = call("GET", "/admin/users?q=" + urllib.parse.quote(email))
+            matches = [u for u in listing.get("items", []) if u.get("email") == email]
+            if not matches:
+                never_registered += 1  # the run stopped before submitting the form
+            for user in matches:
+                call(
+                    "POST",
+                    f"/admin/users/{user['id']}/suspend",
+                    {"reason": "live browser check throw-away account"},
+                    csrf,
+                )
+                suspended += 1
+    except Exception as exc:  # cleanup must not hide the real result
+        print(
+            f"::warning title=live browser cleanup::suspension stopped ({type(exc).__name__})",
+            flush=True,
+        )
+    print(
+        f"  cleanup: {suspended} throw-away account(s) suspended"
+        + (f", {never_registered} never registered" if never_registered else ""),
+        flush=True,
+    )
+    if suspended + never_registered < len(CREATED_ACCOUNTS):
+        print(
+            "::warning title=live browser cleanup::not every throw-away account was suspended",
+            flush=True,
+        )
 
 
 def no_horizontal_scroll(page: Page) -> bool:
@@ -369,8 +446,14 @@ def auth_flow(browser, *, phone: bool, locale: str) -> None:
             )
 
     page.on("response", on_auth)
-    email = f"e2e-browser-{int(time.time())}-{tag}@example.com"
-    password = f"Live-{int(time.time())}-Check!"
+    # CSPRNG, per run: nothing about these credentials can be derived from the
+    # (public) run time. The password is never printed; the account is suspended
+    # when the run ends (suspend_throwaway_accounts).
+    email = f"e2e-browser-{secrets.token_hex(8)}-{tag}@example.com"
+    password = secrets.token_urlsafe(24)
+    # Recorded before registering: cleanup looks it up whether or not the run
+    # gets as far as submitting the form.
+    CREATED_ACCOUNTS.append(email)
 
     # Pages exist (they were 404 before 2.0).
     for path in (
@@ -828,4 +911,9 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        exit_code = main()
+    finally:
+        # Success, failed checks or a crash: never leave throw-away accounts active.
+        suspend_throwaway_accounts()
+    sys.exit(exit_code)
