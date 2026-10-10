@@ -1,7 +1,7 @@
 """Screenshots of the deployed site for design review (desktop + phone, AR/EN,
 light/dark, signed-out and signed-in). Writes JPEGs to ./shots.
 
-    WEB_URL=… DEMO_ACCOUNT_PASSWORD=… python scripts/live/screenshots.py
+    WEB_URL=… DEMO_ACCOUNT_PASSWORD=… DEMO_ADMIN_PASSWORD=… python scripts/live/screenshots.py
 """
 
 from __future__ import annotations
@@ -17,6 +17,7 @@ from playwright.sync_api import sync_playwright
 
 WEB = os.environ["WEB_URL"].rstrip("/")
 PASSWORD = os.environ.get("DEMO_ACCOUNT_PASSWORD", "")
+ADMIN_PASSWORD = os.environ.get("DEMO_ADMIN_PASSWORD", "")
 OUT = Path("shots")
 OUT.mkdir(exist_ok=True)
 # "|"-separated (paths may contain commas, e.g. compare ids).
@@ -95,11 +96,16 @@ def main() -> None:
         if PASSWORD:
             for item in AUTH_PAGES:
                 who, path = item.split(":", 1)
+                # The demo admin has its own password, never the shared one.
+                password = ADMIN_PASSWORD if who == "admin" else PASSWORD
+                if not password:
+                    print(f"  login {who}: skipped (no password configured)", flush=True)
+                    continue
                 ctx = browser.new_context(viewport={"width": 1440, "height": 900})
                 ctx.add_cookies([{"name": "locale", "value": "ar", "url": WEB}])
                 r = ctx.request.post(
                     f"{WEB}/api/v1/auth/login",
-                    data={"email": f"demo.{who}@example.com", "password": PASSWORD},
+                    data={"email": f"demo.{who}@example.com", "password": password},
                 )
                 print(f"  login {who}: {r.status}", flush=True)
                 page = ctx.new_page()

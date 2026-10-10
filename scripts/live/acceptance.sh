@@ -2,10 +2,14 @@
 # Live acceptance test against the DEPLOYED site (Render + Supabase), through the
 # public web origin exactly like a browser (same-origin /api/v1 proxy, cookie
 # sessions + CSRF). Synthetic data only: a throw-away customer
-# (e2e-live-*@example.com) and one listing that is created, edited, approved,
-# found, then deleted again. Demo accounts sign in with DEMO_ACCOUNT_PASSWORD.
+# (e2e-live-<random>@example.com, random per-run password that is never printed)
+# and one listing that is created, edited, approved, found, then deleted again.
+# On exit — success or failure — the listing is deleted and the throw-away
+# customer is suspended by the demo admin. Demo accounts sign in with
+# DEMO_ACCOUNT_PASSWORD; the demo admin with its own DEMO_ADMIN_PASSWORD.
 #
-# Usage: WEB_URL=https://… API_URL=https://… DEMO_ACCOUNT_PASSWORD=… scripts/live/acceptance.sh
+# Usage: WEB_URL=https://… API_URL=https://… DEMO_ACCOUNT_PASSWORD=… DEMO_ADMIN_PASSWORD=… \
+#   scripts/live/acceptance.sh
 set -euo pipefail
 # Read the whole response: `grep -q` exits at the first match, which makes a
 # still-streaming curl fail with exit 23 under pipefail.
@@ -14,12 +18,18 @@ grep_all() { grep "$@" >/dev/null; }
 WEB="${WEB_URL:?WEB_URL}"; WEB="${WEB%/}"
 API="${API_URL:?API_URL}"; API="${API%/}"
 PASSWORD="${DEMO_ACCOUNT_PASSWORD:?DEMO_ACCOUNT_PASSWORD}"
+ADMIN_PASSWORD="${DEMO_ADMIN_PASSWORD:?DEMO_ADMIN_PASSWORD (the demo admin password)}"
 TMP="$(mktemp -d)"
+# STAMP only labels synthetic content; credentials come from a CSPRNG.
 STAMP="$(date +%s)$RANDOM"
-CUSTOMER="e2e-live-$STAMP@example.com"
-CUSTOMER_PASSWORD="Live-Check-$STAMP-Pass"
+CUSTOMER="e2e-live-$(python3 -c 'import secrets; print(secrets.token_hex(8))')@example.com"
+CUSTOMER_PASSWORD="$(python3 -c 'import secrets; print(secrets.token_urlsafe(24))')"
+REGISTERED=""
 LISTING=""
-trap 'cleanup; rm -rf "$TMP"' EXIT
+# Keep the script's own exit status: cleanup must never turn a pass into a fail
+# (or hide a failure).
+# shellcheck disable=SC2154  # rc is assigned inside the trap string
+trap 'rc=$?; set +e; cleanup; rm -rf "$TMP"; exit "$rc"' EXIT
 
 pass=0
 ok() { pass=$((pass + 1)); echo "  ✓ $*"; }
@@ -39,16 +49,34 @@ code_of() { # who METHOD path [json] -> HTTP status
   curl "${args[@]}"
 }
 anon() { curl -fsS --max-time 90 "$WEB/api/v1$1"; }
-login() { # who email password
+# Credentials go to curl on stdin, never in its arguments (visible to other
+# processes on the runner); jq reads them from its environment, not argv.
+creds() { E="$1" P="$2" jq -nc '{email: env.E, password: env.P}'; }
+try_login() { # who email password -> curl status (no exit)
   rm -f "$(jar "$1")"
-  curl -fsS --max-time 90 -c "$(jar "$1")" -X POST "$WEB/api/v1/auth/login" \
-    -H 'Content-Type: application/json' -d "{\"email\":\"$2\",\"password\":\"$3\"}" >/dev/null \
-    || fail "login $2"
+  creds "$2" "$3" | curl -fsS --max-time 90 -c "$(jar "$1")" -X POST "$WEB/api/v1/auth/login" \
+    -H 'Content-Type: application/json' --data-binary @- >/dev/null
 }
+login() { try_login "$@" || fail "login $2"; }
 urlq() { python3 -c "import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1]))" "$1"; }
 cleanup() {
   if [ -n "$LISTING" ] && [ -f "$(jar owner)" ]; then
     code_of owner DELETE "/properties/$LISTING" >/dev/null || true
+  fi
+  # The throw-away customer cannot delete itself (no such endpoint), so the demo
+  # admin suspends it: suspended accounts cannot sign in and their sessions are
+  # revoked. Runs on success and on failure.
+  if [ -n "$REGISTERED" ]; then
+    [ -f "$(jar admin)" ] || try_login admin demo.admin@example.com "$ADMIN_PASSWORD" || true
+    local id
+    id=$(api admin GET "/admin/users?q=$(urlq "$CUSTOMER")" 2>/dev/null \
+      | jq -r --arg e "$CUSTOMER" '[.items[] | select(.email == $e)][0].id // empty' 2>/dev/null)
+    if [ -n "$id" ] \
+      && [ "$(code_of admin POST "/admin/users/$id/suspend" '{"reason":"live acceptance throw-away account"}')" = 200 ]; then
+      echo "  ✓ cleanup: throw-away customer suspended"
+    else
+      echo "::warning title=live acceptance cleanup::could not suspend the throw-away customer"
+    fi
   fi
 }
 
@@ -145,8 +173,10 @@ anon "/search/properties?near_lat=$lat&near_lon=$lon&radius_km=3&sort=distance" 
 ok "details, webp image, map points/clusters ($(jq -r .meta.mode <<<"$country") at country zoom), nearby, radius search"
 
 echo "6. registration, login, logout (new synthetic customer)"
-curl -fsS -X POST "$WEB/api/v1/auth/register" -H 'Content-Type: application/json' \
-  -d "{\"email\":\"$CUSTOMER\",\"password\":\"$CUSTOMER_PASSWORD\",\"full_name\":\"زبون فحص مباشر\"}" >/dev/null \
+REGISTERED=1 # set before the request: cleanup looks the account up either way
+creds "$CUSTOMER" "$CUSTOMER_PASSWORD" | jq -c '. + {full_name: "زبون فحص مباشر"}' \
+  | curl -fsS -X POST "$WEB/api/v1/auth/register" -H 'Content-Type: application/json' \
+    --data-binary @- >/dev/null \
   || fail "register"
 login newcust "$CUSTOMER" "$CUSTOMER_PASSWORD"
 api newcust GET /auth/me | jq -e --arg e "$CUSTOMER" '.user.email == $e' >/dev/null || fail "me"
@@ -160,7 +190,8 @@ api newcust POST /auth/logout >/dev/null
 ok "register → login → favorite → logout; unverified accounts cannot send inquiries (email verification)"
 
 echo "7. demo accounts sign in"
-for who in admin agency agent owner customer; do login "$who" "demo.$who@example.com" "$PASSWORD"; done
+login admin demo.admin@example.com "$ADMIN_PASSWORD"
+for who in agency agent owner customer; do login "$who" "demo.$who@example.com" "$PASSWORD"; done
 AGENCY=$(api agent GET /me/agency | jq -r .id)
 [ -n "$AGENCY" ] && [ "$AGENCY" != null ] || fail "demo agent has no agency"
 ok "admin, agency owner, agent, owner, customer"

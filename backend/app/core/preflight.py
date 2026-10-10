@@ -69,6 +69,14 @@ def config_findings(settings: Settings) -> list[Finding]:
             "DEMO_PASSWORD_REJECTED",
             "DEMO_ACCOUNT_PASSWORD fails the password policy; demo seeding will stop",
         )
+    admin_password = os.environ.get("DEMO_ADMIN_PASSWORD")
+    if admin_password and (password_problems(admin_password) or admin_password == demo_password):
+        add(
+            "warning",
+            "DEMO_ADMIN_PASSWORD_REJECTED",
+            "DEMO_ADMIN_PASSWORD fails the password policy or equals DEMO_ACCOUNT_PASSWORD; "
+            "demo seeding will stop",
+        )
 
     if not prod:
         return out

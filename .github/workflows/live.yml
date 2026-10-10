@@ -10,7 +10,17 @@ name: Live site
 # Runs after CI succeeds on main (waits until Render serves that commit), on demand, and
 # daily. Public URLs live in deploy/live.env; credentials only in GitHub secrets:
 #   DEMO_ACCOUNT_PASSWORD  (same value as on Render)   SUPABASE_DB_URL (session pooler URI)
+#   DEMO_ADMIN_PASSWORD    (same value as on Render; the demo admin's own password)
 #   optional for media backup: S3_ENDPOINT_URL, S3_REGION, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY
+#
+# Trust boundary (docs/SECURITY.md, "CI and production secrets"):
+#   CI also runs for pull requests, including pull requests from forks, and the
+#   `branches: [main]` filter below matches the head branch NAME, which a fork can
+#   also call "main". So the `config` job admits a workflow_run only when CI ran for
+#   a PUSH to main of THIS repository, and schedule/manual runs only on main. It
+#   checks out main (never the triggering commit), proves the commit is already on
+#   main, and reads deploy/live.env as data instead of executing it. Jobs holding
+#   production secrets run only after that gate, on that verified commit.
 
 on:
   workflow_run:
@@ -30,45 +40,78 @@ concurrency:
   group: live-site
   cancel-in-progress: false
 
-permissions:
-  contents: read
+# Nothing by default; each job asks for what it needs.
+permissions: {}
 
 env:
   ANNOTATE: ${{ github.workspace }}/scripts/ci/annotate.sh
 
 jobs:
   config:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    if: >-
+      (github.event_name == 'workflow_run'
+        && github.event.workflow_run.conclusion == 'success'
+        && github.event.workflow_run.event == 'push'
+        && github.event.workflow_run.head_branch == 'main'
+        && github.event.workflow_run.head_repository.full_name == github.repository)
+      || ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+        && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
+      trusted: ${{ steps.urls.outputs.trusted }}
       web: ${{ steps.urls.outputs.web }}
       api: ${{ steps.urls.outputs.api }}
       sha: ${{ steps.urls.outputs.sha }}
       api_sha: ${{ steps.urls.outputs.api_sha }}
       web_sha: ${{ steps.urls.outputs.web_sha }}
     steps:
+      # Trusted code only: main, never the commit named by the event payload.
       - uses: actions/checkout@v5
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: main
           fetch-depth: 0
+          persist-credentials: false
       - id: urls
+        env:
+          WANT_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
         run: |
-          . deploy/live.env
-          echo "web=${LIVE_WEB_URL:-}" >> "$GITHUB_OUTPUT"
-          echo "api=${LIVE_API_URL:-}" >> "$GITHUB_OUTPUT"
-          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          set -euo pipefail
+          # The commit to verify must be a full commit id that is already on main.
+          if ! [[ "$WANT_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error title=trust::not a commit id"; exit 1
+          fi
+          if ! git merge-base --is-ancestor "$WANT_SHA" HEAD; then
+            echo "::error title=trust::$WANT_SHA is not on main — refusing to run with production secrets"
+            exit 1
+          fi
+          # deploy/live.env is data (KEY=value): read it, never `source` it.
+          web=$(sed -n 's/^LIVE_WEB_URL=//p' deploy/live.env | tail -n 1 | tr -d "\r\"' ")
+          api=$(sed -n 's/^LIVE_API_URL=//p' deploy/live.env | tail -n 1 | tr -d "\r\"' ")
+          for v in "$web" "$api"; do
+            if [ -n "$v" ] && ! [[ "$v" =~ ^https://[A-Za-z0-9.-]+(:[0-9]+)?$ ]]; then
+              echo "::error title=config::deploy/live.env must hold plain https origins"; exit 1
+            fi
+          done
+          echo "web=$web" >> "$GITHUB_OUTPUT"
+          echo "api=$api" >> "$GITHUB_OUTPUT"
+          echo "sha=$WANT_SHA" >> "$GITHUB_OUTPUT"
           # Render services have rootDir backend/ and frontend/: a service only
           # redeploys when a commit touches its directory.
-          echo "api_sha=$(git log -1 --format=%H -- backend)" >> "$GITHUB_OUTPUT"
-          echo "web_sha=$(git log -1 --format=%H -- frontend)" >> "$GITHUB_OUTPUT"
-          if [ -z "${LIVE_WEB_URL:-}" ] || [ -z "${LIVE_API_URL:-}" ]; then
+          echo "api_sha=$(git log -1 --format=%H "$WANT_SHA" -- backend)" >> "$GITHUB_OUTPUT"
+          echo "web_sha=$(git log -1 --format=%H "$WANT_SHA" -- frontend)" >> "$GITHUB_OUTPUT"
+          echo "trusted=true" >> "$GITHUB_OUTPUT"
+          if [ -z "$web" ] || [ -z "$api" ]; then
             echo "::notice title=live site summary::No live URLs in deploy/live.env yet — nothing to verify."
           fi
 
   deployed:
     needs: config
-    if: needs.config.outputs.web != ''
+    if: needs.config.outputs.trusted == 'true' && needs.config.outputs.web != ''
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v5
@@ -98,11 +141,15 @@ jobs:
 
   database:
     needs: [config, deployed]
+    if: needs.config.outputs.trusted == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v5
         with:
           ref: ${{ needs.config.outputs.sha }}
+          persist-credentials: false
       - name: Build the backend image
         run: docker build -q -t proptech-backend backend
       - name: Read-only audit of the live database
@@ -116,27 +163,39 @@ jobs:
 
   acceptance:
     needs: [config, deployed]
+    if: needs.config.outputs.trusted == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v5
         with:
           ref: ${{ needs.config.outputs.sha }}
+          persist-credentials: false
       - name: Deploy smoke test (existing script)
-        run: $ANNOTATE "live smoke" bash scripts/deploy/smoke.sh "${{ needs.config.outputs.web }}" "${{ needs.config.outputs.api }}"
+        env:
+          WEB_URL: ${{ needs.config.outputs.web }}
+          API_URL: ${{ needs.config.outputs.api }}
+        run: $ANNOTATE "live smoke" bash scripts/deploy/smoke.sh "$WEB_URL" "$API_URL"
       - name: Live acceptance (customer, agent, agency owner, admin)
         env:
           WEB_URL: ${{ needs.config.outputs.web }}
           API_URL: ${{ needs.config.outputs.api }}
           DEMO_ACCOUNT_PASSWORD: ${{ secrets.DEMO_ACCOUNT_PASSWORD }}
+          DEMO_ADMIN_PASSWORD: ${{ secrets.DEMO_ADMIN_PASSWORD }}
         run: $ANNOTATE "live acceptance" bash scripts/live/acceptance.sh
 
   browser:
     needs: [config, deployed]
+    if: needs.config.outputs.trusted == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v5
         with:
           ref: ${{ needs.config.outputs.sha }}
+          persist-credentials: false
       - name: Install Playwright + Chromium
         run: |
           python -m pip install --quiet playwright pillow
@@ -145,6 +204,8 @@ jobs:
         env:
           WEB_URL: ${{ needs.config.outputs.web }}
           DEMO_ACCOUNT_PASSWORD: ${{ secrets.DEMO_ACCOUNT_PASSWORD }}
+          # Only used to suspend the throw-away accounts the check registers.
+          DEMO_ADMIN_PASSWORD: ${{ secrets.DEMO_ADMIN_PASSWORD }}
         run: $ANNOTATE "live browser" python scripts/live/browser_check.py
       - uses: actions/upload-artifact@v4
         if: always()
@@ -155,27 +216,37 @@ jobs:
 
   security:
     needs: [config, deployed, acceptance]
+    if: needs.config.outputs.trusted == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v5
         with:
           ref: ${{ needs.config.outputs.sha }}
+          persist-credentials: false
       - name: Security checks against the live site
         env:
           WEB_URL: ${{ needs.config.outputs.web }}
           API_URL: ${{ needs.config.outputs.api }}
           DEMO_ACCOUNT_PASSWORD: ${{ secrets.DEMO_ACCOUNT_PASSWORD }}
+          DEMO_ADMIN_PASSWORD: ${{ secrets.DEMO_ADMIN_PASSWORD }}
         run: $ANNOTATE "live security" bash scripts/live/security.sh
 
   backup:
     needs: [config, deployed, acceptance]
-    if: github.event_name != 'workflow_dispatch' || !inputs.skip_backup
+    if: >-
+      needs.config.outputs.trusted == 'true'
+      && (github.event_name != 'workflow_dispatch' || !inputs.skip_backup)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v5
         with:
           ref: ${{ needs.config.outputs.sha }}
+          persist-credentials: false
       - name: Build images
         run: $ANNOTATE "docker build" docker compose build
       - name: Backup the live database and restore it into a fresh stack
