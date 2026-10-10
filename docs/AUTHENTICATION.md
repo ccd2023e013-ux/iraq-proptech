@@ -102,7 +102,7 @@ Client IP comes from the TCP peer; behind a reverse proxy set
 
 ## Web application
 
-- `src/middleware.ts` guards `/dashboard`, `/account`, `/admin`, `/favorites`,
+- `src/proxy.ts` (Next.js 16 proxy, formerly middleware) guards `/dashboard`, `/account`, `/admin`, `/favorites`,
   `/messages` by cookie *presence*: no cookies → `/login?next=…`; only the
   refresh cookie left → `/auth/refresh?next=…`, which renews the session
   server-side and returns the user to the page. The API still makes every

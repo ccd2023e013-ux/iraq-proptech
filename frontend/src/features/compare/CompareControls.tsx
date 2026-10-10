@@ -1,19 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { type MouseEvent, useEffect, useState } from "react";
+import { type MouseEvent, useSyncExternalStore } from "react";
 
 import type { Dictionary } from "@/i18n";
 
-import { clearCompare, onCompareChange, readCompare, toggleCompare } from "./store";
+import {
+  clearCompare,
+  compareServerSnapshot,
+  compareSnapshot,
+  onCompareChange,
+  toggleCompare,
+} from "./store";
+
+const subscribe = (onChange: () => void) => onCompareChange(() => onChange());
 
 function useCompare(): string[] {
-  const [ids, setIds] = useState<string[]>([]);
-  useEffect(() => {
-    setIds(readCompare());
-    return onCompareChange(setIds);
-  }, []);
-  return ids;
+  return useSyncExternalStore(subscribe, compareSnapshot, compareServerSnapshot);
 }
 
 export function CompareToggle({ id, dict }: { id: string; dict: Dictionary }) {

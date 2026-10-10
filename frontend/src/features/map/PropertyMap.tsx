@@ -10,7 +10,7 @@ import type {
   MapMouseEvent,
   StyleSpecification,
 } from "maplibre-gl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
@@ -372,8 +372,12 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
 export function PropertyMap(props: PropertyMapProps) {
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
+  // Latest props for MapLibre's event handlers; updated after each commit (before
+  // any effect below or any later map event reads it).
   const latest = useRef(props);
-  latest.current = props;
+  useLayoutEffect(() => {
+    latest.current = props;
+  });
   const [ready, setReady] = useState(false);
   const [styleVersion, setStyleVersion] = useState(0);
   const [failed, setFailed] = useState(false);

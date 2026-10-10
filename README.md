@@ -38,7 +38,7 @@ property facts.
 | Backend | Python 3.12 · FastAPI · SQLAlchemy 2 · Alembic · Pydantic 2 |
 | Database | PostgreSQL 16 + PostGIS 3.4 (+ `pg_trgm`) |
 | Jobs | Celery on Redis |
-| Frontend | Next.js 15 (App Router) · TypeScript · Tailwind CSS 4 · Arabic RTL first |
+| Frontend | Next.js 16 (App Router) · TypeScript · Tailwind CSS 4 · Arabic RTL first |
 | Automation | n8n (optional, never required by the app) |
 | Packaging | Docker images + Docker Compose (dev / production overlays) |
 

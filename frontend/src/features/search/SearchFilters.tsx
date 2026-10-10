@@ -11,6 +11,7 @@ import { type RawParams, all, first, toApiQuery, withParam } from "@/lib/search"
 import type { Place, ReferenceItem } from "@/types/property";
 
 const PURPOSES = ["SALE", "RENT", "LEASE", "RAHN", "MUSATAHA", "EXCHANGE"] as const;
+const NO_PLACES: Place[] = [];
 const SORTS = ["newest", "price_asc", "price_desc", "area_desc", "area_asc", "relevance"] as const;
 
 export function SearchFilters({
@@ -47,17 +48,22 @@ export function SearchFilters({
     verified_only: first(params.verified_only) === "true",
     exclude_demo: first(params.exclude_demo) === "true",
   }));
-  const [cities, setCities] = useState<Place[]>([]);
+  // Cities loaded for a governorate; only shown while that governorate is chosen.
+  const [loadedCities, setLoadedCities] = useState<{ governorate: string; rows: Place[] } | null>(
+    null,
+  );
+  const cities =
+    form.governorate_id && loadedCities?.governorate === form.governorate_id
+      ? loadedCities.rows
+      : NO_PLACES;
 
   useEffect(() => {
-    if (!form.governorate_id) {
-      setCities([]);
-      return;
-    }
+    const governorate = form.governorate_id;
+    if (!governorate) return;
     let cancelled = false;
-    apiFetch<Place[]>(`/api/v1/locations/cities?governorate_id=${form.governorate_id}`)
-      .then((rows) => !cancelled && setCities(rows))
-      .catch(() => !cancelled && setCities([]));
+    apiFetch<Place[]>(`/api/v1/locations/cities?governorate_id=${governorate}`)
+      .then((rows) => !cancelled && setLoadedCities({ governorate, rows }))
+      .catch(() => !cancelled && setLoadedCities({ governorate, rows: NO_PLACES }));
     return () => {
       cancelled = true;
     };

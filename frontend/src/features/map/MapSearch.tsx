@@ -81,7 +81,7 @@ export function MapSearch({
   const [placeGroups, setPlaceGroups] = useState<Set<string>>(new Set());
   const [showAreas, setShowAreas] = useState(true);
   const [satellite, setSatellite] = useState(false);
-  const [pois, setPois] = useState<FeatureCollection | null>(null);
+  const [loadedPois, setPois] = useState<FeatureCollection | null>(null);
   const [future, setFuture] = useState(first(params.layer) === "future");
   const [projects, setProjects] = useState<FeatureCollection | null>(null);
   const [project, setProject] = useState<Record<string, unknown> | null>(null);
@@ -98,8 +98,13 @@ export function MapSearch({
   useLayoutEffect(() => {
     mode.current = { follow: followMap, drawing: drawing !== null };
   }, [followMap, drawing]);
+
+  // Committed URL params for timers and event handlers (never a render that was
+  // discarded or is still pending).
   const paramsRef = useRef(params);
-  paramsRef.current = params;
+  useLayoutEffect(() => {
+    paramsRef.current = params;
+  }, [params]);
 
   // Map data for the current filters (the query string minus pagination/sort).
   const dataQuery = useMemo(() => {
@@ -136,11 +141,11 @@ export function MapSearch({
     return q.toString();
   }, [placeGroups, viewport]);
 
+  // Kept while the area changes (no flicker on pan); hidden when places are off.
+  const pois = placesQuery ? loadedPois : null;
+
   useEffect(() => {
-    if (!placesQuery) {
-      setPois(null);
-      return;
-    }
+    if (!placesQuery) return;
     let stale = false;
     const handle = setTimeout(() => {
       apiFetch<Poi[]>(`/api/v1/pois?${placesQuery}`)
