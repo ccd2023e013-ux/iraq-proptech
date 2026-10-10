@@ -21,6 +21,7 @@ import os
 import secrets
 import statistics
 import sys
+import time  # noqa: F401 — kept: stage-8-market's market matrix paces requests with it
 import urllib.parse
 import urllib.request
 from pathlib import Path
