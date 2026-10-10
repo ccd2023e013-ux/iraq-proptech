@@ -212,22 +212,22 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
+const NO_PLACES: Place[] = [];
+
+/** Places at `path`; empty while there is no path or its rows have not loaded yet. */
 function usePlaces(path: string | null): Place[] {
-  const [places, setPlaces] = useState<Place[]>([]);
+  const [loaded, setLoaded] = useState<{ path: string; rows: Place[] } | null>(null);
   useEffect(() => {
-    if (!path) {
-      setPlaces([]);
-      return;
-    }
+    if (!path) return;
     let cancelled = false;
     apiFetch<Place[]>(path)
-      .then((rows) => !cancelled && setPlaces(rows))
-      .catch(() => !cancelled && setPlaces([]));
+      .then((rows) => !cancelled && setLoaded({ path, rows }))
+      .catch(() => !cancelled && setLoaded({ path, rows: NO_PLACES }));
     return () => {
       cancelled = true;
     };
   }, [path]);
-  return places;
+  return path && loaded?.path === path ? loaded.rows : NO_PLACES;
 }
 
 export function ListingForm({

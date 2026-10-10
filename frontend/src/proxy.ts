@@ -6,8 +6,10 @@ import { ACCESS_COOKIE, REFRESH_COOKIE, guardDecision } from "@/lib/auth/routing
  * Route guard based on cookie *presence* only (cheap, no network). The real
  * authorization decision is always made by the API; pages that need the user
  * fetch /auth/me on the server and handle 401/403 themselves.
+ *
+ * Next.js 16 "proxy" (formerly middleware); it runs on the Node.js runtime.
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const decision = guardDecision(
     pathname,

@@ -3,14 +3,16 @@ import type { NextConfig } from "next";
 const isDev = process.env.NODE_ENV !== "production";
 
 // Map tiles/styles are runtime-configurable (MAP_STYLE_URL), so images, fonts
-// and fetches may come from any https origin; scripts may not (except the
-// MapLibre RTL-text plugin, loaded by the map's blob workers from unpkg).
+// and fetches may come from any https origin; scripts may not. (No third-party
+// script origin at all since MapLibre 6: its worker is served by this site and
+// Arabic labels need no RTL-text plugin from unpkg any more.)
 // Next.js needs inline scripts for hydration; the dev server also needs eval
 // and its websocket.
 const contentSecurityPolicy = [
   "default-src 'self'",
-  // 'wasm-unsafe-eval' allows WebAssembly (MapLibre's Arabic RTL-text plugin) but not JS eval.
-  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://unpkg.com${isDev ? " 'unsafe-eval'" : ""}`,
+  // 'wasm-unsafe-eval' allows WebAssembly but not JS eval (kept until it is verified
+  // that no MapLibre 6 decoder needs WebAssembly; it was added for the RTL plugin).
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob:${isDev ? " 'unsafe-eval'" : ""}`,
   "worker-src 'self' blob:",
   "child-src 'self' blob:",
   "style-src 'self' 'unsafe-inline'",

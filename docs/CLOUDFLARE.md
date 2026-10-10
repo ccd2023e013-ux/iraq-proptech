@@ -8,7 +8,7 @@ the frontend runs as the same Docker image on Render (or any container host).
 
 | Requirement of this frontend | On Cloudflare |
 | --- | --- |
-| Next.js 15 server rendering, middleware, route handlers | Needs the OpenNext Cloudflare adapter (`@opennextjs/cloudflare`) and a Workers build; the older `next-on-pages` path for Pages is deprecated |
+| Next.js 16 server rendering, proxy (formerly middleware), route handlers | Needs the OpenNext Cloudflare adapter (`@opennextjs/cloudflare`) and a Workers build; the older `next-on-pages` path for Pages is deprecated |
 | Streaming request-body proxy (`/api/v1/*` → API, `duplex: "half"`, multipart uploads up to 100 MB) | Workers' request-size and CPU limits on the free plan are far below a 100 MB video upload |
 | One artifact for every environment (`output: "standalone"` Docker image) | Would require a second, Cloudflare-specific build to maintain and test |
 

@@ -147,6 +147,20 @@ jobs:
         run: $ANNOTATE "listing smoke" bash scripts/ci/smoke-listing.sh
       - name: GIS end-to-end (demo seed, map GeoJSON, resolve, map page)
         run: $ANNOTATE "map smoke" bash scripts/ci/smoke-map.sh
+      - name: Map in a real browser (MapLibre, pre-merge)
+        run: $ANNOTATE "map browser" bash scripts/ci/map-browser.sh
+      - name: Map screenshots (artifact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: map-screenshots
+          path: |
+            screenshots/map-*.png
+            screenshots/future*.png
+            screenshots/maplibre-*.png
+            screenshots/maplibre-states.json
+          if-no-files-found: warn
+          retention-days: 30
       - name: Final acceptance scenario (16 steps, agency/agent/customer/admin, mock AI)
         run: $ANNOTATE "e2e final" bash scripts/ci/e2e-final.sh
       - name: Market intelligence in a real browser (Stage 8, pre-merge)

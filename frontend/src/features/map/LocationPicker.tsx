@@ -3,13 +3,14 @@
 import "maplibre-gl/dist/maplibre-gl.css";
 
 import type { LngLatBoundsLike, Map as MapLibreMap, Marker, StyleSpecification } from "maplibre-gl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
 import { apiFetch } from "@/lib/api/client";
 import type { MapConfig } from "@/lib/map/provider";
+import { maplibreWorkerUrl } from "@/lib/map/worker";
 
 interface PlaceSummary {
   id: string;
@@ -52,8 +53,14 @@ export function LocationPicker({
   const mapRef = useRef<MapLibreMap | null>(null);
   const markerRef = useRef<Marker | null>(null);
   const onPickRef = useRef(onPick);
-  onPickRef.current = onPick;
-  const [resolved, setResolved] = useState<Resolved | null>(null);
+  useLayoutEffect(() => {
+    onPickRef.current = onPick;
+  });
+  const valid = lat !== null && lon !== null && Number.isFinite(lat) && Number.isFinite(lon);
+  const point = valid ? `${lat},${lon}` : null;
+  // The area resolved for a point; shown only while that point is still the one typed.
+  const [lookup, setLookup] = useState<{ point: string; area: Resolved | null } | null>(null);
+  const resolved = point && lookup?.point === point ? lookup.area : null;
   const [outside, setOutside] = useState(false);
   const f = dict.listingForm;
 
@@ -63,6 +70,7 @@ export function LocationPicker({
     (async () => {
       const maplibre = await import("maplibre-gl");
       if (cancelled || !container.current) return;
+      maplibre.setWorkerUrl(maplibreWorkerUrl(maplibre.getVersion()));
       const start = lat !== null && lon !== null;
       map = new maplibre.Map({
         container: container.current,
@@ -98,10 +106,7 @@ export function LocationPicker({
 
   // Keep marker in sync with typed coordinates and resolve the area.
   useEffect(() => {
-    if (lat === null || lon === null || !Number.isFinite(lat) || !Number.isFinite(lon)) {
-      setResolved(null);
-      return;
-    }
+    if (lat === null || lon === null || !Number.isFinite(lat) || !Number.isFinite(lon)) return;
     const map = mapRef.current;
     if (map && markerRef.current) markerRef.current.setLngLat([lon, lat]).addTo(map);
     let cancelled = false;
@@ -109,12 +114,12 @@ export function LocationPicker({
       apiFetch<Resolved>(`/api/v1/locations/resolve?lat=${lat}&lon=${lon}`)
         .then((r) => {
           if (cancelled) return;
-          setResolved(r);
+          setLookup({ point: `${lat},${lon}`, area: r });
           setOutside(false);
         })
         .catch(() => {
           if (cancelled) return;
-          setResolved(null);
+          setLookup({ point: `${lat},${lon}`, area: null });
           setOutside(true);
         });
     }, 300);

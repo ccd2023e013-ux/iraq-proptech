@@ -20,7 +20,24 @@ export function readCompare(): string[] {
   }
 }
 
+// The selection as last read or written, so a React store snapshot is a stable
+// array (and so a selection survives in memory when storage is unavailable).
+let snapshot: string[] | null = null;
+const EMPTY: string[] = [];
+
+/** Current selection for `useSyncExternalStore` (same array until it changes). */
+export function compareSnapshot(): string[] {
+  if (snapshot === null) snapshot = readCompare();
+  return snapshot;
+}
+
+/** Server render / hydration snapshot: storage is per browser, so empty. */
+export function compareServerSnapshot(): string[] {
+  return EMPTY;
+}
+
 function write(ids: string[]): void {
+  snapshot = ids;
   try {
     window.localStorage.setItem(KEY, JSON.stringify(ids));
   } catch {
@@ -44,7 +61,11 @@ export function clearCompare(): void {
 
 export function onCompareChange(listener: (ids: string[]) => void): () => void {
   const handler = (event: Event) => listener((event as CustomEvent<string[]>).detail);
-  const storage = (event: StorageEvent) => event.key === KEY && listener(readCompare());
+  const storage = (event: StorageEvent) => {
+    if (event.key !== KEY) return;
+    snapshot = readCompare();
+    listener(snapshot);
+  };
   window.addEventListener(EVENT, handler);
   window.addEventListener("storage", storage);
   return () => {
