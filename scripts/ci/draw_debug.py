@@ -64,10 +64,25 @@ HOOK = r"""
     } catch (e) {}
     if (!rsc) return realFetch(input, init);
     const sig = (init && init.signal) || (input instanceof Request ? input.signal : undefined);
-    log('fetch>', u, 'signal=' + !!sig, '|', stack());
+    let tree = '';
+    try {
+      const h = new Headers((init && init.headers) || (input instanceof Request ? input.headers : undefined));
+      tree = decodeURIComponent(h.get('Next-Router-State-Tree') || '');
+    } catch (e) {}
+    const kind = tree.includes('refetch') ? 'LAZY(refetch-marker)' : 'NAV';
+    log('fetch>', kind, u, 'signal=' + !!sig, '|', stack());
+    log('tree>', tree.replace(/"/g, '').slice(0, 330));
     if (sig) sig.addEventListener('abort', () => log('signal-abort', u, String(sig.reason).slice(0, 90)));
     return realFetch(input, init).then(
-      (r) => { log('fetch<', r.status, u); return r; },
+      (r) => {
+        log('fetch<', r.status, u);
+        try {
+          r.clone().text().then(
+            (b) => log('body', b.length + 'B', JSON.stringify(b.slice(0, 260))),
+            (e) => log('body!', String(e).slice(0, 90)));
+        } catch (e) {}
+        return r;
+      },
       (e) => { log('fetch!', u, String(e).slice(0, 90)); throw e; });
   };
   const abort = AbortController.prototype.abort;
