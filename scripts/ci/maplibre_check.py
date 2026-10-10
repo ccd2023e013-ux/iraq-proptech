@@ -257,6 +257,62 @@ def state(browser: Browser, *, lang: str, scheme: str, phone: bool, errors: list
     }
 
 
+DRAW_ATTEMPTS = 6
+
+
+def draw_area(browser: Browser) -> None:
+    """Draw-area search, repeated: finishing a drawn area must always land on a
+    polygon URL (a late viewport update must never replace it). Logs every URL
+    the page commits so a failure shows what overwrote what."""
+    passed = 0
+    for attempt in range(1, DRAW_ATTEMPTS + 1):
+        ctx = browser.new_context(viewport={"width": 1366, "height": 900}, locale="en-US")
+        ctx.add_init_script(DIAGNOSTIC_HOOK)
+        page = ctx.new_page()
+        urls: list[str] = []
+        page.on(
+            "framenavigated",
+            lambda f, urls=urls, page=page: (
+                urls.append(f.url.replace(WEB, "")[:140]) if f == page.main_frame else None
+            ),
+        )
+        page.goto(WEB + BASRA, wait_until="load", timeout=120_000)
+        if poll_bubbles(page) == 0:
+            check(False, f"[draw {attempt}] map drew no bubbles")
+            ctx.close()
+            continue
+        page.locator("[data-testid=draw-area]").click()
+        box = page.locator("[data-testid=map-canvas]").bounding_box()
+        if box is None:
+            check(False, f"[draw {attempt}] map has no bounding box")
+            ctx.close()
+            continue
+        cx, cy = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
+        for dx, dy in ((-120, -90), (130, -80), (0, 120)):
+            page.mouse.click(cx + dx, cy + dy)
+            page.wait_for_timeout(700)
+        page.locator("[data-testid=finish-area]").click()
+        landed = False
+        for _ in range(30):
+            if "polygon=" in page.url:
+                landed = True
+                break
+            page.wait_for_timeout(500)
+        page.wait_for_timeout(2_000)  # a late viewport update would replace it here
+        kept = "polygon=" in page.url
+        ok = landed and kept
+        passed += int(ok)
+        print(
+            f"  {'✓' if ok else '✗'} [draw {attempt}] landed={landed} kept={kept} urls={urls[-6:]}",
+            flush=True,
+        )
+        ctx.close()
+    check(
+        passed == DRAW_ATTEMPTS,
+        f"draw-area search lands on and keeps the polygon URL ({passed}/{DRAW_ATTEMPTS})",
+    )
+
+
 def theme_switch(browser: Browser, errors: list[str]) -> None:
     """Switching the site theme swaps the basemap (setStyle); overlays must return."""
     ctx = browser.new_context(viewport={"width": 1440, "height": 900}, color_scheme="light")
@@ -298,6 +354,10 @@ def main() -> int:
             theme_switch(browser, errors)
         except Exception as exc:  # recorded, run continues
             check(False, f"[theme] crashed: {type(exc).__name__}: {exc}"[:300])
+        try:
+            draw_area(browser)
+        except Exception as exc:  # recorded, run continues
+            check(False, f"[draw] crashed: {type(exc).__name__}: {exc}"[:300])
         browser.close()
 
     csp = [e for e in errors if "Content Security Policy" in e or "Refused to" in e]
