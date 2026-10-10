@@ -132,7 +132,8 @@ export function MapPreview({
           if (p.label) el.textContent = p.label;
           new maplibre.Marker({ element: el }).setLngLat([p.lon, p.lat]).addTo(m);
         }
-        setReady(true);
+        // Fade in once the tiles are drawn, not while the basemap is half-loaded.
+        m.once("idle", () => setReady(true));
       });
     })().catch(() => undefined);
     return () => {
