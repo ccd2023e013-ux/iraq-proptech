@@ -1,0 +1,133 @@
+name: Design preview (isolated, temporary)
+
+# Isolated, throwaway preview of the design/premium-redesign branch for phone
+# review. Runs the same Docker stack as CI on a standard GitHub-hosted runner,
+# seeds clearly-labelled DEMO data, and exposes ONLY the web frontend through a
+# Cloudflare quick tunnel (random https://*.trycloudflare.com URL, no account).
+#
+# Isolation: no repository secrets are used; the database, media and Redis live
+# in this runner's containers and are destroyed when the job ends; JWT and demo
+# passwords are generated per run. Production (Render/Supabase) is never
+# contacted. The preview URL is published as a commit status ("design-preview")
+# and a notice. Demo passwords are only published encrypted to the reviewer's key.
+#
+# A run lives for up to ~5h40m; re-run the job for a fresh URL.
+
+on:
+  push:
+    branches: ["design/premium-redesign"]
+
+permissions: {}
+
+concurrency:
+  group: design-preview
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    if: github.ref == 'refs/heads/design/premium-redesign'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      statuses: write   # publish the preview URL as a commit status
+    timeout-minutes: 350
+    env:
+      APP_ENV: development
+      MAP_DEFAULT_BBOX: 47.65,30.40,47.95,30.62
+      TRUSTED_PROXY_HOPS: "0"
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Per-run secrets (never printed)
+        run: |
+          gen() { printf '%s-Mk7!' "$(openssl rand -base64 24 | tr -d '/+=' | cut -c1-20)"; }
+          {
+            echo "JWT_SECRET=$(openssl rand -hex 48)"
+            echo "POSTGRES_PASSWORD=$(openssl rand -hex 24)"
+            echo "DEMO_ACCOUNT_PASSWORD=$(gen)"
+            echo "DEMO_ADMIN_PASSWORD=$(gen)"
+          } > /tmp/preview.env
+          while IFS='=' read -r k v; do echo "::add-mask::$v"; echo "$k=$v" >> "$GITHUB_ENV"; done < /tmp/preview.env
+          rm /tmp/preview.env
+
+      - name: Build images
+        run: docker compose build
+
+      - name: Start stack
+        run: STACK_TIMEOUT=420 bash scripts/ci/wait-for-stack.sh
+
+      - name: Seed DEMO data (national dataset, Basra map data, Future Iraq layer)
+        run: |
+          docker compose exec -T -e DEMO_ACCOUNT_PASSWORD -e DEMO_ADMIN_PASSWORD backend \
+            python -m app.cli seed-demo-iraq --per-city 18
+          docker compose exec -T backend python -m app.cli seed-demo --listings 30
+          docker compose exec -T backend python -m app.cli import-development --dataset basra
+
+      - name: Open the tunnel
+        id: tunnel
+        run: |
+          curl -fsSL -o /tmp/cloudflared \
+            https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
+          chmod +x /tmp/cloudflared
+          nohup /tmp/cloudflared tunnel --no-autoupdate --url http://localhost:3000 > /tmp/tunnel.log 2>&1 &
+          for _ in $(seq 1 60); do
+            url=$(grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' /tmp/tunnel.log | head -1 || true)
+            [ -n "$url" ] && break
+            sleep 2
+          done
+          [ -n "$url" ] || { tail -20 /tmp/tunnel.log; exit 1; }
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          # Wait until the public URL actually serves the app.
+          for _ in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$url/healthz" || true)
+            [ "$code" = "200" ] && break
+            sleep 3
+          done
+          echo "public /healthz: $code"
+
+      - name: Publish the preview URL
+        env:
+          URL: ${{ steps.tunnel.outputs.url }}
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          home=$(curl -s -o /dev/null -w '%{http_code}' "$URL/" || true)
+          map=$(curl -s -o /dev/null -w '%{http_code}' "$URL/map" || true)
+          echo "::notice title=Design preview URL::$URL (home $home, map $map; live until this job ends)"
+          gh api "repos/$REPO/statuses/$SHA" -f state=success -f context=design-preview \
+            -f target_url="$URL" -f description="Live preview (home $home, map $map) — ends when the job ends" >/dev/null
+          # Demo account passwords, encrypted to the reviewer's public key only.
+          cat > /tmp/reviewer.pub <<'KEY'
+          -----BEGIN PUBLIC KEY-----
+          MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEA0wtwggUgFkPNKjrt5X9C
+          MUUeQoJvMeODfAeFNhzLwm6Wjz+SCGTQ/Tq8UvyoUKCK/UjDpc81jTb30Ydq3vB0
+          h90dGVq6PDseZXBjfVhjs3FtimhF+w85XiR2BH/yHFcXzQLAowy9lu90Lp8B2lqF
+          c/cFB+vq6tLQ67IeT2Y75i8rsInkjz6z1zxyHdONvWbNJRMhwST8E/DHLtLP8x3B
+          Vt5YxleLZtgadnxsicb2ZfOMX3pgzCaU8eBd8B7lqgu8p6OrOpSXbxMGlcqQ7Dmw
+          MQUR6BQA/WpJThVm8+pxOzPeqxirUkaxGrLMY1D8IvZPCdhLVfAZ/3nv68JC8LDc
+          8hlz/fyLWRoGYnYni+GU8BcRIc4P/XdhJWU65/gjTqnM8SUACM3GmzxoM7hUmlqb
+          gx+NW+yuk+blw0CmCNTSC+3zAOsuFX089sX6/bRbq7Yr2F++iCQSOLX4d8fnKtSk
+          WgOKB0T9LDd3yvHRdq13zMklI+8gjXv8ZnR5eGoZq90pAgMBAAE=
+          -----END PUBLIC KEY-----
+          KEY
+          sed -i 's/^ *//' /tmp/reviewer.pub
+          enc=$(printf 'accounts=%s admin=%s' "$DEMO_ACCOUNT_PASSWORD" "$DEMO_ADMIN_PASSWORD" \
+            | openssl pkeyutl -encrypt -pubin -inkey /tmp/reviewer.pub \
+                -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256 | base64 -w0)
+          echo "::notice title=Design preview demo logins (encrypted)::$enc"
+
+      - name: Keep the preview alive
+        timeout-minutes: 330
+        env:
+          URL: ${{ steps.tunnel.outputs.url }}
+        run: |
+          end=$((320 * 60))   # the job's 350-minute limit minus set-up time
+          while (( SECONDS < end )); do
+            sleep 300
+            if ! pgrep -f "cloudflared tunnel" >/dev/null; then echo "tunnel exited"; tail -20 /tmp/tunnel.log; exit 1; fi
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$URL/healthz" || true)
+            echo "$(date -u +%H:%M) public /healthz $code"
+          done
