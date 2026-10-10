@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { TrustBadge } from "@/components/ui/TrustBadge";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
 import { apiFetch } from "@/lib/api/client";
@@ -43,7 +44,14 @@ export function PropertySummary({
   }
 
   return (
-    <Card title={`${a.summary} · ${a.badge}`}>
+    <Card
+      title={
+        <span className="flex items-center gap-2">
+          {a.summary}
+          <TrustBadge kind="ai">{a.badge}</TrustBadge>
+        </span>
+      }
+    >
       {envelope ? (
         <div className="flex flex-col gap-2" data-testid="ai-summary">
           <ProviderBadge dict={dict} provider={envelope.provider} model={envelope.model} />

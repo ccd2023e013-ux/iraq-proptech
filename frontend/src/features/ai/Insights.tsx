@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/Card";
+import { TrustBadge } from "@/components/ui/TrustBadge";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
 import { serverApiFetch } from "@/lib/api/server";
@@ -64,7 +65,14 @@ export async function Insights({
   const money = (v: string | null) => (v ? formatPrice(v, p.currency, locale) : "—");
 
   return (
-    <Card title={`${a.insights} · ${a.estimate}`}>
+    <Card
+      title={
+        <span className="flex items-center gap-2">
+          {a.insights}
+          <TrustBadge kind="estimate">{a.estimate}</TrustBadge>
+        </span>
+      }
+    >
       <div className="flex flex-col gap-4">
         <ProviderBadge dict={dict} provider={price.provider} model={price.model} />
         <section aria-label={a.priceAnalysis}>
