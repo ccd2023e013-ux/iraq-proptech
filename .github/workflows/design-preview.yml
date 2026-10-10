@@ -28,7 +28,7 @@ jobs:
     if: github.ref == 'refs/heads/design/premium-redesign'
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write   # push review screenshots to a new screenshots/design-* branch
       statuses: write   # publish the preview URL as a commit status
     timeout-minutes: 350
     env:
@@ -118,6 +118,32 @@ jobs:
             | openssl pkeyutl -encrypt -pubin -inkey /tmp/reviewer.pub \
                 -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256 | base64 -w0)
           echo "::notice title=Design preview demo logins (encrypted)::$enc"
+
+      - name: Design review screenshots
+        continue-on-error: true
+        env:
+          URL: ${{ steps.tunnel.outputs.url }}
+        run: |
+          python -m pip install --quiet playwright
+          python -m playwright install --with-deps chromium >/dev/null
+          WEB_URL=http://localhost:3000 PUBLIC_URL="$URL" OUT=/tmp/shots python scripts/design/shots.py
+
+      - name: Push screenshots to screenshots/design-${{ github.run_id }}-${{ github.run_attempt }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BRANCH: screenshots/design-${{ github.run_id }}-${{ github.run_attempt }}
+          SHA: ${{ github.sha }}
+        run: |
+          cd /tmp/shots
+          git init -q -b "$BRANCH"
+          git config user.name "design-preview"
+          git config user.email "design-preview@users.noreply.github.com"
+          git add -A
+          git commit -qm "design screenshots for $SHA"
+          git push -q "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:refs/heads/$BRANCH"
+          echo "::notice title=Design screenshots::branch $BRANCH"
 
       - name: Keep the preview alive
         timeout-minutes: 330
