@@ -97,4 +97,11 @@ describe("geo helpers", () => {
     expect(readBboxProperty([1, 2, 3, 4])).toEqual([1, 2, 3, 4]);
     expect(readBboxProperty("nope")).toBeNull();
   });
+
+  it("reads bbox properties in MapLibre 6's tagged nested-value form", () => {
+    expect(readBboxProperty("__$json__[47.1,30.1,47.9,30.9]")).toEqual([47.1, 30.1, 47.9, 30.9]);
+    expect(readBboxProperty("__$json__nope")).toBeNull();
+    expect(readBboxProperty("__$json__[1,2,3]")).toBeNull();
+    expect(readBboxProperty({ bbox: [1, 2, 3, 4] })).toBeNull();
+  });
 });

@@ -38,9 +38,17 @@ export function closedRing(points: LonLat[]): LonLat[] {
   return [...points, firstPoint];
 }
 
-/** MapLibre stringifies nested GeoJSON properties; accept both forms. */
+// MapLibre 6 tags nested GeoJSON values with this marker when it serialises
+// them for the worker (and parses them back); accept the tagged form as well.
+const MAPLIBRE_JSON_TAG = "__$json__";
+
+/** MapLibre stringifies nested GeoJSON properties; accept every form. */
 export function readBboxProperty(value: unknown): Bbox | null {
-  const raw = typeof value === "string" ? safeJson(value) : value;
+  const text =
+    typeof value === "string" && value.startsWith(MAPLIBRE_JSON_TAG)
+      ? value.slice(MAPLIBRE_JSON_TAG.length)
+      : value;
+  const raw = typeof text === "string" ? safeJson(text) : text;
   if (Array.isArray(raw) && raw.length === 4 && raw.every((n) => typeof n === "number")) {
     return raw as Bbox;
   }
