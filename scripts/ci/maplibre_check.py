@@ -34,6 +34,32 @@ OUT = Path("screenshots")
 OUT.mkdir(exist_ok=True)
 FAILURES: list[str] = []
 
+# Installed before any page script runs (via CDP, so the site's CSP does not
+# apply): logs what an uncaught error or unhandled rejection really was, since
+# Playwright reports non-Error reasons only as "Error" without a stack.
+DIAGNOSTIC_HOOK = """
+(() => {
+  const what = (v) => {
+    try {
+      if (v instanceof Error) {
+        const top = (v.stack || '').split('\\n').slice(0, 4).join(' | ');
+        return `${v.name}: ${v.message} @ ${top}`;
+      }
+      if (v instanceof Event) {
+        const t = v.target || {};
+        return `Event(${v.type}) target=${t.constructor && t.constructor.name} ` +
+          `src=${t.src || t.url || t.href || ''} msg=${v.message || ''}`;
+      }
+      return `${Object.prototype.toString.call(v)} ${JSON.stringify(v)}`.slice(0, 300);
+    } catch (e) { return String(v); }
+  };
+  addEventListener('unhandledrejection',
+    (e) => console.error('[diag] unhandledrejection ' + what(e.reason)));
+  addEventListener('error', (e) => console.error('[diag] error ' + what(e.error || e) +
+    ` file=${e.filename || ''}:${e.lineno || ''}:${e.colno || ''}`), true);
+})();
+"""
+
 
 def describe(error: Exception) -> str:
     """Name, message and the top of the stack of an uncaught page error."""
@@ -108,6 +134,7 @@ def state(browser: Browser, *, lang: str, scheme: str, phone: bool, errors: list
             {"name": "theme", "value": scheme, "url": WEB},
         ]
     )
+    ctx.add_init_script(DIAGNOSTIC_HOOK)
     page = ctx.new_page()
     page.on("pageerror", lambda e: errors.append(f"[{tag}] pageerror: {describe(e)}"))
     page.on(
@@ -219,6 +246,7 @@ def theme_switch(browser: Browser, errors: list[str]) -> None:
     """Switching the site theme swaps the basemap (setStyle); overlays must return."""
     ctx = browser.new_context(viewport={"width": 1440, "height": 900}, color_scheme="light")
     ctx.add_cookies([{"name": "theme", "value": "light", "url": WEB}])
+    ctx.add_init_script(DIAGNOSTIC_HOOK)
     page = ctx.new_page()
     page.on("pageerror", lambda e: errors.append(f"[theme] pageerror: {describe(e)}"))
     page.goto(WEB + BASRA, wait_until="load", timeout=120_000)
