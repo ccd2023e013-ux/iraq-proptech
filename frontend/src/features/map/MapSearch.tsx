@@ -237,6 +237,27 @@ export function MapSearch({
 
   useEffect(() => () => void (timer.current && clearTimeout(timer.current)), []);
 
+  // The layers panel closes like a popover: on a tap outside it or on Escape.
+  const layersRef = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    const close = (event: Event) => {
+      const panel = layersRef.current;
+      if (!panel?.open) return;
+      if (event instanceof KeyboardEvent) {
+        if (event.key !== "Escape") return;
+      } else if (panel.contains(event.target as Node)) {
+        return;
+      }
+      panel.open = false;
+    };
+    document.addEventListener("pointerdown", close);
+    document.addEventListener("keydown", close);
+    return () => {
+      document.removeEventListener("pointerdown", close);
+      document.removeEventListener("keydown", close);
+    };
+  }, []);
+
   /** Drop a viewport (`bbox`) update still waiting in the debounce. */
   function cancelViewportUpdate() {
     if (timer.current) clearTimeout(timer.current);
@@ -536,7 +557,7 @@ export function MapSearch({
 
       {/* Map tools: a floating column on the end side. */}
       <div className="absolute end-3 top-[calc(var(--map-top)+0.75rem)] z-[var(--z-float)] flex flex-col items-end gap-2 lg:end-4">
-        <details className="group relative" data-testid="map-layers">
+        <details ref={layersRef} className="group relative z-20" data-testid="map-layers">
           <summary className="press surface-float flex h-10 cursor-pointer list-none items-center gap-2 rounded-full px-3.5 text-sm font-medium text-ink [&::-webkit-details-marker]:hidden">
             <Icon name="layers" className="size-[18px] text-spatial" />
             <span className="max-sm:sr-only">{m.layers}</span>
