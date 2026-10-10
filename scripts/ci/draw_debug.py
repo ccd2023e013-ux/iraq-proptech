@@ -246,7 +246,7 @@ HOOK = r"""
 
 
 def attempt(
-    browser, n: int, forced: bool, delay_ms: int | None = None
+    browser, n: int, forced: bool, delay_ms: int | None = None, throttle: float = 1
 ) -> tuple[bool, list[str], bool]:
     ctx = browser.new_context(viewport={"width": 1366, "height": 900}, locale="en-US")
     ctx.add_init_script(HOOK)
@@ -309,6 +309,12 @@ def attempt(
     for dx, dy in ((-120, -90), (130, -80), (0, 120)):
         page.mouse.click(cx + dx, cy + dy)
         page.wait_for_timeout(700)
+    if throttle > 1:
+        # Slow the renderer's CPU from here on: React's render of the navigation
+        # takes longer, so the RSC response lands while it is still rendering.
+        cdp = ctx.new_cdp_session(page)
+        cdp.send("Emulation.setCPUThrottlingRate", {"rate": throttle})
+        log.append(f"[pw] {stamp()} cpu throttle x{throttle}")
     log.append(f"[pw] {stamp()} ---- click Finish")
     page.locator("[data-testid=finish-area]").click()
     ok = False
@@ -432,7 +438,39 @@ def split_sweep(configs: list[str], reps: int) -> int:
     return 0
 
 
+def throttle_sweep(rates: list[float], reps: int) -> int:
+    rows: list[str] = []
+    first_fail: tuple[str, list[str]] | None = None
+    with sync_playwright() as p:
+        browser = p.chromium.launch(
+            args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
+        )
+        for rate in rates:
+            marks = []
+            for r in range(reps):
+                ok, log, _ = attempt(browser, r + 1, False, None, rate)
+                marks.append("P" if ok else "F")
+                print(f"throttle x{rate} rep {r + 1}: {'PASS' if ok else 'FAIL'}", flush=True)
+                if not ok and first_fail is None:
+                    first_fail = (f"x{rate}", log)
+            rows.append(f"x{rate}: {marks.count('P')}/{reps} {''.join(marks)}")
+        browser.close()
+    print("::notice title=draw debug cpu-throttle sweep::" + " | ".join(rows), flush=True)
+    if first_fail:
+        i = max((k for k, line in enumerate(first_fail[1]) if "map ready" in line), default=0)
+        text = " ⏎ ".join(
+            line if line.startswith("[post]") else line.split(" | at ")[0]
+            for line in first_fail[1][i:]
+            if "tree>" not in line
+        )
+        print(f"::notice title=draw debug throttle FAIL {first_fail[0]}::{text[:9000]}", flush=True)
+    return 0
+
+
 def main() -> int:
+    if os.environ.get("THROTTLES"):
+        rates = [float(x) for x in os.environ["THROTTLES"].split(",")]
+        return throttle_sweep(rates, int(os.environ.get("REPS", "8")))
     if os.environ.get("SPLITS"):
         return split_sweep(os.environ["SPLITS"].split(","), int(os.environ.get("REPS", "4")))
     if os.environ.get("DELAYS"):
