@@ -79,31 +79,34 @@ def suspend_throwaway_accounts() -> None:
         with opener.open(request, timeout=90) as response:
             return json.loads(response.read() or b"{}")
 
-    suspended = 0
+    suspended = never_registered = 0
     try:
         call("POST", "/auth/login", {"email": "demo.admin@example.com", "password": admin_password})
         csrf = next((c.value for c in jar if c.name == "csrf_token"), "") or ""
         for email in CREATED_ACCOUNTS:
             listing = call("GET", "/admin/users?q=" + urllib.parse.quote(email))
-            for user in listing.get("items", []):
-                if user.get("email") == email:
-                    call(
-                        "POST",
-                        f"/admin/users/{user['id']}/suspend",
-                        {"reason": "live browser check throw-away account"},
-                        csrf,
-                    )
-                    suspended += 1
+            matches = [u for u in listing.get("items", []) if u.get("email") == email]
+            if not matches:
+                never_registered += 1  # the run stopped before submitting the form
+            for user in matches:
+                call(
+                    "POST",
+                    f"/admin/users/{user['id']}/suspend",
+                    {"reason": "live browser check throw-away account"},
+                    csrf,
+                )
+                suspended += 1
     except Exception as exc:  # cleanup must not hide the real result
         print(
             f"::warning title=live browser cleanup::suspension stopped ({type(exc).__name__})",
             flush=True,
         )
     print(
-        f"  cleanup: {suspended}/{len(CREATED_ACCOUNTS)} throw-away account(s) suspended",
+        f"  cleanup: {suspended} throw-away account(s) suspended"
+        + (f", {never_registered} never registered" if never_registered else ""),
         flush=True,
     )
-    if suspended < len(CREATED_ACCOUNTS):
+    if suspended + never_registered < len(CREATED_ACCOUNTS):
         print(
             "::warning title=live browser cleanup::not every throw-away account was suspended",
             flush=True,
@@ -230,6 +233,9 @@ def auth_flow(browser, *, phone: bool, locale: str) -> None:
     # when the run ends (suspend_throwaway_accounts).
     email = f"e2e-browser-{secrets.token_hex(8)}-{tag}@example.com"
     password = secrets.token_urlsafe(24)
+    # Recorded before registering: cleanup looks it up whether or not the run
+    # gets as far as submitting the form.
+    CREATED_ACCOUNTS.append(email)
 
     # Pages exist (they were 404 before 2.0).
     for path in ("/login", "/register", "/forgot-password", "/reset-password", "/verify-email"):
@@ -250,7 +256,6 @@ def auth_flow(browser, *, phone: bool, locale: str) -> None:
     page.fill("input[name=email]", email)
     page.fill("input[name=password]", password)
     page.screenshot(path=str(OUT / f"register-{tag}.png"), full_page=True)
-    CREATED_ACCOUNTS.append(email)  # before submitting: cleanup looks it up either way
     with page.expect_response(lambda r: "/api/v1/auth/register" in r.url, timeout=90_000) as reg:
         page.locator("form button[type=submit]").click()
     check(reg.value.status == 201, f"[{tag}] registration accepted ({reg.value.status})")
