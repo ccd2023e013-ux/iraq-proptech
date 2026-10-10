@@ -33,7 +33,7 @@ jobs:
           python -m playwright install --with-deps chromium >/dev/null
       - name: Draw-area diagnostic (natural + forced)
         if: always()
-        run: WEB_URL=http://localhost:3000 ATTEMPTS=40 python scripts/ci/draw_debug.py
+        run: WEB_URL=http://localhost:3000 ATTEMPTS=60 python scripts/ci/draw_debug.py
       - name: Server-side view of /map renders and polygon searches
         if: always()
         run: |
