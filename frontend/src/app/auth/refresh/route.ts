@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 /**
  * Renews an expired browser session during navigation, then returns the user
- * to where they were going. Called by middleware when only the refresh cookie
+ * to where they were going. Called by the proxy (src/proxy.ts) when only the refresh cookie
  * is left. On failure the user is sent to /login with the same destination.
  */
 export async function GET(request: NextRequest) {

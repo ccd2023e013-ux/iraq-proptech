@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # End-to-end auth smoke test against the running Docker stack, entirely
-# through the frontend origin (same-origin API proxy + middleware), the way
+# through the frontend origin (same-origin API proxy + route-guard proxy), the way
 # a browser uses it. Requires APP_ENV != production (uses the mock outbox).
 set -euo pipefail
 # Read the whole response: `grep -q` exits at the first match, which makes a

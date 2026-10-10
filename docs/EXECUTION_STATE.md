@@ -26,15 +26,24 @@ during launch: ONLINE-LAUNCH-STATUS.md.
 
 Stages 0–7 done and live-verified (latest Live site run 37306723398 on `c2fa8fe`).
 Brand: مَكان | MAKAN (`0dfbb95`) — deployed by Render; CI/live run blocked (below).
-Stage 8 (Market Intelligence) is built on branch `stage-8-market` (PR) and is
-NOT merged: it waits for CI and the Live site run.
+Stage 8 (Market Intelligence) is built and statically audited on branch
+`stage-8-market` (PR #1, docs/STAGE-8-AUDIT.md on that branch) and is NOT
+merged. Stage 9 must not start until Stage 8 is fully verified.
 
 **Blocker (2026-10-05 ~13:35 UTC):** GitHub Actions refuses to start jobs
 ("recent account payments have failed or your spending limit needs to be
-increased") — the private repo's free minutes are used up. CI, Live site and
-the scheduled jobs cannot run. Owner options: make the repo public (free
-Actions), wait for the monthly reset, or raise the limit (not $0). The
-scheduled jobs now run every 3 hours instead of hourly to save minutes.
+increased") — the private repo's free minutes are used up. **Owner decision:
+keep the repo private, do not raise spending, wait for the monthly reset.**
+The scheduled jobs now run every 3 hours instead of hourly to save minutes.
+
+STAGE8_STATUS: UNVERIFIED
+
+Gate (owner-approved, docs/STAGE-8-AUDIT.md on the branch):
+UNVERIFIED → CI → Security → Browser (48 states) → Merge → Render deploy →
+Production verification → Market live re-check → COMPLETE. Stage 9 is blocked
+until COMPLETE. The daily Actions retry stops by itself once the line above
+reads `STAGE8_STATUS: COMPLETE` (set only after production verification passes).
+
 Render still deploys `main` on push without CI, so unverified work stays on
 branches until CI is back.
 
