@@ -36,8 +36,8 @@ HOOK = r"""
     configurable: true,
     get() { return this[ST]; },
     set(v) {
-      if (this[ST] === undefined && armed && tracked.length < 3000) {
-        tracked.push({ p: this, t: (performance.now() - t0r).toFixed(0), first: v,
+      if (this[ST] === undefined && tracked.length < 6000) {
+        tracked.push({ p: this, t: (performance.now() - t0r).toFixed(0), first: v, after: armed,
           stack: (new Error().stack || '').split('\n').slice(2, 6).map((x) => x.trim()
             .replace(location.origin, '').replace(/\/_next\/static\/chunks\//g, '')).join(' < ') });
       }
@@ -82,10 +82,10 @@ HOOK = r"""
     for (const x of tracked) {
       const st = x.p[ST];
       if (st === 'fulfilled' || st === 'rejected') continue;
-      out.push('UNSETTLED t=' + x.t + ' status=' + st + ' (first ' + x.first + ') ctor=' +
+      out.push('UNSETTLED ' + (x.after ? 'after' : 'BEFORE') + '-finish t=' + x.t + ' status=' + st + ' (first ' + x.first + ') ctor=' +
         (x.p.constructor && x.p.constructor.name) + ' value=' + describe(x.p.value) +
         ' reason=' + describe(x.p.reason) + ' | ' + x.stack);
-      if (out.length > 40) break;
+      if (out.length > 60) break;
     }
     return out;
   };
