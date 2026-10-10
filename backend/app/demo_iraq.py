@@ -6,6 +6,12 @@ demo points of interest, plus optional demo accounts (admin, agency owner,
 agent, private owner, customer) whose shared password comes from the
 environment — never from source code.
 
+The demo ADMIN never uses the shared password in production: there it exists
+only with its own ``DEMO_ADMIN_PASSWORD`` (policy-checked, different from the
+shared one). Without it, a production run creates no demo admin and disables an
+existing one (ADMIN role removed, password made unusable, account deactivated,
+sessions revoked). Outside production the previous behaviour is kept.
+
 Honesty rules (same as ``app.demo``):
 
 * every listing has ``is_demo=True``, says "إعلان تجريبي" / "DEMO" in its title
@@ -37,6 +43,7 @@ from sqlalchemy.orm import Session
 from app.agencies.models import Agency, AgencyMember, AgencyStatus, AgentProfile, MemberRole
 from app.audit import service as audit
 from app.auth.security import hash_password
+from app.auth.service import revoke_all_sessions
 from app.demo import BASRA_DISTRICTS, DEMO_GEOMETRY_SOURCE, HALF_SIZE, DemoDistrict
 from app.demo import _districts as basra_districts
 from app.demo_images import render as render_image
@@ -63,8 +70,9 @@ LISTINGS_PER_CITY = 18
 AGENCY_SLUG = "demo-rafidain-real-estate"
 
 # Demo accounts (emails are reserved example.com addresses; no real people).
+DEMO_ADMIN_EMAIL = "demo.admin@example.com"
 DEMO_ACCOUNTS: list[tuple[str, str, Role | None]] = [
-    ("demo.admin@example.com", "مدير تجريبي (DEMO)", Role.ADMIN),
+    (DEMO_ADMIN_EMAIL, "مدير تجريبي (DEMO)", Role.ADMIN),
     ("demo.agency@example.com", "صاحب مكتب تجريبي (DEMO)", Role.AGENCY_OWNER),
     ("demo.agent@example.com", "وكيل عقاري تجريبي (DEMO)", Role.AGENT),
     ("demo.owner@example.com", "مالك عقار تجريبي (DEMO)", Role.PROPERTY_OWNER),
@@ -286,14 +294,81 @@ def _ensure_role(user: User, role: Role) -> None:
         user.role_links.append(UserRole(role_code=role.value))
 
 
-def ensure_accounts(db: Session, password: str | None) -> dict[str, uuid.UUID]:
-    """Demo agency + accounts. Passwords are set only when ``password`` is given."""
+def _disable_demo_admin(db: Session) -> None:
+    """Production without ``DEMO_ADMIN_PASSWORD``: no usable demo admin may remain.
+
+    Removes the ADMIN role, replaces the password with an unusable random one,
+    deactivates the account and revokes its sessions (access tokens are refused
+    on the next request because the account is no longer ACTIVE). Idempotent.
+    """
+    user = db.execute(select(User).where(User.email == DEMO_ADMIN_EMAIL)).scalar_one_or_none()
+    if user is None:
+        return
+    admin_links = [link for link in user.role_links if Role(link.role_code) == Role.ADMIN]
+    if not admin_links and user.status != UserStatus.ACTIVE:
+        return  # already disabled
+    for link in admin_links:
+        user.role_links.remove(link)
+    user.password_hash = hash_password(secrets.token_urlsafe(32))
+    if user.status == UserStatus.ACTIVE:
+        user.status = UserStatus.DEACTIVATED
+    revoke_all_sessions(db, user.id, reason="demo_admin_disabled", actor_id=None)
+    audit.record(
+        db,
+        "demo.admin_disabled",
+        actor_id=None,
+        resource_type="user",
+        resource_id=user.id,
+        data={"reason": "production without DEMO_ADMIN_PASSWORD"},
+    )
+    db.flush()
+    logger.warning(
+        "Demo admin disabled: production requires its own DEMO_ADMIN_PASSWORD "
+        "(the shared demo password is never used for an admin)"
+    )
+
+
+def ensure_accounts(
+    db: Session,
+    password: str | None,
+    *,
+    admin_password: str | None = None,
+    production: bool = False,
+) -> dict[str, uuid.UUID]:
+    """Demo agency + accounts. Passwords are set only when ``password`` is given.
+
+    The demo ADMIN: outside production it uses ``admin_password`` when given,
+    otherwise the shared ``password`` (unchanged behaviour). In production it
+    exists only with its own ``admin_password``; without one it is not created
+    and an existing one is disabled (``_disable_demo_admin``).
+    """
     if password:
         problems = password_problems(password)
         if problems:
             raise ValueError(f"DEMO_ACCOUNT_PASSWORD rejected: {', '.join(problems)}")
+    if admin_password:
+        problems = password_problems(admin_password)
+        if problems:
+            raise ValueError(f"DEMO_ADMIN_PASSWORD rejected: {', '.join(problems)}")
+        if password and admin_password == password:
+            raise ValueError("DEMO_ADMIN_PASSWORD must differ from DEMO_ACCOUNT_PASSWORD")
     ids: dict[str, uuid.UUID] = {}
     for email, name, role in DEMO_ACCOUNTS:
+        if role is Role.ADMIN:
+            if production and not admin_password:
+                _disable_demo_admin(db)
+                continue
+            admin = _user(db, email, name)
+            _ensure_role(admin, role)
+            secret = admin_password or password
+            if secret:
+                admin.password_hash = hash_password(secret)
+            if production and admin.status == UserStatus.DEACTIVATED:
+                # Disabled earlier for lack of a dedicated password; the owner has
+                # now configured one. A SUSPENDED account is left to the admins.
+                admin.status = UserStatus.ACTIVE
+            ids[email] = admin.id
+            continue
         user = _user(db, email, name)
         if role is not None:
             _ensure_role(user, role)
@@ -612,9 +687,13 @@ def seed(
     *,
     per_city: int = LISTINGS_PER_CITY,
     account_password: str | None = None,
+    admin_password: str | None = None,
+    production: bool = False,
     images: bool = True,
 ) -> dict[str, int]:
-    accounts = ensure_accounts(db, account_password)
+    accounts = ensure_accounts(
+        db, account_password, admin_password=admin_password, production=production
+    )
     lister = _user(db, LISTER_EMAIL, "حساب العرض التجريبي — العراق (DEMO)")
     _ensure_role(lister, Role.PROPERTY_OWNER)
     db.flush()

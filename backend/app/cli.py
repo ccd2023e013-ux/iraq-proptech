@@ -89,7 +89,8 @@ def main(argv: list[str] | None = None) -> int:
     iraq = sub.add_parser(
         "seed-demo-iraq",
         help="National DEMO dataset (7 cities, generated images, demo accounts if "
-        "DEMO_ACCOUNT_PASSWORD is set)",
+        "DEMO_ACCOUNT_PASSWORD is set; in production the demo admin only with its "
+        "own DEMO_ADMIN_PASSWORD)",
     )
     iraq.add_argument("--per-city", type=int, default=18)
     iraq.add_argument("--no-images", action="store_true")
@@ -203,6 +204,10 @@ def main(argv: list[str] | None = None) -> int:
                     db,
                     per_city=max(0, min(args.per_city, 200)),
                     account_password=os.environ.get("DEMO_ACCOUNT_PASSWORD") or None,
+                    # Production: the demo admin needs its own password, never the
+                    # shared one (see app.demo_iraq).
+                    admin_password=os.environ.get("DEMO_ADMIN_PASSWORD") or None,
+                    production=get_settings().is_production,
                     images=not args.no_images,
                 )
         except Exception as exc:

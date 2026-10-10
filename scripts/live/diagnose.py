@@ -22,6 +22,7 @@ def note(line: str) -> None:
 for key in (
     "DATABASE_URL",
     "DEMO_ACCOUNT_PASSWORD",
+    "DEMO_ADMIN_PASSWORD",
     "S3_ENDPOINT_URL",
     "S3_REGION",
     "S3_ACCESS_KEY_ID",
@@ -29,15 +30,21 @@ for key in (
 ):
     note(f"{key}: {'set' if os.environ.get(key) else 'NOT SET'}")
 
+# Policy results only — never a value or its length (run logs may be public).
 password = os.environ.get("DEMO_ACCOUNT_PASSWORD")
 if password:
     from app.users.validation import password_problems
 
     problems = password_problems(password)
-    note(
-        f"DEMO_ACCOUNT_PASSWORD policy: {'OK' if not problems else ', '.join(problems)} "
-        f"(length {len(password)})"
-    )
+    note(f"DEMO_ACCOUNT_PASSWORD policy: {'OK' if not problems else ', '.join(problems)}")
+admin_password = os.environ.get("DEMO_ADMIN_PASSWORD")
+if admin_password:
+    from app.users.validation import password_problems
+
+    problems = password_problems(admin_password)
+    if admin_password == password:
+        problems.append("SAME_AS_DEMO_ACCOUNT_PASSWORD")
+    note(f"DEMO_ADMIN_PASSWORD policy: {'OK' if not problems else ', '.join(problems)}")
 
 if os.environ.get("S3_ACCESS_KEY_ID") and os.environ.get("S3_ENDPOINT_URL"):
     from urllib.parse import urlparse

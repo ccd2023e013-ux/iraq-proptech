@@ -10,12 +10,15 @@ on:
         required: false
         default: ""
 
-permissions:
-  contents: write
+permissions: {}
 
 jobs:
   shoot:
+    # Demo-account secrets: only code on main may run with them.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # pushes the screenshots/run-<id> branch
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
@@ -27,6 +30,7 @@ jobs:
       - name: Screenshots
         env:
           DEMO_ACCOUNT_PASSWORD: ${{ secrets.DEMO_ACCOUNT_PASSWORD }}
+          DEMO_ADMIN_PASSWORD: ${{ secrets.DEMO_ADMIN_PASSWORD }}
           PAGES_INPUT: ${{ inputs.pages }}
         run: |
           . deploy/live.env
