@@ -271,7 +271,7 @@ HISTORY_HOOK = """
 """
 
 
-DRAW_ATTEMPTS = 10
+DRAW_ATTEMPTS = 16
 DRAW_AREA_ISSUE = "https://github.com/ccd2023e013-ux/iraq-proptech/issues/4"
 
 
@@ -280,6 +280,7 @@ def draw_area(browser: Browser) -> None:
     polygon URL (a late viewport update must never replace it). Logs every URL
     the page commits so a failure shows what overwrote what."""
     passed = 0
+    sample: dict[bool, str] = {}  # first passing / first failing trace (issue #4)
     for attempt in range(1, DRAW_ATTEMPTS + 1):
         ctx = browser.new_context(viewport={"width": 1366, "height": 900}, locale="en-US")
         ctx.add_init_script(DIAGNOSTIC_HOOK)
@@ -373,12 +374,15 @@ def draw_area(browser: Browser) -> None:
                 f" console={console[-4:]}"
             )
         detail += f" trace={trace[:14]}"
+        sample.setdefault(ok, f"attempt {attempt}: {trace[:14]}")
         print(
             f"  {'✓' if ok else '✗'} [draw {attempt}] landed={landed} kept={kept} "
             f"urls={urls[-6:]}{detail}",
             flush=True,
         )
         ctx.close()
+    for ok, text in sample.items():  # notices are kept even when the step passes
+        print(f"::notice title=draw trace ({'pass' if ok else 'FAIL'})::{text[:900]}", flush=True)
     # Gating: drawing must work. The rate is measured, not gated: an intermittent
     # pre-existing bug (Finish ends draw mode but the polygon navigation is never
     # committed) also occurs on maplibre-gl 5 — tracked in DRAW_AREA_ISSUE.
