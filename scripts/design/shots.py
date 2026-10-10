@@ -171,6 +171,70 @@ def sign_in(page: Page, email: str, password: str) -> bool:
         return False
 
 
+def map_states(browser: Browser, lang: str, view: str) -> None:
+    """Interaction states on /map: layers panel, drawing, phone sheet, a selection."""
+    tag = f"{lang}-dark-{view}"
+    ctx = context(browser, lang, "dark", view)
+    page = ctx.new_page()
+    errors: list[str] = []
+    page.on("console", lambda m: errors.append(m.text[:200]) if m.type == "error" else None)
+    page.on("pageerror", lambda e: errors.append(f"pageerror: {str(e)[:200]}"))
+    states: dict[str, str] = {}
+    try:
+        page.goto(WEB + "/map", wait_until="load", timeout=90_000)
+        settle(page, "/map")
+
+        def snap(name: str) -> None:
+            page.wait_for_timeout(700)
+            page.screenshot(path=str(OUT / f"{tag}--map-{name}.jpg"), type="jpeg", quality=72)
+            states[name] = "ok"
+
+        canvas = page.locator("[data-testid=map-canvas]")
+        box = canvas.bounding_box()
+        # A selected listing: click each price tag position until a selection opens.
+        if box:
+            found = False
+            for fx in (0.35, 0.45, 0.5, 0.55, 0.62, 0.4, 0.58):
+                for fy in (0.3, 0.38, 0.45, 0.52, 0.6):
+                    page.mouse.click(box["x"] + box["width"] * fx, box["y"] + box["height"] * fy)
+                    page.wait_for_timeout(250)
+                    if page.locator("[data-testid=map-selection]").count():
+                        found = True
+                        break
+                if found:
+                    break
+            if found:
+                snap("selected")
+                page.keyboard.press("Escape")
+                page.mouse.click(box["x"] + 8, box["y"] + box["height"] - 8)
+            else:
+                states["selected"] = "no tag hit"
+        layers = page.locator("[data-testid=map-layers] summary")
+        if layers.count():
+            layers.first.click()
+            snap("layers")
+            layers.first.click()
+        if view == "390":
+            handle = page.locator("section button[aria-expanded]").first
+            if handle.count():
+                handle.click()
+                snap("sheet-open")
+                handle.click()
+        draw = page.locator("[data-testid=draw-area]")
+        if draw.count() and box:
+            draw.click()
+            for dx, dy in ((-0.15, -0.12), (0.12, -0.1)):
+                page.mouse.click(
+                    box["x"] + box["width"] * (0.5 + dx), box["y"] + box["height"] * (0.5 + dy)
+                )
+                page.wait_for_timeout(300)
+            snap("drawing")
+    except Exception as exc:  # recorded, the run continues
+        errors.append(f"map states failed: {type(exc).__name__}: {str(exc)[:200]}")
+    REPORT.append({"shot": f"{tag}--map-states", "states": states, "console_errors": errors[:8]})
+    ctx.close()
+
+
 def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     with sync_playwright() as p:
@@ -196,6 +260,8 @@ def main() -> int:
                 page = ctx.new_page()
                 shoot(page, name, path, tag)
                 ctx.close()
+        for lang, view in (("ar", "1440"), ("ar", "390"), ("en", "390")):
+            map_states(browser, lang, view)
         for who, email, env, paths in SIGNED_IN:
             password = os.environ.get(env)
             if not password:
