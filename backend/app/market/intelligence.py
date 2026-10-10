@@ -825,11 +825,13 @@ def build_report(
     if child_level:
         model = District if child_level == "district" else City
         column = Property.district_id if child_level == "district" else Property.city_id
-        counts = dict(
-            db.execute(
+        counts: dict[uuid.UUID, int] = {
+            area_id: total
+            for area_id, total in db.execute(
                 select(column, func.count()).where(*active, column.is_not(None)).group_by(column)
             ).all()
-        )
+            if area_id is not None  # excluded by the query; narrows the type
+        }
         sale = [k for k in groups if k[1] == "SALE"]
         if sale:
             code, purpose, currency = max(sale, key=lambda k: len(groups[k]))
@@ -930,7 +932,7 @@ def build_report(
                 segment_sample=top.sample,
             )
         try:
-            data, row = ai_service.generate(
+            data, generation = ai_service.generate(
                 db,
                 principal,
                 feature="market.interpretation",
@@ -957,7 +959,7 @@ def build_report(
                 raise
             unavailable.append(Unavailable(metric="ai_interpretation", reason="ai_quota_reached"))
         else:
-            provider = row.provider
+            provider = generation.provider
             statements.append(
                 MarketStatement(
                     kind="AI_INTERPRETATION",
