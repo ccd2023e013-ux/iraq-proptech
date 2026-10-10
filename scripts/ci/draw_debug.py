@@ -25,6 +25,52 @@ HOOK = r"""
   const t0r = performance.now();
   let armed = false, commits = 0;
   const lanes = (n) => '0b' + (n >>> 0).toString(2);
+  // Thenable tracking: React's use() and the Flight client record a thenable's
+  // state in a `status` field. An accessor on Promise.prototype sees every such
+  // write (Flight chunks inherit from Promise.prototype), so after a stuck
+  // navigation we can list thenables that never settled and where they came from.
+  const ST = Symbol('status');
+  const tracked = [];
+  Object.defineProperty(Promise.prototype, 'status', {
+    configurable: true,
+    get() { return this[ST]; },
+    set(v) {
+      if (this[ST] === undefined && armed && tracked.length < 3000) {
+        tracked.push({ p: this, t: (performance.now() - t0r).toFixed(0), first: v,
+          stack: (new Error().stack || '').split('\n').slice(2, 6).map((x) => x.trim()
+            .replace(location.origin, '').replace(/\/_next\/static\/chunks\//g, '')).join(' < ') });
+      }
+      this[ST] = v;
+    },
+  });
+  const describe = (v) => {
+    try {
+      if (v === null || v === undefined) return String(v);
+      if (typeof v === 'function') return 'fn ' + (v.name || '?');
+      if (Array.isArray(v)) return 'array(' + v.length + ')';
+      if (typeof v === 'object') return 'obj{' + Object.keys(v).slice(0, 6).join(',') + '}' +
+        (v.$$typeof ? ' ' + String(v.$$typeof) : '') + (v.type && v.type.name ? ' type=' + v.type.name : '');
+      return typeof v + ' ' + String(v).slice(0, 60);
+    } catch (e) { return '?'; }
+  };
+  window.__dbgPending = () => {
+    const r = window.__dbgRoot;
+    const out = ['root pending=' + (r ? lanes(r.pendingLanes) : '?') + ' suspended=' + (r ? lanes(r.suspendedLanes) : '?') +
+      ' pinged=' + (r ? lanes(r.pingedLanes) : '?') + ' callbackNode=' + (r ? !!r.callbackNode : '?') +
+      ' tracked=' + tracked.length];
+    const counts = {};
+    for (const x of tracked) counts[x.p[ST]] = (counts[x.p[ST]] || 0) + 1;
+    out.push('final statuses ' + JSON.stringify(counts));
+    for (const x of tracked) {
+      const st = x.p[ST];
+      if (st === 'fulfilled' || st === 'rejected') continue;
+      out.push('UNSETTLED t=' + x.t + ' status=' + st + ' (first ' + x.first + ') ctor=' +
+        (x.p.constructor && x.p.constructor.name) + ' value=' + describe(x.p.value) +
+        ' reason=' + describe(x.p.reason) + ' | ' + x.stack);
+      if (out.length > 40) break;
+    }
+    return out;
+  };
   const qlog = (...a) => console.warn('[dbg] ' + (performance.now() - t0r).toFixed(0).padStart(5) + ' ' + a.join(' '));
   const pageSeg = (tree) => {
     // Walk children slots down to the leaf page segment.
@@ -80,6 +126,7 @@ HOOK = r"""
     inject(renderer) { const id = this.renderers.size + 1; this.renderers.set(id, renderer); return id; },
     checkDCE() {}, onScheduleFiberRoot() {}, onCommitFiberUnmount() {}, onPostCommitFiberRoot() {},
     onCommitFiberRoot(id, root) {
+      window.__dbgRoot = root;
       if (!window.__dbgQueue) findQueue(root.current);
       commits += 1;
       if (armed && commits < 400) console.warn('[dbg] ' + (performance.now() - t0r).toFixed(0).padStart(5) +
@@ -244,6 +291,11 @@ def attempt(browser, n: int, forced: bool) -> tuple[bool, list[str], bool]:
         page.wait_for_timeout(500)
     page.wait_for_timeout(2_000)
     ok = ok and "polygon=" in page.url
+    try:
+        for line in page.evaluate("() => window.__dbgPending ? window.__dbgPending() : ['no tracker']"):
+            log.append(f"[post] {line[:700]}")
+    except Exception as exc:  # noqa: BLE001 - diagnostics only
+        log.append(f"[post] tracker failed: {exc}")
     skeleton = page.locator("[role=status][aria-busy]").count()
     map_alive = page.locator("[data-testid=map-canvas]").count()
     log.append(
@@ -294,10 +346,11 @@ def main() -> int:
 
     def tail(log: list[str]) -> str:
         i = max((k for k, line in enumerate(log) if "map ready" in line), default=0)
-        early = [line for line in log[:i] if " Q." in line or "router." in line or "queue" in line]
         late = [line for line in log[i:] if "tree>" not in line and " body " not in line]
-        text = " ⏎ ".join(line.split(" | at ")[0] for line in early + ["----"] + late)
-        return text[:9000]
+        text = " ⏎ ".join(
+            line if line.startswith("[post]") else line.split(" | at ")[0] for line in late
+        )
+        return text[:12000]
 
     if first_pass:
         print(f"::notice title=draw debug PASS #{first_pass[0]}::{tail(first_pass[1])}", flush=True)
