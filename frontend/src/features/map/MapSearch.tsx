@@ -214,8 +214,22 @@ export function MapSearch({
 
   useEffect(() => () => void (timer.current && clearTimeout(timer.current)), []);
 
+  /** Drop a viewport (`bbox`) update still waiting in the debounce. */
+  function cancelViewportUpdate() {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = null;
+  }
+
+  function startDrawing() {
+    // A pan just before "Draw area" must not move the URL to that viewport
+    // while the user is drawing (or replace the area they then finish).
+    cancelViewportUpdate();
+    setDrawing([]);
+  }
+
   function finishDrawing() {
     if (!drawing || drawing.length < 3) return;
+    cancelViewportUpdate();
     const next: RawParams = { ...paramsRef.current, polygon: formatPolygon(drawing) };
     for (const key of ["bbox", "page", "near_lat", "near_lon", "radius_km"]) delete next[key];
     setDrawing(null);
@@ -224,6 +238,7 @@ export function MapSearch({
   }
 
   function clearArea() {
+    cancelViewportUpdate();
     const next: RawParams = { ...paramsRef.current };
     for (const key of ["polygon", "near_lat", "near_lon", "radius_km", "page"]) delete next[key];
     setFollowMap(true);
@@ -245,6 +260,7 @@ export function MapSearch({
           radius_km: "3",
         };
         for (const key of ["bbox", "polygon", "page"]) delete next[key];
+        cancelViewportUpdate();
         setFollowMap(false);
         setFocusBbox(bboxAround(coords.longitude, coords.latitude, 3));
         navigate(toApiQuery(next));
@@ -322,7 +338,7 @@ export function MapSearch({
             </>
           ) : (
             <>
-              <Button variant="secondary" onClick={() => setDrawing([])} data-testid="draw-area">
+              <Button variant="secondary" onClick={startDrawing} data-testid="draw-area">
                 {m.drawArea}
               </Button>
               <Button variant="secondary" onClick={nearMe}>
