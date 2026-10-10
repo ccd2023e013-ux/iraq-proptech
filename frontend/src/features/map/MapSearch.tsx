@@ -469,7 +469,9 @@ export function MapSearch({
                         className="h-[72px] w-24 shrink-0 rounded-xl bg-fill object-cover"
                       />
                     ) : (
-                      <div className="h-[72px] w-24 shrink-0 rounded-xl bg-fill" />
+                      <div className="grid h-[72px] w-24 shrink-0 place-items-center rounded-xl bg-fill text-ink-3">
+                        <Icon name="home" className="size-5 opacity-70" />
+                      </div>
                     )}
                     <div className="flex min-w-0 flex-col gap-0.5 text-sm">
                       <span className="font-display font-semibold tracking-tight text-ink tabular">
@@ -736,8 +738,12 @@ function SelectionSheet({
         className="surface-focus pop-in pointer-events-auto flex w-full max-w-md gap-3.5 rounded-[var(--radius-card)] p-2.5"
       >
         <div className="relative size-28 shrink-0 overflow-hidden rounded-[calc(var(--radius-card)-0.5rem)] bg-fill">
-          {cover && (
+          {cover ? (
             <SafeImage src={cover} alt="" fallbackLabel="—" className="size-full object-cover" />
+          ) : (
+            <span className="grid size-full place-items-center text-ink-3">
+              <Icon name="home" className="size-6 opacity-70" />
+            </span>
           )}
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-1 py-1 text-sm">
