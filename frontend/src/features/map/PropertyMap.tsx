@@ -956,7 +956,7 @@ export function PropertyMap(props: PropertyMapProps) {
             type: "fill-extrusion",
             source: vector,
             "source-layer": "building",
-            minzoom: 14,
+            minzoom: 13,
             paint: {
               "fill-extrusion-color": isDark() ? "#1d2228" : "#dcdfdb",
               "fill-extrusion-height": ["coalesce", ["get", "render_height"], 0],
@@ -973,9 +973,16 @@ export function PropertyMap(props: PropertyMapProps) {
     }
     if (on) map.touchPitch.enable();
     else map.touchPitch.disable();
+    // Turning 3D on also brings buildings into view (at most two zoom levels).
     const pitch = on ? 50 : 0;
-    if (Math.abs(map.getPitch() - pitch) > 0.5) {
-      map.easeTo({ pitch, duration: cameraDuration(reducedMotion(), 900), easing: easeStandard });
+    const zoom = on && map.getZoom() < 14 ? Math.min(map.getZoom() + 2, 15) : map.getZoom();
+    if (Math.abs(map.getPitch() - pitch) > 0.5 || zoom !== map.getZoom()) {
+      map.easeTo({
+        pitch,
+        zoom,
+        duration: cameraDuration(reducedMotion(), 900),
+        easing: easeStandard,
+      });
     }
   }, [ready, styleVersion, props.buildings3d]);
 

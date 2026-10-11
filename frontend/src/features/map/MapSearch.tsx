@@ -729,6 +729,7 @@ export function MapSearch({
                         type="button"
                         onClick={() => showOnMap(card)}
                         aria-label={`${m.showOnMap}: ${title}`}
+                        data-testid="show-on-map"
                         title={m.showOnMap}
                         className="icon-btn size-9 shrink-0 text-ink-3 opacity-70 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
                       >
@@ -837,7 +838,7 @@ export function MapSearch({
             </Button>
           </div>
         )}
-        {buildings3d && zoom < 14 && (
+        {buildings3d && zoom < 13 && (
           <p className="surface-float pop-in caption max-w-48 rounded-[var(--radius-control)] px-3 py-2 text-ink-2">
             {m.zoomInFor3d}
           </p>
@@ -968,7 +969,7 @@ function LayerPanel({
         </div>
       )}
       <Switch checked={buildings3d} onChange={setBuildings3d} label={m.buildings3d} />
-      {buildings3d && zoom < 14 && <p className="caption -mt-0.5 mb-1">{m.zoomInFor3d}</p>}
+      {buildings3d && zoom < 13 && <p className="caption -mt-0.5 mb-1">{m.zoomInFor3d}</p>}
       <p className="meta mt-3 mb-1 border-t border-hairline pt-3 font-medium">{m.overlays}</p>
       <Switch
         checked={future}

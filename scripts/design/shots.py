@@ -242,7 +242,24 @@ def map_states(browser: Browser, lang: str, view: str) -> None:
                     close.click()
                 page.wait_for_timeout(400)
             else:
-                states["selected"] = "no tag hit"
+                # Phones start zoomed out (groups, no tags): choose from the
+                # list instead ("Show on map" selects and glides to it).
+                handle = page.locator("section button[aria-expanded]").first
+                if handle.count() and handle.is_visible():
+                    handle.click()
+                    page.wait_for_timeout(500)
+                show = page.locator("[data-testid=show-on-map]").first
+                if show.count() and show.is_visible():
+                    show.click()
+                    page.wait_for_timeout(1_300)
+                if page.locator("[data-testid=map-selection]").count():
+                    snap("selected")
+                    close = page.locator("[data-testid=map-selection] button").first
+                    if close.count():
+                        close.click()
+                    page.wait_for_timeout(400)
+                else:
+                    states["selected"] = "no tag hit"
         if view != "390":
             # List → map: hovering a result outlines its price tag.
             row = page.locator("section a[href^='/properties/']").first
@@ -253,7 +270,7 @@ def map_states(browser: Browser, lang: str, view: str) -> None:
         if box:
             # Closer in: tags spread out; then 3D buildings with a pitched camera.
             page.mouse.move(box["x"] + box["width"] * 0.62, box["y"] + box["height"] * 0.45)
-            for _ in range(3):
+            for _ in range(6 if view == "390" else 3):
                 page.mouse.wheel(0, -320)
                 page.wait_for_timeout(350)
             page.wait_for_timeout(900)
