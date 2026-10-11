@@ -1,0 +1,811 @@
+[
+ {
+  "shot": "ar-dark-1440--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "path": "/",
+  "status": 200,
+  "seconds": 5.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--map",
+  "map_previews_ready": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 21.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--properties",
+  "map_previews_ready": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 2.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "path": "/properties/cd178a70-6a50-48cd-9c62-5dd1046acb91",
+  "status": 200,
+  "seconds": 5.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "/api/v1/analytics/property-views/cd178a70-6a50-48cd-9c62-5dd1046acb91 net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-dark-1440--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "path": "/future",
+  "status": 200,
+  "seconds": 3.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--market",
+  "map_previews_ready": [],
+  "path": "/market",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--pricing",
+  "map_previews_ready": [],
+  "path": "/pricing",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--login",
+  "map_previews_ready": [],
+  "path": "/login",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--register",
+  "map_previews_ready": [],
+  "path": "/register",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--smart",
+  "map_previews_ready": [],
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--compare",
+  "map_previews_ready": [],
+  "path": "/compare",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--notfound",
+  "map_previews_ready": [],
+  "path": "/this-page-does-not-exist",
+  "status": 404,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "path": "/",
+  "status": 200,
+  "seconds": 4.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--map",
+  "map_previews_ready": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 20.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--properties",
+  "map_previews_ready": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 4.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "path": "/properties/cd178a70-6a50-48cd-9c62-5dd1046acb91",
+  "status": 200,
+  "seconds": 4.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "/api/v1/analytics/property-views/cd178a70-6a50-48cd-9c62-5dd1046acb91 net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "en-dark-1440--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "path": "/future",
+  "status": 200,
+  "seconds": 3.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--market",
+  "map_previews_ready": [],
+  "path": "/market",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--pricing",
+  "map_previews_ready": [],
+  "path": "/pricing",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--login",
+  "map_previews_ready": [],
+  "path": "/login",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--register",
+  "map_previews_ready": [],
+  "path": "/register",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--smart",
+  "map_previews_ready": [],
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--compare",
+  "map_previews_ready": [],
+  "path": "/compare",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--notfound",
+  "map_previews_ready": [],
+  "path": "/this-page-does-not-exist",
+  "status": 404,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "path": "/",
+  "status": 200,
+  "seconds": 3.2,
+  "overflow_px": 88,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--map",
+  "map_previews_ready": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 23.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--properties",
+  "map_previews_ready": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 2.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "path": "/properties/cd178a70-6a50-48cd-9c62-5dd1046acb91",
+  "status": 200,
+  "seconds": 3.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "/api/v1/analytics/property-views/cd178a70-6a50-48cd-9c62-5dd1046acb91 net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-dark-390--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "path": "/future",
+  "status": 200,
+  "seconds": 3.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--market",
+  "map_previews_ready": [],
+  "path": "/market",
+  "status": 200,
+  "seconds": 1.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--pricing",
+  "map_previews_ready": [],
+  "path": "/pricing",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--login",
+  "map_previews_ready": [],
+  "path": "/login",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--register",
+  "map_previews_ready": [],
+  "path": "/register",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--smart",
+  "map_previews_ready": [],
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--compare",
+  "map_previews_ready": [],
+  "path": "/compare",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--notfound",
+  "map_previews_ready": [],
+  "path": "/this-page-does-not-exist",
+  "status": 404,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "path": "/",
+  "status": 200,
+  "seconds": 3.2,
+  "overflow_px": 99,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--map",
+  "map_previews_ready": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 23.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--properties",
+  "map_previews_ready": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 2.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "path": "/properties/cd178a70-6a50-48cd-9c62-5dd1046acb91",
+  "status": 200,
+  "seconds": 2.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "/api/v1/analytics/property-views/cd178a70-6a50-48cd-9c62-5dd1046acb91 net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "en-dark-390--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "path": "/future",
+  "status": 200,
+  "seconds": 3.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--market",
+  "map_previews_ready": [],
+  "path": "/market",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--pricing",
+  "map_previews_ready": [],
+  "path": "/pricing",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--login",
+  "map_previews_ready": [],
+  "path": "/login",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--register",
+  "map_previews_ready": [],
+  "path": "/register",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--smart",
+  "map_previews_ready": [],
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--compare",
+  "map_previews_ready": [],
+  "path": "/compare",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--notfound",
+  "map_previews_ready": [],
+  "path": "/this-page-does-not-exist",
+  "status": 404,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-1440--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "path": "/",
+  "status": 200,
+  "seconds": 4.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-1440--map",
+  "map_previews_ready": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 16.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-1440--properties",
+  "map_previews_ready": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 3.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-1440--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "path": "/properties/cd178a70-6a50-48cd-9c62-5dd1046acb91",
+  "status": 200,
+  "seconds": 4.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "/api/v1/analytics/property-views/cd178a70-6a50-48cd-9c62-5dd1046acb91 net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-light-1440--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "path": "/future",
+  "status": 200,
+  "seconds": 4.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1920--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "path": "/",
+  "status": 200,
+  "seconds": 5.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1920--map",
+  "map_previews_ready": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 26.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1920--properties",
+  "map_previews_ready": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 4.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1920--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "path": "/properties/cd178a70-6a50-48cd-9c62-5dd1046acb91",
+  "status": 200,
+  "seconds": 5.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "/api/v1/analytics/property-views/cd178a70-6a50-48cd-9c62-5dd1046acb91 net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-dark-1920--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "path": "/future",
+  "status": 200,
+  "seconds": 3.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--map-states",
+  "states": {
+   "selected": "ok",
+   "layers": "ok",
+   "drawing": "ok"
+  },
+  "console_errors": []
+ },
+ {
+  "shot": "ar-dark-390--map-states",
+  "states": {
+   "selected": "ok",
+   "layers": "ok",
+   "sheet-open": "ok",
+   "drawing": "ok"
+  },
+  "console_errors": []
+ },
+ {
+  "shot": "en-dark-390--map-states",
+  "states": {
+   "selected": "ok",
+   "layers": "ok",
+   "sheet-open": "ok",
+   "drawing": "ok"
+  },
+  "console_errors": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_dashboard",
+  "map_previews_ready": [],
+  "path": "/dashboard",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_dashboard_properties",
+  "map_previews_ready": [],
+  "path": "/dashboard/properties",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_account",
+  "map_previews_ready": [],
+  "path": "/account",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_dashboard",
+  "map_previews_ready": [],
+  "path": "/dashboard",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_dashboard_properties",
+  "map_previews_ready": [],
+  "path": "/dashboard/properties",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_account",
+  "map_previews_ready": [],
+  "path": "/account",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin",
+  "map_previews_ready": [],
+  "path": "/admin",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_users",
+  "map_previews_ready": [],
+  "path": "/admin/users",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin",
+  "map_previews_ready": [],
+  "path": "/admin",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_users",
+  "map_previews_ready": [],
+  "path": "/admin/users",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--public-home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "path": "/",
+  "status": 200,
+  "seconds": 4.7,
+  "overflow_px": 88,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--public-map",
+  "map_previews_ready": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 24.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--public-home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "path": "/",
+  "status": 200,
+  "seconds": 4.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--public-map",
+  "map_previews_ready": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 18.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ }
+]
