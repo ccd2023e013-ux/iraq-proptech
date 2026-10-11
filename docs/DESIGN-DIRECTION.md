@@ -171,17 +171,20 @@ Heights are 32, 40 and 48px. Every button has designed states:
 - Stagger at most one group per screen.
 - Under reduced motion, movement becomes a crossfade or an instant change.
 
-## 11. Map and camera (detailed in Pass 2)
+## 11. Map and camera (implemented in Pass 2)
 
-- **The basemap is context.** It is re-toned to the palette, quiet, with water as the only colour.
-- **Camera moves are eases, not flights:**
-  - Selecting a listing eases to it in 700–900ms. Zoom changes by at most 2 levels, and the camera offsets so the listing clears the open panel.
-  - Bearing never changes unless the user rotates.
-  - Pitch is used only where real 3D data exists. OpenFreeMap building heights allow honest extrusions; there is no fake 3D.
-- **Markers:**
-  - Price tags are small raised surfaces; the selected tag grows slightly and turns emerald.
-  - Clusters expand with a camera ease to their bounds.
-- **Drawing has three visible states:** entry (hint), active (vertices and a live outline) and complete (the area settles into a cyan outline).
+- **Basemap is context.** OpenFreeMap re-toned onto basalt (dark) and limestone (light): land ≈ canvas, roads step up in lightness by importance, water is the only colour (deep cyan), labels muted with a canvas halo.
+- **Camera = eases, not flights** (`lib/map/camera.ts`, unit-tested):
+  - Selecting a listing (its tag, its dot, or "Show on map" in the list) eases there in 800 ms with `--ease-standard`; zoom rises by at most two levels and never past 15; the listing is centred in the *open* part of the map (beside the docked rail, above the selection card).
+  - Bearing never changes: drag-rotate, touch rotation and keyboard rotation are off, so north stays up.
+  - Groups open to the zoom at which they split (never more than three levels).
+  - Under `prefers-reduced-motion` every move is instant.
+- **Price tags** are HTML markers (so Arabic is set in Readex Pro: "269 مليون د.ع", "165 ألف دولار/شهر"; English stays compact: "$165K/mo"). A tag is a raised surface with a tail pointing at the exact dot. States: arrival (fade + 6 px rise), hover from the list (accent outline, 2 px lift), selected (emerald, 8 % larger, soft emerald halo on the map), approximate (dashed edge), departure (fade). Tags are placed without overlap when the camera settles; a listing whose tag does not fit keeps its dot.
+- **Groups** (below district zoom, or server clusters when dense): raised discs with a cyan rim and the count in ink — the same material as the tags.
+- **Layers**: one panel (base map, 3D buildings; Future Iraq, area boundaries, places) with legend swatches; overlays fade in and out (280 ms) instead of popping.
+- **3D buildings**: real OpenStreetMap footprints extruded to OpenMapTiles `render_height` (buildings without a mapped height use OpenMapTiles' default — the panel says so), seen from a 50° pitch; turning 3D on also brings buildings into view (≤ 2 zoom levels). No fake 3D. Terrain and photo-real 3D would need an external tile provider and credentials (not configured).
+- **Drawing**: entry (crosshair, status line with a live point count), active (vertices, the first larger; a dashed cyan outline that follows the pointer; tags dim and ignore taps), complete (the area settles from a 4 px to a 2 px solid outline while its fill fades in).
+- **Results**: a docked rail on wide screens; on phones a sheet with three positions (header only, half, nearly full) that can be dragged or tapped. Results update without blocking the map: a thin cyan progress line and "Updating results…".
 
 ## 12. Composition per page (Pass 1 scope in bold)
 
@@ -197,3 +200,8 @@ Heights are 32, 40 and 48px. Every button has designed states:
   - Filters form a ruled column on desktop and a single button with a sheet on phones.
   - Results sit in a 3-column grid with ruled row separators.
 - Map, AI, Studio and Future Iraq follow in Passes 2–4, using the same tokens.
+
+## 13. Demo imagery
+
+DEMO listings use **representative photographs** (backend `app/demo_photos`, credits at `/credits`): real streets and buildings in Iraq from Wikimedia Commons under free licences (CC0, CC BY, CC BY-SA), chosen by type, resized and stripped of metadata. Every placement says *representative photo, not of this property* — on the image's bottom edge in cards, and with the author and licence under the gallery. Images of soldiers, damage, heritage sites, identifiable people or businesses were left out.
+
