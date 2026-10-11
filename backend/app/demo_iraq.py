@@ -1,7 +1,7 @@
 """National Iraqi DEMO dataset for the public demonstration site.
 
 Seven cities (Basra, Baghdad, Najaf, Karbala, Erbil, Mosul, Sulaymaniyah),
-18 synthetic listings each, with generated DEMO illustrations, demo areas and
+18 synthetic listings each, with representative DEMO photos, demo areas and
 demo points of interest, plus optional demo accounts (admin, agency owner,
 agent, private owner, customer) whose shared password comes from the
 environment — never from source code.
@@ -19,7 +19,8 @@ Honesty rules (same as ``app.demo``):
 * area squares are placeholders (``DEMO_GEOMETRY_SOURCE``); a few well-known
   district names are used with *approximate* centres, the other areas are
   explicitly synthetic ("المنطقة الشمالية (تجريبية)");
-* images are generated illustrations labelled "DEMO — SYNTHETIC IMAGE".
+* images are representative licensed photos (app/demo_photos) captioned as such,
+  or labelled illustrations where no photo of the type exists.
 
 Idempotent: listings are counted per city and only the missing ones are
 created; accounts are created once and their password is (re)set from the
@@ -46,20 +47,17 @@ from app.auth.security import hash_password
 from app.auth.service import revoke_all_sessions
 from app.demo import BASRA_DISTRICTS, DEMO_GEOMETRY_SOURCE, HALF_SIZE, DemoDistrict
 from app.demo import _districts as basra_districts
-from app.demo_images import render as render_image
+from app.demo_images import attach_demo_image
 from app.geo.models import City, District, Governorate
 from app.geo.spatial import coarsen, make_point
 from app.properties.models import (
     Property,
     PropertyAmenity,
-    PropertyMedia,
     PropertyPriceHistory,
     PropertyStatusHistory,
 )
 from app.properties.service import _next_reference
-from app.properties.uploads import process_image
 from app.rbac.catalog import Role
-from app.storage import get_storage
 from app.users.models import User, UserRole, UserStatus
 from app.users.validation import password_problems
 
@@ -516,42 +514,21 @@ def _description(
         f"{type_ar} {purpose_ar} في {d.name_ar} بمدينة {spec.name_ar}، بمساحة {area} م².{rooms_ar}"
         " قريب من الخدمات والطرق الرئيسية.\n\n"
         "تنبيه: هذا إعلان تجريبي (DEMO) لعرض إمكانات المنصة فقط وليس عرضاً حقيقياً. "
-        "الصور رسوم توضيحية مولّدة، والسعر والمواصفات أرقام افتراضية."
+        "الصور تمثيلية (من Wikimedia Commons) وليست صوراً لهذا العقار، "
+        "والسعر والمواصفات أرقام افتراضية."
     )
     en = (
         f"{type_en} {purpose_en} in {d.name_en}, {spec.name_en}: {area} m²,{rooms_en}"
         " close to services and main roads.\n\n"
         "Note: DEMO listing for demonstrating the platform only — not a real offer. "
-        "Images are generated illustrations; price and details are hypothetical."
+        "Photos are representative (Wikimedia Commons), not of this property; price and details "
+        "are hypothetical."
     )
     return ar, en
 
 
 def _attach_image(db: Session, prop: Property, seed: int) -> None:
-    image = process_image(render_image(prop.property_type_code, seed), limit=10 * 1024 * 1024)
-    media_id = uuid.uuid4()
-    base = f"properties/{prop.id}/{media_id}"
-    storage = get_storage()
-    storage.put(f"{base}.webp", image.main, image.content_type)
-    storage.put(f"{base}-thumb.webp", image.thumbnail, image.content_type)
-    db.add(
-        PropertyMedia(
-            id=media_id,
-            property_id=prop.id,
-            kind="IMAGE",
-            storage_key=f"{base}.webp",
-            thumbnail_key=f"{base}-thumb.webp",
-            content_type=image.content_type,
-            size_bytes=len(image.main),
-            width=image.width,
-            height=image.height,
-            sort_order=1,
-            caption="صورة توضيحية مولّدة — DEMO",
-            sha256=image.sha256,
-            perceptual_hash=image.perceptual_hash,
-            uploaded_by_id=None,
-        )
-    )
+    attach_demo_image(db, prop, seed)
 
 
 def _city_listings(

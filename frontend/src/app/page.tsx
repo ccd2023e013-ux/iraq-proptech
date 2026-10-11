@@ -217,8 +217,11 @@ export default async function HomePage() {
                     <div className="skeleton size-full" />
                   )}
                   {lead.is_demo && (
-                    <span className="absolute start-3 bottom-3">
-                      <TrustBadge kind="demo">{dict.listing.demo}</TrustBadge>
+                    <span className="absolute start-0 bottom-0 rounded-se-[var(--radius-tag)] bg-gold-500 px-2.5 py-1 text-xs font-semibold text-[#1d1405]">
+                      {dict.listing.demo}
+                      {lead.cover_url && (
+                        <span className="font-medium"> · {dict.listing.representativePhoto}</span>
+                      )}
                     </span>
                   )}
                 </div>

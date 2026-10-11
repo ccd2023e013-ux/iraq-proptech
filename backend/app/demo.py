@@ -27,11 +27,13 @@ from sqlalchemy.orm import Session
 
 from app.audit import service as audit
 from app.auth.security import hash_password
+from app.demo_images import attach_demo_image
 from app.geo.models import City, District, Governorate
 from app.geo.spatial import coarsen, make_point
 from app.properties.models import (
     Property,
     PropertyAmenity,
+    PropertyMedia,
     PropertyPriceHistory,
     PropertyStatusHistory,
 )
@@ -198,8 +200,9 @@ def _demo_plans(db: Session) -> int:
     return created
 
 
-def seed(db: Session, *, listings: int = 40) -> dict[str, int]:
-    """Create the demo lister, demo district squares in Basra and demo listings."""
+def seed(db: Session, *, listings: int = 40, images: bool = True) -> dict[str, int]:
+    """Create the demo lister, demo district squares in Basra and demo listings
+    (each with a representative photo, captioned as such, unless ``images`` is off)."""
     gov = db.execute(select(Governorate).where(Governorate.code == "BSR")).scalar_one()
     city = db.execute(
         select(City).where(City.governorate_id == gov.id, City.slug == "basra")
@@ -236,9 +239,12 @@ def seed(db: Session, *, listings: int = 40) -> dict[str, int]:
             title_en=f"DEMO listing — {code.replace('_', ' ').title()} in {d.name_en}",
             description_ar=(
                 "هذا إعلان تجريبي لأغراض العرض فقط وليس عرضاً حقيقياً. "
-                "المواصفات والسعر أرقام توضيحية."
+                "المواصفات والسعر أرقام توضيحية، والصورة تمثيلية وليست لهذا العقار."
             ),
-            description_en="Demo listing for demonstration only — not a real offer.",
+            description_en=(
+                "Demo listing for demonstration only — not a real offer. "
+                "The photo is representative, not of this property."
+            ),
             property_type_code=code,
             purpose="RENT" if rent else "SALE",
             rent_period="MONTHLY" if rent else None,
@@ -271,6 +277,8 @@ def seed(db: Session, *, listings: int = 40) -> dict[str, int]:
             ]
         db.add(prop)
         db.flush()
+        if images:
+            attach_demo_image(db, prop, seed=2026 + i)
         db.add(
             PropertyStatusHistory(
                 property_id=prop.id,
@@ -317,7 +325,7 @@ def reset(db: Session) -> dict[str, int]:
             select(Property.id).where(Property.lister_id == user.id, Property.is_demo.is_(True))
         ).scalars()
     )
-    for model in (PropertyStatusHistory, PropertyPriceHistory, PropertyAmenity):
+    for model in (PropertyStatusHistory, PropertyPriceHistory, PropertyAmenity, PropertyMedia):
         db.execute(delete(model).where(model.property_id.in_(ids)))
     db.execute(delete(Property).where(Property.id.in_(ids)))
     audit.record(db, "demo.reset", actor_id=None, resource_type="demo", data={"deleted": len(ids)})

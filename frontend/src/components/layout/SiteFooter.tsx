@@ -23,6 +23,7 @@ export function SiteFooter({ dict, locale }: { dict: Dictionary; locale: Locale 
         { href: "/search/smart", label: dict.ai.smartSearch },
         { href: "/pricing", label: dict.footer.pricing },
         { href: "/status", label: dict.footer.status },
+        { href: "/credits", label: dict.footer.photoCredits },
       ],
     },
   ];

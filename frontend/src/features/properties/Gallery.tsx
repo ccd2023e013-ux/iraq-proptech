@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { type KeyboardEvent, useState } from "react";
 
 import { Icon } from "@/components/ui/Icon";
@@ -16,11 +17,14 @@ export function Gallery({
   title,
   emptyLabel,
   labels = { prev: "‹", next: "›" },
+  creditsLabel,
 }: {
   media: Media[];
   title: string;
   emptyLabel: string;
   labels?: { prev: string; next: string };
+  /** Link text to the photo credits, shown under credited (Commons) photos. */
+  creditsLabel?: string;
 }) {
   const images = media.filter((m) => m.kind !== "VIDEO");
   const videos = media.filter((m) => m.kind === "VIDEO");
@@ -97,6 +101,18 @@ export function Gallery({
             </>
           )}
         </div>
+      )}
+      {/* A photo's caption sits under it; representative DEMO photos carry
+          their credit here and link to the full attribution. */}
+      {current?.caption && (
+        <p className="caption flex flex-wrap items-baseline gap-x-2" dir="auto">
+          <span>{current.caption}</span>
+          {creditsLabel && current.caption.includes("Wikimedia Commons") && (
+            <Link href="/credits" className="link">
+              {creditsLabel}
+            </Link>
+          )}
+        </p>
       )}
       {images.length > 1 && (
         <ul className="quiet-scroll flex gap-2 overflow-x-auto px-0.5 pt-0.5 pb-1">

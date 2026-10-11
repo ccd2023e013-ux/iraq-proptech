@@ -88,6 +88,9 @@ export function PropertyCard({
             {card.is_demo && (
               <span className="rounded-se-[var(--radius-tag)] bg-gold-500 px-2 py-0.5 text-[11px] font-semibold text-[#1d1405]">
                 {dict.listing.demo}
+                {card.cover_url && (
+                  <span className="font-medium"> · {dict.listing.representativePhoto}</span>
+                )}
               </span>
             )}
             {card.is_featured && (

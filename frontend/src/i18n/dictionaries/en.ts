@@ -97,6 +97,7 @@ const en: Dictionary = {
     quickLinks: "Quick links",
   },
   listing: {
+    representativePhoto: "Representative photo",
     promoted: "Promoted",
     purposes: {
       SALE: "For sale",
@@ -1347,7 +1348,27 @@ const en: Dictionary = {
     heroMapCaption: "{n} Basra listings on the map now",
     openMap: "Open the map",
   },
+  credits: {
+    title: "Photo credits",
+    intro:
+      "DEMO listings use representative photographs of real streets and buildings in Iraq, from Wikimedia Commons under free licences. A photo shows the general type and setting only — never the listed property, which is fictional.",
+    author: "Author",
+    licence: "Licence",
+    source: "Source",
+    changes: "Changes",
+    kinds: {
+      HOUSE: "Houses",
+      VILLA: "Villas",
+      APARTMENT: "Apartments",
+      LAND: "Land",
+      SHOP: "Shops",
+      OFFICE: "Offices",
+    },
+    changed: "Resized to 1600 px and re-encoded; metadata removed.",
+    shareAlike: "Photos under CC BY-SA remain under the same licence after these changes.",
+  },
   footer: {
+    photoCredits: "Photo credits",
     tagline: "Property intelligence that understands place.",
     demoNotice:
       "All current listings are DEMO listings that demonstrate the platform, not real offers.",

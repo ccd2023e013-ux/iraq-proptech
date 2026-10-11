@@ -1,17 +1,104 @@
-"""Deterministic, clearly-labelled DEMO illustrations for demo listings.
+"""Images for DEMO listings: representative licensed photos, or illustrations.
 
-No photographs are used or downloaded: each image is a flat illustration drawn
-with Pillow from the listing's type and a seed, with a large "DEMO" label and
-"SYNTHETIC IMAGE" caption burned in, so it can never pass for a real photo of
-a real property. The same (type, seed) always produces the same image.
+Photos: a small library in ``app/demo_photos`` (see its manifest.json), sourced
+from Wikimedia Commons under free licences (public domain, CC0, CC BY, CC BY-SA)
+with their author, licence and source page recorded; they were resized and
+re-encoded with all metadata removed. They are *representative*: real streets
+and buildings in Iraq of the listing's general type, never a photograph of the
+(fictional) listing itself, and the media caption says so with the credit.
+Nothing is downloaded at run time.
+
+Illustrations: when no photo of a type exists, a flat drawing made with Pillow
+from the listing's type and a seed, with "DEMO" and "SYNTHETIC IMAGE" burned in
+inside the area every crop keeps. The same (type, seed) always gives the same
+image.
 """
 
 from __future__ import annotations
 
 import io
+import json
 import random
+import uuid
+from dataclasses import dataclass
+from functools import lru_cache
+from pathlib import Path
+from typing import TYPE_CHECKING
 
 from PIL import Image, ImageDraw, ImageFont
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
+    from app.properties.models import Property
+
+PHOTO_DIR = Path(__file__).with_name("demo_photos")
+# Which photo pools stand in for which property types (first pool preferred).
+_POOLS: dict[str, tuple[str, ...]] = {
+    "HOUSE": ("HOUSE", "VILLA"),
+    "VILLA": ("VILLA", "HOUSE"),
+    "APARTMENT": ("APARTMENT",),
+    "BUILDING": ("APARTMENT",),
+    "LAND": ("LAND",),
+    "FARM": ("LAND",),
+    "SHOP": ("SHOP", "OFFICE"),
+    "OFFICE": ("OFFICE", "SHOP"),
+}
+CAPTION_MAX = 200
+
+
+@dataclass(frozen=True)
+class DemoPhoto:
+    file: str
+    kind: str
+    title: str
+    author: str
+    licence: str
+    licence_url: str
+    source: str
+
+
+@lru_cache(maxsize=1)
+def photo_library() -> tuple[DemoPhoto, ...]:
+    """The licensed photo library (empty when the folder is absent)."""
+    manifest = PHOTO_DIR / "manifest.json"
+    if not manifest.exists():
+        return ()
+    rows = json.loads(manifest.read_text(encoding="utf-8"))
+    return tuple(
+        DemoPhoto(
+            file=r["file"],
+            kind=r["kind"],
+            title=r["title"],
+            author=r["author"],
+            licence=r["licence"],
+            licence_url=r.get("licence_url") or "",
+            source=r["source"],
+        )
+        for r in rows
+        if (PHOTO_DIR / r["file"]).exists()
+    )
+
+
+def pick_photo(property_type: str, seed: int) -> DemoPhoto | None:
+    """A representative photo for ``property_type`` (deterministic per seed)."""
+    kinds = _POOLS.get(property_type, ("SHOP", "OFFICE"))
+    pool = [p for kind in kinds for p in photo_library() if p.kind == kind]
+    return pool[seed % len(pool)] if pool else None
+
+
+def photo_bytes(photo: DemoPhoto) -> bytes:
+    return (PHOTO_DIR / photo.file).read_bytes()
+
+
+def photo_caption(photo: DemoPhoto) -> str:
+    """Media caption: representative, DEMO, and the credit (author, licence, source)."""
+    head = "صورة تمثيلية وليست لهذا العقار — DEMO · "
+    tail = f" · {photo.licence} · Wikimedia Commons"
+    room = CAPTION_MAX - len(head) - len(tail)
+    author = photo.author if len(photo.author) <= room else photo.author[: room - 1] + "…"
+    return f"{head}{author}{tail}"
+
 
 WIDTH, HEIGHT = 1200, 800
 
@@ -163,15 +250,15 @@ def render(property_type: str, seed: int) -> bytes:
     else:
         _shop(draw, rng, wall, accent, ground_y)
 
-    # Unmistakable labels.
+    # Unmistakable labels, kept inside the area a 4:3 or 16:9 crop keeps.
     draw.rectangle([0, 0, WIDTH, 96], fill=(30, 30, 30))
-    draw.text((32, 18), "DEMO", fill=(255, 196, 0), font=_font(60))
+    draw.text((140, 18), "DEMO", fill=(255, 196, 0), font=_font(60))
     draw.text(
-        (250, 34), "SYNTHETIC IMAGE - NOT A REAL PROPERTY", fill=(255, 255, 255), font=_font(30)
+        (340, 34), "SYNTHETIC IMAGE - NOT A REAL PROPERTY", fill=(255, 255, 255), font=_font(30)
     )
     draw.rectangle([0, HEIGHT - 50, WIDTH, HEIGHT], fill=(30, 30, 30))
     draw.text(
-        (32, HEIGHT - 42),
+        (140, HEIGHT - 42),
         f"MAKAN demo illustration #{seed}",
         fill=(220, 220, 220),
         font=_font(26),
@@ -180,3 +267,45 @@ def render(property_type: str, seed: int) -> bytes:
     out = io.BytesIO()
     image.save(out, format="PNG", optimize=True)
     return out.getvalue()
+
+
+def demo_image(property_type: str, seed: int) -> tuple[bytes, str]:
+    """(image bytes, caption) for a demo listing: a representative photo when
+    one exists for the type, otherwise a labelled illustration."""
+    photo = pick_photo(property_type, seed)
+    if photo:
+        return photo_bytes(photo), photo_caption(photo)
+    return render(property_type, seed), "صورة توضيحية مولّدة — DEMO"
+
+
+def attach_demo_image(db: Session, prop: Property, seed: int) -> None:
+    """Store the demo image (main + thumbnail) and its captioned media row."""
+    from app.properties.models import PropertyMedia
+    from app.properties.uploads import process_image
+    from app.storage import get_storage
+
+    data, caption = demo_image(prop.property_type_code, seed)
+    image = process_image(data, limit=10 * 1024 * 1024)
+    media_id = uuid.uuid4()
+    base = f"properties/{prop.id}/{media_id}"
+    storage = get_storage()
+    storage.put(f"{base}.webp", image.main, image.content_type)
+    storage.put(f"{base}-thumb.webp", image.thumbnail, image.content_type)
+    db.add(
+        PropertyMedia(
+            id=media_id,
+            property_id=prop.id,
+            kind="IMAGE",
+            storage_key=f"{base}.webp",
+            thumbnail_key=f"{base}-thumb.webp",
+            content_type=image.content_type,
+            size_bytes=len(image.main),
+            width=image.width,
+            height=image.height,
+            sort_order=1,
+            caption=caption,
+            sha256=image.sha256,
+            perceptual_hash=image.perceptual_hash,
+            uploaded_by_id=None,
+        )
+    )

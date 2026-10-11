@@ -162,6 +162,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
           title={title}
           emptyLabel={dict.listing.noImage}
           labels={{ prev: p.prevPhoto, next: p.nextPhoto }}
+          creditsLabel={dict.footer.photoCredits}
         />
       </div>
 

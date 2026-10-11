@@ -459,6 +459,140 @@ interface Tag {
   leaving?: ReturnType<typeof setTimeout>;
 }
 
+interface TagState {
+  features: Feature[];
+  selectedId: string | null;
+  highlightId: string | null;
+  locale: Locale;
+}
+
+/**
+ * The HTML price tags over the map, keyed by listing id. Tags are placed when
+ * the camera settles (they ride with the map while it moves), without overlap;
+ * a tag that does not fit leaves its listing marked by the dot below.
+ */
+class PriceTags {
+  private tags = new Map<string, Tag>();
+
+  constructor(
+    private map: MapLibreMap,
+    private Marker: typeof MapLibreMarker,
+    private onPick: (id: string) => void,
+  ) {}
+
+  /** Tags shown (not leaving). */
+  get count(): number {
+    let n = 0;
+    for (const tag of this.tags.values()) if (!tag.leaving) n++;
+    return n;
+  }
+
+  sync({ features, selectedId, highlightId, locale }: TagState): number {
+    const map = this.map;
+    const show = map.getZoom() >= BUBBLE_MIN_ZOOM;
+    const canvas = map.getCanvas();
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    const boxes: TagBox[] = [];
+    const byId = new Map<string, Feature>();
+    if (show) {
+      for (const f of features) {
+        const p = (f.properties ?? {}) as Record<string, unknown>;
+        if ("point_count" in p || f.geometry.type !== "Point") continue;
+        const id = String(p.id);
+        const [lon, lat] = (f.geometry as Point).coordinates as [number, number];
+        const at = map.project([lon, lat]);
+        if (at.x < -80 || at.y < -40 || at.x > w + 80 || at.y > h + 40) continue;
+        const label = tagLabel(
+          p.price_amount,
+          p.currency,
+          p.price_on_request,
+          p.rent_period,
+          locale,
+        );
+        const width = this.tags.get(id)?.width || label.length * 7 + 20;
+        byId.set(id, f);
+        boxes.push({
+          id,
+          x: at.x - width / 2,
+          y: at.y - 34,
+          width,
+          height: 26,
+          pinned: id === selectedId || id === highlightId,
+        });
+      }
+    }
+    const visible = placeTags(boxes, TAG_LIMIT);
+    // Departures: fade out, then remove.
+    for (const [id, tag] of this.tags) {
+      if (visible.has(id)) {
+        if (tag.leaving) {
+          clearTimeout(tag.leaving);
+          tag.leaving = undefined;
+          delete tag.el.dataset.leaving;
+        }
+        continue;
+      }
+      if (tag.leaving) continue;
+      tag.el.dataset.leaving = "1";
+      tag.leaving = setTimeout(
+        () => {
+          tag.marker.remove();
+          this.tags.delete(id);
+        },
+        reducedMotion() ? 0 : 160,
+      );
+    }
+    // Arrivals and state.
+    for (const id of visible) {
+      const f = byId.get(id)!;
+      const p = (f.properties ?? {}) as Record<string, unknown>;
+      const coords = (f.geometry as Point).coordinates as [number, number];
+      const label = tagLabel(p.price_amount, p.currency, p.price_on_request, p.rent_period, locale);
+      let tag = this.tags.get(id);
+      if (!tag) {
+        const el = document.createElement("div");
+        el.className = "map-tag-anchor";
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "map-tag";
+        // Keyboard and screen-reader users choose listings from the results
+        // list ("Show on map"); the tags are a pointer shortcut to the same.
+        button.tabIndex = -1;
+        button.setAttribute("aria-hidden", "true");
+        el.appendChild(button);
+        button.addEventListener("click", () => this.onPick(id));
+        const marker = new this.Marker({ element: el, anchor: "bottom", offset: [0, -7] })
+          .setLngLat(coords)
+          .addTo(map);
+        tag = { marker, el, button, width: 0 };
+        this.tags.set(id, tag);
+      } else {
+        tag.marker.setLngLat(coords);
+      }
+      if (tag.button.textContent !== label) tag.button.textContent = label;
+      if (p.approximate === true) tag.button.dataset.approx = "1";
+      else delete tag.button.dataset.approx;
+      const state = id === selectedId ? "selected" : id === highlightId ? "hover" : "";
+      if ((tag.button.dataset.state ?? "") !== state) {
+        if (state) tag.button.dataset.state = state;
+        else delete tag.button.dataset.state;
+      }
+      tag.el.style.zIndex = state === "selected" ? "3" : state === "hover" ? "2" : "1";
+      if (!tag.width) tag.width = tag.button.offsetWidth || label.length * 7 + 20;
+    }
+    return visible.size;
+  }
+
+  destroy(): void {
+    for (const tag of this.tags.values()) {
+      if (tag.leaving) clearTimeout(tag.leaving);
+      tag.marker.remove();
+    }
+    this.tags.clear();
+  }
+}
+
 export function PropertyMap(props: PropertyMapProps) {
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -471,10 +605,8 @@ export function PropertyMap(props: PropertyMapProps) {
   const [ready, setReady] = useState(false);
   const [styleVersion, setStyleVersion] = useState(0);
   const [failed, setFailed] = useState(false);
-  // HTML price tags, keyed by listing id, and the listings they are drawn from.
-  const tags = useRef(new Map<string, Tag>());
+  // The listings the HTML price tags are drawn from (tags: see PriceTags).
   const points = useRef<Feature[]>([]);
-  const markerClass = useRef<typeof MapLibreMarker | null>(null);
   const syncRef = useRef<() => void>(() => undefined);
   const focusRef = useRef<(coords: [number, number]) => void>(() => undefined);
 
@@ -484,14 +616,13 @@ export function PropertyMap(props: PropertyMapProps) {
     let map: MapLibreMap | null = null;
     let dark = false;
     const cleanups: (() => void)[] = [];
-    const tagMap = tags.current;
+    let priceTags: PriceTags | null = null;
     (async () => {
       try {
         const maplibre = await import("maplibre-gl");
         if (cancelled || !container.current) return;
         // Served by the site itself: the bundler does not ship MapLibre 6's worker.
         maplibre.setWorkerUrl(maplibreWorkerUrl(maplibre.getVersion()));
-        markerClass.current = maplibre.Marker;
         // No RTL text plugin: MapLibre 6 shapes Arabic labels natively.
         const { config } = latest.current;
         dark = isDark();
@@ -515,6 +646,25 @@ export function PropertyMap(props: PropertyMapProps) {
         map.keyboard.disableRotation();
         map.touchPitch.disable();
         mapRef.current = map;
+        // Price tags: HTML, so prices are set in the site's fonts (proper
+        // Arabic), and selection, hover, arrival and departure are CSS.
+        const tagLayer = new PriceTags(map, maplibre.Marker, (id) => {
+          if (latest.current.drawing !== null) return;
+          const feature = points.current.find((f) => String((f.properties ?? {}).id) === id);
+          if (!feature) return;
+          latest.current.onSelect(id, (feature.properties ?? {}) as Record<string, unknown>);
+          focusRef.current((feature.geometry as Point).coordinates as [number, number]);
+        });
+        priceTags = tagLayer;
+        syncRef.current = () => {
+          const shown = tagLayer.sync({
+            features: points.current,
+            selectedId: latest.current.selectedId ?? null,
+            highlightId: latest.current.highlightId,
+            locale: latest.current.locale,
+          });
+          if (container.current) container.current.dataset.bubbles = String(shown);
+        };
         // Zoom buttons at the bottom of the end side (wide screens; phones pinch).
         map.addControl(
           new maplibre.NavigationControl({ showCompass: false }),
@@ -709,7 +859,7 @@ export function PropertyMap(props: PropertyMapProps) {
         map.on("idle", () => {
           if (!map || !container.current || !map.getLayer("points-under")) return;
           const count = (layers: string[]) => map!.queryRenderedFeatures({ layers }).length;
-          container.current.dataset.bubbles = String(visibleTags(tagMap));
+          container.current.dataset.bubbles = String(tagLayer.count);
           container.current.dataset.clusters = String(count(["clusters", "clusters-server"]));
           container.current.dataset.pois = String(count(["poi-dots"]));
           container.current.dataset.projects = String(count(["development-points"]));
@@ -722,126 +872,12 @@ export function PropertyMap(props: PropertyMapProps) {
     return () => {
       cancelled = true;
       cleanups.forEach((fn) => fn());
-      for (const tag of tagMap.values()) {
-        if (tag.leaving) clearTimeout(tag.leaving);
-        tag.marker.remove();
-      }
-      tagMap.clear();
+      priceTags?.destroy();
+      syncRef.current = () => undefined;
       map?.remove();
       mapRef.current = null;
     };
   }, []);
-
-  // Price tags: HTML, so prices are set in the site's fonts (proper Arabic),
-  // and selection, hover, arrival and departure are CSS transitions.
-  const syncTags = () => {
-    const map = mapRef.current;
-    const Marker = markerClass.current;
-    if (!map || !Marker || !container.current) return;
-    const { selectedId, highlightId, locale } = latest.current;
-    const show = map.getZoom() >= BUBBLE_MIN_ZOOM;
-    const canvas = map.getCanvas();
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
-    const boxes: TagBox[] = [];
-    const byId = new Map<string, Feature>();
-    if (show) {
-      for (const f of points.current) {
-        const p = (f.properties ?? {}) as Record<string, unknown>;
-        if ("point_count" in p || f.geometry.type !== "Point") continue;
-        const id = String(p.id);
-        const [lon, lat] = (f.geometry as Point).coordinates as [number, number];
-        const at = map.project([lon, lat]);
-        if (at.x < -80 || at.y < -40 || at.x > w + 80 || at.y > h + 40) continue;
-        const label = tagLabel(
-          p.price_amount,
-          p.currency,
-          p.price_on_request,
-          p.rent_period,
-          locale,
-        );
-        const width = tags.current.get(id)?.width || label.length * 7 + 20;
-        byId.set(id, f);
-        boxes.push({
-          id,
-          x: at.x - width / 2,
-          y: at.y - 34,
-          width,
-          height: 26,
-          pinned: id === selectedId || id === highlightId,
-        });
-      }
-    }
-    const visible = placeTags(boxes, TAG_LIMIT);
-    // Departures: fade out, then remove.
-    for (const [id, tag] of tags.current) {
-      if (visible.has(id)) {
-        if (tag.leaving) {
-          clearTimeout(tag.leaving);
-          tag.leaving = undefined;
-          delete tag.el.dataset.leaving;
-        }
-        continue;
-      }
-      if (tag.leaving) continue;
-      tag.el.dataset.leaving = "1";
-      tag.leaving = setTimeout(
-        () => {
-          tag.marker.remove();
-          tags.current.delete(id);
-        },
-        reducedMotion() ? 0 : 160,
-      );
-    }
-    // Arrivals and state.
-    for (const id of visible) {
-      const f = byId.get(id)!;
-      const p = (f.properties ?? {}) as Record<string, unknown>;
-      const coords = (f.geometry as Point).coordinates as [number, number];
-      let tag = tags.current.get(id);
-      const label = tagLabel(p.price_amount, p.currency, p.price_on_request, p.rent_period, locale);
-      if (!tag) {
-        const el = document.createElement("div");
-        el.className = "map-tag-anchor";
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "map-tag";
-        // Keyboard and screen-reader users choose listings from the results
-        // list ("Show on map"); the tags are a pointer shortcut to the same.
-        button.tabIndex = -1;
-        button.setAttribute("aria-hidden", "true");
-        el.appendChild(button);
-        button.addEventListener("click", () => {
-          if (latest.current.drawing !== null) return;
-          const feature = byIdCurrent(points.current, id);
-          if (!feature) return;
-          latest.current.onSelect(id, (feature.properties ?? {}) as Record<string, unknown>);
-          focusRef.current((feature.geometry as Point).coordinates as [number, number]);
-        });
-        const marker = new Marker({ element: el, anchor: "bottom", offset: [0, -7] })
-          .setLngLat(coords)
-          .addTo(map);
-        tag = { marker, el, button, width: 0 };
-        tags.current.set(id, tag);
-      } else {
-        tag.marker.setLngLat(coords);
-      }
-      if (tag.button.textContent !== label) tag.button.textContent = label;
-      if (p.approximate === true) tag.button.dataset.approx = "1";
-      else delete tag.button.dataset.approx;
-      const state = id === selectedId ? "selected" : id === highlightId ? "hover" : "";
-      if ((tag.button.dataset.state ?? "") !== state) {
-        if (state) tag.button.dataset.state = state;
-        else delete tag.button.dataset.state;
-      }
-      tag.el.style.zIndex = state === "selected" ? "3" : state === "hover" ? "2" : "1";
-      if (!tag.width) tag.width = tag.button.offsetWidth || label.length * 7 + 20;
-    }
-    container.current.dataset.bubbles = String(visible.size);
-  };
-  useLayoutEffect(() => {
-    syncRef.current = syncTags;
-  });
 
   // Data updates (re-applied after every style load).
   useEffect(() => {
@@ -1014,16 +1050,6 @@ export function PropertyMap(props: PropertyMapProps) {
       )}
     </div>
   );
-}
-
-function byIdCurrent(features: Feature[], id: string): Feature | undefined {
-  return features.find((f) => String((f.properties ?? {}).id) === id);
-}
-
-function visibleTags(tagMap: Map<string, Tag>): number {
-  let n = 0;
-  for (const tag of tagMap.values()) if (!tag.leaving) n++;
-  return n;
 }
 
 /** Vertices (the first one larger), the outline and, from three points, the area. */
