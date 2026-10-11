@@ -199,10 +199,10 @@ export default async function HomePage() {
               </>
             }
           >
-            <div className="grid gap-8 lg:grid-cols-9 lg:gap-6">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-9 lg:gap-6">
               <Link
                 href={`/properties/${lead.id}`}
-                className="group flex flex-col gap-4 lg:col-span-5"
+                className="group flex min-w-0 flex-col gap-4 lg:col-span-5"
               >
                 <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-card)] bg-fill">
                   {lead.cover_url ? (
@@ -231,7 +231,7 @@ export default async function HomePage() {
                   </p>
                 </div>
               </Link>
-              <ol className="flex flex-col border-t border-hairline lg:col-span-4">
+              <ol className="flex min-w-0 flex-col border-t border-hairline lg:col-span-4">
                 {ledger.map((card) => {
                   const area = formatArea(card.area_m2, locale);
                   return (
@@ -300,7 +300,7 @@ export default async function HomePage() {
               </>
             }
           >
-            <dl className="grid border-t border-hairline sm:grid-cols-2 sm:divide-x sm:divide-hairline rtl:sm:divide-x-reverse">
+            <dl className="grid grid-cols-1 border-t border-hairline sm:grid-cols-2 sm:divide-x sm:divide-hairline rtl:sm:divide-x-reverse">
               {[
                 {
                   label: h.housesForSale,
@@ -344,7 +344,7 @@ export default async function HomePage() {
         {/* City index: a ruled table of places, not tiles. */}
         {cities.length > 0 && (
           <Section id="explore-heading" title={h.exploreTitle}>
-            <ul className="grid border-t border-hairline sm:grid-cols-2 sm:gap-x-6">
+            <ul className="grid grid-cols-1 border-t border-hairline sm:grid-cols-2 sm:gap-x-6">
               {cities.slice(0, 8).map((c) => (
                 <li key={c.city_id} className="border-b border-hairline">
                   <Link
@@ -376,7 +376,7 @@ export default async function HomePage() {
           title={h.nextTitle}
           aside={<p className="text-ink-2">{h.nextBody}</p>}
         >
-          <ul className="grid border-t border-hairline sm:grid-cols-2 sm:gap-x-6">
+          <ul className="grid grid-cols-1 border-t border-hairline sm:grid-cols-2 sm:gap-x-6">
             {NEXT_MODULES.map((m) => (
               <li key={m.key} className="flex gap-4 border-b border-hairline py-6">
                 <Icon name={m.icon} className="mt-1 size-5 shrink-0 text-spatial" />

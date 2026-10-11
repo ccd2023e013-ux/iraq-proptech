@@ -71,24 +71,29 @@ export function NearYou({ dict, locale }: { dict: Dictionary; locale: Locale }) 
   }
 
   return (
-    <section aria-labelledby="near-heading" className="grid gap-8 lg:grid-cols-[0.8fr_2fr]">
-      <div className="flex flex-col items-start gap-3">
-        <h2
-          id="near-heading"
-          className="font-display text-3xl font-semibold tracking-tight text-ink"
-        >
+    <section
+      aria-labelledby="near-heading"
+      className="rule-top grid grid-cols-1 gap-8 pt-10 md:grid-cols-12 md:gap-6 md:pt-12"
+    >
+      <div className="flex min-w-0 flex-col items-start gap-3 md:col-span-4 lg:col-span-3">
+        <h2 id="near-heading" className="display-md text-ink">
           {h.nearTitle}
         </h2>
         <p className="text-ink-2">{h.nearBody}</p>
         {state.kind !== "done" && (
-          <Button onClick={locate} loading={state.kind === "locating"} data-testid="near-you">
+          <Button
+            variant="secondary"
+            onClick={locate}
+            loading={state.kind === "locating"}
+            data-testid="near-you"
+          >
             {h.nearButton}
           </Button>
         )}
         {state.kind === "denied" && <p className="text-sm text-ink-3">{dict.map.nearMeDenied}</p>}
         {state.kind === "error" && <p className="text-sm text-danger">{dict.map.error}</p>}
       </div>
-      <div className="min-w-0">
+      <div className="min-w-0 md:col-span-8 lg:col-span-9">
         {state.kind === "done" && state.items.length === 0 && (
           <p className="rounded-[var(--radius-card)] bg-fill px-5 py-8 text-ink-2">
             {h.nearNone.replace("{km}", String(NEAR_RADIUS_KM))}
