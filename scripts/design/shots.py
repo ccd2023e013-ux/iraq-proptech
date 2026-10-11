@@ -87,7 +87,29 @@ def settle(page: Page, path: str) -> None:
         ):
             break
         page.wait_for_timeout(500)
-    page.wait_for_timeout(1_200)  # entrance motion and image decode
+    # Lazy images only load when they near the viewport, and a full-page
+    # screenshot does not scroll: walk the page so every image is requested,
+    # then wait until each one has loaded and faded in (or failed).
+    page.evaluate(
+        """async () => {
+          const step = Math.max(200, window.innerHeight * 0.8);
+          for (let y = 0; y < document.documentElement.scrollHeight; y += step) {
+            window.scrollTo(0, y);
+            await new Promise((r) => setTimeout(r, 120));
+          }
+          window.scrollTo(0, 0);
+        }"""
+    )
+    for _ in range(40):
+        # SafeImage keeps opacity-0 until its onLoad marks it loaded.
+        pending = page.evaluate(
+            "() => [...document.images].filter(i => !i.complete"
+            " || (i.naturalWidth > 0 && i.classList.contains('opacity-0'))).length"
+        )
+        if pending == 0:
+            break
+        page.wait_for_timeout(250)
+    page.wait_for_timeout(900)  # entrance motion and the image fade-in
 
 
 def shoot(page: Page, name: str, path: str, tag: str) -> None:
@@ -127,6 +149,14 @@ def shoot(page: Page, name: str, path: str, tag: str) -> None:
         errors.append(f"capture failed: {type(exc).__name__}: {str(exc)[:200]}")
         overflow = None
     previews_ready = None
+    broken_images = None
+    try:
+        broken_images = page.evaluate(
+            "() => [...document.images].filter(i => i.complete && i.naturalWidth === 0)"
+            ".map(i => i.getAttribute('src')).slice(0, 5)"
+        )
+    except Exception:
+        pass
     try:
         pv = page.locator("[data-testid=map-preview]")
         previews_ready = [pv.nth(i).get_attribute("data-ready") for i in range(pv.count())]
@@ -136,6 +166,7 @@ def shoot(page: Page, name: str, path: str, tag: str) -> None:
         {
             "shot": f"{tag}--{name}",
             "map_previews_ready": previews_ready,
+            "broken_images": broken_images,
             "path": path,
             "status": status,
             "seconds": round(time.monotonic() - t0, 1),

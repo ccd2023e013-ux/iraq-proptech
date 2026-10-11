@@ -1,0 +1,51 @@
+name: Demo photos (Wikimedia Commons, licence-checked)
+
+# Manual helper for the design branch: finds or downloads representative
+# photos for DEMO listings from Wikimedia Commons, keeping only free licences
+# (PD, CC0, CC BY, CC BY-SA) with their attribution. Results are pushed to a
+# new assets/demo-photos-* branch for review; nothing is merged or deployed.
+
+# Triggered by editing scripts/demo_photos/request.txt on the design branch:
+# its first line is the mode (survey | fetch); for fetch, the following lines
+# are KIND|File:Title entries.
+on:
+  push:
+    branches: ["design/premium-redesign"]
+    paths: ["scripts/demo_photos/request.txt"]
+
+permissions: {}
+
+jobs:
+  photos:
+    if: github.ref == 'refs/heads/design/premium-redesign'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # push the result to a new assets/demo-photos-* branch
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install pillow==11.3.0
+      - name: Run
+        run: |
+          MODE=$(head -1 scripts/demo_photos/request.txt | tr -d '[:space:]')
+          export PHOTOS="$(tail -n +2 scripts/demo_photos/request.txt)"
+          python scripts/demo_photos/commons.py "$MODE" /tmp/photos
+      - name: Push to assets/demo-photos-${{ github.run_id }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BRANCH: assets/demo-photos-${{ github.run_id }}
+        run: |
+          cd /tmp/photos
+          git init -q -b "$BRANCH"
+          git config user.name "demo-photos"
+          git config user.email "demo-photos@users.noreply.github.com"
+          git add -A
+          git commit -qm "demo photos" || exit 0
+          git push -q "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:refs/heads/$BRANCH"
+          echo "::notice title=Demo photos::branch $BRANCH"

@@ -141,22 +141,23 @@ export default async function HomePage() {
             )}
           </div>
           {points.length > 0 && (
-            <figure className="fade-in relative min-w-0 md:col-span-6 md:-me-6 lg:-me-8 xl:-me-[calc((100vw-1320px)/2+2rem)]">
+            <figure className="fade-in flex min-w-0 flex-col gap-3 md:col-span-6 md:-me-6 lg:-me-8 xl:-me-[calc((100vw-1320px)/2+2rem)]">
               <MapPreview
                 config={mapConfig}
                 dense
-                className="h-[22rem] rounded-none sm:h-[28rem] md:h-full md:min-h-[30rem] md:rounded-s-[var(--radius-card)] md:rounded-e-none"
+                className="h-[22rem] rounded-none sm:h-[28rem] md:min-h-[30rem] md:flex-1 md:rounded-s-[var(--radius-card)] md:rounded-e-none"
                 label={h.heroMapCaption.replace("{n}", n(points.length))}
                 points={points}
               />
-              <figcaption className="mt-3 flex items-center justify-between gap-4 md:absolute md:inset-x-4 md:bottom-4 md:mt-0">
-                <span className="caption md:rounded-[var(--radius-control)] md:bg-raised/80 md:px-3 md:py-2 md:text-ink-2 md:shadow-[var(--shadow-float)] md:backdrop-blur-xl">
-                  <span className="me-1.5 inline-block size-2 rounded-full bg-accent-fill align-middle" />
+              {/* The caption sits under the map, never over its credits. */}
+              <figcaption className="flex items-center justify-between gap-4 md:pe-6 lg:pe-8 xl:pe-[calc((100vw-1320px)/2+2rem)]">
+                <span className="caption flex items-center gap-2">
+                  <span aria-hidden className="inline-block size-2 rounded-full bg-accent-fill" />
                   {h.heroMapCaption.replace("{n}", n(basra?.listings ?? points.length))}
                 </span>
                 <Link
                   href="/map"
-                  className="press inline-flex h-9 shrink-0 items-center gap-2 rounded-[var(--radius-control)] px-3 text-sm font-medium text-ink shadow-[inset_0_0_0_1px_var(--hairline-strong)] hover:bg-fill md:bg-raised/80 md:shadow-[var(--shadow-float)] md:backdrop-blur-xl"
+                  className="link inline-flex shrink-0 items-center gap-1.5 text-sm font-medium"
                 >
                   <Icon name="map" className="size-4 text-spatial" />
                   {h.openMap}
