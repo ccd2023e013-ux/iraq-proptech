@@ -107,6 +107,46 @@ export function bubbleLabel(amount: unknown, currency: unknown, onRequest: unkno
   return currency === "USD" ? `$${compact}` : `${compact} IQD`;
 }
 
+const AR_UNITS = { B: "مليار", M: "مليون", K: "ألف" } as const;
+const PERIOD = {
+  ar: { DAILY: "/يوم", MONTHLY: "/شهر", YEARLY: "/سنة" },
+  en: { DAILY: "/day", MONTHLY: "/mo", YEARLY: "/yr" },
+} as const;
+
+/**
+ * The price on a map tag, in the reader's language: tags are HTML, set in the
+ * site's own fonts, so Arabic is written properly ("269 مليون د.ع",
+ * "165 ألف دولار/شهر") and English stays compact ("269M IQD", "$165K/mo").
+ * Digits are Latin in both, as on the rest of the site.
+ */
+export function tagLabel(
+  amount: unknown,
+  currency: unknown,
+  onRequest: unknown,
+  period: unknown,
+  locale: "ar" | "en",
+): string {
+  const value = typeof amount === "number" ? amount : Number(amount);
+  if (onRequest === true || amount == null || amount === "" || !Number.isFinite(value)) return "—";
+  const suffix =
+    typeof period === "string" && period in PERIOD[locale]
+      ? PERIOD[locale][period as keyof (typeof PERIOD)["ar"]]
+      : "";
+  if (locale === "en") return `${bubbleLabel(value, currency, false)}${suffix}`;
+  const short = (n: number) =>
+    n >= 100 ? Math.round(n).toString() : (Math.round(n * 10) / 10).toString();
+  const [n, unit] =
+    value >= 1_000_000_000
+      ? [short(value / 1_000_000_000), AR_UNITS.B]
+      : value >= 1_000_000
+        ? [short(value / 1_000_000), AR_UNITS.M]
+        : value >= 1_000
+          ? [short(value / 1_000), AR_UNITS.K]
+          : [String(Math.round(value)), ""];
+  const money = currency === "USD" ? "دولار" : "د.ع";
+  return `${[n, unit, money].filter(Boolean).join(" ")}${suffix}`;
+}
+
 /** Adds `price_label` to point features; clusters are untouched. */
 export function withPriceLabels(collection: FeatureCollection): FeatureCollection {
   const features: Feature[] = collection.features.map((feature) => {

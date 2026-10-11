@@ -243,6 +243,28 @@ def map_states(browser: Browser, lang: str, view: str) -> None:
                 page.wait_for_timeout(400)
             else:
                 states["selected"] = "no tag hit"
+        if view != "390":
+            # List → map: hovering a result outlines its price tag.
+            row = page.locator("section a[href^='/properties/']").first
+            if row.count():
+                row.hover()
+                snap("list-hover")
+                page.mouse.move(5, 5)
+        if box:
+            # Closer in: tags spread out; then 3D buildings with a pitched camera.
+            page.mouse.move(box["x"] + box["width"] * 0.62, box["y"] + box["height"] * 0.45)
+            for _ in range(3):
+                page.mouse.wheel(0, -320)
+                page.wait_for_timeout(350)
+            page.wait_for_timeout(900)
+            snap("zoomed")
+            three = page.locator("[data-testid=buildings-3d]")
+            if three.count():
+                three.click()
+                page.wait_for_timeout(1_600)
+                snap("3d")
+                three.click()
+                page.wait_for_timeout(1_200)
         layers = page.locator("[data-testid=map-layers] summary")
         if layers.count():
             layers.first.click()

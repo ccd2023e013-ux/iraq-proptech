@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
   type ReactNode,
   useCallback,
   useEffect,
@@ -10,11 +12,12 @@ import {
   useMemo,
   useRef,
   useState,
+  useTransition,
 } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Icon } from "@/components/ui/Icon";
+import { Icon, type IconName } from "@/components/ui/Icon";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { TrustBadge } from "@/components/ui/TrustBadge";
 import { priceLabel } from "@/features/properties/PropertyCard";
@@ -32,11 +35,15 @@ import {
 } from "@/lib/map/geo";
 import { PLACE_GROUPS, bboxAround, placesAllowed } from "@/lib/map/places";
 import { type MapConfig, parseBbox } from "@/lib/map/provider";
-import { stagger } from "@/lib/motion";
 import { type RawParams, first, toApiQuery, withParam } from "@/lib/search";
 import type { PropertyCard } from "@/types/property";
 
-import { type MapFeatureCollection, POI_COLORS, PropertyMap } from "./PropertyMap";
+import {
+  type FocusRequest,
+  type MapFeatureCollection,
+  POI_COLORS,
+  PropertyMap,
+} from "./PropertyMap";
 import type { Feature, FeatureCollection } from "geojson";
 
 export interface MapSearchProps {
@@ -61,6 +68,26 @@ interface Poi {
   lon: number;
   source: string;
   is_demo: boolean;
+}
+
+/** Phone sheet positions: just the header, half the map, or nearly all of it. */
+type Sheet = "peek" | "half" | "full";
+const SHEET_SHARE: Record<Sheet, number> = { peek: 0, half: 0.52, full: 0.9 };
+
+/** The selection card's data, from a map feature or a list card. */
+function cardProps(card: PropertyCard): Record<string, unknown> {
+  return {
+    id: card.id,
+    title_ar: card.title_ar,
+    title_en: card.title_en,
+    price_amount: card.price_amount,
+    currency: card.currency,
+    price_on_request: card.price_on_request,
+    rent_period: card.rent_period,
+    cover_url: card.cover_url,
+    is_demo: card.is_demo,
+    area_m2: card.area_m2,
+  };
 }
 
 /**
@@ -88,20 +115,25 @@ export function MapSearch({
   const [followMap, setFollowMap] = useState(!polygon && !nearActive);
   const [drawing, setDrawing] = useState<LonLat[] | null>(null);
   const [data, setData] = useState<MapFeatureCollection | null>(null);
+  const [loadingData, setLoadingData] = useState(false);
   const [error, setError] = useState(false);
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const [selected, setSelected] = useState<Record<string, unknown> | null>(null);
-  const [view, setView] = useState<"map" | "list">("map");
+  const [focusRequest, setFocusRequest] = useState<FocusRequest | null>(null);
+  const [sheet, setSheet] = useState<Sheet>("peek");
   const [placeGroups, setPlaceGroups] = useState<Set<string>>(new Set());
   const [showAreas, setShowAreas] = useState(true);
   const [satellite, setSatellite] = useState(false);
+  const [buildings3d, setBuildings3d] = useState(false);
   const [loadedPois, setPois] = useState<FeatureCollection | null>(null);
   const [future, setFuture] = useState(first(params.layer) === "future");
   const [projects, setProjects] = useState<FeatureCollection | null>(null);
   const [project, setProject] = useState<Record<string, unknown> | null>(null);
   const [viewport, setViewport] = useState<Bbox | null>(null);
+  const [zoom, setZoom] = useState(12);
   const [focusBbox, setFocusBbox] = useState<Bbox | null>(null);
   const [geoError, setGeoError] = useState(false);
+  const [navigating, startNavigation] = useTransition();
   const zoomRef = useRef(12);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Whether viewport moves may navigate. Kept in a ref and switched inside the
@@ -128,6 +160,7 @@ export function MapSearch({
   }, [params]);
 
   const load = useCallback(async (query: string, zoom: number) => {
+    setLoadingData(true);
     try {
       const sep = query ? "&" : "";
       setData(
@@ -136,6 +169,8 @@ export function MapSearch({
       setError(false);
     } catch {
       setError(true);
+    } finally {
+      setLoadingData(false);
     }
   }, []);
 
@@ -208,13 +243,17 @@ export function MapSearch({
   }, [future, projects, locale]);
 
   const navigate = useCallback(
-    (query: string) => router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false }),
+    (query: string) =>
+      startNavigation(() =>
+        router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false }),
+      ),
     [router, pathname],
   );
 
   const onViewportChange = useCallback(
     (bbox: Bbox, zoom: number) => {
       setViewport(bbox);
+      setZoom(zoom);
       const zoomChanged = zoom !== zoomRef.current;
       zoomRef.current = zoom;
       if (!mode.current.follow || mode.current.drawing) {
@@ -239,6 +278,7 @@ export function MapSearch({
 
   // The layers panel closes like a popover: on a tap outside it or on Escape.
   const layersRef = useRef<HTMLDetailsElement>(null);
+  const [layersOpen, setLayersOpen] = useState(false);
   useEffect(() => {
     const close = (event: Event) => {
       const panel = layersRef.current;
@@ -270,6 +310,8 @@ export function MapSearch({
     cancelViewportUpdate();
     mode.current = { ...mode.current, drawing: true };
     setDrawing([]);
+    setSelected(null);
+    goSheet("peek");
   }
 
   function cancelDrawing() {
@@ -333,9 +375,97 @@ export function MapSearch({
   }
 
   const onSelect = useCallback((id: string | null, props?: Record<string, unknown>) => {
-    setHighlightId(id);
     setSelected(id && props ? props : null);
+    if (id) setProject(null);
   }, []);
+
+  /** "Show on map" from the list: select the listing and glide to it. */
+  function showOnMap(card: PropertyCard) {
+    if (!card.display_location) return;
+    setSelected(cardProps(card));
+    setProject(null);
+    goSheet("peek");
+    setFocusRequest((r) => ({
+      id: card.id,
+      lon: card.display_location!.lon,
+      lat: card.display_location!.lat,
+      n: (r?.n ?? 0) + 1,
+    }));
+  }
+
+  // Phone sheet: drag the header between peek, half and full; tap toggles.
+  const sheetRef = useRef<HTMLElement>(null);
+  const drag = useRef<{ y: number; start: number; t: number; moved: boolean } | null>(null);
+  function sheetOffset(target: Sheet): number {
+    const el = sheetRef.current;
+    const parent = el?.parentElement;
+    if (!el || !parent) return 0;
+    const full = el.offsetHeight;
+    const header = el.querySelector("header")?.offsetHeight ?? 120;
+    const visible = target === "peek" ? header : parent.clientHeight * SHEET_SHARE[target];
+    return Math.max(0, full - visible);
+  }
+  function onSheetPointerDown(event: ReactPointerEvent) {
+    if (window.matchMedia("(min-width: 1024px)").matches) return;
+    if ((event.target as Element).closest("input,select,label,details,a")) return;
+    drag.current = {
+      y: event.clientY,
+      start: sheetOffset(sheet),
+      t: event.timeStamp,
+      moved: false,
+    };
+  }
+  function onSheetPointerMove(event: ReactPointerEvent) {
+    const d = drag.current;
+    const el = sheetRef.current;
+    if (!d || !el) return;
+    const dy = event.clientY - d.y;
+    if (!d.moved && Math.abs(dy) < 6) return;
+    if (!d.moved) (event.currentTarget as Element).setPointerCapture?.(event.pointerId);
+    d.moved = true;
+    el.style.transition = "none";
+    el.style.transform = `translateY(${Math.max(0, d.start + dy)}px)`;
+  }
+  function onSheetPointerUp(event: ReactPointerEvent) {
+    const d = drag.current;
+    drag.current = null;
+    const el = sheetRef.current;
+    if (!d || !el || !d.moved) return;
+    el.style.transition = "";
+    el.style.transform = "";
+    const dy = event.clientY - d.y;
+    const velocity = dy / Math.max(1, event.timeStamp - d.t); // px per ms
+    const at = d.start + dy;
+    const order: Sheet[] = ["full", "half", "peek"];
+    let next: Sheet;
+    if (Math.abs(velocity) > 0.5) {
+      const i = order.indexOf(sheet) + (velocity > 0 ? 1 : -1);
+      next = order[Math.min(Math.max(i, 0), order.length - 1)]!;
+    } else {
+      next = order.reduce((best, s) =>
+        Math.abs(sheetOffset(s) - at) < Math.abs(sheetOffset(best) - at) ? s : best,
+      );
+    }
+    goSheet(next);
+  }
+  // The sheet's resting offset (px), measured from the DOM in event handlers
+  // and after layout; before the first measurement CSS approximates "peek".
+  const [sheetY, setSheetY] = useState("calc(100% - 7.5rem)");
+  const sheetNow = useRef<Sheet>("peek");
+  function goSheet(next: Sheet) {
+    sheetNow.current = next;
+    setSheet(next);
+    setSheetY(`${sheetOffset(next)}px`);
+  }
+  useEffect(() => {
+    const measure = () => setSheetY(`${sheetOffset(sheetNow.current)}px`);
+    const frame = requestAnimationFrame(measure);
+    window.addEventListener("resize", measure);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("resize", measure);
+    };
+  }, [items.length, total]);
 
   const clustered = data?.meta?.mode === "clusters";
   const demoBoundary = boundaries?.features.some((f) =>
@@ -355,9 +485,12 @@ export function MapSearch({
     : Number.isFinite(nearLat) && Number.isFinite(nearLon) && nearActive
       ? bboxAround(nearLon, nearLat, Number(first(params.radius_km)) || 3)
       : (parseBbox(first(params.bbox)) ?? initialBbox);
-  const listOpen = view === "list";
+  const busy = loadingData || navigating;
+  const hideSheet = !!(selected || project);
+  const sheetOpen = sheet !== "peek";
+  const selectedId = selected ? String(selected.id) : null;
   const footnotes = (
-    <div className="flex flex-col gap-1 text-[11.5px] leading-relaxed text-ink-3">
+    <div className="flex flex-col gap-1.5 text-[11.5px] leading-relaxed text-ink-3">
       {error && <p className="text-danger">{m.error}</p>}
       {clustered && <p>{m.clustered}</p>}
       <p>
@@ -374,13 +507,14 @@ export function MapSearch({
           {demoBoundary && <strong className="ms-1 text-warning">({m.demoBoundary})</strong>}
         </p>
       )}
+      {buildings3d && <p>{m.buildings3dNote}</p>}
     </div>
   );
 
-  // Map-first stage: the map fills the space; everything else floats above it.
-  //   start side  — results rail (desktop) / bottom sheet (phones, tablets)
-  //   end side    — map tools (layers, draw, near me) as a floating column
-  //   bottom      — the selected listing or project, centred in the open map
+  // Map-first stage: the map fills the space.
+  //   start side  — results: a docked rail (wide screens) / a bottom sheet (phones)
+  //   end side    — one instrument column (layers, draw, near me, 3D)
+  //   bottom      — the selected listing or project, in the open part of the map
   return (
     <div className="relative size-full overflow-hidden">
       <div className="absolute inset-0">
@@ -395,11 +529,14 @@ export function MapSearch({
           showBoundaries={showAreas}
           pois={pois}
           satellite={satellite}
+          buildings3d={buildings3d}
           development={future ? projects : null}
           onSelectProject={setProject}
           polygon={polygon}
           drawing={drawing}
+          selectedId={selectedId}
           highlightId={highlightId}
+          focusRequest={focusRequest}
           focusBbox={focusBbox}
           onViewportChange={onViewportChange}
           onSelect={onSelect}
@@ -407,46 +544,82 @@ export function MapSearch({
         />
       </div>
 
-      {/* Status pills (drawing hint, location errors) float at the top centre. */}
+      {/* Drawing and location status float at the top centre of the open map. */}
       {(drawing || geoError) && (
-        <div className="pointer-events-none absolute inset-x-4 top-[calc(var(--map-top)+0.75rem)] z-[var(--z-float)] flex justify-center">
-          <p
+        <div className="pointer-events-none absolute inset-x-4 top-[calc(var(--map-top)+0.75rem)] z-[var(--z-float)] flex justify-center lg:start-[calc(400px+1rem)]">
+          <div
             role="status"
-            className={`surface-float pop-in pointer-events-auto max-w-md rounded-[var(--radius-control)] px-4 py-2 text-center text-[13px] ${geoError ? "text-danger" : "text-ink"}`}
+            className={`surface-float pop-in pointer-events-auto flex max-w-md items-center gap-3 rounded-[var(--radius-control)] px-3.5 py-2 text-[13px] ${geoError ? "text-danger" : "text-ink"}`}
           >
-            {geoError ? m.nearMeDenied : m.drawHint}
-          </p>
+            {geoError ? (
+              m.nearMeDenied
+            ) : (
+              <>
+                <span aria-hidden className="relative grid size-5 place-items-center">
+                  <span className="absolute inset-0 animate-ping rounded-full bg-spatial-fill/30" />
+                  <span className="size-2 rounded-full bg-spatial-fill" />
+                </span>
+                <span>{m.drawHint}</span>
+                <span className="caption shrink-0 tabular">
+                  {m.drawPoints.replace("{n}", String(drawing?.length ?? 0))}
+                </span>
+              </>
+            )}
+          </div>
         </div>
       )}
 
-      {/* Results: a rail on wide screens, a bottom sheet on phones and tablets. */}
+      {/* Results: a docked rail on wide screens, a draggable sheet on phones. */}
       <section
-        aria-label={m.showList}
-        className={`surface-modal absolute z-[var(--z-float)] flex flex-col overflow-hidden transition-[height] duration-[var(--duration-spatial)] ease-[var(--ease-spring)] max-lg:inset-x-2 max-lg:bottom-2 max-lg:rounded-[1.5rem] lg:start-4 lg:top-[calc(var(--map-top)+0.75rem)] lg:bottom-4 lg:w-[392px] lg:rounded-[var(--radius-card)] ${
-          listOpen ? "max-lg:h-[72%]" : "max-lg:h-auto"
-        } ${selected || project ? "max-lg:hidden" : ""}`}
+        ref={sheetRef}
+        aria-label={m.results}
+        data-map-rail
+        data-sheet={sheet}
+        style={{ "--sheet-y": hideSheet ? "110%" : sheetY } as CSSProperties}
+        className="absolute z-[var(--z-float)] flex flex-col overflow-hidden transition-transform duration-[var(--duration-spatial)] ease-[var(--ease-standard)] max-lg:inset-x-0 max-lg:bottom-0 max-lg:h-[90%] max-lg:translate-y-[var(--sheet-y)] max-lg:rounded-t-[var(--radius-sheet)] max-lg:bg-raised/95 max-lg:shadow-[0_-12px_40px_-16px_rgb(0_0_0/0.6)] max-lg:backdrop-blur-xl lg:start-0 lg:top-[var(--map-top)] lg:bottom-0 lg:w-[400px] lg:border-e lg:border-hairline lg:bg-canvas/95 lg:backdrop-blur-xl"
       >
-        <header className="flex shrink-0 flex-col gap-2 px-4 pt-2 pb-3 lg:pt-4">
-          {/* Sheet handle (phones/tablets): tap to open or close the list. */}
+        {/* A thin progress line while results update; the map stays usable. */}
+        <div
+          aria-hidden
+          className={`pointer-events-none absolute inset-x-0 top-0 h-0.5 overflow-hidden transition-opacity duration-[var(--duration-base)] ${busy ? "opacity-100" : "opacity-0"}`}
+        >
+          <div className="map-progress h-full w-1/3 bg-spatial-fill" />
+        </div>
+        <header
+          className="flex shrink-0 touch-none flex-col gap-3 px-4 pt-2 pb-3 select-none lg:touch-auto lg:px-5 lg:pt-5 lg:select-auto"
+          onPointerDown={onSheetPointerDown}
+          onPointerMove={onSheetPointerMove}
+          onPointerUp={onSheetPointerUp}
+          onPointerCancel={onSheetPointerUp}
+        >
+          {/* Sheet handle (phones): tap to open or close the list, or drag. */}
           <button
             type="button"
-            onClick={() => setView(listOpen ? "map" : "list")}
-            aria-expanded={listOpen}
-            aria-label={listOpen ? m.showMap : m.showList}
-            className="mx-auto mb-1 flex h-5 w-full items-center justify-center lg:hidden"
+            onClick={() => goSheet(sheetOpen ? "peek" : "half")}
+            aria-expanded={sheetOpen}
+            aria-label={sheetOpen ? m.showMap : m.showList}
+            className="mx-auto -mb-1 flex h-5 w-16 items-center justify-center lg:hidden"
           >
-            <span aria-hidden className="h-1 w-10 rounded-full bg-hairline-strong" />
+            <span aria-hidden className="h-1 w-9 rounded-full bg-hairline-strong" />
           </button>
-          <div className="flex items-baseline justify-between gap-3">
-            <h1 className="font-display text-lg font-semibold tracking-tight text-ink">
-              {m.title}
-            </h1>
-            <p className="text-[13px] text-ink-3 tabular" data-testid="map-total">
-              <span className="font-semibold text-ink">{total}</span> {m.inView}
+          <div className="flex items-end justify-between gap-3">
+            <div className="flex min-w-0 flex-col gap-0.5">
+              <h1 className="title text-ink">{m.title}</h1>
+              <p className="meta tabular" data-testid="map-total">
+                <span className="font-semibold text-ink">{total}</span> {m.inView}
+              </p>
+            </div>
+            <p
+              role="status"
+              aria-live="polite"
+              className={`caption flex shrink-0 items-center gap-1.5 transition-opacity duration-[var(--duration-base)] ${busy ? "opacity-100" : "opacity-0"}`}
+            >
+              <span aria-hidden className="size-1.5 animate-pulse rounded-full bg-spatial-fill" />
+              {busy ? m.updating : ""}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <label className="flex items-center gap-2 text-[13px] text-ink-2">
+            <label className="flex cursor-pointer items-center gap-2.5 text-[13px] text-ink-2">
               <input
                 type="checkbox"
                 checked={followMap}
@@ -457,7 +630,11 @@ export function MapSearch({
                   if (!follow) cancelViewportUpdate();
                   setFollowMap(follow);
                 }}
-                className="size-4 accent-[var(--accent)]"
+                className="peer sr-only"
+              />
+              <span
+                aria-hidden
+                className="relative h-5 w-9 shrink-0 rounded-full bg-fill-strong transition-colors duration-[var(--duration-quick)] peer-checked:bg-accent-fill peer-focus-visible:ring-2 peer-focus-visible:ring-accent peer-disabled:opacity-40 after:absolute after:start-0.5 after:top-0.5 after:size-4 after:rounded-full after:bg-white after:shadow after:transition-transform after:duration-[var(--duration-base)] peer-checked:after:translate-x-4 rtl:peer-checked:after:-translate-x-4"
               />
               {m.searchAsMove}
             </label>
@@ -469,7 +646,7 @@ export function MapSearch({
             )}
           </div>
           {filters && (
-            <details className="group">
+            <details className="group" onToggle={(e) => e.currentTarget.open && goSheet("full")}>
               <summary className="chip w-fit cursor-pointer list-none [&::-webkit-details-marker]:hidden">
                 <Icon name="filter" className="size-4" />
                 {dict.search.filters}
@@ -486,58 +663,79 @@ export function MapSearch({
         </header>
 
         <div
-          className={`quiet-scroll flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto border-t border-hairline px-2 py-2 ${
-            listOpen ? "" : "max-lg:hidden"
-          }`}
+          className={`quiet-scroll flex min-h-0 flex-1 flex-col overflow-y-auto border-t border-hairline transition-opacity duration-[var(--duration-base)] ${busy ? "opacity-70" : ""}`}
         >
           {items.length === 0 && <EmptyState title={dict.search.noResults} glyph="map" />}
           <ul className="flex flex-col">
-            {items.map((card, i) => {
+            {items.map((card) => {
               const title = locale === "en" && card.title_en ? card.title_en : card.title_ar;
-              const active = highlightId === card.id;
+              const active = highlightId === card.id || selectedId === card.id;
+              const area = formatArea(card.area_m2, locale);
               return (
-                <li key={card.id} className="reveal" style={stagger(i)}>
-                  <a
-                    href={`/properties/${card.id}`}
-                    onMouseEnter={() => setHighlightId(card.id)}
-                    onMouseLeave={() => setHighlightId(selected ? String(selected.id) : null)}
-                    onFocus={() => setHighlightId(card.id)}
-                    aria-current={active ? "true" : undefined}
-                    className={`flex gap-3 rounded-2xl p-2 transition-colors duration-[var(--duration-quick)] ${active ? "bg-accent-tint" : "hover:bg-fill"}`}
+                <li key={card.id} className="border-b border-hairline">
+                  <div
+                    data-active={active || undefined}
+                    className="group relative flex items-center gap-2 px-3 transition-colors duration-[var(--duration-quick)] hover:bg-fill/60 data-[active]:bg-accent-tint/60 lg:px-4"
                   >
-                    {card.cover_url ? (
-                      <SafeImage
-                        src={card.cover_url}
-                        alt=""
-                        fallbackLabel="—"
-                        className="h-[72px] w-24 shrink-0 rounded-xl bg-fill object-cover"
-                      />
-                    ) : (
-                      <div className="grid h-[72px] w-24 shrink-0 place-items-center rounded-xl bg-fill text-ink-3">
-                        <Icon name="home" className="size-5 opacity-70" />
-                      </div>
-                    )}
-                    <div className="flex min-w-0 flex-col gap-0.5 text-sm">
-                      <span className="font-display font-semibold tracking-tight text-ink tabular">
-                        {priceLabel(card, dict, locale)}
+                    <span
+                      aria-hidden
+                      className="absolute inset-y-2 start-0 w-0.5 origin-center scale-y-0 bg-accent-fill transition-transform duration-[var(--duration-base)] ease-[var(--ease-standard)] group-data-[active]:scale-y-100"
+                    />
+                    <a
+                      href={`/properties/${card.id}`}
+                      onMouseEnter={() => setHighlightId(card.id)}
+                      onMouseLeave={() => setHighlightId(null)}
+                      onFocus={() => setHighlightId(card.id)}
+                      onBlur={() => setHighlightId(null)}
+                      aria-current={selectedId === card.id ? "true" : undefined}
+                      className="flex min-w-0 flex-1 gap-3 py-3"
+                    >
+                      <span className="relative h-[66px] w-[88px] shrink-0 overflow-hidden rounded-[var(--radius-control)] bg-fill">
+                        {card.cover_url ? (
+                          <SafeImage
+                            src={card.cover_url}
+                            alt=""
+                            fallbackLabel="—"
+                            className="size-full object-cover"
+                          />
+                        ) : (
+                          <span className="grid size-full place-items-center text-ink-3">
+                            <Icon name="home" className="size-5 opacity-70" />
+                          </span>
+                        )}
+                        {card.is_demo && (
+                          <span className="absolute start-0 bottom-0 rounded-se-[var(--radius-tag)] bg-gold-500 px-1.5 py-px text-[10px] font-semibold text-[#1d1405]">
+                            {dict.listing.demo}
+                          </span>
+                        )}
                       </span>
-                      <span className="truncate text-ink-2">{title}</span>
-                      <span className="flex min-w-0 items-center gap-1 text-xs text-ink-3">
-                        <Icon name="pin" className="size-3 shrink-0 text-spatial" />
-                        <span className="truncate">
+                      <span className="flex min-w-0 flex-col justify-center gap-0.5">
+                        <span className="kpi text-[17px] text-ink">
+                          {priceLabel(card, dict, locale)}
+                        </span>
+                        <span className="truncate text-sm text-ink-2 group-hover:text-ink">
+                          {title}
+                        </span>
+                        <span className="caption truncate">
                           {[placeName(card.district ?? null, locale), placeName(card.city, locale)]
                             .filter(Boolean)
                             .join("، ")}
-                          {card.area_m2 ? ` · ${formatArea(card.area_m2, locale)}` : ""}
+                          {area ? ` · ${area}` : ""}
                         </span>
                       </span>
-                      {card.is_demo && (
-                        <span>
-                          <TrustBadge kind="demo">{dict.listing.demo}</TrustBadge>
-                        </span>
-                      )}
-                    </div>
-                  </a>
+                    </a>
+                    {card.display_location && (
+                      <button
+                        type="button"
+                        onClick={() => showOnMap(card)}
+                        aria-label={`${m.showOnMap}: ${title}`}
+                        title={m.showOnMap}
+                        className="icon-btn size-9 shrink-0 text-ink-3 opacity-70 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                      >
+                        <Icon name="locate" className="size-[18px] text-spatial" />
+                      </button>
+                    )}
+                  </div>
                 </li>
               );
             })}
@@ -545,99 +743,91 @@ export function MapSearch({
           {total > items.length && (
             <a
               href={`/properties?${toApiQuery(params)}`}
-              className="press mx-auto inline-flex h-9 items-center gap-1.5 rounded-[var(--radius-control)] px-4 text-sm font-medium text-accent hover:bg-accent-tint"
+              className="link mx-4 mt-4 inline-flex w-fit items-center gap-1.5 text-sm font-medium"
             >
               {dict.landing.viewAll}
               <Icon name="arrow" className="size-4" />
             </a>
           )}
-          <div className="mt-auto px-2 pt-3 pb-1">{footnotes}</div>
+          <div className="mt-auto px-4 pt-5 pb-4 lg:px-5">{footnotes}</div>
         </div>
       </section>
 
-      {/* Map tools: a floating column on the end side. */}
-      <div className="absolute end-3 top-[calc(var(--map-top)+0.75rem)] z-[var(--z-float)] flex flex-col items-end gap-2 lg:end-4">
-        <details ref={layersRef} className="group relative z-20" data-testid="map-layers">
-          <summary className="press surface-float flex h-10 cursor-pointer list-none items-center gap-2 rounded-[var(--radius-control)] px-3.5 text-sm font-medium text-ink [&::-webkit-details-marker]:hidden">
-            <Icon name="layers" className="size-[18px] text-spatial" />
-            <span className="max-sm:sr-only">{m.layers}</span>
-          </summary>
-          <div className="surface-focus pop-in absolute end-0 top-12 flex w-72 origin-top-right flex-col gap-4 rounded-[var(--radius-card)] p-4 text-sm rtl:origin-top-left">
-            {config.satellite && (
-              <div className="seg w-full" role="group">
-                {[false, true].map((sat) => (
-                  <button
-                    key={String(sat)}
-                    type="button"
-                    aria-pressed={satellite === sat}
-                    onClick={() => setSatellite(sat)}
-                    className="flex-1"
-                  >
-                    {sat ? m.satellite : m.streets}
-                  </button>
-                ))}
-              </div>
-            )}
-            <label className="flex items-center justify-between gap-2 text-ink">
-              <span className="flex items-center gap-2">
-                <span aria-hidden className="size-2.5 rounded-full bg-gold-500" />
-                {dict.future.layer}
-              </span>
-              <input
-                type="checkbox"
-                data-layer="future"
-                checked={future}
-                onChange={(e) => {
-                  setFuture(e.target.checked);
-                  if (!e.target.checked) setProject(null);
-                }}
-                className="size-4 accent-[var(--accent)]"
-              />
-            </label>
-            <label className="flex items-center justify-between gap-2 text-ink">
-              {m.areas}
-              <input
-                type="checkbox"
-                checked={showAreas}
-                onChange={(e) => setShowAreas(e.target.checked)}
-                className="size-4 accent-[var(--accent)]"
-              />
-            </label>
-            <fieldset className="flex flex-col gap-2 border-t border-hairline pt-3">
-              <legend className="meta mb-2 font-medium">{m.places}</legend>
-              <div className="flex flex-wrap gap-1.5">
-                {PLACE_GROUPS.map((g) => (
-                  <button
-                    key={g.key}
-                    type="button"
-                    data-place={g.key}
-                    aria-pressed={placeGroups.has(g.key)}
-                    onClick={() => togglePlaces(g.key)}
-                    className="chip chip-spatial"
-                  >
-                    <span
-                      aria-hidden
-                      className="size-2 rounded-full"
-                      style={{ background: POI_COLORS[g.key] }}
-                    />
-                    {dict.nearby.categories[g.key as keyof typeof dict.nearby.categories]}
-                  </button>
-                ))}
-              </div>
-              {placeGroups.size > 0 && !placesAllowed(viewport) && (
-                <p className="meta">{m.zoomInForPlaces}</p>
-              )}
-            </fieldset>
-          </div>
-        </details>
+      {/* Instruments: one column on the end side. */}
+      <div
+        role="toolbar"
+        aria-label={m.tools}
+        aria-orientation="vertical"
+        className="absolute end-3 top-[calc(var(--map-top)+0.75rem)] z-[var(--z-float)] flex flex-col items-end gap-2 lg:end-4"
+      >
+        <div className="surface-float flex flex-col rounded-[var(--radius-card)] p-1">
+          <details
+            ref={layersRef}
+            className="group relative z-20"
+            data-testid="map-layers"
+            onToggle={(e) => setLayersOpen(e.currentTarget.open)}
+          >
+            <summary
+              title={m.layers}
+              aria-label={m.layers}
+              className="list-none [&::-webkit-details-marker]:hidden"
+            >
+              <ToolFace icon="layers" active={layersOpen} />
+            </summary>
+            <LayerPanel
+              dict={dict}
+              hasSatellite={!!config.satellite}
+              satellite={satellite}
+              setSatellite={setSatellite}
+              buildings3d={buildings3d}
+              setBuildings3d={setBuildings3d}
+              zoom={zoom}
+              future={future}
+              setFuture={(on) => {
+                setFuture(on);
+                if (!on) setProject(null);
+              }}
+              showAreas={showAreas}
+              setShowAreas={setShowAreas}
+              placeGroups={placeGroups}
+              togglePlaces={togglePlaces}
+              placesBlocked={placeGroups.size > 0 && !placesAllowed(viewport)}
+            />
+          </details>
+          <span aria-hidden className="mx-2 h-px bg-hairline" />
+          <button
+            type="button"
+            onClick={drawing ? cancelDrawing : startDrawing}
+            aria-pressed={!!drawing}
+            aria-label={m.drawArea}
+            title={m.drawArea}
+            data-testid={drawing ? undefined : "draw-area"}
+          >
+            <ToolFace icon="draw" active={!!drawing} />
+          </button>
+          <button type="button" onClick={nearMe} aria-label={m.nearMe} title={m.nearMe}>
+            <ToolFace icon="locate" active={nearActive} />
+          </button>
+          <button
+            type="button"
+            onClick={() => setBuildings3d((v) => !v)}
+            aria-pressed={buildings3d}
+            aria-label={m.buildings3d}
+            data-testid="buildings-3d"
+            title={m.buildings3d}
+          >
+            <ToolFace icon="cube" active={buildings3d} />
+          </button>
+        </div>
 
-        {drawing ? (
+        {drawing && (
           <div className="surface-float pop-in flex items-center gap-1 rounded-[var(--radius-control)] p-1">
             <Button
               size="sm"
               onClick={finishDrawing}
               disabled={drawing.length < 3}
               data-testid="finish-area"
+              title={drawing.length < 3 ? m.drawNeedMore : undefined}
             >
               <Icon name="check" className="size-4" />
               {m.finishDrawing}
@@ -646,17 +836,11 @@ export function MapSearch({
               {m.cancelDrawing}
             </Button>
           </div>
-        ) : (
-          <>
-            <Button variant="glass" className="h-10" onClick={startDrawing} data-testid="draw-area">
-              <Icon name="draw" className="size-[18px] text-spatial" />
-              <span className="max-sm:sr-only">{m.drawArea}</span>
-            </Button>
-            <Button variant="glass" className="h-10" onClick={nearMe}>
-              <Icon name="locate" className="size-[18px] text-spatial" />
-              <span className="max-sm:sr-only">{m.nearMe}</span>
-            </Button>
-          </>
+        )}
+        {buildings3d && zoom < 14 && (
+          <p className="surface-float pop-in caption max-w-48 rounded-[var(--radius-control)] px-3 py-2 text-ink-2">
+            {m.zoomInFor3d}
+          </p>
         )}
       </div>
 
@@ -671,11 +855,157 @@ export function MapSearch({
       {selected && !project && (
         <SelectionSheet
           props={selected}
+          card={items.find((c) => c.id === selectedId) ?? null}
           dict={dict}
           locale={locale}
           onClose={() => onSelect(null)}
         />
       )}
+    </div>
+  );
+}
+
+/** One instrument: a 40 px square; active = accent glyph with a 2 px bar. */
+function ToolFace({ icon, active }: { icon: IconName; active: boolean }) {
+  return (
+    <span
+      className={`press relative grid size-10 cursor-pointer place-items-center rounded-[var(--radius-control)] transition-colors duration-[var(--duration-quick)] hover:bg-fill ${active ? "text-accent" : "text-ink-2 hover:text-ink"}`}
+    >
+      <span
+        aria-hidden
+        className={`absolute inset-y-2.5 start-0 w-0.5 rounded-full bg-accent-fill transition-transform duration-[var(--duration-base)] ease-[var(--ease-standard)] ${active ? "scale-y-100" : "scale-y-0"}`}
+      />
+      <Icon name={icon} className="size-[19px]" strokeWidth={1.7} />
+    </span>
+  );
+}
+
+function Switch({
+  checked,
+  onChange,
+  label,
+  swatch,
+  layer,
+}: {
+  checked: boolean;
+  onChange: (on: boolean) => void;
+  label: string;
+  swatch?: string;
+  layer?: string;
+}) {
+  return (
+    <label className="flex cursor-pointer items-center justify-between gap-3 py-1.5 text-ink">
+      <span className="flex items-center gap-2.5">
+        {swatch && (
+          <span aria-hidden className="size-2.5 rounded-full" style={{ background: swatch }} />
+        )}
+        {label}
+      </span>
+      <input
+        type="checkbox"
+        data-layer={layer}
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="peer sr-only"
+      />
+      <span
+        aria-hidden
+        className="relative h-5 w-9 shrink-0 rounded-full bg-fill-strong transition-colors duration-[var(--duration-quick)] peer-checked:bg-accent-fill peer-focus-visible:ring-2 peer-focus-visible:ring-accent after:absolute after:start-0.5 after:top-0.5 after:size-4 after:rounded-full after:bg-white after:shadow after:transition-transform after:duration-[var(--duration-base)] peer-checked:after:translate-x-4 rtl:peer-checked:after:-translate-x-4"
+      />
+    </label>
+  );
+}
+
+/** Layers: base map, then what is drawn on it — each with its own legend swatch. */
+function LayerPanel({
+  dict,
+  hasSatellite,
+  satellite,
+  setSatellite,
+  buildings3d,
+  setBuildings3d,
+  zoom,
+  future,
+  setFuture,
+  showAreas,
+  setShowAreas,
+  placeGroups,
+  togglePlaces,
+  placesBlocked,
+}: {
+  dict: Dictionary;
+  hasSatellite: boolean;
+  satellite: boolean;
+  setSatellite: (on: boolean) => void;
+  buildings3d: boolean;
+  setBuildings3d: (on: boolean) => void;
+  zoom: number;
+  future: boolean;
+  setFuture: (on: boolean) => void;
+  showAreas: boolean;
+  setShowAreas: (on: boolean) => void;
+  placeGroups: Set<string>;
+  togglePlaces: (key: string) => void;
+  placesBlocked: boolean;
+}) {
+  const m = dict.map;
+  return (
+    <div className="surface-focus pop-in absolute end-[calc(100%+0.75rem)] top-0 flex w-[17.5rem] origin-top-right flex-col rounded-[var(--radius-card)] p-4 text-sm rtl:origin-top-left">
+      <p className="meta mb-2 font-medium">{m.base}</p>
+      {hasSatellite && (
+        <div className="seg mb-2 w-full" role="group">
+          {[false, true].map((sat) => (
+            <button
+              key={String(sat)}
+              type="button"
+              aria-pressed={satellite === sat}
+              onClick={() => setSatellite(sat)}
+              className="flex-1"
+            >
+              {sat ? m.satellite : m.streets}
+            </button>
+          ))}
+        </div>
+      )}
+      <Switch checked={buildings3d} onChange={setBuildings3d} label={m.buildings3d} />
+      {buildings3d && zoom < 14 && <p className="caption -mt-0.5 mb-1">{m.zoomInFor3d}</p>}
+      <p className="meta mt-3 mb-1 border-t border-hairline pt-3 font-medium">{m.overlays}</p>
+      <Switch
+        checked={future}
+        onChange={setFuture}
+        label={dict.future.layer}
+        swatch="var(--gold-fill)"
+        layer="future"
+      />
+      <Switch
+        checked={showAreas}
+        onChange={setShowAreas}
+        label={m.areas}
+        swatch="var(--spatial-fill)"
+      />
+      <fieldset className="mt-3 flex flex-col gap-2 border-t border-hairline pt-3">
+        <legend className="meta mb-2 font-medium">{m.places}</legend>
+        <div className="flex flex-wrap gap-1.5">
+          {PLACE_GROUPS.map((g) => (
+            <button
+              key={g.key}
+              type="button"
+              data-place={g.key}
+              aria-pressed={placeGroups.has(g.key)}
+              onClick={() => togglePlaces(g.key)}
+              className="chip chip-spatial"
+            >
+              <span
+                aria-hidden
+                className="size-2 rounded-full"
+                style={{ background: POI_COLORS[g.key] }}
+              />
+              {dict.nearby.categories[g.key as keyof typeof dict.nearby.categories]}
+            </button>
+          ))}
+        </div>
+        {placesBlocked && <p className="caption">{m.zoomInForPlaces}</p>}
+      </fieldset>
     </div>
   );
 }
@@ -709,11 +1039,11 @@ function ProjectSheet({
       role="dialog"
       aria-label={name}
       data-testid="map-project"
-      className="pointer-events-none absolute inset-x-2 bottom-2 z-[var(--z-float)] flex justify-center lg:start-[calc(392px+2rem)] lg:end-4 lg:bottom-4"
+      className="pointer-events-none absolute inset-x-2 bottom-2 z-[var(--z-float)] flex justify-center lg:start-[calc(400px+1.5rem)] lg:end-20 lg:bottom-5"
     >
-      <div className="surface-focus pop-in pointer-events-auto flex w-full max-w-md flex-col gap-2.5 rounded-[var(--radius-card)] p-4 text-sm">
+      <div className="surface-focus sheet-in pointer-events-auto flex w-full max-w-md flex-col gap-2.5 rounded-[var(--radius-card)] p-4 text-sm">
         <div className="flex items-start justify-between gap-3">
-          <p className="font-display text-base font-semibold text-ink">{name}</p>
+          <p className="title text-ink">{name}</p>
           <button
             type="button"
             onClick={onClose}
@@ -731,13 +1061,13 @@ function ProjectSheet({
             {f.precision[String(props.location_precision) as keyof typeof f.precision]}
           </TrustBadge>
         </p>
-        <p className="text-xs text-ink-3">
+        <p className="caption">
           {dict.intel.source}: {sources.join(" · ")} ·{" "}
           {props.latest_source_date ? String(props.latest_source_date) : f.undated}
         </p>
         <Link
           href={`/future#${encodeURIComponent(String(props.slug))}`}
-          className="font-medium text-accent underline-offset-4 hover:underline"
+          className="link w-fit font-medium"
         >
           {f.evidence}
         </Link>
@@ -746,14 +1076,16 @@ function ProjectSheet({
   );
 }
 
-/** The selected listing as a glass card over the map (replaces map popups). */
+/** The selected listing as a card over the open part of the map. */
 function SelectionSheet({
   props,
+  card,
   dict,
   locale,
   onClose,
 }: {
   props: Record<string, unknown>;
+  card: PropertyCard | null;
   dict: Dictionary;
   locale: Locale;
   onClose: () => void;
@@ -769,19 +1101,33 @@ function SelectionSheet({
       ? dict.listing.priceOnRequest
       : `${formatCompactPrice(String(props.price_amount), props.currency === "USD" ? "USD" : "IQD", locale) ?? ""}${period}`;
   const cover = typeof props.cover_url === "string" ? props.cover_url : null;
+  const area = formatArea((props.area_m2 as string | null) ?? null, locale);
+  const where = card
+    ? [placeName(card.district ?? null, locale), placeName(card.city, locale)]
+        .filter(Boolean)
+        .join("، ")
+    : null;
   return (
     <div
       role="dialog"
       aria-label={title}
       data-testid="map-selection"
-      className="pointer-events-none absolute inset-x-2 bottom-2 z-[var(--z-float)] flex justify-center lg:start-[calc(392px+2rem)] lg:end-4 lg:bottom-4"
+      className="pointer-events-none absolute inset-x-2 bottom-2 z-[var(--z-float)] flex justify-center lg:start-[calc(400px+1.5rem)] lg:end-20 lg:bottom-5"
     >
       {/* Keyed by listing: choosing another property replays the arrival. */}
       <div
         key={id}
-        className="surface-focus pop-in pointer-events-auto flex w-full max-w-md gap-3.5 rounded-[var(--radius-card)] p-2.5"
+        className="surface-focus sheet-in pointer-events-auto flex w-full max-w-[30rem] gap-4 rounded-[var(--radius-card)] p-2.5"
       >
-        <div className="relative size-28 shrink-0 overflow-hidden rounded-[calc(var(--radius-card)-0.5rem)] bg-fill">
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={dict.map.close}
+          className="icon-btn absolute end-2 top-2 z-10 size-8"
+        >
+          <Icon name="close" className="size-4" />
+        </button>
+        <div className="relative aspect-[4/3] w-32 shrink-0 overflow-hidden rounded-[var(--radius-control)] bg-fill sm:w-36">
           {cover ? (
             <SafeImage src={cover} alt="" fallbackLabel="—" className="size-full object-cover" />
           ) : (
@@ -789,18 +1135,23 @@ function SelectionSheet({
               <Icon name="home" className="size-6 opacity-70" />
             </span>
           )}
+          {props.is_demo === true && (
+            <span className="absolute start-0 bottom-0 rounded-se-[var(--radius-tag)] bg-gold-500 px-1.5 py-px text-[10px] font-semibold text-[#1d1405]">
+              {dict.listing.demo}
+            </span>
+          )}
         </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-1 py-1 text-sm">
-          <p className="font-display text-lg font-semibold tracking-tight text-ink tabular">
-            {price}
-          </p>
-          <p className="line-clamp-2 leading-snug text-ink-2">{title}</p>
-          <div className="flex flex-wrap gap-1">
-            {props.is_demo === true && <TrustBadge kind="demo">{dict.listing.demo}</TrustBadge>}
-            {props.approximate === true && (
+        <div className="flex min-w-0 flex-1 flex-col gap-1 py-1 pe-8">
+          <p className="kpi text-xl text-ink">{price}</p>
+          <p className="line-clamp-2 text-sm leading-snug text-ink-2">{title}</p>
+          {(where || area) && (
+            <p className="caption truncate">{[where, area].filter(Boolean).join(" · ")}</p>
+          )}
+          {props.approximate === true && (
+            <span>
               <TrustBadge kind="estimate">{dict.map.approximate}</TrustBadge>
-            )}
-          </div>
+            </span>
+          )}
           <Link
             href={`/properties/${encodeURIComponent(id)}`}
             className="press mt-auto inline-flex h-8 w-fit items-center gap-1.5 rounded-[var(--radius-control)] bg-accent-fill px-3.5 text-[13px] font-medium text-on-accent hover:bg-accent-fill-hover"
@@ -809,14 +1160,6 @@ function SelectionSheet({
             <Icon name="arrow" className="size-3.5" />
           </Link>
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={dict.map.close}
-          className="icon-btn size-8 shrink-0"
-        >
-          <Icon name="close" className="size-4" />
-        </button>
       </div>
     </div>
   );

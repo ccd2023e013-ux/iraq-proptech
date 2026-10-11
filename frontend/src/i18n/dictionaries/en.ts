@@ -1258,6 +1258,19 @@ const en: Dictionary = {
     placesDemoNote: "Demo places are marked and are not real.",
     close: "Close",
     priceBubbles: "Prices are asking prices from listings.",
+
+    showOnMap: "Show on map",
+    updating: "Updating results…",
+    buildings3d: "3D buildings",
+    buildings3dNote:
+      "Building footprints and heights from OpenStreetMap; buildings without a mapped height use a default.",
+    zoomInFor3d: "Zoom in to see buildings.",
+    base: "Base map",
+    overlays: "On the map",
+    drawPoints: "Points: {n}",
+    drawNeedMore: "Add at least 3 points",
+    tools: "Map tools",
+    results: "Results",
   },
   landing: {
     heroTitle: "Find your next home in Iraq",

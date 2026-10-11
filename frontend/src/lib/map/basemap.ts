@@ -10,7 +10,7 @@
  *   roads step up in lightness with importance; buildings barely rise from land;
  *   labels are muted slate with a canvas halo so overlays stay legible.
  * The light theme (OpenFreeMap "liberty") gets the same hierarchy in light
- * tones: white roads on soft grey land, pale water, slate labels.
+ * tones: white roads on limestone land, pale water, graphite labels.
  *
  * Pure: `basemapOverrides` maps the style's layer list to paint changes, so it
  * is unit-tested without a WebGL map.
@@ -29,43 +29,43 @@ export interface PaintOverride {
 }
 
 const LIGHT = {
-  land: "#f4f6f9",
-  landcover: "#eef2f5",
-  park: "#e2eee7",
-  water: "#cce5ee",
-  waterLine: "#b3d8e3",
-  building: "#e6e9ef",
+  land: "#eceeeb",
+  landcover: "#e7eae6",
+  park: "#dfe8e0",
+  water: "#c4dde4",
+  waterLine: "#aed0da",
+  building: "#e1e3df",
   roadMinor: "#ffffff",
   roadMajor: "#ffffff",
-  roadHighway: "#fbf7ee",
-  casing: "#dde2ea",
-  aeroway: "#e7eaf0",
-  rail: "#d4d9e1",
-  boundary: "#b5bfcc",
-  label: "#6b7686",
-  placeLabel: "#364152",
-  waterLabel: "#4a8597",
-  halo: "#ffffff",
+  roadHighway: "#fbf8f1",
+  casing: "#d8dbd7",
+  aeroway: "#e3e6e2",
+  rail: "#d1d5d0",
+  boundary: "#aab1b6",
+  label: "#697077",
+  placeLabel: "#2f353b",
+  waterLabel: "#3b7d8e",
+  halo: "#f2f3f1",
 } as const;
 
 const DARK = {
-  land: "#0d121c",
-  landcover: "#0f1620",
-  park: "#0f1a1a",
-  water: "#0a2230",
-  waterLine: "#0f3442",
-  building: "#151c2a",
-  roadMinor: "#161e2c",
-  roadMajor: "#1d2739",
-  roadHighway: "#263349",
-  casing: "#0d121c",
-  aeroway: "#151c29",
-  rail: "#222b3b",
-  boundary: "#3a4a63",
-  label: "#7c879c",
-  placeLabel: "#a3aec2",
-  waterLabel: "#3f7f91",
-  halo: "#0b0f17",
+  land: "#0c0e11",
+  landcover: "#0e1114",
+  park: "#0f1513",
+  water: "#0b1f26",
+  waterLine: "#11313b",
+  building: "#15181c",
+  roadMinor: "#171a1f",
+  roadMajor: "#1f232a",
+  roadHighway: "#2a2f37",
+  casing: "#0c0e11",
+  aeroway: "#14171b",
+  rail: "#22262d",
+  boundary: "#3b4149",
+  label: "#6f767f",
+  placeLabel: "#a7adb4",
+  waterLabel: "#3f8494",
+  halo: "#0a0c0f",
 } as const;
 
 function has(id: string, ...parts: string[]): boolean {

@@ -22,20 +22,20 @@ const value = (layer: string, property: string) =>
   basemapOverrides(layers, true).find((o) => o.layer === layer && o.property === property)?.value;
 
 describe("basemap tone", () => {
-  it("tones the light basemap too: white roads on soft grey land, pale water", () => {
+  it("tones the light basemap too: white roads on limestone land, pale water", () => {
     const light = (layer: string, property: string) =>
       basemapOverrides(layers, false).find((o) => o.layer === layer && o.property === property)
         ?.value;
-    expect(light("background", "background-color")).toBe("#f4f6f9");
+    expect(light("background", "background-color")).toBe("#eceeeb");
     expect(light("highway_minor", "line-color")).toBe("#ffffff");
-    expect(light("water", "fill-color")).toBe("#cce5ee");
-    expect(light("poi_label", "text-halo-color")).toBe("#ffffff");
+    expect(light("water", "fill-color")).toBe("#c4dde4");
+    expect(light("poi_label", "text-halo-color")).toBe("#f2f3f1");
   });
 
   it("puts land on the canvas, tints water, and steps roads by importance", () => {
-    expect(value("background", "background-color")).toBe("#0d121c");
-    expect(value("water", "fill-color")).toBe("#0a2230");
-    expect(value("waterway", "line-color")).toBe("#0f3442");
+    expect(value("background", "background-color")).toBe("#0c0e11");
+    expect(value("water", "fill-color")).toBe("#0b1f26");
+    expect(value("waterway", "line-color")).toBe("#11313b");
     const lightness = (hex: string) =>
       parseInt(hex.slice(1, 3), 16) + parseInt(hex.slice(3, 5), 16);
     const motorway = lightness(String(value("highway_motorway", "line-color")));
@@ -46,14 +46,14 @@ describe("basemap tone", () => {
   });
 
   it("hides road casings in the land and quiets runways", () => {
-    expect(value("highway_primary_casing", "line-color")).toBe("#0d121c");
-    expect(value("aeroway_runway", "line-color")).toBe("#151c29");
+    expect(value("highway_primary_casing", "line-color")).toBe("#0c0e11");
+    expect(value("aeroway_runway", "line-color")).toBe("#14171b");
   });
 
   it("mutes labels but keeps place names brighter, with a canvas halo", () => {
-    expect(value("place_city", "text-color")).toBe("#a3aec2");
-    expect(value("poi_label", "text-color")).toBe("#7c879c");
-    expect(value("poi_label", "text-halo-color")).toBe("#0b0f17");
+    expect(value("place_city", "text-color")).toBe("#a7adb4");
+    expect(value("poi_label", "text-color")).toBe("#6f767f");
+    expect(value("poi_label", "text-halo-color")).toBe("#0a0c0f");
     expect(value("hillshade", "text-color")).toBeUndefined();
   });
 
@@ -62,6 +62,6 @@ describe("basemap tone", () => {
       if (layer === "water") throw new Error("unsupported");
     });
     expect(() => applyBasemapTone({ setPaintProperty }, layers, true)).not.toThrow();
-    expect(setPaintProperty).toHaveBeenCalledWith("background", "background-color", "#0d121c");
+    expect(setPaintProperty).toHaveBeenCalledWith("background", "background-color", "#0c0e11");
   });
 });

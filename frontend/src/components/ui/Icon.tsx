@@ -76,6 +76,8 @@ const PATHS = {
     "M20 20v-4h-4",
   ],
   back: ["M19 12H5M11 6l-6 6 6 6"],
+  // 3D buildings: an isometric block.
+  cube: ["M12 3 4 7.5v9L12 21l8-4.5v-9L12 3Z", "M4 7.5 12 12l8-4.5M12 12v9"],
 } as const;
 
 export type IconName = keyof typeof PATHS;

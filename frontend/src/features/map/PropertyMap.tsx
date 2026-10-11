@@ -8,16 +8,25 @@ import type {
   Map as MapLibreMap,
   MapGeoJSONFeature,
   MapMouseEvent,
+  Marker as MapLibreMarker,
   StyleSpecification,
 } from "maplibre-gl";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { type RefObject, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
-import { parseHex, pillImage, withPriceLabels } from "@/lib/map/bubbles";
+import { type LayerInfo, applyBasemapTone } from "@/lib/map/basemap";
+import { parseHex, tagLabel } from "@/lib/map/bubbles";
+import {
+  cameraDuration,
+  easeStandard,
+  focusZoom,
+  openAreaOffset,
+  placeTags,
+  type TagBox,
+} from "@/lib/map/camera";
 import { type Bbox, closedRing, type LonLat, readBboxProperty } from "@/lib/map/geo";
 import type { MapConfig } from "@/lib/map/provider";
-import { type LayerInfo, applyBasemapTone } from "@/lib/map/basemap";
 import { maplibreWorkerUrl } from "@/lib/map/worker";
 import type { Feature, FeatureCollection, Point } from "geojson";
 
@@ -25,6 +34,15 @@ export interface MapFeatureCollection {
   type: "FeatureCollection";
   features: Feature[];
   meta?: { mode: "points" | "clusters"; total: number; limit: number };
+}
+
+/** A request to select a listing and glide to it (from the results list). */
+export interface FocusRequest {
+  id: string;
+  lon: number;
+  lat: number;
+  /** Changes on every request, so asking twice for the same listing still moves. */
+  n: number;
 }
 
 export interface PropertyMapProps {
@@ -40,9 +58,15 @@ export interface PropertyMapProps {
   development?: FeatureCollection | null;
   onSelectProject?: (properties: Record<string, unknown> | null) => void;
   satellite?: boolean;
+  /** Extruded buildings from OpenStreetMap heights, with a pitched camera. */
+  buildings3d?: boolean;
   polygon: LonLat[] | null;
   drawing: LonLat[] | null;
+  /** The listing open in the selection card (emerald tag, halo on the map). */
+  selectedId?: string | null;
+  /** The listing under the pointer in the results list (outlined tag). */
   highlightId: string | null;
+  focusRequest?: FocusRequest | null;
   /** Fly to these bounds when they change (e.g. "near me"). */
   focusBbox?: Bbox | null;
   onViewportChange: (bbox: Bbox, zoom: number) => void;
@@ -53,22 +77,50 @@ export interface PropertyMapProps {
 }
 
 const EMPTY: FeatureCollection = { type: "FeatureCollection", features: [] };
-/** From this zoom (about a district) every listing is drawn as its own price bubble. */
+/** From this zoom (about a district) listings are drawn as price tags. */
 const BUBBLE_MIN_ZOOM = 10.5;
+/** At most this many tags at once; the rest are marked by their dot. */
+const TAG_LIMIT = 140;
 
 /** POI colours by category family (also used by the layers panel legend). */
 export const POI_COLORS: Record<string, string> = {
-  SCHOOL: "#2563eb",
-  UNIVERSITY: "#2563eb",
-  HOSPITAL: "#dc2626",
-  CLINIC: "#dc2626",
-  PHARMACY: "#dc2626",
-  MOSQUE: "#0f766e",
-  CHURCH: "#0f766e",
-  MARKET: "#b45309",
-  MALL: "#b45309",
-  PARK: "#15803d",
+  SCHOOL: "#5b8def",
+  UNIVERSITY: "#5b8def",
+  HOSPITAL: "#e8665a",
+  CLINIC: "#e8665a",
+  PHARMACY: "#e8665a",
+  MOSQUE: "#3fa58f",
+  CHURCH: "#3fa58f",
+  MARKET: "#d29a3c",
+  MALL: "#d29a3c",
+  PARK: "#5aa964",
 };
+
+/** Layers that fade in and out when their overlay is switched (property → target). */
+const FADES: Record<string, [string, unknown][]> = {
+  "poi-dots": [
+    ["circle-opacity", ["case", ["boolean", ["get", "is_demo"], false], 0.55, 0.95]],
+    ["circle-stroke-opacity", 1],
+  ],
+  "poi-labels": [["text-opacity", 1]],
+  "development-area": [
+    ["circle-opacity", 0.14],
+    ["circle-stroke-opacity", 0.5],
+  ],
+  "development-points": [
+    ["circle-opacity", 1],
+    ["circle-stroke-opacity", 1],
+  ],
+  "development-labels": [["text-opacity", 1]],
+  "boundary-fill": [["fill-opacity", 0.05]],
+  "boundary-line": [["line-opacity", 0.8]],
+};
+const FADE_GROUPS = {
+  pois: ["poi-dots", "poi-labels"],
+  development: ["development-area", "development-points", "development-labels"],
+  boundaries: ["boundary-fill", "boundary-line"],
+} as const;
+const FADE_MS = 280;
 
 function isDark(): boolean {
   const forced = document.documentElement.dataset.theme;
@@ -76,48 +128,47 @@ function isDark(): boolean {
   return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
+function reducedMotion(): boolean {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 function cssVar(name: string): string {
-  return getComputedStyle(document.documentElement).getPropertyValue(name);
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
 
 function styleFor(config: MapConfig, dark: boolean): string | StyleSpecification {
   return ((dark && config.darkStyle) || config.style) as string | StyleSpecification;
 }
 
+/** Fade a group of layers to visible (`on`) or to zero. */
+function fadeLayers(map: MapLibreMap, layers: readonly string[], on: boolean, instant = false) {
+  const duration = instant || reducedMotion() ? 0 : FADE_MS;
+  for (const id of layers) {
+    if (!map.getLayer(id)) continue;
+    for (const [prop, target] of FADES[id] ?? []) {
+      try {
+        map.setPaintProperty(id, `${prop}-transition` as never, { duration, delay: 0 } as never);
+        map.setPaintProperty(id, prop as never, (on ? target : 0) as never);
+      } catch {
+        // A property this layer type does not have: skip.
+      }
+    }
+  }
+}
+
 /**
- * Our sources, images and layers on top of the basemap. Called on every
- * `style.load`, because switching the basemap (theme) removes them.
+ * Our sources and layers on top of the basemap. Called on every `style.load`,
+ * because switching the basemap (theme) removes them. Price tags are HTML
+ * markers (see PropertyMap), so they survive style switches untouched.
  */
 function installOverlays(map: MapLibreMap, config: MapConfig): void {
-  const ink = cssVar("--ink").trim() || "#10201e";
-  const accent = parseHex(cssVar("--accent-fill"), [18, 116, 107, 255]);
-  // Price tags are small floating surfaces: the raised surface colour with a
-  // hairline edge and ink text, so they read as part of the interface (not as
-  // map labels). The selected listing turns emerald with dark text (contrast).
   const dark = isDark();
-  const tag = parseHex(cssVar("--surface-raised"), dark ? [27, 37, 56, 255] : [255, 255, 255, 255]);
-  const tagText = ink;
-  const edge: [number, number, number, number] = dark ? [148, 163, 184, 90] : [15, 23, 42, 46];
-  const activeEdge: [number, number, number, number] = dark
-    ? [167, 243, 208, 255]
-    : [4, 120, 87, 255];
-  for (const [name, fill, stroke] of [
-    ["iqp-price-tag", tag, edge],
-    ["iqp-price-tag-active", accent, activeEdge],
-  ] as const) {
-    if (map.hasImage(name)) map.removeImage(name);
-    const pill = pillImage(fill, stroke, 2);
-    map.addImage(
-      name,
-      { width: pill.width, height: pill.height, data: pill.data },
-      {
-        pixelRatio: pill.pixelRatio,
-        stretchX: pill.stretchX,
-        stretchY: pill.stretchY,
-        content: pill.content,
-      },
-    );
-  }
+  const ink = cssVar("--ink") || (dark ? "#edeeef" : "#0e1114");
+  const canvas = cssVar("--canvas") || (dark ? "#0a0c0f" : "#f2f3f1");
+  const raised = cssVar("--surface-raised") || (dark ? "#181c21" : "#ffffff");
+  const spatialRgba = parseHex(cssVar("--spatial-fill"), [20, 180, 204, 255]);
+  const spatial = `rgb(${spatialRgba[0]} ${spatialRgba[1]} ${spatialRgba[2]})`;
+  const gold = cssVar("--gold-fill") || "#c49640";
 
   // Satellite imagery sits under the basemap's labels when configured.
   if (config.satellite && !map.getSource("satellite")) {
@@ -129,19 +180,25 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
     });
     const firstSymbol = map.getStyle().layers.find((l) => l.type === "symbol")?.id;
     map.addLayer(
-      { id: "satellite", type: "raster", source: "satellite", layout: { visibility: "none" } },
+      {
+        id: "satellite",
+        type: "raster",
+        source: "satellite",
+        layout: { visibility: "none" },
+        paint: { "raster-opacity-transition": { duration: FADE_MS, delay: 0 } },
+      },
       firstSymbol,
     );
   }
 
   // Two views of the same listings: grouped circles for country/region zoom and
-  // individual price bubbles from city zoom (layer zoom ranges decide which).
+  // individual points (dots under the HTML price tags) from district zoom.
   map.addSource("properties", { type: "geojson", data: EMPTY, promoteId: "id" });
   map.addSource("properties-grouped", {
     type: "geojson",
     data: EMPTY,
     cluster: true,
-    clusterRadius: 40,
+    clusterRadius: 44,
     clusterMaxZoom: 22,
     clusterProperties: { total: ["+", ["coalesce", ["get", "point_count"], 1]] },
   });
@@ -150,38 +207,53 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
   map.addSource("pois", { type: "geojson", data: EMPTY });
   map.addSource("development", { type: "geojson", data: EMPTY, promoteId: "id" });
 
+  // Area boundaries: a fine dashed survey line, barely tinted inside.
   map.addLayer({
     id: "boundary-fill",
     type: "fill",
     source: "boundaries",
     filter: ["==", ["geometry-type"], "Polygon"],
-    paint: { "fill-color": "#2f7e78", "fill-opacity": 0.06 },
+    paint: { "fill-color": spatial, "fill-opacity": 0.05 },
   });
   map.addLayer({
     id: "boundary-line",
     type: "line",
     source: "boundaries",
-    paint: { "line-color": "#2f9e94", "line-width": 1.5, "line-dasharray": [2, 1] },
+    paint: {
+      "line-color": spatial,
+      "line-opacity": 0.8,
+      "line-width": ["interpolate", ["linear"], ["zoom"], 9, 0.8, 14, 1.6] as never,
+      "line-dasharray": [3, 2],
+    },
   });
+
+  // Drawn area: cyan (a place), dashed while drawing, solid once complete.
   map.addLayer({
     id: "area-fill",
     type: "fill",
     source: "area",
     filter: ["==", ["geometry-type"], "Polygon"],
-    paint: { "fill-color": "#c99a3a", "fill-opacity": 0.12 },
+    paint: { "fill-color": spatial, "fill-opacity": 0.08 },
   });
   map.addLayer({
     id: "area-line",
     type: "line",
     source: "area",
-    paint: { "line-color": "#b98a2c", "line-width": 2 },
+    filter: ["!=", ["geometry-type"], "Point"],
+    layout: { "line-join": "round", "line-cap": "round" },
+    paint: { "line-color": spatial, "line-width": 2 },
   });
   map.addLayer({
     id: "area-vertices",
     type: "circle",
     source: "area",
-    filter: ["==", ["geometry-type"], "Point"],
-    paint: { "circle-radius": 4, "circle-color": "#b98a2c" },
+    filter: ["all", ["==", ["geometry-type"], "Point"], ["!", ["has", "cursor"]]],
+    paint: {
+      "circle-radius": ["case", ["boolean", ["get", "first"], false], 6.5, 4.5] as never,
+      "circle-color": canvas,
+      "circle-stroke-color": spatial,
+      "circle-stroke-width": 2,
+    },
   });
 
   // Places: small coloured dots, names from zoom 15.
@@ -190,16 +262,17 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
     type: "circle",
     source: "pois",
     paint: {
-      "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 3, 16, 6],
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 3, 16, 5.5],
       "circle-color": [
         "match",
         ["get", "category"],
         ...Object.entries(POI_COLORS).flat(),
-        "#6b7a77",
+        "#7c858e",
       ] as unknown as string,
-      "circle-stroke-color": "#ffffff",
+      "circle-stroke-color": canvas,
       "circle-stroke-width": 1.5,
-      "circle-opacity": ["case", ["boolean", ["get", "is_demo"], false], 0.55, 0.95],
+      "circle-opacity": 0,
+      "circle-stroke-opacity": 0,
     },
   });
   map.addLayer({
@@ -217,16 +290,14 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
     },
     paint: {
       "text-color": ink,
-      "text-halo-color": isDark() ? "#0b0f17" : "#ffffff",
+      "text-halo-color": canvas,
       "text-halo-width": 1.2,
+      "text-opacity": 0,
     },
   });
 
-  // Grouped listings and dots are spatial marks: cyan, per the MAKAN palette.
-  const spatial = parseHex(cssVar("--spatial-fill"), [6, 182, 212, 255]);
-  const accentRgb = `rgb(${spatial[0]} ${spatial[1]} ${spatial[2]})`;
-  // Future Iraq: gold diamonds; area-level positions get a soft halo so they
-  // never read as an exact site.
+  // Future Iraq: gold (planned, not built). Area-level positions get a soft
+  // disc so they never read as an exact site.
   map.addLayer({
     id: "development-area",
     type: "circle",
@@ -234,10 +305,10 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
     filter: ["!=", ["get", "location_precision"], "EXACT"],
     paint: {
       "circle-radius": ["interpolate", ["linear"], ["zoom"], 6, 10, 14, 40],
-      "circle-color": "#b98a2c",
-      "circle-opacity": 0.14,
-      "circle-stroke-color": "#b98a2c",
-      "circle-stroke-opacity": 0.5,
+      "circle-color": gold,
+      "circle-opacity": 0,
+      "circle-stroke-color": gold,
+      "circle-stroke-opacity": 0,
       "circle-stroke-width": 1,
     },
   });
@@ -246,10 +317,12 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
     type: "circle",
     source: "development",
     paint: {
-      "circle-radius": 7,
-      "circle-color": "#b98a2c",
-      "circle-stroke-color": "#ffffff",
+      "circle-radius": 6.5,
+      "circle-color": gold,
+      "circle-stroke-color": canvas,
       "circle-stroke-width": 2.5,
+      "circle-opacity": 0,
+      "circle-stroke-opacity": 0,
     },
   });
   map.addLayer({
@@ -267,18 +340,32 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
       "text-max-width": 10,
     },
     paint: {
-      "text-color": "#8f6418",
-      "text-halo-color": isDark() ? "#0b0f17" : "#ffffff",
+      "text-color": cssVar("--gold") || "#ddb15e",
+      "text-halo-color": canvas,
       "text-halo-width": 1.4,
+      "text-opacity": 0,
     },
   });
+
   const countOf = ["coalesce", ["get", "total"], ["get", "point_count"]];
-  // Grouped circles: client groups below bubble zoom, and server clusters (the
-  // API groups when a view holds more than its point limit) at any zoom.
+  // Groups: a raised disc with a cyan rim and the count in ink — the same
+  // material as the price tags, so a group reads as "several tags here".
   for (const [suffix, source, range] of [
     ["", "properties-grouped", { maxzoom: BUBBLE_MIN_ZOOM }],
     ["-server", "properties", { minzoom: BUBBLE_MIN_ZOOM }],
   ] as const) {
+    map.addLayer({
+      id: `clusters-halo${suffix}`,
+      type: "circle",
+      source,
+      ...range,
+      filter: ["has", "point_count"],
+      paint: {
+        "circle-color": spatial,
+        "circle-opacity": 0.12,
+        "circle-radius": ["step", countOf, 22, 10, 26, 50, 31, 200, 37] as never,
+      },
+    });
     map.addLayer({
       id: `clusters${suffix}`,
       type: "circle",
@@ -286,29 +373,12 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
       ...range,
       filter: ["has", "point_count"],
       paint: {
-        "circle-color": accentRgb,
-        "circle-opacity": 0.94,
-        "circle-stroke-color": dark ? "rgba(11,15,23,0.9)" : "rgba(255,255,255,0.95)",
-        "circle-stroke-width": 2,
-        "circle-radius": ["step", countOf, 17, 10, 21, 50, 27, 200, 33] as never,
+        "circle-color": raised,
+        "circle-stroke-color": spatial,
+        "circle-stroke-width": 1.5,
+        "circle-radius": ["step", countOf, 15, 10, 18, 50, 22, 200, 27] as never,
       },
     });
-    // A soft ring around each group: depth without a shadow, and a larger target.
-    map.addLayer(
-      {
-        id: `clusters-halo${suffix}`,
-        type: "circle",
-        source,
-        ...range,
-        filter: ["has", "point_count"],
-        paint: {
-          "circle-color": accentRgb,
-          "circle-opacity": 0.16,
-          "circle-radius": ["step", countOf, 25, 10, 30, 50, 37, 200, 44] as never,
-        },
-      },
-      `clusters${suffix}`,
-    );
     map.addLayer({
       id: `cluster-count${suffix}`,
       type: "symbol",
@@ -317,14 +387,14 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
       filter: ["has", "point_count"],
       layout: {
         "text-field": ["to-string", countOf] as never,
-        "text-size": 13,
+        "text-size": 12.5,
         "text-font": ["Noto Sans Bold"],
         "text-allow-overlap": true,
       },
-      paint: { "text-color": "#03181d" }, // dark on cyan: 8:1 contrast
+      paint: { "text-color": ink },
     });
   }
-  // Single listings below bubble zoom: small dots (prices appear when zooming in).
+  // Single listings below tag zoom: small cyan dots (prices appear when zooming in).
   map.addLayer({
     id: "points-dots",
     type: "circle",
@@ -332,13 +402,30 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
     maxzoom: BUBBLE_MIN_ZOOM,
     filter: ["!", ["has", "point_count"]],
     paint: {
-      "circle-color": accentRgb,
-      "circle-radius": 5.5,
-      "circle-stroke-color": dark ? "#0b0f17" : "#ffffff",
+      "circle-color": spatial,
+      "circle-radius": 5,
+      "circle-stroke-color": canvas,
       "circle-stroke-width": 2,
     },
   });
-  // Price bubbles: every listing shows its asking price on the map.
+  // Selection halo: a soft geographic highlight under the chosen listing.
+  map.addLayer({
+    id: "selection-halo",
+    type: "circle",
+    source: "properties",
+    minzoom: BUBBLE_MIN_ZOOM,
+    filter: ["==", ["get", "id"], ""],
+    paint: {
+      "circle-color": cssVar("--accent-fill") || "#14b07f",
+      "circle-opacity": 0.16,
+      "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 14, 17, 26],
+      "circle-stroke-color": cssVar("--accent-fill") || "#14b07f",
+      "circle-stroke-opacity": 0.55,
+      "circle-stroke-width": 1,
+    },
+  });
+  // The exact spot of every listing (the tag's tail points at it); approximate
+  // locations are hollow rings.
   map.addLayer({
     id: "points-under",
     type: "circle",
@@ -346,56 +433,30 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
     minzoom: BUBBLE_MIN_ZOOM,
     filter: ["!", ["has", "point_count"]],
     paint: {
-      // The exact spot under each tag (and the only mark when tags collide).
-      "circle-color": `rgb(${accent[0]} ${accent[1]} ${accent[2]})`,
+      "circle-color": [
+        "case",
+        ["boolean", ["get", "approximate"], false],
+        canvas,
+        spatial,
+      ] as never,
       "circle-radius": 3.5,
-      "circle-stroke-color": dark ? "#0b0f17" : "#ffffff",
+      "circle-stroke-color": [
+        "case",
+        ["boolean", ["get", "approximate"], false],
+        spatial,
+        canvas,
+      ] as never,
       "circle-stroke-width": 1.5,
     },
   });
-  const bubble = (
-    id: string,
-    image: string,
-    color: string,
-    filter: unknown,
-    allowOverlap: boolean,
-  ) =>
-    map.addLayer({
-      id,
-      type: "symbol",
-      source: "properties",
-      minzoom: BUBBLE_MIN_ZOOM,
-      filter: filter as never,
-      layout: {
-        "text-field": ["get", "price_label"],
-        "text-size": 12.5,
-        "text-font": ["Noto Sans Bold"],
-        "text-letter-spacing": 0.02,
-        "icon-image": image,
-        "icon-text-fit": "both",
-        "icon-text-fit-padding": [4, 10, 4, 10],
-        // Tags sit just above the exact spot, like a pin's head.
-        "text-anchor": "bottom",
-        "text-offset": [0, -0.7],
-        // Overlapping tags give way (the dot below still marks every listing);
-        // the active tag always shows.
-        "icon-allow-overlap": allowOverlap,
-        "text-allow-overlap": allowOverlap,
-        "symbol-sort-key": ["case", ["boolean", ["get", "is_demo"], false], 1, 0],
-      },
-      paint: {
-        "text-color": color,
-        "icon-opacity": ["case", ["boolean", ["get", "approximate"], false], 0.85, 1],
-      },
-    });
-  bubble("price-bubbles", "iqp-price-tag", tagText, ["!", ["has", "point_count"]], false);
-  bubble(
-    "price-bubbles-active",
-    "iqp-price-tag-active",
-    "#04130d",
-    ["==", ["get", "id"], ""],
-    true,
-  );
+}
+
+interface Tag {
+  marker: MapLibreMarker;
+  el: HTMLDivElement;
+  button: HTMLButtonElement;
+  width: number;
+  leaving?: ReturnType<typeof setTimeout>;
 }
 
 export function PropertyMap(props: PropertyMapProps) {
@@ -410,6 +471,12 @@ export function PropertyMap(props: PropertyMapProps) {
   const [ready, setReady] = useState(false);
   const [styleVersion, setStyleVersion] = useState(0);
   const [failed, setFailed] = useState(false);
+  // HTML price tags, keyed by listing id, and the listings they are drawn from.
+  const tags = useRef(new Map<string, Tag>());
+  const points = useRef<Feature[]>([]);
+  const markerClass = useRef<typeof MapLibreMarker | null>(null);
+  const syncRef = useRef<() => void>(() => undefined);
+  const focusRef = useRef<(coords: [number, number]) => void>(() => undefined);
 
   // Create the map once; overlays are (re)installed on every style load.
   useEffect(() => {
@@ -417,12 +484,14 @@ export function PropertyMap(props: PropertyMapProps) {
     let map: MapLibreMap | null = null;
     let dark = false;
     const cleanups: (() => void)[] = [];
+    const tagMap = tags.current;
     (async () => {
       try {
         const maplibre = await import("maplibre-gl");
         if (cancelled || !container.current) return;
         // Served by the site itself: the bundler does not ship MapLibre 6's worker.
         maplibre.setWorkerUrl(maplibreWorkerUrl(maplibre.getVersion()));
+        markerClass.current = maplibre.Marker;
         // No RTL text plugin: MapLibre 6 shapes Arabic labels natively.
         const { config } = latest.current;
         dark = isDark();
@@ -437,13 +506,19 @@ export function PropertyMap(props: PropertyMapProps) {
             customAttribution: config.provider === "openfreemap" ? undefined : config.attribution,
           },
           maxZoom: 19,
+          maxPitch: 60,
+          // North stays up: bearing never changes, so the city never spins.
+          dragRotate: false,
+          pitchWithRotate: false,
         });
+        map.touchZoomRotate.disableRotation();
+        map.keyboard.disableRotation();
+        map.touchPitch.disable();
         mapRef.current = map;
-        // Zoom sits at the bottom of the end side, out of the way of floating panels.
-        const rtl = document.documentElement.dir === "rtl";
+        // Zoom buttons at the bottom of the end side (wide screens; phones pinch).
         map.addControl(
           new maplibre.NavigationControl({ showCompass: false }),
-          rtl ? "bottom-left" : "bottom-right",
+          document.documentElement.dir === "rtl" ? "bottom-left" : "bottom-right",
         );
         // Errors must not crash the page; non-tile errors are logged for diagnosis.
         map.on("error", (e) => {
@@ -482,11 +557,46 @@ export function PropertyMap(props: PropertyMapProps) {
         cleanups.push(() => observer.disconnect());
         cleanups.push(() => media.removeEventListener("change", onTheme));
 
+        const rtl = () => document.documentElement.dir === "rtl";
+        /** Space covered by the results rail (wide screens) and a bottom card. */
+        const cover = () => {
+          const wide = window.matchMedia("(min-width: 1024px)").matches;
+          const rail = document.querySelector<HTMLElement>("[data-map-rail]");
+          const railWidth = wide && rail ? rail.getBoundingClientRect().width : 0;
+          return { railWidth, bottom: wide ? 160 : 240 };
+        };
+        const padding = (base: number) => {
+          const { railWidth } = cover();
+          const start = base + railWidth;
+          return rtl()
+            ? { top: base, bottom: base, left: base, right: start }
+            : { top: base, bottom: base, left: start, right: base };
+        };
+
+        // Selecting a listing glides to it: at most two zoom levels, bearing
+        // untouched, centred in the open part of the map.
+        focusRef.current = (coords) => {
+          if (!map) return;
+          const { railWidth, bottom } = cover();
+          map.easeTo({
+            center: coords,
+            zoom: focusZoom(map.getZoom()),
+            offset: openAreaOffset(railWidth, bottom, rtl()),
+            duration: cameraDuration(reducedMotion()),
+            easing: easeStandard,
+          });
+        };
+
         // While drawing, a click on any layer is a polygon vertex (the general
-        // click handler below), never a zoom into a cluster.
+        // click handler below), never a zoom into a group.
         map.on("click", ["clusters-server", "points-dots"], (event: MapMouseEvent) => {
-          if (latest.current.drawing !== null) return;
-          map?.easeTo({ center: event.lngLat, zoom: (map?.getZoom() ?? 8) + 2, duration: 600 });
+          if (latest.current.drawing !== null || !map) return;
+          map.easeTo({
+            center: event.lngLat,
+            zoom: map.getZoom() + 2,
+            duration: cameraDuration(reducedMotion(), 650),
+            easing: easeStandard,
+          });
         });
         map.on(
           "click",
@@ -496,9 +606,16 @@ export function PropertyMap(props: PropertyMapProps) {
             if (!feature || !map || latest.current.drawing !== null) return;
             const serverBbox = readBboxProperty(feature.properties?.bbox);
             if (serverBbox) {
-              map.fitBounds(serverBbox as LngLatBoundsLike, { padding: 40, maxZoom: 17 });
+              map.fitBounds(serverBbox as LngLatBoundsLike, {
+                padding: padding(56),
+                maxZoom: 17,
+                duration: cameraDuration(reducedMotion(), 700),
+                easing: easeStandard,
+              });
               return;
             }
+            // A group opens to the zoom at which it splits (no further), and its
+            // tags then arrive with their entrance motion.
             const source = map.getSource("properties-grouped") as GeoJSONSource;
             const zoom = await source.getClusterExpansionZoom(
               Number(feature.properties?.cluster_id),
@@ -506,30 +623,22 @@ export function PropertyMap(props: PropertyMapProps) {
             const geometry = feature.geometry as Point;
             map.easeTo({
               center: geometry.coordinates as [number, number],
-              zoom: Math.max(zoom, map.getZoom() + 1.5),
-              duration: 600,
+              zoom: Math.min(Math.max(zoom, map.getZoom() + 1), map.getZoom() + 3),
+              duration: cameraDuration(reducedMotion(), 650),
+              easing: easeStandard,
             });
           },
         );
         map.on(
           "click",
-          ["price-bubbles", "points-under"],
+          "points-under",
           (event: MapMouseEvent & { features?: MapGeoJSONFeature[] }) => {
             const feature = event.features?.[0];
             if (!feature || !map || latest.current.drawing !== null) return;
             const p = (feature.properties ?? {}) as Record<string, unknown>;
             latest.current.onSelect(String(p.id), p);
-            // Focus the camera on the chosen listing, centred in the open part of
-            // the map (beside the results rail on wide screens, above the card).
             if (latest.current.bleed && feature.geometry.type === "Point") {
-              const wide = window.matchMedia("(min-width: 1024px)").matches;
-              const rtlDoc = document.documentElement.dir === "rtl";
-              const side = wide ? 208 : 0;
-              map.easeTo({
-                center: (feature.geometry as Point).coordinates as [number, number],
-                offset: [rtlDoc ? -side : side, wide ? -40 : -90],
-                duration: 700,
-              });
+              focusRef.current((feature.geometry as Point).coordinates as [number, number]);
             }
           },
         );
@@ -543,6 +652,9 @@ export function PropertyMap(props: PropertyMapProps) {
           },
         );
         map.on("click", (event: MapMouseEvent) => {
+          // A click on a price tag is handled by the tag itself.
+          const target = event.originalEvent?.target as Element | null;
+          if (target?.closest?.(".map-tag")) return;
           if (latest.current.drawing !== null) {
             latest.current.onDrawPoint([event.lngLat.lng, event.lngLat.lat]);
             return;
@@ -552,9 +664,18 @@ export function PropertyMap(props: PropertyMapProps) {
           });
           if (!project?.length) latest.current.onSelectProject?.(null);
           const hit = map?.queryRenderedFeatures(event.point, {
-            layers: ["price-bubbles", "points-under", "clusters", "clusters-server", "points-dots"],
+            layers: ["points-under", "clusters", "clusters-server", "points-dots"],
           });
           if (!hit?.length) latest.current.onSelect(null);
+        });
+        // While drawing, the outline follows the pointer from the last vertex.
+        map.on("mousemove", (event: MapMouseEvent) => {
+          const drawing = latest.current.drawing;
+          if (!map || !drawing || drawing.length === 0) return;
+          const cursor: LonLat = [event.lngLat.lng, event.lngLat.lat];
+          (map.getSource("area") as GeoJSONSource | undefined)?.setData(
+            areaFeatures(drawing, cursor),
+          );
         });
         for (const layer of [
           "development-points",
@@ -562,10 +683,13 @@ export function PropertyMap(props: PropertyMapProps) {
           "clusters-server",
           "points-dots",
           "points-under",
-          "price-bubbles",
         ]) {
-          map.on("mouseenter", layer, () => map && (map.getCanvas().style.cursor = "pointer"));
-          map.on("mouseleave", layer, () => map && (map.getCanvas().style.cursor = ""));
+          map.on("mouseenter", layer, () => {
+            if (map && latest.current.drawing === null) map.getCanvas().style.cursor = "pointer";
+          });
+          map.on("mouseleave", layer, () => {
+            if (map && latest.current.drawing === null) map.getCanvas().style.cursor = "";
+          });
         }
         const report = () => {
           if (!map) return;
@@ -577,11 +701,15 @@ export function PropertyMap(props: PropertyMapProps) {
         };
         map.on("moveend", report);
         map.once("load", report);
+        // Tags are re-placed when the camera settles (they ride with the map
+        // while it moves, so nothing is recomputed per frame).
+        map.on("moveend", () => syncRef.current());
+        map.on("resize", () => syncRef.current());
         // Rendered counts for automated checks (and nothing else).
         map.on("idle", () => {
-          if (!map || !container.current || !map.getLayer("price-bubbles")) return;
+          if (!map || !container.current || !map.getLayer("points-under")) return;
           const count = (layers: string[]) => map!.queryRenderedFeatures({ layers }).length;
-          container.current.dataset.bubbles = String(count(["price-bubbles"]));
+          container.current.dataset.bubbles = String(visibleTags(tagMap));
           container.current.dataset.clusters = String(count(["clusters", "clusters-server"]));
           container.current.dataset.pois = String(count(["poi-dots"]));
           container.current.dataset.projects = String(count(["development-points"]));
@@ -594,97 +722,274 @@ export function PropertyMap(props: PropertyMapProps) {
     return () => {
       cancelled = true;
       cleanups.forEach((fn) => fn());
+      for (const tag of tagMap.values()) {
+        if (tag.leaving) clearTimeout(tag.leaving);
+        tag.marker.remove();
+      }
+      tagMap.clear();
       map?.remove();
       mapRef.current = null;
     };
   }, []);
 
+  // Price tags: HTML, so prices are set in the site's fonts (proper Arabic),
+  // and selection, hover, arrival and departure are CSS transitions.
+  const syncTags = () => {
+    const map = mapRef.current;
+    const Marker = markerClass.current;
+    if (!map || !Marker || !container.current) return;
+    const { selectedId, highlightId, locale } = latest.current;
+    const show = map.getZoom() >= BUBBLE_MIN_ZOOM;
+    const canvas = map.getCanvas();
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    const boxes: TagBox[] = [];
+    const byId = new Map<string, Feature>();
+    if (show) {
+      for (const f of points.current) {
+        const p = (f.properties ?? {}) as Record<string, unknown>;
+        if ("point_count" in p || f.geometry.type !== "Point") continue;
+        const id = String(p.id);
+        const [lon, lat] = (f.geometry as Point).coordinates as [number, number];
+        const at = map.project([lon, lat]);
+        if (at.x < -80 || at.y < -40 || at.x > w + 80 || at.y > h + 40) continue;
+        const label = tagLabel(
+          p.price_amount,
+          p.currency,
+          p.price_on_request,
+          p.rent_period,
+          locale,
+        );
+        const width = tags.current.get(id)?.width || label.length * 7 + 20;
+        byId.set(id, f);
+        boxes.push({
+          id,
+          x: at.x - width / 2,
+          y: at.y - 34,
+          width,
+          height: 26,
+          pinned: id === selectedId || id === highlightId,
+        });
+      }
+    }
+    const visible = placeTags(boxes, TAG_LIMIT);
+    // Departures: fade out, then remove.
+    for (const [id, tag] of tags.current) {
+      if (visible.has(id)) {
+        if (tag.leaving) {
+          clearTimeout(tag.leaving);
+          tag.leaving = undefined;
+          delete tag.el.dataset.leaving;
+        }
+        continue;
+      }
+      if (tag.leaving) continue;
+      tag.el.dataset.leaving = "1";
+      tag.leaving = setTimeout(
+        () => {
+          tag.marker.remove();
+          tags.current.delete(id);
+        },
+        reducedMotion() ? 0 : 160,
+      );
+    }
+    // Arrivals and state.
+    for (const id of visible) {
+      const f = byId.get(id)!;
+      const p = (f.properties ?? {}) as Record<string, unknown>;
+      const coords = (f.geometry as Point).coordinates as [number, number];
+      let tag = tags.current.get(id);
+      const label = tagLabel(p.price_amount, p.currency, p.price_on_request, p.rent_period, locale);
+      if (!tag) {
+        const el = document.createElement("div");
+        el.className = "map-tag-anchor";
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "map-tag";
+        // Keyboard and screen-reader users choose listings from the results
+        // list ("Show on map"); the tags are a pointer shortcut to the same.
+        button.tabIndex = -1;
+        button.setAttribute("aria-hidden", "true");
+        el.appendChild(button);
+        button.addEventListener("click", () => {
+          if (latest.current.drawing !== null) return;
+          const feature = byIdCurrent(points.current, id);
+          if (!feature) return;
+          latest.current.onSelect(id, (feature.properties ?? {}) as Record<string, unknown>);
+          focusRef.current((feature.geometry as Point).coordinates as [number, number]);
+        });
+        const marker = new Marker({ element: el, anchor: "bottom", offset: [0, -7] })
+          .setLngLat(coords)
+          .addTo(map);
+        tag = { marker, el, button, width: 0 };
+        tags.current.set(id, tag);
+      } else {
+        tag.marker.setLngLat(coords);
+      }
+      if (tag.button.textContent !== label) tag.button.textContent = label;
+      if (p.approximate === true) tag.button.dataset.approx = "1";
+      else delete tag.button.dataset.approx;
+      const state = id === selectedId ? "selected" : id === highlightId ? "hover" : "";
+      if ((tag.button.dataset.state ?? "") !== state) {
+        if (state) tag.button.dataset.state = state;
+        else delete tag.button.dataset.state;
+      }
+      tag.el.style.zIndex = state === "selected" ? "3" : state === "hover" ? "2" : "1";
+      if (!tag.width) tag.width = tag.button.offsetWidth || label.length * 7 + 20;
+    }
+    container.current.dataset.bubbles = String(visible.size);
+  };
+  useLayoutEffect(() => {
+    syncRef.current = syncTags;
+  });
+
   // Data updates (re-applied after every style load).
   useEffect(() => {
     const map = mapRef.current;
     if (!ready || !map) return;
-    const labelled = props.data ? withPriceLabels(props.data as FeatureCollection) : EMPTY;
-    (map.getSource("properties") as GeoJSONSource | undefined)?.setData(labelled);
-    (map.getSource("properties-grouped") as GeoJSONSource | undefined)?.setData(labelled);
+    const data = (props.data as FeatureCollection | null) ?? EMPTY;
+    points.current = data.features;
+    (map.getSource("properties") as GeoJSONSource | undefined)?.setData(data);
+    (map.getSource("properties-grouped") as GeoJSONSource | undefined)?.setData(data);
+    syncRef.current();
   }, [ready, styleVersion, props.data]);
 
+  // Tag states follow selection, hover and language.
   useEffect(() => {
+    if (!ready) return;
+    syncRef.current();
     const map = mapRef.current;
-    if (!ready || !map) return;
-    const visible = props.showBoundaries ?? true;
-    (map.getSource("boundaries") as GeoJSONSource | undefined)?.setData(
-      visible ? (props.boundaries ?? EMPTY) : EMPTY,
-    );
-  }, [ready, styleVersion, props.boundaries, props.showBoundaries]);
+    if (map?.getLayer("selection-halo")) {
+      map.setFilter("selection-halo", [
+        "all",
+        ["!", ["has", "point_count"]],
+        ["==", ["get", "id"], props.selectedId ?? ""],
+      ]);
+    }
+  }, [ready, styleVersion, props.selectedId, props.highlightId, props.locale]);
 
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!ready || !map) return;
-    (map.getSource("pois") as GeoJSONSource | undefined)?.setData(props.pois ?? EMPTY);
-  }, [ready, styleVersion, props.pois]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!ready || !map) return;
-    (map.getSource("development") as GeoJSONSource | undefined)?.setData(
-      props.development ?? EMPTY,
-    );
-  }, [ready, styleVersion, props.development]);
+  // Overlays fade in when switched on and fade out before their data is cleared.
+  useFadedData(
+    mapRef,
+    ready,
+    styleVersion,
+    "boundaries",
+    FADE_GROUPS.boundaries,
+    (() => {
+      const visible = props.showBoundaries ?? true;
+      return visible ? (props.boundaries ?? null) : null;
+    })(),
+  );
+  useFadedData(mapRef, ready, styleVersion, "pois", FADE_GROUPS.pois, props.pois ?? null);
+  useFadedData(
+    mapRef,
+    ready,
+    styleVersion,
+    "development",
+    FADE_GROUPS.development,
+    props.development ?? null,
+  );
 
   useEffect(() => {
     const map = mapRef.current;
     if (!ready || !map || !map.getLayer("satellite")) return;
-    map.setLayoutProperty("satellite", "visibility", props.satellite ? "visible" : "none");
+    if (props.satellite) {
+      map.setLayoutProperty("satellite", "visibility", "visible");
+      map.setPaintProperty("satellite", "raster-opacity", 0);
+      requestAnimationFrame(() => map.setPaintProperty("satellite", "raster-opacity", 1));
+    } else {
+      map.setLayoutProperty("satellite", "visibility", "none");
+    }
   }, [ready, styleVersion, props.satellite]);
 
+  // 3D: real building footprints extruded to their OpenStreetMap heights
+  // (OpenMapTiles' render_height), seen from a pitched camera. Off = flat, north up.
   useEffect(() => {
     const map = mapRef.current;
     if (!ready || !map) return;
-    const points = props.drawing ?? props.polygon ?? [];
-    const features: Feature[] = points.map((coordinates) => ({
-      type: "Feature",
-      properties: {},
-      geometry: { type: "Point", coordinates },
-    }));
-    if (points.length >= 3) {
-      features.push({
-        type: "Feature",
-        properties: {},
-        geometry: { type: "Polygon", coordinates: [closedRing(points)] },
-      });
-    } else if (points.length === 2) {
-      features.push({
-        type: "Feature",
-        properties: {},
-        geometry: { type: "LineString", coordinates: points },
-      });
+    const on = !!props.buildings3d;
+    const style = map.getStyle();
+    const native = style.layers.some((l) => l.type === "fill-extrusion" && l.id !== "makan-3d");
+    if (on && !native && !map.getLayer("makan-3d")) {
+      const vector = Object.entries(style.sources).find(([, s]) => s.type === "vector")?.[0];
+      if (vector) {
+        const firstSymbol = style.layers.find((l) => l.type === "symbol")?.id;
+        map.addLayer(
+          {
+            id: "makan-3d",
+            type: "fill-extrusion",
+            source: vector,
+            "source-layer": "building",
+            minzoom: 14,
+            paint: {
+              "fill-extrusion-color": isDark() ? "#1d2228" : "#dcdfdb",
+              "fill-extrusion-height": ["coalesce", ["get", "render_height"], 0],
+              "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
+              "fill-extrusion-opacity": 0.88,
+            },
+          },
+          firstSymbol,
+        );
+      }
     }
-    (map.getSource("area") as GeoJSONSource | undefined)?.setData({
-      type: "FeatureCollection",
-      features,
-    });
-    map.getCanvas().style.cursor = props.drawing ? "crosshair" : "";
+    if (map.getLayer("makan-3d")) {
+      map.setLayoutProperty("makan-3d", "visibility", on ? "visible" : "none");
+    }
+    if (on) map.touchPitch.enable();
+    else map.touchPitch.disable();
+    const pitch = on ? 50 : 0;
+    if (Math.abs(map.getPitch() - pitch) > 0.5) {
+      map.easeTo({ pitch, duration: cameraDuration(reducedMotion(), 900), easing: easeStandard });
+    }
+  }, [ready, styleVersion, props.buildings3d]);
+
+  // Drawing: entry (crosshair), active (vertices, dashed outline following the
+  // pointer), complete (the area settles into a solid cyan outline).
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!ready || !map) return;
+    const drawing = props.drawing;
+    const points = drawing ?? props.polygon ?? [];
+    (map.getSource("area") as GeoJSONSource | undefined)?.setData(areaFeatures(points));
+    if (container.current) container.current.dataset.drawing = drawing ? "1" : "0";
+    map.getCanvas().style.cursor = drawing ? "crosshair" : "";
+    if (map.getLayer("area-line")) {
+      map.setPaintProperty("area-line", "line-dasharray", drawing ? [2, 1.5] : [1, 0]);
+      if (!drawing && props.polygon) {
+        const d = cameraDuration(reducedMotion(), 500);
+        map.setPaintProperty("area-line", "line-width-transition", { duration: 0, delay: 0 });
+        map.setPaintProperty("area-line", "line-width", 4);
+        map.setPaintProperty("area-fill", "fill-opacity-transition", { duration: 0, delay: 0 });
+        map.setPaintProperty("area-fill", "fill-opacity", 0);
+        requestAnimationFrame(() => {
+          if (!map.getLayer("area-line")) return;
+          map.setPaintProperty("area-line", "line-width-transition", { duration: d, delay: 0 });
+          map.setPaintProperty("area-line", "line-width", 2);
+          map.setPaintProperty("area-fill", "fill-opacity-transition", { duration: d, delay: 0 });
+          map.setPaintProperty("area-fill", "fill-opacity", 0.08);
+        });
+      }
+    }
     // Quick clicks while drawing add points; they must not zoom the map.
-    if (props.drawing) map.doubleClickZoom.disable();
+    if (drawing) map.doubleClickZoom.disable();
     else map.doubleClickZoom.enable();
   }, [ready, styleVersion, props.drawing, props.polygon]);
 
-  // List ↔ map: the selected/hovered listing's bubble turns accent and rises.
+  // The list asked to show a listing on the map.
   useEffect(() => {
-    const map = mapRef.current;
-    if (!ready || !map || !map.getLayer("price-bubbles-active")) return;
-    map.setFilter("price-bubbles-active", [
-      "all",
-      ["!", ["has", "point_count"]],
-      ["==", ["get", "id"], props.highlightId ?? ""],
-    ]);
-  }, [ready, styleVersion, props.highlightId]);
+    if (!ready || !props.focusRequest) return;
+    focusRef.current([props.focusRequest.lon, props.focusRequest.lat]);
+  }, [ready, props.focusRequest]);
 
   // Smooth camera to a requested area.
   useEffect(() => {
     const map = mapRef.current;
     if (!ready || !map || !props.focusBbox) return;
-    map.fitBounds(props.focusBbox as LngLatBoundsLike, { padding: 48, duration: 900 });
+    map.fitBounds(props.focusBbox as LngLatBoundsLike, {
+      padding: 48,
+      duration: cameraDuration(reducedMotion(), 900),
+      easing: easeStandard,
+    });
   }, [ready, props.focusBbox]);
 
   return (
@@ -709,4 +1014,81 @@ export function PropertyMap(props: PropertyMapProps) {
       )}
     </div>
   );
+}
+
+function byIdCurrent(features: Feature[], id: string): Feature | undefined {
+  return features.find((f) => String((f.properties ?? {}).id) === id);
+}
+
+function visibleTags(tagMap: Map<string, Tag>): number {
+  let n = 0;
+  for (const tag of tagMap.values()) if (!tag.leaving) n++;
+  return n;
+}
+
+/** Vertices (the first one larger), the outline and, from three points, the area. */
+function areaFeatures(points: LonLat[], cursor?: LonLat): FeatureCollection {
+  const features: Feature[] = points.map((coordinates, i) => ({
+    type: "Feature",
+    properties: i === 0 ? { first: true } : {},
+    geometry: { type: "Point", coordinates },
+  }));
+  const path = cursor ? [...points, cursor] : points;
+  if (path.length >= 3) {
+    features.push({
+      type: "Feature",
+      properties: {},
+      geometry: { type: "Polygon", coordinates: [closedRing(path)] },
+    });
+  } else if (path.length === 2) {
+    features.push({
+      type: "Feature",
+      properties: {},
+      geometry: { type: "LineString", coordinates: path },
+    });
+  }
+  return { type: "FeatureCollection", features };
+}
+
+/**
+ * Sets a GeoJSON source and fades its layers: in when data arrives, out
+ * (then cleared) when the overlay is switched off.
+ */
+function useFadedData(
+  mapRef: RefObject<MapLibreMap | null>,
+  ready: boolean,
+  styleVersion: number,
+  source: string,
+  layers: readonly string[],
+  data: FeatureCollection | null,
+) {
+  const shown = useRef(false);
+  const lastStyle = useRef(-1);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!ready || !map) return;
+    const src = map.getSource(source) as GeoJSONSource | undefined;
+    if (!src) return;
+    const has = !!data && data.features.length > 0;
+    if (has) {
+      src.setData(data);
+      // A fresh style starts at zero opacity: fade in (or stay visible).
+      fadeLayers(map, layers, true, shown.current && styleVersion === lastStyle.current);
+      shown.current = true;
+      lastStyle.current = styleVersion;
+      return;
+    }
+    if (!shown.current) {
+      src.setData(EMPTY);
+      return;
+    }
+    fadeLayers(map, layers, false);
+    shown.current = false;
+    const handle = setTimeout(
+      () => (map.getSource(source) as GeoJSONSource | undefined)?.setData(EMPTY),
+      reducedMotion() ? 0 : FADE_MS,
+    );
+    return () => clearTimeout(handle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- layers/source are constants
+  }, [ready, styleVersion, data]);
 }
