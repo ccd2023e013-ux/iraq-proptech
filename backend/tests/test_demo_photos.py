@@ -5,10 +5,14 @@ from __future__ import annotations
 import io
 import re
 
+import pytest
 from PIL import Image
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
-from app import demo_images
+from app import demo, demo_images
 from app.demo_images import photo_caption, photo_library, pick_photo
+from app.properties.models import Property
 
 FREE = re.compile(r"^(Public domain|CC0|CC BY(-SA)? (2\.0|2\.5|3\.0|4\.0))$")
 DEMO_TYPES = ("HOUSE", "APARTMENT", "VILLA", "LAND", "SHOP", "OFFICE")
@@ -42,3 +46,18 @@ def test_each_demo_type_gets_a_photo_and_a_representative_caption() -> None:
         assert photo.licence in caption and len(caption) <= 200
     # Deterministic: the same listing seed always gets the same photo.
     assert pick_photo("HOUSE", 11) == pick_photo("HOUSE", 11)
+
+
+@pytest.mark.db
+def test_basra_seed_attaches_captioned_photos_only_when_asked(db_session: Session) -> None:
+    demo.seed(db_session, listings=3, images=True)
+    rows = (
+        db_session.execute(select(Property).where(Property.title_ar.like("عقار تجريبي%")))
+        .scalars()
+        .all()
+    )
+    assert len(rows) == 3
+    for p in rows:
+        assert len(p.media) == 1
+        assert "صورة تمثيلية" in p.media[0].caption and "Wikimedia Commons" in p.media[0].caption
+        assert "تمثيلية" in p.description_ar and "representative" in p.description_en

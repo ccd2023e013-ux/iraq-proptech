@@ -2,7 +2,7 @@
 
     python -m app.cli create-superadmin --email admin@example.com --name "Admin"
         (password from SUPERADMIN_PASSWORD or an interactive prompt)
-    python -m app.cli seed-demo [--listings 40] [--allow-production]
+    python -m app.cli seed-demo [--listings 40] [--photos] [--allow-production]
     python -m app.cli reset-demo
     python -m app.cli run-jobs [name ...]   (default: every scheduled job once)
     python -m app.cli storage-export DIR   (configured storage → local directory)
@@ -85,6 +85,11 @@ def main(argv: list[str] | None = None) -> int:
     demo = sub.add_parser("seed-demo", help="Create clearly-labelled DEMO districts and listings")
     demo.add_argument("--listings", type=int, default=40)
     demo.add_argument("--allow-production", action="store_true")
+    demo.add_argument(
+        "--photos",
+        action="store_true",
+        help="Attach a representative licensed photo (captioned as such) to each listing",
+    )
     sub.add_parser("reset-demo", help="Delete DEMO listings created by seed-demo")
     iraq = sub.add_parser(
         "seed-demo-iraq",
@@ -185,7 +190,9 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         with get_sessionmaker()() as db:
             if args.command == "seed-demo":
-                result = demo_data.seed(db, listings=max(0, min(args.listings, 500)))
+                result = demo_data.seed(
+                    db, listings=max(0, min(args.listings, 500)), images=args.photos
+                )
             else:
                 result = demo_data.reset(db)
         print(result)

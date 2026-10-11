@@ -62,7 +62,7 @@ jobs:
         run: |
           docker compose exec -T -e DEMO_ACCOUNT_PASSWORD -e DEMO_ADMIN_PASSWORD backend \
             python -m app.cli seed-demo-iraq --per-city 18
-          docker compose exec -T backend python -m app.cli seed-demo --listings 30
+          docker compose exec -T backend python -m app.cli seed-demo --listings 30 --photos
           docker compose exec -T backend python -m app.cli import-development --dataset basra
 
       - name: Open the tunnel

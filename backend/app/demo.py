@@ -200,9 +200,11 @@ def _demo_plans(db: Session) -> int:
     return created
 
 
-def seed(db: Session, *, listings: int = 40, images: bool = True) -> dict[str, int]:
-    """Create the demo lister, demo district squares in Basra and demo listings
-    (each with a representative photo, captioned as such, unless ``images`` is off)."""
+def seed(db: Session, *, listings: int = 40, images: bool = False) -> dict[str, int]:
+    """Create the demo lister, demo district squares in Basra and demo listings.
+
+    No photos by default; with ``images`` each listing gets one representative
+    licensed photo whose caption says it is not of the listing (app/demo_images)."""
     gov = db.execute(select(Governorate).where(Governorate.code == "BSR")).scalar_one()
     city = db.execute(
         select(City).where(City.governorate_id == gov.id, City.slug == "basra")
@@ -239,12 +241,11 @@ def seed(db: Session, *, listings: int = 40, images: bool = True) -> dict[str, i
             title_en=f"DEMO listing — {code.replace('_', ' ').title()} in {d.name_en}",
             description_ar=(
                 "هذا إعلان تجريبي لأغراض العرض فقط وليس عرضاً حقيقياً. "
-                "المواصفات والسعر أرقام توضيحية، والصورة تمثيلية وليست لهذا العقار."
+                "المواصفات والسعر أرقام توضيحية."
+                + (" الصورة تمثيلية وليست لهذا العقار." if images else "")
             ),
-            description_en=(
-                "Demo listing for demonstration only — not a real offer. "
-                "The photo is representative, not of this property."
-            ),
+            description_en="Demo listing for demonstration only — not a real offer."
+            + (" The photo is representative, not of this property." if images else ""),
             property_type_code=code,
             purpose="RENT" if rent else "SALE",
             rent_period="MONTHLY" if rent else None,
