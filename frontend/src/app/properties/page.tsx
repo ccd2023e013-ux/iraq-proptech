@@ -38,15 +38,19 @@ export default async function PropertiesPage({
   const s = dict.search;
 
   return (
-    <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[300px_1fr]">
-      <aside className="lg:sticky lg:top-[calc(var(--header-h)+1rem)] lg:self-start">
-        {/* Phones start with the filters folded so results lead; desktops keep them open. */}
-        <details className="surface-1 rounded-[var(--radius-card)] p-4" open={!phone}>
-          <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold text-ink lg:hidden [&::-webkit-details-marker]:hidden">
-            <Icon name="filter" className="size-4 text-ink-2" />
-            {s.filters}
+    <div className="mx-auto grid max-w-[1320px] gap-6 px-4 py-8 sm:px-6 md:py-12 lg:grid-cols-12 lg:gap-8 lg:px-8">
+      {/* Filters are a ruled column on the page, not a box. Phones start with
+          them folded so results lead; desktops keep them open. */}
+      <aside className="lg:sticky lg:top-[calc(var(--header-h)+1.5rem)] lg:col-span-3 lg:max-h-[calc(100dvh-var(--header-h)-3rem)] lg:self-start lg:overflow-y-auto lg:border-e lg:border-hairline lg:pe-6 quiet-scroll">
+        <details className="border-y border-hairline py-3 lg:border-0 lg:py-0" open={!phone}>
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-medium text-ink lg:hidden [&::-webkit-details-marker]:hidden">
+            <span className="flex items-center gap-2">
+              <Icon name="filter" className="size-4 text-ink-2" />
+              {s.filters}
+            </span>
+            <Icon name="chevron-down" className="size-4 text-ink-3" />
           </summary>
-          <div className="mt-3 lg:mt-0">
+          <div className="mt-4 lg:mt-0">
             <SearchFilters
               dict={dict}
               locale={locale}
@@ -58,12 +62,15 @@ export default async function PropertiesPage({
         </details>
       </aside>
 
-      <section aria-labelledby="results-heading" className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 id="results-heading" className="flex items-baseline gap-3">
-            <span className="display-md text-ink">{s.title}</span>
+      <section
+        aria-labelledby="results-heading"
+        className="flex min-w-0 flex-col gap-8 lg:col-span-9"
+      >
+        <div className="flex flex-wrap items-end justify-between gap-4 border-b border-hairline pb-5">
+          <h1 id="results-heading" className="flex flex-col gap-1">
+            <span className="display-lg text-ink">{s.title}</span>
             {"total" in result && (
-              <span className="text-sm font-normal text-ink-3 tabular">
+              <span className="meta tabular">
                 {result.total} {s.results}
               </span>
             )}
@@ -95,7 +102,7 @@ export default async function PropertiesPage({
           <EmptyState title={s.noResults} glyph="search" />
         ) : (
           <>
-            <ul className="grid gap-x-5 gap-y-9 sm:grid-cols-2 xl:grid-cols-3">
+            <ul className="grid gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
               {result.items.map((card, i) => (
                 <li key={card.id} className="reveal" style={stagger(i)}>
                   <PropertyCard
@@ -135,9 +142,12 @@ function Pagination({
 }) {
   if (pages <= 1) return null;
   const link =
-    "press surface-1 inline-flex h-10 items-center gap-1.5 rounded-[var(--radius-control)] px-4 text-sm font-medium text-ink";
+    "press inline-flex h-10 items-center gap-1.5 rounded-[var(--radius-control)] px-4 text-sm font-medium text-ink shadow-[inset_0_0_0_1px_var(--hairline-strong)] hover:bg-fill";
   return (
-    <nav aria-label="pagination" className="flex items-center justify-center gap-3">
+    <nav
+      aria-label="pagination"
+      className="flex items-center justify-between gap-3 border-t border-hairline pt-6"
+    >
       {page > 1 && (
         <Link className={link} href={`/properties?${withParam(params, "page", String(page - 1))}`}>
           {labels.previous}
