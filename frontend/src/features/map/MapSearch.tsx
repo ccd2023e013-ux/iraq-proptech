@@ -412,7 +412,7 @@ export function MapSearch({
         <div className="pointer-events-none absolute inset-x-4 top-[calc(var(--map-top)+0.75rem)] z-[var(--z-float)] flex justify-center">
           <p
             role="status"
-            className={`surface-float pop-in pointer-events-auto max-w-md rounded-full px-4 py-2 text-center text-[13px] ${geoError ? "text-danger" : "text-ink"}`}
+            className={`surface-float pop-in pointer-events-auto max-w-md rounded-[var(--radius-control)] px-4 py-2 text-center text-[13px] ${geoError ? "text-danger" : "text-ink"}`}
           >
             {geoError ? m.nearMeDenied : m.drawHint}
           </p>
@@ -545,7 +545,7 @@ export function MapSearch({
           {total > items.length && (
             <a
               href={`/properties?${toApiQuery(params)}`}
-              className="press mx-auto inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-sm font-medium text-accent hover:bg-accent-tint"
+              className="press mx-auto inline-flex h-9 items-center gap-1.5 rounded-[var(--radius-control)] px-4 text-sm font-medium text-accent hover:bg-accent-tint"
             >
               {dict.landing.viewAll}
               <Icon name="arrow" className="size-4" />
@@ -558,7 +558,7 @@ export function MapSearch({
       {/* Map tools: a floating column on the end side. */}
       <div className="absolute end-3 top-[calc(var(--map-top)+0.75rem)] z-[var(--z-float)] flex flex-col items-end gap-2 lg:end-4">
         <details ref={layersRef} className="group relative z-20" data-testid="map-layers">
-          <summary className="press surface-float flex h-10 cursor-pointer list-none items-center gap-2 rounded-full px-3.5 text-sm font-medium text-ink [&::-webkit-details-marker]:hidden">
+          <summary className="press surface-float flex h-10 cursor-pointer list-none items-center gap-2 rounded-[var(--radius-control)] px-3.5 text-sm font-medium text-ink [&::-webkit-details-marker]:hidden">
             <Icon name="layers" className="size-[18px] text-spatial" />
             <span className="max-sm:sr-only">{m.layers}</span>
           </summary>
@@ -632,7 +632,7 @@ export function MapSearch({
         </details>
 
         {drawing ? (
-          <div className="surface-float pop-in flex items-center gap-1 rounded-full p-1">
+          <div className="surface-float pop-in flex items-center gap-1 rounded-[var(--radius-control)] p-1">
             <Button
               size="sm"
               onClick={finishDrawing}
@@ -803,7 +803,7 @@ function SelectionSheet({
           </div>
           <Link
             href={`/properties/${encodeURIComponent(id)}`}
-            className="press mt-auto inline-flex h-8 w-fit items-center gap-1.5 rounded-full bg-accent-fill px-3.5 text-[13px] font-medium text-on-accent hover:bg-accent-fill-hover"
+            className="press mt-auto inline-flex h-8 w-fit items-center gap-1.5 rounded-[var(--radius-control)] bg-accent-fill px-3.5 text-[13px] font-medium text-on-accent hover:bg-accent-fill-hover"
           >
             {dict.map.openListing}
             <Icon name="arrow" className="size-3.5" />

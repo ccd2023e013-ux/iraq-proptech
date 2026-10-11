@@ -35,15 +35,17 @@ export function MobileMenu({
           <path d="M4 8h16M4 16h16" />
         </svg>
       </summary>
+      {/* A sheet under the header: large ruled links, thumb-sized. */}
       <nav
         aria-label={label}
-        className="surface-focus pop-in absolute end-0 top-12 z-40 flex w-60 origin-top flex-col rounded-[var(--radius-card)] p-1.5 text-sm"
+        className="fade-in fixed inset-x-0 top-[var(--header-h)] z-40 flex flex-col border-b border-hairline bg-canvas px-4 pb-4 shadow-[var(--shadow-float)]"
       >
         {links.map((l) => (
           <Link
             key={l.href}
             href={l.href}
-            className="rounded-xl px-3 py-2.5 text-ink transition-colors hover:bg-fill"
+            aria-current={pathname === l.href ? "page" : undefined}
+            className="flex h-12 items-center border-b border-hairline font-display text-[17px] text-ink transition-colors last:border-b-0 hover:text-accent aria-[current=page]:text-accent"
           >
             {l.label}
           </Link>

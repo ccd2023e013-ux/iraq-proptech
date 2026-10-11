@@ -13,24 +13,32 @@ import { PrimaryNav } from "./PrimaryNav";
 import { ThemeToggle } from "./ThemeToggle";
 import { UserMenu } from "./UserMenu";
 
-/** MAKAN mark: a place pin over the bend of the Shatt al-Arab, in a rounded tile. */
-export function BrandMark({ className = "size-8" }: { className?: string }) {
+/**
+ * MAKAN mark: a survey plot (the square) with one fixed point on it (emerald)
+ * and the river running beneath (cyan) — "a place, read precisely".
+ * Drawn on a 32-unit grid; the frame follows the ink colour of the theme.
+ */
+export function BrandMark({ className = "size-7" }: { className?: string }) {
   return (
     <svg aria-hidden viewBox="0 0 32 32" className={className}>
-      <rect width="32" height="32" rx="9" className="fill-accent-fill" />
-      <path
-        d="M6 22c4-1 6-4 10-4s6 2 10 0"
+      <rect
+        x="3.25"
+        y="3.25"
+        width="25.5"
+        height="25.5"
+        rx="5"
         fill="none"
-        stroke="#04130d"
-        strokeOpacity="0.45"
+        className="stroke-ink"
+        strokeWidth="2.5"
+      />
+      <path
+        d="M3.5 22.5c5.5-2.6 9.5-2.6 13.2-.6 3.7 2 7.6 2 11.8-.4"
+        fill="none"
+        className="stroke-spatial-fill"
         strokeWidth="2.2"
         strokeLinecap="round"
       />
-      <path
-        d="M16 6.5a5.5 5.5 0 0 0-5.5 5.5c0 4 5.5 8.5 5.5 8.5s5.5-4.5 5.5-8.5A5.5 5.5 0 0 0 16 6.5Z"
-        fill="#04130d"
-      />
-      <circle cx="16" cy="12" r="2" className="fill-accent-fill" />
+      <circle cx="19.5" cy="12.5" r="3.6" className="fill-accent-fill" />
     </svg>
   );
 }
@@ -63,18 +71,18 @@ export function SiteHeader({
       ]
     : [];
   return (
-    // Phones: a slim bar across the top. From md up: a floating bar inset from
-    // the page edges, hovering over the content as it scrolls underneath.
-    <header className="sticky top-0 z-[var(--z-header)] md:px-4 md:pt-3">
-      <div className="surface-float mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 max-md:rounded-none max-md:shadow-[0_1px_0_var(--hairline)] md:h-14 md:rounded-full md:ps-3 md:pe-2">
-        <div className="flex min-w-0 items-center gap-5">
+    // A full-width bar with a hairline base. It is an overlay when content
+    // scrolls under it (and on the map), so it is translucent with a blur.
+    <header className="sticky top-0 z-[var(--z-header)] h-[var(--header-h)] border-b border-hairline bg-canvas/85 backdrop-blur-xl backdrop-saturate-150">
+      <div className="mx-auto flex h-full max-w-[1320px] items-stretch justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <div className="flex min-w-0 items-stretch gap-6 lg:gap-8">
           <Link
             href="/"
-            className="press flex items-center gap-2.5 rounded-full"
+            className="press flex items-center gap-2.5 self-center rounded-[var(--radius-control)]"
             aria-label={dict.nav.home}
           >
             <BrandMark />
-            <span className="font-display text-[17px] font-semibold tracking-tight whitespace-nowrap text-ink max-[380px]:hidden">
+            <span className="font-display text-[19px] leading-none font-semibold tracking-tight whitespace-nowrap text-ink max-[380px]:hidden">
               {locale === "ar" ? "مَكان" : "MAKAN"}
             </span>
           </Link>
@@ -84,7 +92,7 @@ export function SiteHeader({
           {me && (
             <Link
               href="/dashboard/properties/new"
-              className="press hidden h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium text-accent hover:bg-accent-tint lg:inline-flex"
+              className="press hidden h-9 items-center gap-1.5 rounded-[var(--radius-control)] px-3 text-sm font-medium text-accent hover:bg-accent-tint lg:inline-flex"
             >
               <Icon name="plus" className="size-4" strokeWidth={2} />
               {dict.nav.addProperty}
@@ -112,13 +120,13 @@ export function SiteHeader({
             <>
               <Link
                 href="/login"
-                className="press hidden h-9 items-center rounded-full px-3 text-sm font-medium text-ink-2 hover:bg-fill hover:text-ink sm:inline-flex"
+                className="press hidden h-9 items-center rounded-[var(--radius-control)] px-3 text-sm font-medium text-ink-2 hover:bg-fill hover:text-ink sm:inline-flex"
               >
                 {dict.nav.login}
               </Link>
               <Link
                 href="/register"
-                className="press inline-flex h-9 items-center rounded-full bg-accent-fill px-4 text-sm font-medium whitespace-nowrap text-on-accent shadow-[inset_0_1px_0_rgb(255_255_255/0.25)] hover:bg-accent-fill-hover"
+                className="press ms-1 inline-flex h-9 items-center rounded-[var(--radius-control)] bg-accent-fill px-3.5 text-sm font-medium whitespace-nowrap text-on-accent shadow-[inset_0_1px_0_rgb(255_255_255/0.18)] hover:bg-accent-fill-hover"
               >
                 {dict.nav.register}
               </Link>

@@ -53,7 +53,7 @@ export default async function SmartSearchPage({
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:px-6">
       <header className="flex flex-col items-center gap-4 pt-6 text-center">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-spatial-tint px-3 py-1 text-xs font-medium text-spatial">
+        <span className="inline-flex items-center gap-1.5 rounded-[var(--radius-tag)] bg-spatial-tint px-3 py-1 text-xs font-medium text-spatial">
           <Icon name="insight" className="size-3.5" />
           {a.badge}
         </span>
@@ -64,7 +64,7 @@ export default async function SmartSearchPage({
         method="get"
         action="/search/smart"
         role="search"
-        className="surface-float mx-auto flex w-full max-w-3xl items-center gap-2 rounded-full p-1.5 ps-4 focus-within:shadow-[var(--edge),0_0_0_2px_var(--accent),var(--shadow-float)]"
+        className="surface-float mx-auto flex w-full max-w-3xl items-center gap-2 rounded-[var(--radius-control)] p-1.5 ps-4 focus-within:shadow-[var(--edge),0_0_0_2px_var(--accent),var(--shadow-float)]"
       >
         <Icon name="search" className="size-5 shrink-0 text-ink-3" />
         <input
@@ -78,7 +78,7 @@ export default async function SmartSearchPage({
         />
         <button
           type="submit"
-          className="press inline-flex h-11 shrink-0 items-center rounded-full bg-accent-fill px-5 font-medium text-on-accent hover:bg-accent-fill-hover"
+          className="press inline-flex h-11 shrink-0 items-center rounded-[var(--radius-control)] bg-accent-fill px-5 font-medium text-on-accent hover:bg-accent-fill-hover"
         >
           {dict.landing.heroCta}
         </button>
@@ -89,7 +89,7 @@ export default async function SmartSearchPage({
             <li key={example}>
               <Link
                 href={`/search/smart?q=${encodeURIComponent(example)}`}
-                className="press inline-flex h-9 items-center gap-1.5 rounded-full px-3.5 text-sm text-ink-2 ring-1 ring-inset ring-hairline-strong hover:bg-fill hover:text-ink"
+                className="press inline-flex h-9 items-center gap-1.5 rounded-[var(--radius-control)] px-3.5 text-sm text-ink-2 ring-1 ring-inset ring-hairline-strong hover:bg-fill hover:text-ink"
               >
                 <span className="text-ink-3">{a.tryExample}:</span> {example}
               </Link>
@@ -111,7 +111,7 @@ export default async function SmartSearchPage({
               {data.interpretation.result.understood.map((u, i) => (
                 <li
                   key={i}
-                  className="inline-flex items-center overflow-hidden rounded-full text-xs ring-1 ring-inset ring-hairline-strong"
+                  className="inline-flex items-center overflow-hidden rounded-[var(--radius-control)] text-xs ring-1 ring-inset ring-hairline-strong"
                 >
                   <span className="bg-fill px-2.5 py-1 text-ink-2">«{u.phrase}»</span>
                   <span className="px-2.5 py-1 text-ink">

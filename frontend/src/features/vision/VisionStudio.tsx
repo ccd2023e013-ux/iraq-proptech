@@ -130,7 +130,7 @@ export function VisionStudio({
   }
 
   const chip = (active: boolean) =>
-    `h-9 rounded-full px-3.5 text-sm font-medium transition ${
+    `h-9 rounded-[var(--radius-control)] px-3.5 text-sm font-medium transition ${
       active ? "bg-ink text-surface" : "bg-fill text-ink-2 hover:text-ink"
     }`;
   const label = v.label;
@@ -250,7 +250,7 @@ export function VisionStudio({
       </form>
 
       <section className="flex min-w-0 flex-col gap-3" aria-live="polite">
-        <div className="flex rounded-full bg-fill p-1" role="tablist">
+        <div className="flex rounded-[var(--radius-control)] bg-fill p-1" role="tablist">
           {(["current", "concept", "vision"] as const).map((s) => (
             <button
               key={s}
@@ -259,7 +259,7 @@ export function VisionStudio({
               aria-selected={step === s}
               disabled={s !== "current" && !result}
               onClick={() => setStep(s)}
-              className={`h-9 flex-1 rounded-full text-sm font-medium transition disabled:opacity-40 ${step === s ? "bg-surface text-ink shadow-soft" : "text-ink-2"}`}
+              className={`h-9 flex-1 rounded-[var(--radius-control)] text-sm font-medium transition disabled:opacity-40 ${step === s ? "bg-surface text-ink shadow-soft" : "text-ink-2"}`}
             >
               {v.steps[s]}
             </button>

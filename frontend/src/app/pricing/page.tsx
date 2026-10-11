@@ -41,7 +41,7 @@ export default async function PricingPage() {
               className={`surface-1 relative flex flex-col gap-3 overflow-hidden rounded-[var(--radius-card)] p-6 ${plan.kind === "SUBSCRIPTION" ? "shadow-[var(--edge),0_0_0_1px_var(--accent-line),var(--shadow-soft)]" : ""}`}
             >
               <span
-                className={`w-fit rounded-full px-2.5 py-0.5 text-xs font-medium ${plan.kind === "SUBSCRIPTION" ? "bg-accent-tint text-accent" : "bg-fill text-ink-2"}`}
+                className={`w-fit rounded-[var(--radius-tag)] px-2.5 py-0.5 text-xs font-medium ${plan.kind === "SUBSCRIPTION" ? "bg-accent-tint text-accent" : "bg-fill text-ink-2"}`}
               >
                 {b.kinds[plan.kind]}
               </span>

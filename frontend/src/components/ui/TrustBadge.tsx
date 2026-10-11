@@ -20,7 +20,7 @@ export function TrustBadge({ kind, children }: { kind: TrustKind; children: Reac
   return (
     <span
       data-trust={kind}
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold leading-5 ${STYLES[kind]}`}
+      className={`inline-flex items-center rounded-[var(--radius-tag)] px-2 py-0.5 text-[11px] font-semibold leading-5 ${STYLES[kind]}`}
     >
       {children}
     </span>

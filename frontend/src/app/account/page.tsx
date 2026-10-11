@@ -39,7 +39,7 @@ export default async function AccountPage() {
           {user.roles.map((role) => (
             <li
               key={role}
-              className="rounded-full bg-brand-50 px-3 py-1 text-sm font-medium text-brand-800"
+              className="rounded-[var(--radius-control)] bg-brand-50 px-3 py-1 text-sm font-medium text-brand-800"
             >
               {dict.roles[role]}
             </li>

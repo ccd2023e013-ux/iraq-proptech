@@ -39,14 +39,14 @@ export default function GlobalError({
         <button
           type="button"
           onClick={reset}
-          className="press inline-flex h-11 items-center gap-2 rounded-full bg-accent-fill px-5 font-medium text-on-accent hover:bg-accent-fill-hover"
+          className="press inline-flex h-11 items-center gap-2 rounded-[var(--radius-control)] bg-accent-fill px-5 font-medium text-on-accent hover:bg-accent-fill-hover"
         >
           <Icon name="refresh" className="size-4" />
           إعادة المحاولة / Try again
         </button>
         <Link
           href="/"
-          className="press surface-1 inline-flex h-11 items-center gap-2 rounded-full px-5 font-medium text-ink"
+          className="press surface-1 inline-flex h-11 items-center gap-2 rounded-[var(--radius-control)] px-5 font-medium text-ink"
         >
           الرئيسية / Home
         </Link>

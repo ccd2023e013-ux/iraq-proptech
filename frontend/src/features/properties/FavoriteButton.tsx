@@ -54,7 +54,7 @@ export function FavoriteButton({
         onClick={toggle}
         disabled={busy}
         aria-pressed={saved}
-        className="press surface-1 inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-medium text-ink"
+        className="press surface-1 inline-flex h-10 items-center gap-2 rounded-[var(--radius-control)] px-4 text-sm font-medium text-ink"
       >
         <Heart filled={saved} pop={pop} onDone={() => setPop(false)} />
         {saved ? labels.saved : labels.save}
@@ -69,7 +69,7 @@ export function FavoriteButton({
       aria-pressed={saved}
       aria-label={label}
       title={label}
-      className={`press surface-float grid size-9 place-items-center rounded-full ${saved ? "text-danger" : "text-ink"}`}
+      className={`press surface-float grid size-9 place-items-center rounded-[var(--radius-control)] ${saved ? "text-danger" : "text-ink"}`}
     >
       <Heart filled={saved} pop={pop} onDone={() => setPop(false)} />
     </button>

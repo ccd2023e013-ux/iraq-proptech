@@ -59,9 +59,9 @@ export default async function FuturePage() {
     <div className="flex flex-col gap-14">
       {/* Urban-intelligence header: the projects plotted where they are, on a
           survey grid, beside the title. Positions come from the records. */}
-      <header className="relative isolate overflow-hidden md:-mt-[var(--header-h)]">
+      <header className="relative isolate overflow-hidden">
         <div aria-hidden className="stage-grid absolute inset-0 -z-10" />
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 pt-10 pb-6 sm:px-6 md:pt-[calc(var(--header-h)+3rem)] lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 pt-10 pb-6 sm:px-6 md:pt-16 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="flex flex-col gap-5">
             <p className="reveal meta flex items-center gap-2">
               <Icon name="future" className="size-4 text-spatial" />
@@ -94,7 +94,7 @@ export default async function FuturePage() {
             {allBbox && (
               <Link
                 href={`/map?bbox=${allBbox}&layer=future`}
-                className="press reveal surface-float mt-2 inline-flex h-11 w-fit items-center gap-2 rounded-full px-5 text-sm font-medium text-ink"
+                className="press reveal surface-float mt-2 inline-flex h-11 w-fit items-center gap-2 rounded-[var(--radius-control)] px-5 text-sm font-medium text-ink"
                 style={stagger(4)}
               >
                 <Icon name="map" className="size-4 text-spatial" />
@@ -159,7 +159,7 @@ export default async function FuturePage() {
                     {index + 1}
                   </span>
                   <span
-                    className={`rounded-full px-2.5 py-1 font-medium ${STATUS_TONE[p.status] ?? "bg-fill text-ink-2"}`}
+                    className={`rounded-[var(--radius-control)] px-2.5 py-1 font-medium ${STATUS_TONE[p.status] ?? "bg-fill text-ink-2"}`}
                   >
                     {(f.statuses as Record<string, string>)[p.status] ?? p.status}
                   </span>
@@ -189,7 +189,7 @@ export default async function FuturePage() {
                       )}{" "}
                       <Link
                         href={`/map?bbox=${[lon - d, lat - d, lon + d, lat + d].map((v) => v.toFixed(3)).join(",")}&layer=future`}
-                        className="press mt-2 flex h-8 w-fit items-center gap-1.5 rounded-full bg-spatial-tint px-3 text-[13px] font-medium text-spatial"
+                        className="press mt-2 flex h-8 w-fit items-center gap-1.5 rounded-[var(--radius-control)] bg-spatial-tint px-3 text-[13px] font-medium text-spatial"
                       >
                         <Icon name="pin" className="size-3.5" />
                         {f.showOnMap}

@@ -18,7 +18,7 @@ export function PasswordField({
         type="button"
         onClick={() => setVisible((v) => !v)}
         aria-pressed={visible}
-        className="absolute end-2 top-[2.1rem] h-8 rounded-full px-3 text-xs font-medium text-ink-2 hover:bg-fill-strong"
+        className="absolute end-2 top-[2.1rem] h-8 rounded-[var(--radius-control)] px-3 text-xs font-medium text-ink-2 hover:bg-fill-strong"
       >
         {visible ? hideLabel : showLabel}
       </button>

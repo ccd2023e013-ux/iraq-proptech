@@ -52,7 +52,7 @@ export function Gallery({
   }
 
   const control =
-    "press surface-float absolute top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-full text-ink opacity-90 transition-opacity hover:opacity-100 max-sm:size-9";
+    "press surface-float absolute top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-[var(--radius-control)] text-ink opacity-90 transition-opacity hover:opacity-100 max-sm:size-9";
 
   return (
     <div className="flex flex-col gap-3">
@@ -91,7 +91,7 @@ export function Gallery({
               >
                 <Icon name="chevron" className="size-5" />
               </button>
-              <span className="surface-float absolute end-4 bottom-4 rounded-full px-3 py-1 text-xs font-medium text-ink tabular">
+              <span className="surface-float absolute end-4 bottom-4 rounded-[var(--radius-tag)] px-3 py-1 text-xs font-medium text-ink tabular">
                 {index + 1} / {images.length}
               </span>
             </>
@@ -147,7 +147,7 @@ export function ShareButton({ label, copied }: { label: string; copied: string }
     <button
       type="button"
       onClick={share}
-      className="press surface-1 inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-medium text-ink"
+      className="press surface-1 inline-flex h-10 items-center gap-2 rounded-[var(--radius-control)] px-4 text-sm font-medium text-ink"
     >
       {done ? (
         <Icon name="check" className="icon-swap size-4 text-accent" strokeWidth={2.2} />

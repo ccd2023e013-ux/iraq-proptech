@@ -35,7 +35,7 @@ export function SectionNav({
               <Link
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={`press relative flex h-9 items-center rounded-full px-3.5 text-sm whitespace-nowrap transition-colors lg:h-10 lg:rounded-xl ${
+                className={`press relative flex h-9 items-center rounded-[var(--radius-control)] px-3.5 text-sm whitespace-nowrap transition-colors lg:h-10 lg:rounded-xl ${
                   active
                     ? "bg-fill font-medium text-ink lg:before:absolute lg:before:inset-y-2.5 lg:before:start-0 lg:before:w-0.5 lg:before:rounded-full lg:before:bg-accent-fill"
                     : "text-ink-2 ring-1 ring-inset ring-hairline hover:bg-fill hover:text-ink lg:ring-0"

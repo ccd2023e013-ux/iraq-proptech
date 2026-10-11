@@ -54,7 +54,10 @@ export default async function AdminOverview() {
         <h2 className="mb-3 text-sm font-semibold">{a.listingsByStatus}</h2>
         <ul className="flex flex-wrap gap-2 text-sm">
           {Object.entries(s.listings_by_status).map(([status, n]) => (
-            <li key={status} className="rounded-full bg-sand-100 px-3 py-1 tabular">
+            <li
+              key={status}
+              className="rounded-[var(--radius-control)] bg-sand-100 px-3 py-1 tabular"
+            >
               {dict.listing.statuses[status as keyof typeof dict.listing.statuses] ?? status}: {n}
             </li>
           ))}

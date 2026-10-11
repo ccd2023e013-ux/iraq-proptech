@@ -59,70 +59,45 @@ export function PropertyCard({
   const area = formatArea(card.area_m2, locale);
   if (area) facts.push({ icon: "area", text: area });
 
-  // Editorial card: the photograph carries the card; text sits on the page,
-  // not in a box. Price leads, then title, then quiet facts with icons.
+  // Survey card: the photograph is the figure; everything else sits on the
+  // page as type. Only the save control floats on the image, and DEMO is a
+  // gold tag on the image's bottom edge (where trust labels always live).
   return (
-    <article className="group relative flex flex-col gap-3.5">
+    <article className="group relative flex flex-col gap-3">
       <Link
         href={`/properties/${card.id}`}
         className="absolute inset-0 z-10 rounded-[var(--radius-card)]"
         aria-label={title}
       />
-      <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-card)] bg-fill shadow-[inset_0_0_0_1px_var(--hairline)] transition-[box-shadow,translate] duration-[var(--duration-base)] ease-[var(--ease-out-soft)] group-hover:-translate-y-0.5 group-hover:shadow-[var(--shadow-float)]">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-card)] bg-fill shadow-[inset_0_0_0_1px_var(--hairline)]">
         {card.cover_url ? (
           <SafeImage
             src={card.cover_url}
             alt=""
             fallbackLabel={dict.listing.noImage}
-            className="size-full object-cover transition-transform duration-[900ms] ease-[var(--ease-out-soft)] group-hover:scale-[1.045]"
+            className="size-full object-cover transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:scale-[1.02]"
           />
         ) : (
-          <div className="relative isolate flex size-full flex-col items-center justify-center gap-2 text-[13px] text-ink-3">
-            <div aria-hidden className="stage-grid absolute inset-0 -z-10 opacity-80" />
-            <Icon name="home" className="size-6 text-ink-3/80" />
+          <div className="flex size-full flex-col items-center justify-center gap-2 text-[13px] text-ink-3">
+            <Icon name="home" className="size-6 opacity-70" />
             {dict.listing.noImage}
           </div>
         )}
-        {/* A soft shade at the top keeps chips legible on bright photos. */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/25 to-transparent"
-        />
-        <div className="absolute start-3 top-3 flex flex-wrap gap-1.5">
-          <span className="surface-float rounded-full px-2.5 py-0.5 text-xs font-medium text-ink">
-            {dict.listing.purposes[card.purpose]}
-          </span>
-          {card.verified && !compact && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-accent-fill px-2.5 py-0.5 text-xs font-medium text-on-accent">
-              <Icon name="check" className="size-3.5" strokeWidth={2.2} />
-              {dict.listing.verified}
-            </span>
-          )}
-        </div>
-        <div className="absolute bottom-3 start-3 flex flex-wrap gap-1.5">
-          {card.verified && compact && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-accent-fill px-2 py-0.5 text-[11px] font-medium text-on-accent">
-              <Icon name="check" className="size-3" strokeWidth={2.4} />
-              {dict.listing.verified}
-            </span>
-          )}
-          {card.is_demo && (
-            <span className="rounded-full bg-gold-500 px-2 py-0.5 text-[11px] font-semibold text-[#1d1405]">
-              {dict.listing.demo}
-            </span>
-          )}
-          {card.is_featured && (
-            <span className="surface-float rounded-full px-2 py-0.5 text-[11px] font-medium text-ink">
-              {dict.listing.promoted}
-            </span>
-          )}
-        </div>
-        {!compact && (
-          <div className="absolute end-3 bottom-3 z-20 opacity-0 transition-opacity duration-[var(--duration-base)] group-focus-within:opacity-100 group-hover:opacity-100 max-md:opacity-100">
-            <CompareToggle id={card.id} dict={dict} />
+        {(card.is_demo || card.is_featured) && (
+          <div className="absolute start-0 bottom-0 flex">
+            {card.is_demo && (
+              <span className="rounded-se-[var(--radius-tag)] bg-gold-500 px-2 py-0.5 text-[11px] font-semibold text-[#1d1405]">
+                {dict.listing.demo}
+              </span>
+            )}
+            {card.is_featured && (
+              <span className="bg-canvas/80 px-2 py-0.5 text-[11px] font-medium text-ink backdrop-blur-md">
+                {dict.listing.promoted}
+              </span>
+            )}
           </div>
         )}
-        <div className="absolute end-3 top-3 z-20">
+        <div className="absolute end-2.5 top-2.5 z-20">
           <FavoriteButton
             propertyId={card.id}
             initial={!!favorite}
@@ -135,33 +110,48 @@ export function PropertyCard({
           />
         </div>
       </div>
-      <div className="flex flex-col gap-1 px-0.5">
-        <p
-          className={`font-display font-semibold tracking-tight text-ink tabular ${compact ? "text-base" : "text-[19px] leading-snug"}`}
+      <div className="flex flex-col gap-0.5">
+        <div className="flex items-baseline justify-between gap-3">
+          <p className={`kpi text-ink ${compact ? "text-base" : "text-xl"}`}>
+            {priceLabel(card, dict, locale)}
+          </p>
+          <span className="caption shrink-0">
+            {dict.listing.purposes[card.purpose]}
+            {card.verified && (
+              <span className="ms-2 inline-flex items-center gap-1 text-accent">
+                <Icon name="check" className="size-3.5" strokeWidth={2.2} />
+                {dict.listing.verified}
+              </span>
+            )}
+          </span>
+        </div>
+        <h3
+          className={`line-clamp-1 text-ink-2 transition-colors group-hover:text-ink ${compact ? "text-sm" : "text-[15px]"}`}
         >
-          {priceLabel(card, dict, locale)}
-        </p>
-        <h3 className={`line-clamp-1 text-ink-2 ${compact ? "text-sm" : "text-[15px]"}`}>
           {title}
         </h3>
-        {!compact && (where || typeName) && (
-          <p className="flex min-w-0 items-center gap-1.5 text-[13px] text-ink-3">
-            <Icon name="pin" className="size-3.5 shrink-0 text-spatial" />
+        {!compact && (
+          <p className="meta flex min-w-0 items-center gap-x-3 tabular">
             <span className="truncate">{[typeName, where].filter(Boolean).join(" · ")}</span>
+            {facts.length > 0 && (
+              <span className="flex shrink-0 items-center gap-2.5">
+                {facts.map((f) => (
+                  <span key={f.icon} className="flex items-center gap-1">
+                    <Icon name={f.icon} className="size-3.5 text-ink-3" strokeWidth={1.8} />
+                    {f.text}
+                    {f.label && <span className="sr-only">{f.label}</span>}
+                  </span>
+                ))}
+              </span>
+            )}
           </p>
         )}
-        {!compact && facts.length > 0 && (
-          <ul className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-ink-2 tabular">
-            {facts.map((f) => (
-              <li key={f.icon} className="flex items-center gap-1.5">
-                <Icon name={f.icon} className="size-4 text-ink-3" />
-                <span>{f.text}</span>
-                {f.label && <span className="sr-only">{f.label}</span>}
-              </li>
-            ))}
-          </ul>
+        {!compact && (
+          <div className="relative z-20 mt-2 flex items-center justify-between gap-3">
+            <span className="caption truncate">{card.agency_name}</span>
+            <CompareToggle id={card.id} dict={dict} />
+          </div>
         )}
-        {!compact && card.agency_name && <p className="meta mt-0.5">{card.agency_name}</p>}
       </div>
     </article>
   );

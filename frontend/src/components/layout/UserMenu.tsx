@@ -43,7 +43,7 @@ export function UserMenu({ dict, name }: { dict: Dictionary; name: string }) {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="press flex h-9 items-center gap-2 rounded-full ps-1 pe-3 text-sm font-medium text-ink hover:bg-fill aria-expanded:bg-fill"
+        className="press flex h-9 items-center gap-2 rounded-[var(--radius-control)] ps-1 pe-3 text-sm font-medium text-ink hover:bg-fill aria-expanded:bg-fill"
       >
         <span
           aria-hidden

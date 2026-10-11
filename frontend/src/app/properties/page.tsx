@@ -135,7 +135,7 @@ function Pagination({
 }) {
   if (pages <= 1) return null;
   const link =
-    "press surface-1 inline-flex h-10 items-center gap-1.5 rounded-full px-4 text-sm font-medium text-ink";
+    "press surface-1 inline-flex h-10 items-center gap-1.5 rounded-[var(--radius-control)] px-4 text-sm font-medium text-ink";
   return (
     <nav aria-label="pagination" className="flex items-center justify-center gap-3">
       {page > 1 && (

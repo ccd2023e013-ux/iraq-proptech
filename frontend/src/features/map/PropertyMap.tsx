@@ -696,7 +696,7 @@ export function PropertyMap(props: PropertyMapProps) {
       <div ref={container} style={{ position: "absolute", inset: 0 }} data-testid="map-canvas" />
       {!ready && !failed && (
         <div role="status" className="skeleton absolute inset-0 grid place-items-center">
-          <p className="surface-float flex items-center gap-2 rounded-full px-4 py-2 text-sm text-ink-2">
+          <p className="surface-float flex items-center gap-2 rounded-[var(--radius-control)] px-4 py-2 text-sm text-ink-2">
             <span aria-hidden className="size-2 animate-pulse rounded-full bg-spatial-fill" />
             {props.dict.map.loading}
           </p>

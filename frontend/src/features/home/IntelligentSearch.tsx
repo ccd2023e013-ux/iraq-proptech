@@ -62,7 +62,7 @@ export function IntelligentSearch({
   }
 
   const select =
-    "h-11 min-w-0 rounded-full bg-fill px-4 text-sm text-ink outline-none ring-accent transition focus-visible:ring-2";
+    "h-11 min-w-0 rounded-[var(--radius-control)] bg-fill px-4 text-sm text-ink outline-none ring-accent transition focus-visible:ring-2";
 
   return (
     <form
@@ -89,7 +89,7 @@ export function IntelligentSearch({
             </button>
           ))}
         </div>
-        <label className="flex cursor-pointer items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium text-ink-2 hover:bg-fill">
+        <label className="flex cursor-pointer items-center gap-2 rounded-[var(--radius-control)] px-3 py-1.5 text-sm font-medium text-ink-2 hover:bg-fill">
           <input
             type="checkbox"
             checked={ai}
@@ -140,11 +140,11 @@ export function IntelligentSearch({
           onChange={(e) => setQ(e.target.value)}
           placeholder={ai ? h.aiPlaceholder : h.searchPlaceholder}
           aria-label={ai ? h.aiPlaceholder : h.searchPlaceholder}
-          className="h-11 w-full min-w-0 shrink-0 rounded-full sm:w-auto sm:flex-1 bg-fill px-4 text-ink outline-none ring-accent transition-shadow placeholder:text-ink-3 focus-visible:ring-2"
+          className="h-11 w-full min-w-0 shrink-0 rounded-[var(--radius-control)] sm:w-auto sm:flex-1 bg-fill px-4 text-ink outline-none ring-accent transition-shadow placeholder:text-ink-3 focus-visible:ring-2"
         />
         <button
           type="submit"
-          className="press inline-flex h-11 items-center justify-center gap-2 rounded-full bg-accent-fill px-6 font-medium text-on-accent shadow-[inset_0_1px_0_rgb(255_255_255/0.25)] hover:bg-accent-fill-hover"
+          className="press inline-flex h-11 items-center justify-center gap-2 rounded-[var(--radius-control)] bg-accent-fill px-6 font-medium text-on-accent shadow-[inset_0_1px_0_rgb(255_255_255/0.25)] hover:bg-accent-fill-hover"
         >
           <Icon name="search" className="size-[18px]" strokeWidth={2} />
           {h.search}

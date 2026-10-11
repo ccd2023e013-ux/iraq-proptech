@@ -20,7 +20,7 @@ export function StatusBadge({ tone, children }: { tone: BadgeTone; children: Rea
   return (
     <span
       data-tone={tone}
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${TONES[tone]}`}
+      className={`inline-flex items-center gap-1.5 rounded-[var(--radius-tag)] px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${TONES[tone]}`}
     >
       <span aria-hidden className={`size-1.5 rounded-full ${DOTS[tone]}`} />
       {children}

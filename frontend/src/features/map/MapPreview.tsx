@@ -42,11 +42,14 @@ export function MapPreview({
   points,
   label,
   className = "h-56 sm:h-64",
+  dense = false,
 }: {
   config: MapConfig;
   points: PreviewPoint[];
   label: string;
   className?: string;
+  /** Many points (e.g. a city's listings): small dots without halos. */
+  dense?: boolean;
 }) {
   const container = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
@@ -127,7 +130,9 @@ export function MapPreview({
             if (!p.label) continue;
             el.style.cssText = `color:${color};font:700 12px/1 var(--font-sans);text-shadow:0 0 3px ${dark ? "#0b0f17" : "#ffffff"};`;
           } else {
-            el.style.cssText = `display:grid;place-items:center;min-width:${p.label ? 22 : 14}px;height:${p.label ? 22 : 14}px;padding:0 5px;border-radius:999px;background:${color};color:#04130d;font:600 11px/1 var(--font-sans);border:2px solid ${dark ? "#0b0f17" : "#ffffff"};box-shadow:0 0 0 6px ${color}2e;`;
+            el.style.cssText = dense
+              ? `width:8px;height:8px;border-radius:999px;background:${color};box-shadow:0 0 0 2px ${dark ? "#0a0c0f" : "#ffffff"};`
+              : `display:grid;place-items:center;min-width:${p.label ? 22 : 14}px;height:${p.label ? 22 : 14}px;padding:0 5px;border-radius:999px;background:${color};color:#04130d;font:600 11px/1 var(--font-sans);border:2px solid ${dark ? "#0a0c0f" : "#ffffff"};box-shadow:0 0 0 6px ${color}2e;`;
           }
           if (p.label) el.textContent = p.label;
           new maplibre.Marker({ element: el }).setLngLat([p.lon, p.lat]).addTo(m);
@@ -142,7 +147,7 @@ export function MapPreview({
     };
     // `key` captures the points; config is static per page.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, config]);
+  }, [key, config, dense]);
 
   return (
     <div

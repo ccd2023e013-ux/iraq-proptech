@@ -22,7 +22,7 @@ export function LanguageSwitcher({ current, label }: { current: Locale; label: s
         startTransition(() => router.refresh());
       }}
       aria-label={label}
-      className="press h-9 rounded-full px-2.5 text-sm font-medium whitespace-nowrap text-ink-2 hover:bg-fill hover:text-ink disabled:opacity-50 sm:px-3"
+      className="press h-9 rounded-[var(--radius-control)] px-2.5 text-sm font-medium whitespace-nowrap text-ink-2 hover:bg-fill hover:text-ink disabled:opacity-50 sm:px-3"
     >
       {/* Short form on phones so the header never wraps or overflows. */}
       <span aria-hidden className="sm:hidden">

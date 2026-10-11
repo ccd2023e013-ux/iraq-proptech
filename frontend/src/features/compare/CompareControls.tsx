@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { type MouseEvent, useSyncExternalStore } from "react";
 
+import { Icon } from "@/components/ui/Icon";
+
 import type { Dictionary } from "@/i18n";
 
 import {
@@ -32,9 +34,15 @@ export function CompareToggle({ id, dict }: { id: string; dict: Dictionary }) {
       type="button"
       onClick={toggle}
       aria-pressed={on}
-      className={`rounded-full px-2.5 py-0.5 text-xs font-medium backdrop-blur-md ${on ? "bg-accent-fill text-on-accent" : "bg-glass text-ink"}`}
+      className={`press inline-flex h-7 items-center gap-1.5 rounded-[var(--radius-control)] px-2 text-xs font-medium transition-colors duration-[var(--duration-quick)] ${on ? "bg-accent-tint text-accent" : "text-ink-3 shadow-[inset_0_0_0_1px_var(--hairline-strong)] hover:text-ink"}`}
     >
-      {on ? `✓ ${dict.compare.add}` : dict.compare.add}
+      <span
+        aria-hidden
+        className={`grid size-3.5 place-items-center rounded-[2px] ${on ? "bg-accent-fill text-on-accent" : "shadow-[inset_0_0_0_1px_currentColor]"}`}
+      >
+        {on && <Icon name="check" className="size-3" strokeWidth={2.6} />}
+      </span>
+      {dict.compare.add}
     </button>
   );
 }
@@ -48,7 +56,7 @@ export function CompareBar({ dict }: { dict: Dictionary }) {
     <div
       role="region"
       aria-label={dict.compare.title}
-      className="surface-float pop-in fixed inset-x-3 bottom-[calc(var(--tabbar-h)+0.75rem)] z-40 mx-auto max-w-3xl rounded-full px-5 py-2.5"
+      className="surface-float pop-in fixed inset-x-3 bottom-[calc(var(--tabbar-h)+0.75rem)] z-40 mx-auto max-w-3xl rounded-[var(--radius-control)] px-5 py-2.5"
     >
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3">
         <span className="text-sm text-sand-700 tabular">

@@ -1,165 +1,152 @@
 @import "tailwindcss";
 
 /*
- * مَكان | MAKAN design system.
+ * مَكان | MAKAN — "The Survey" (see docs/DESIGN-DIRECTION.md).
  *
- * Semantic tokens live on :root as CSS variables with a light and a dark value
- * (dark by default; data-theme="light|dark" forces one, no attribute follows the system). The
- * Tailwind palette names used throughout the codebase (sand-*, brand-*,
- * gold-*, surface, ink-*) point at these variables, so every screen follows
- * the theme without per-component dark styles.
- *
- * MAKAN: emerald (#10B981) is the brand and action colour; cyan (#06B6D4) is
- * reserved for spatial things (map, GIS, places). Date-palm gold marks DEMO /
- * estimate / promoted signals. Dark (#0B0F17 / #161E2E) is the default theme.
+ * Neutral basalt and limestone, not navy: the city read like a survey plate.
+ * Emerald = doing (one primary fill per view) · cyan = where (maps, places,
+ * layers) · date-palm gold = uncertain or illustrative (DEMO, estimates,
+ * generated concepts). Depth comes from luminance steps; only overlays
+ * (map controls, sheets, menus, dialogs) get blur and a shadow.
+ * Dark is the default; data-theme="light|dark" forces one, none follows the OS.
  * Logical utilities (ms-/me-/ps-/pe-/start-/end-) keep RTL and LTR mirrored.
- *
- * Spatial depth model (one vocabulary for every screen):
- *   canvas   — the ground (page background, map backdrop)
- *   surface  — content resting on the ground (cards, sections)      .surface-1
- *   float    — panels hovering above content or the map             .surface-float
- *   focus    — the thing being looked at (selection, popovers)      .surface-focus
- *   modal    — dialogs and sheets that own the screen               .surface-modal
- * Depth comes from light (a hairline highlight on the top edge), a soft shadow
- * and, for float/modal only, translucency + blur. Not everything is glass.
- *
- * Motion: quick (feedback) · base (layout) · spatial (things moving in space,
- * sheets, camera) · slow (one-off reveals). Transform/opacity only; everything
- * collapses to instant under prefers-reduced-motion.
  */
 
+/* Light: limestone. */
 :root {
   color-scheme: light;
-  --canvas: #f8fafc;
+  --canvas: #f2f3f1;
   --surface: #ffffff;
-  --surface-glass: rgb(255 255 255 / 0.74);
-  --fill: #eef2f6;
-  --fill-strong: #e2e8f0;
-  --hairline: rgb(15 23 42 / 0.09);
-  --hairline-strong: rgb(15 23 42 / 0.16);
-  --ink: #0b0f17;
-  --ink-2: #475569;
-  --ink-3: #64748b;
-  --accent: #047857;
-  --accent-strong: #065f46;
-  --accent-fill: #10b981;
-  --accent-fill-hover: #0ea371;
-  --on-accent: #04130d;
-  --accent-tint: #e6f6ef;
-  --accent-tint-strong: #c8eddc;
-  --accent-line: #7dd3b0;
-  --spatial: #0e7490;
-  --spatial-fill: #06b6d4;
-  --spatial-tint: #e3f6fa;
-  --gold: #8f6418;
-  --gold-fill: #b98a2c;
-  --gold-tint: #f6ecd6;
-  --gold-line: #e2c88f;
-  --positive: #047857;
-  --caution: #9a6700;
-  --critical: #b42318;
-  --shadow-soft: 0 1px 2px rgb(15 23 42 / 0.06), 0 8px 24px -12px rgb(15 23 42 / 0.16);
-  --shadow-float: 0 2px 6px rgb(15 23 42 / 0.08), 0 24px 60px -24px rgb(15 23 42 / 0.32);
   --surface-raised: #ffffff;
-  --float-bg: rgb(255 255 255 / 0.78);
-  --float-bg-strong: rgb(255 255 255 / 0.92);
-  --float-ring: rgb(15 23 42 / 0.08);
+  --surface-glass: rgb(255 255 255 / 0.78);
+  --fill: #e8eae7;
+  --fill-strong: #dcdfdb;
+  --hairline: rgb(14 17 20 / 0.09);
+  --hairline-strong: rgb(14 17 20 / 0.17);
+  --ink: #0e1114;
+  --ink-2: #4b525a;
+  --ink-3: #6c737b;
+  --accent: #0b8c63;
+  --accent-strong: #08704f;
+  --accent-fill: #0f9f72;
+  --accent-fill-hover: #0c8d65;
+  --on-accent: #ffffff;
+  --accent-tint: #e2f2ea;
+  --accent-tint-strong: #c9e8d8;
+  --accent-line: #8fd0b4;
+  --spatial: #0a7c96;
+  --spatial-fill: #0e9bb8;
+  --spatial-tint: #e0f1f5;
+  --gold: #8a6217;
+  --gold-fill: #c49640;
+  --gold-tint: #f4ead3;
+  --gold-line: #e0c88f;
+  --positive: #0b8c63;
+  --caution: #9a6700;
+  --critical: #b8352a;
   --edge: inset 0 1px 0 rgb(255 255 255 / 0.9);
-  --scrim: rgb(11 15 23 / 0.32);
-  --canvas-glow: rgb(16 185 129 / 0.06);
-  --grid-line: rgb(15 23 42 / 0.05);
-  --shadow-focus: 0 4px 12px rgb(15 23 42 / 0.08), 0 32px 80px -28px rgb(15 23 42 / 0.36);
-  --shadow-modal: 0 8px 24px rgb(15 23 42 / 0.12), 0 48px 120px -32px rgb(15 23 42 / 0.45);
+  --shadow-soft: 0 1px 2px rgb(14 17 20 / 0.06);
+  --shadow-float: 0 1px 2px rgb(14 17 20 / 0.08), 0 12px 32px -12px rgb(14 17 20 / 0.24);
+  --shadow-focus: 0 2px 6px rgb(14 17 20 / 0.08), 0 20px 48px -20px rgb(14 17 20 / 0.3);
+  --shadow-modal: 0 8px 24px rgb(14 17 20 / 0.12), 0 40px 96px -32px rgb(14 17 20 / 0.4);
+  --float-bg: rgb(255 255 255 / 0.84);
+  --float-bg-strong: rgb(255 255 255 / 0.94);
+  --float-ring: rgb(14 17 20 / 0.1);
+  --scrim: rgb(10 12 15 / 0.36);
+  --canvas-glow: transparent;
+  --grid-line: rgb(14 17 20 / 0.05);
 }
 
+/* Dark: basalt (the default). Same values for the OS preference (no theme
+   forced) and for data-theme="dark". */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --canvas: #0b0f17;
-    --surface: #161e2e;
-    --surface-glass: rgb(22 30 46 / 0.72);
-    --fill: #1c2536;
-    --fill-strong: #243045;
-    --hairline: rgb(226 232 240 / 0.09);
-    --hairline-strong: rgb(226 232 240 / 0.16);
-    --ink: #e6eaf2;
-    --ink-2: #a3aec2;
-    --ink-3: #7c879c;
-    --accent: #10b981;
-    --accent-strong: #6ee7b7;
-    --accent-fill: #10b981;
-    --accent-fill-hover: #34d399;
+    --canvas: #0a0c0f;
+    --surface: #111418;
+    --surface-raised: #181c21;
+    --surface-glass: rgb(17 20 24 / 0.74);
+    --fill: #1d2127;
+    --fill-strong: #262b32;
+    --hairline: rgb(214 220 226 / 0.09);
+    --hairline-strong: rgb(214 220 226 / 0.16);
+    --ink: #edeeef;
+    --ink-2: #a7adb4;
+    --ink-3: #737a83;
+    --accent: #34d39e;
+    --accent-strong: #7ee8c2;
+    --accent-fill: #14b07f;
+    --accent-fill-hover: #25c290;
     --on-accent: #04130d;
-    --accent-tint: #0f2e2a;
-    --accent-tint-strong: #144038;
-    --accent-line: #1f6b55;
-    --spatial: #22d3ee;
-    --spatial-fill: #06b6d4;
-    --spatial-tint: #0b2a33;
-    --gold: #e0b45c;
-    --gold-fill: #b98a2c;
-    --gold-tint: #2b2414;
-    --gold-line: #5c4a22;
-    --positive: #34d399;
-    --caution: #e0a43a;
-    --critical: #f0705f;
-    --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.45), 0 8px 24px -12px rgb(0 0 0 / 0.65);
-    --shadow-float: 0 2px 6px rgb(0 0 0 / 0.45), 0 24px 60px -24px rgb(0 0 0 / 0.85);
-    --surface-raised: #1b2538;
-    --float-bg: rgb(19 26 40 / 0.72);
-    --float-bg-strong: rgb(19 26 40 / 0.9);
-    --float-ring: rgb(255 255 255 / 0.08);
-    --edge: inset 0 1px 0 rgb(255 255 255 / 0.06);
-    --scrim: rgb(2 4 8 / 0.6);
-    --canvas-glow: rgb(16 185 129 / 0.07);
-    --grid-line: rgb(148 163 184 / 0.07);
-    --shadow-focus: 0 4px 12px rgb(0 0 0 / 0.5), 0 32px 80px -28px rgb(0 0 0 / 0.9);
-    --shadow-modal: 0 8px 24px rgb(0 0 0 / 0.55), 0 48px 120px -32px rgb(0 0 0 / 0.95);
+    --accent-tint: #0f2a21;
+    --accent-tint-strong: #143a2d;
+    --accent-line: #1f6a51;
+    --spatial: #4cd3e6;
+    --spatial-fill: #14b4cc;
+    --spatial-tint: #0b252b;
+    --gold: #ddb15e;
+    --gold-fill: #c49640;
+    --gold-tint: #2a2314;
+    --gold-line: #5a4823;
+    --positive: #3fcf95;
+    --caution: #e8ac45;
+    --critical: #f27a6e;
+    --edge: inset 0 1px 0 rgb(255 255 255 / 0.05);
+    --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-float: 0 1px 2px rgb(0 0 0 / 0.5), 0 16px 40px -16px rgb(0 0 0 / 0.85);
+    --shadow-focus: 0 2px 8px rgb(0 0 0 / 0.5), 0 24px 64px -24px rgb(0 0 0 / 0.9);
+    --shadow-modal: 0 8px 24px rgb(0 0 0 / 0.55), 0 48px 112px -32px rgb(0 0 0 / 0.95);
+    --float-bg: rgb(17 20 24 / 0.74);
+    --float-bg-strong: rgb(17 20 24 / 0.92);
+    --float-ring: rgb(214 220 226 / 0.1);
+    --scrim: rgb(2 3 5 / 0.62);
+    --canvas-glow: transparent;
+    --grid-line: rgb(214 220 226 / 0.05);
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --canvas: #0b0f17;
-  --surface: #161e2e;
-  --surface-glass: rgb(22 30 46 / 0.72);
-  --fill: #1c2536;
-  --fill-strong: #243045;
-  --hairline: rgb(226 232 240 / 0.09);
-  --hairline-strong: rgb(226 232 240 / 0.16);
-  --ink: #e6eaf2;
-  --ink-2: #a3aec2;
-  --ink-3: #7c879c;
-  --accent: #10b981;
-  --accent-strong: #6ee7b7;
-  --accent-fill: #10b981;
-  --accent-fill-hover: #34d399;
+  --canvas: #0a0c0f;
+  --surface: #111418;
+  --surface-raised: #181c21;
+  --surface-glass: rgb(17 20 24 / 0.74);
+  --fill: #1d2127;
+  --fill-strong: #262b32;
+  --hairline: rgb(214 220 226 / 0.09);
+  --hairline-strong: rgb(214 220 226 / 0.16);
+  --ink: #edeeef;
+  --ink-2: #a7adb4;
+  --ink-3: #737a83;
+  --accent: #34d39e;
+  --accent-strong: #7ee8c2;
+  --accent-fill: #14b07f;
+  --accent-fill-hover: #25c290;
   --on-accent: #04130d;
-  --accent-tint: #0f2e2a;
-  --accent-tint-strong: #144038;
-  --accent-line: #1f6b55;
-  --spatial: #22d3ee;
-  --spatial-fill: #06b6d4;
-  --spatial-tint: #0b2a33;
-  --gold: #e0b45c;
-  --gold-fill: #b98a2c;
-  --gold-tint: #2b2414;
-  --gold-line: #5c4a22;
-  --positive: #34d399;
-  --caution: #e0a43a;
-  --critical: #f0705f;
-  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.45), 0 8px 24px -12px rgb(0 0 0 / 0.65);
-  --shadow-float: 0 2px 6px rgb(0 0 0 / 0.45), 0 24px 60px -24px rgb(0 0 0 / 0.85);
-  --surface-raised: #1b2538;
-  --float-bg: rgb(19 26 40 / 0.72);
-  --float-bg-strong: rgb(19 26 40 / 0.9);
-  --float-ring: rgb(255 255 255 / 0.08);
-  --edge: inset 0 1px 0 rgb(255 255 255 / 0.06);
-  --scrim: rgb(2 4 8 / 0.6);
-  --canvas-glow: rgb(16 185 129 / 0.07);
-  --grid-line: rgb(148 163 184 / 0.07);
-  --shadow-focus: 0 4px 12px rgb(0 0 0 / 0.5), 0 32px 80px -28px rgb(0 0 0 / 0.9);
-  --shadow-modal: 0 8px 24px rgb(0 0 0 / 0.55), 0 48px 120px -32px rgb(0 0 0 / 0.95);
+  --accent-tint: #0f2a21;
+  --accent-tint-strong: #143a2d;
+  --accent-line: #1f6a51;
+  --spatial: #4cd3e6;
+  --spatial-fill: #14b4cc;
+  --spatial-tint: #0b252b;
+  --gold: #ddb15e;
+  --gold-fill: #c49640;
+  --gold-tint: #2a2314;
+  --gold-line: #5a4823;
+  --positive: #3fcf95;
+  --caution: #e8ac45;
+  --critical: #f27a6e;
+  --edge: inset 0 1px 0 rgb(255 255 255 / 0.05);
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-float: 0 1px 2px rgb(0 0 0 / 0.5), 0 16px 40px -16px rgb(0 0 0 / 0.85);
+  --shadow-focus: 0 2px 8px rgb(0 0 0 / 0.5), 0 24px 64px -24px rgb(0 0 0 / 0.9);
+  --shadow-modal: 0 8px 24px rgb(0 0 0 / 0.55), 0 48px 112px -32px rgb(0 0 0 / 0.95);
+  --float-bg: rgb(17 20 24 / 0.74);
+  --float-bg-strong: rgb(17 20 24 / 0.92);
+  --float-ring: rgb(214 220 226 / 0.1);
+  --scrim: rgb(2 3 5 / 0.62);
+  --canvas-glow: transparent;
+  --grid-line: rgb(214 220 226 / 0.05);
 }
 
 @theme {
@@ -224,23 +211,36 @@
   --color-warning: var(--caution);
   --color-danger: var(--critical);
 
-  /* Radius hierarchy: controls < cards < media/hero surfaces. */
-  --radius-control: 0.75rem;
-  --radius-card: 1.25rem;
-  --radius-media: 1.75rem;
+  /* Shape: precise, not pill-shaped. Round only what is round (avatars, dots). */
+  --radius-tag: 3px;
+  --radius-control: 6px;
+  --radius-card: 10px;
+  --radius-media: 10px;
+  --radius-sheet: 16px;
+  /* Tailwind's scale re-tuned to the same family. */
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-2xl: 10px;
+  --radius-3xl: 12px;
 
   --shadow-soft: var(--shadow-soft);
   --shadow-float: var(--shadow-float);
   --shadow-focus: var(--shadow-focus);
   --shadow-modal: var(--shadow-modal);
 
-  /* Motion: short for feedback, medium for layout, long only for the hero. */
-  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+  /* Motion (docs/DESIGN-DIRECTION.md §10): instant 80 · quick 140 · base 220 ·
+     panel 360 · slow 480; camera moves are timed in the map code (700–1100). */
+  --ease-out-soft: cubic-bezier(0.2, 0, 0, 1);
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out-soft: cubic-bezier(0.6, 0, 0.3, 1);
+  --duration-instant: 80ms;
   --duration-quick: 140ms;
-  --duration-base: 240ms;
-  --duration-spatial: 420ms;
-  --duration-slow: 560ms;
+  --duration-base: 220ms;
+  --duration-spatial: 360ms;
+  --duration-slow: 480ms;
 
   --animate-enter: enter var(--duration-base) var(--ease-out-soft) both;
   --animate-fade: fade var(--duration-slow) var(--ease-out-soft) both;
@@ -249,7 +249,7 @@
   @keyframes enter {
     from {
       opacity: 0;
-      transform: translateY(6px);
+      transform: translateY(8px);
     }
   }
   @keyframes fade {
@@ -266,16 +266,16 @@
 
 /* ── Layout constants (not colours: no light/dark variants) ───────────────── */
 :root {
-  --header-h: 4rem;
-  --tabbar-h: calc(4.5rem + env(safe-area-inset-bottom));
+  --header-h: 3.5rem;
+  --tabbar-h: calc(3.5rem + env(safe-area-inset-bottom));
   --z-float: 20;
   --z-header: 40;
   --z-tabbar: 40;
   --z-sheet: 45;
   --z-modal: 60;
   --z-toast: 70;
-  --blur-float: 20px;
-  --blur-modal: 28px;
+  --blur-float: 16px;
+  --blur-modal: 24px;
   /* A soft physical spring (slight settle, no bounce) for things that move in space. */
   --ease-spring: cubic-bezier(0.2, 0.9, 0.25, 1.05);
 }
@@ -300,8 +300,8 @@
 }
 @media (min-width: 768px) {
   :root {
-    /* 0.75rem inset + 3.5rem floating bar */
-    --header-h: 4.25rem;
+    /* full-width bar with a hairline base */
+    --header-h: 4rem;
     --tabbar-h: 0px;
   }
 }
@@ -314,16 +314,20 @@ html {
 }
 
 body {
-  /* One quiet light source above the page: depth without decoration. */
-  background:
-    radial-gradient(1100px 520px at 50% -180px, var(--canvas-glow), transparent 70%), var(--canvas);
+  background: var(--canvas);
   color: var(--ink);
   font-family: var(--font-sans);
   font-feature-settings: "cv11", "ss01";
-  line-height: 1.7;
+  font-size: 1rem;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+/* Arabic reads better a touch larger with more air between lines. */
+:root:lang(ar) body {
+  font-size: 1.0625rem;
+  line-height: 1.85;
 }
 
 h1,
@@ -335,7 +339,6 @@ p {
   text-wrap: pretty;
 }
 
-/* Arabic display type needs a little more line height than Latin. */
 :lang(ar) .font-display {
   line-height: 1.3;
 }
@@ -348,70 +351,102 @@ p {
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-control);
 }
 
 ::selection {
   background: var(--accent-tint-strong);
 }
 
-/* ── Type scale (display) ─────────────────────────────────────────────────── */
+/* ── Type scale ───────────────────────────────────────────────────────────── */
+/* Fluid, ~1.25 ratio. Arabic display is set ~10% larger, without tracking and
+   with more leading; Latin display is tight. Labels are sentence case. */
 .display-xl {
   font-family: var(--font-display);
-  font-size: clamp(2.5rem, 1.6rem + 3.6vw, 4.75rem);
-  line-height: 1.02;
-  letter-spacing: -0.035em;
-  font-weight: 620;
+  font-size: clamp(2.75rem, 1.7rem + 3.9vw, 5rem);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  font-weight: 600;
 }
 .display-lg {
   font-family: var(--font-display);
-  font-size: clamp(2rem, 1.5rem + 2vw, 3.25rem);
-  line-height: 1.08;
-  letter-spacing: -0.03em;
-  font-weight: 620;
+  font-size: clamp(2.125rem, 1.6rem + 2vw, 3.25rem);
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+  font-weight: 600;
 }
 .display-md {
   font-family: var(--font-display);
-  font-size: clamp(1.5rem, 1.25rem + 1vw, 2.125rem);
-  line-height: 1.15;
+  font-size: clamp(1.625rem, 1.35rem + 1vw, 2.125rem);
+  line-height: 1.12;
   letter-spacing: -0.02em;
   font-weight: 600;
 }
 :lang(ar) :is(.display-xl, .display-lg, .display-md) {
   letter-spacing: 0;
+  line-height: 1.25;
+}
+:lang(ar) .display-xl {
+  font-size: clamp(3rem, 1.85rem + 4.3vw, 5.5rem);
+}
+:lang(ar) .display-lg {
+  font-size: clamp(2.3rem, 1.75rem + 2.2vw, 3.6rem);
+}
+.title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
   line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+:lang(ar) .title {
+  letter-spacing: 0;
+  line-height: 1.5;
 }
 .meta {
   font-size: 0.8125rem;
   line-height: 1.5;
   color: var(--ink-3);
 }
+.caption {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-3);
+}
 .kpi {
-  font-family: var(--font-display);
+  font-family: "Inter Variable", var(--font-display);
   font-variant-numeric: tabular-nums;
   font-weight: 600;
   letter-spacing: -0.03em;
   line-height: 1;
 }
+/* A ruled section: the editorial divider used between page groups. */
+.rule-top {
+  border-top: 1px solid var(--hairline);
+}
 
-/* ── Surfaces (depth model) ───────────────────────────────────────────────── */
+/* ── Surfaces and primitives ─────────────────────────────────────────────── */
+/* Depth = luminance: canvas → surface → raised → overlay. Only overlays blur
+   and cast a shadow. Class names are stable across the codebase. */
 @layer components {
+  /* Content resting on the ground: a luminance step and a hairline, no shadow. */
   .surface-1 {
     background: var(--surface);
     box-shadow:
       var(--edge),
-      0 0 0 1px var(--hairline),
-      var(--shadow-soft);
+      0 0 0 1px var(--hairline);
   }
+  /* Overlay over the map or imagery: translucent, blurred, one soft shadow. */
   .surface-float {
     background: var(--float-bg);
-    -webkit-backdrop-filter: blur(var(--blur-float)) saturate(1.6);
-    backdrop-filter: blur(var(--blur-float)) saturate(1.6);
+    -webkit-backdrop-filter: blur(var(--blur-float)) saturate(1.4);
+    backdrop-filter: blur(var(--blur-float)) saturate(1.4);
     box-shadow:
       var(--edge),
       0 0 0 1px var(--float-ring),
       var(--shadow-float);
   }
+  /* The thing being looked at: menus, popovers, the selection card. */
   .surface-focus {
     background: var(--surface-raised);
     box-shadow:
@@ -421,104 +456,106 @@ p {
   }
   .surface-modal {
     background: var(--float-bg-strong);
-    -webkit-backdrop-filter: blur(var(--blur-modal)) saturate(1.8);
-    backdrop-filter: blur(var(--blur-modal)) saturate(1.8);
+    -webkit-backdrop-filter: blur(var(--blur-modal)) saturate(1.5);
+    backdrop-filter: blur(var(--blur-modal)) saturate(1.5);
     box-shadow:
       var(--edge),
       0 0 0 1px var(--float-ring),
       var(--shadow-modal);
   }
-  /* Where blur is unsupported, float panels become solid instead of see-through. */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .surface-float,
     .surface-modal {
-      background: var(--surface);
+      background: var(--surface-raised);
     }
   }
 
-  /* A faint survey grid fading out from the centre: the "spatial" ground used
-     behind heroes and the Future Iraq header. */
+  /* Survey grid: a faint measured ground behind map-led headers. */
   .stage-grid {
     background-image:
       linear-gradient(var(--grid-line) 1px, transparent 1px),
       linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-    background-size: 48px 48px;
+    background-size: 40px 40px;
     background-position: center;
-    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 75%);
-    mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 40%, #000 25%, transparent 78%);
+    mask-image: radial-gradient(ellipse 75% 65% at 50% 40%, #000 25%, transparent 78%);
   }
 
-  /* ── Interaction primitives ── */
+  /* ── Interaction ── */
+  /* Press: the control settles 1px (80ms), it does not shrink. */
   .press {
     transition:
-      transform var(--duration-quick) var(--ease-out-soft),
-      background-color var(--duration-quick) var(--ease-out-soft),
-      color var(--duration-quick) var(--ease-out-soft),
-      box-shadow var(--duration-base) var(--ease-out-soft);
+      transform var(--duration-instant) var(--ease-standard),
+      background-color var(--duration-quick) var(--ease-standard),
+      color var(--duration-quick) var(--ease-standard),
+      box-shadow var(--duration-quick) var(--ease-standard),
+      opacity var(--duration-quick) var(--ease-standard);
   }
   .press:active:not(:disabled) {
-    transform: scale(0.97);
+    transform: translateY(1px);
   }
+  /* Hover on a tile: its outline strengthens; it does not jump. */
   .lift {
     transition:
-      transform var(--duration-base) var(--ease-out-soft),
-      box-shadow var(--duration-base) var(--ease-out-soft);
+      box-shadow var(--duration-quick) var(--ease-standard),
+      background-color var(--duration-quick) var(--ease-standard);
   }
   @media (hover: hover) {
     .lift:hover {
-      transform: translateY(-2px);
       box-shadow:
         var(--edge),
-        0 0 0 1px var(--hairline-strong),
-        var(--shadow-float);
+        0 0 0 1px var(--hairline-strong);
+      background-color: var(--surface-raised);
     }
   }
 
+  /* Icon-only control: a square with the control radius. */
   .icon-btn {
     display: inline-grid;
     place-items: center;
     width: 2.5rem;
     height: 2.5rem;
-    border-radius: 9999px;
+    border-radius: var(--radius-control);
     color: var(--ink-2);
     transition:
-      transform var(--duration-quick) var(--ease-out-soft),
-      background-color var(--duration-quick) var(--ease-out-soft),
-      color var(--duration-quick) var(--ease-out-soft);
+      transform var(--duration-instant) var(--ease-standard),
+      background-color var(--duration-quick) var(--ease-standard),
+      color var(--duration-quick) var(--ease-standard);
   }
   .icon-btn:hover {
     background: var(--fill);
     color: var(--ink);
   }
   .icon-btn:active {
-    transform: scale(0.94);
+    transform: translateY(1px);
   }
 
-  /* Chips: filters, place groups, quick choices. Selected = emerald (confirmed);
-     .chip-spatial uses cyan for map layers. */
+  /* Chips: filters, place groups, quick choices. Outlined; selected = emerald
+     (confirmed); .chip-spatial selected = cyan (map layers). */
   .chip {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    height: 2.25rem;
-    padding-inline: 0.875rem;
-    border-radius: 9999px;
+    height: 2rem;
+    padding-inline: 0.75rem;
+    border-radius: var(--radius-control);
     font-size: 0.8125rem;
     font-weight: 500;
     color: var(--ink-2);
-    background: var(--fill);
-    box-shadow: inset 0 0 0 1px transparent;
+    background: transparent;
+    box-shadow: inset 0 0 0 1px var(--hairline-strong);
     transition:
-      background-color var(--duration-quick) var(--ease-out-soft),
-      color var(--duration-quick) var(--ease-out-soft),
-      box-shadow var(--duration-quick) var(--ease-out-soft),
-      transform var(--duration-quick) var(--ease-out-soft);
+      background-color var(--duration-quick) var(--ease-standard),
+      color var(--duration-quick) var(--ease-standard),
+      box-shadow var(--duration-quick) var(--ease-standard),
+      transform var(--duration-instant) var(--ease-standard);
   }
   .chip:hover {
     color: var(--ink);
+    background: var(--fill);
   }
   .chip:active {
-    transform: scale(0.97);
+    transform: translateY(1px);
   }
   .chip[aria-pressed="true"],
   .chip[aria-current="page"],
@@ -530,29 +567,33 @@ p {
   .chip-spatial[aria-pressed="true"] {
     color: var(--spatial);
     background: var(--spatial-tint);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--spatial-fill) 40%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--spatial-fill) 45%, transparent);
   }
 
-  /* Segmented control (map/list, streets/satellite, tabs). */
+  /* Segmented control: an inset track with a raised current segment. */
   .seg {
     display: inline-flex;
-    padding: 0.25rem;
-    gap: 0.125rem;
-    border-radius: 9999px;
+    padding: 3px;
+    gap: 2px;
+    border-radius: var(--radius-control);
     background: var(--fill);
   }
   .seg > button,
   .seg > a {
     height: 2rem;
     padding-inline: 0.875rem;
-    border-radius: 9999px;
+    border-radius: 4px;
     font-size: 0.8125rem;
     font-weight: 500;
     color: var(--ink-2);
     transition:
-      background-color var(--duration-base) var(--ease-out-soft),
-      color var(--duration-base) var(--ease-out-soft),
-      box-shadow var(--duration-base) var(--ease-out-soft);
+      background-color var(--duration-base) var(--ease-standard),
+      color var(--duration-base) var(--ease-standard),
+      box-shadow var(--duration-base) var(--ease-standard);
+  }
+  .seg > button:hover,
+  .seg > a:hover {
+    color: var(--ink);
   }
   .seg > [aria-pressed="true"],
   .seg > [aria-checked="true"],
@@ -562,10 +603,11 @@ p {
     background: var(--surface-raised);
     box-shadow:
       var(--edge),
+      0 0 0 1px var(--hairline),
       0 1px 2px rgb(0 0 0 / 0.12);
   }
 
-  /* Form fields share one shape and one calm focus ring. */
+  /* Form fields: one shape, one calm focus ring. */
   .field {
     width: 100%;
     height: 2.75rem;
@@ -574,26 +616,26 @@ p {
     color: var(--ink);
     padding-inline: 0.875rem;
     box-shadow: inset 0 0 0 1px var(--hairline-strong);
-    transition: box-shadow var(--duration-quick) var(--ease-out-soft);
+    transition: box-shadow var(--duration-quick) var(--ease-standard);
   }
   .field::placeholder {
     color: var(--ink-3);
   }
   .field:hover {
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink-3) 60%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink-3) 70%, transparent);
   }
   .field:focus,
   .field:focus-visible {
     outline: none;
     box-shadow:
       inset 0 0 0 1px var(--accent),
-      0 0 0 4px color-mix(in srgb, var(--accent-fill) 18%, transparent);
+      0 0 0 3px color-mix(in srgb, var(--accent-fill) 22%, transparent);
   }
   .field[aria-invalid="true"] {
     box-shadow: inset 0 0 0 1px var(--critical);
   }
 
-  /* Skeleton: a soft surface with light passing over it (static under reduced motion). */
+  /* Skeleton: a quiet surface with light passing over it (static under reduced motion). */
   .skeleton {
     background: linear-gradient(
       100deg,
@@ -607,10 +649,22 @@ p {
     animation: var(--animate-shimmer);
   }
 
-  /* Scrollbars inside floating panels stay out of the way. */
   .quiet-scroll {
     scrollbar-width: thin;
     scrollbar-color: var(--hairline-strong) transparent;
+  }
+
+  /* Text link with a drawn underline (tertiary actions, inline navigation). */
+  .link {
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-color: var(--hairline-strong);
+    text-underline-offset: 0.25em;
+    text-decoration-thickness: 1px;
+    transition: text-decoration-color var(--duration-quick) var(--ease-standard);
+  }
+  .link:hover {
+    text-decoration-color: currentColor;
   }
 }
 
@@ -636,13 +690,13 @@ p {
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
 }
 @keyframes pop-in {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.96);
+    transform: translateY(8px) scale(0.985);
   }
 }
 @keyframes sheet-in {
@@ -701,7 +755,7 @@ p {
   background: var(--float-bg) !important;
   -webkit-backdrop-filter: blur(var(--blur-float)) saturate(1.6);
   backdrop-filter: blur(var(--blur-float)) saturate(1.6);
-  border-radius: 9999px !important;
+  border-radius: var(--radius-control) !important;
   overflow: hidden;
   box-shadow:
     var(--edge),

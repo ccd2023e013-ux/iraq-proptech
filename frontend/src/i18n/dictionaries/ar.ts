@@ -1311,12 +1311,17 @@ const ar = {
     listTitle: "لديك عقار؟",
     listBody: "اعرضه مجاناً أمام المشترين والمستأجرين في العراق.",
     listButton: "أضف عقارك",
+    heroMapCaption: "{n} إعلاناً في البصرة على الخريطة الآن",
+    openMap: "افتح الخريطة",
   },
   footer: {
     tagline: "ذكاء عقاري يفهم المكان.",
     demoNotice: "جميع الإعلانات الحالية تجريبية لعرض إمكانات المنصة، وليست عروضاً حقيقية.",
     status: "حالة النظام",
     pricing: "الباقات",
+    explore: "استكشف",
+    platform: "المنصّة",
+    mapCredits: "بيانات الخرائط: © مساهمو OpenStreetMap وOpenFreeMap",
   },
   roles: {
     SUPER_ADMIN: "مدير النظام الأعلى",

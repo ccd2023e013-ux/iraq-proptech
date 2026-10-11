@@ -46,7 +46,7 @@ export default async function SavedSearchesPage() {
                 <span className="font-semibold text-sand-900">
                   {row.name}
                   {row.new_matches > 0 && (
-                    <span className="ms-2 rounded-full bg-gold-500 px-2 py-0.5 text-xs font-bold text-[#1d1405] tabular">
+                    <span className="ms-2 rounded-[var(--radius-tag)] bg-gold-500 px-2 py-0.5 text-xs font-bold text-[#1d1405] tabular">
                       {row.new_matches} {s.newMatches}
                     </span>
                   )}

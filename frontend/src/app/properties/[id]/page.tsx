@@ -169,11 +169,11 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
         <div className="flex min-w-0 flex-col">
           <header className="reveal flex flex-col gap-3 pb-8" style={stagger(1)}>
             <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="rounded-full bg-fill px-2.5 py-1 font-medium text-ink">
+              <span className="rounded-[var(--radius-control)] bg-fill px-2.5 py-1 font-medium text-ink">
                 {dict.listing.purposes[property.purpose]}
               </span>
               {property.verified && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-accent-tint px-2.5 py-1 font-medium text-accent">
+                <span className="inline-flex items-center gap-1 rounded-[var(--radius-control)] bg-accent-tint px-2.5 py-1 font-medium text-accent">
                   <Icon name="check" className="size-3.5" strokeWidth={2.2} />
                   {dict.listing.verified}
                 </span>
@@ -238,7 +238,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                 {property.amenities.map((code) => (
                   <li
                     key={code}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-fill px-3 py-1.5 text-ink"
+                    className="inline-flex items-center gap-1.5 rounded-[var(--radius-control)] bg-fill px-3 py-1.5 text-ink"
                   >
                     <Icon name="check" className="size-3.5 text-accent" strokeWidth={2.2} />
                     {label(amenities, code)}
@@ -264,7 +264,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                 />
                 <Link
                   href={`/map?bbox=${formatBbox(bboxAround(property.display_location.lon, property.display_location.lat, 1.5))}`}
-                  className="press inline-flex h-9 w-fit items-center gap-2 rounded-full px-3.5 text-sm font-medium text-ink ring-1 ring-inset ring-hairline-strong hover:bg-fill"
+                  className="press inline-flex h-9 w-fit items-center gap-2 rounded-[var(--radius-control)] px-3.5 text-sm font-medium text-ink ring-1 ring-inset ring-hairline-strong hover:bg-fill"
                 >
                   <Icon name="map" className="size-4 text-spatial" />
                   {dict.future.showOnMap}
@@ -380,7 +380,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                   <a
                     href={`tel:${property.lister.phone}`}
                     dir="ltr"
-                    className="press inline-flex h-12 items-center justify-center gap-2 rounded-full bg-accent-fill px-5 font-medium text-on-accent shadow-[inset_0_1px_0_rgb(255_255_255/0.25)] hover:bg-accent-fill-hover"
+                    className="press inline-flex h-12 items-center justify-center gap-2 rounded-[var(--radius-control)] bg-accent-fill px-5 font-medium text-on-accent shadow-[inset_0_1px_0_rgb(255_255_255/0.25)] hover:bg-accent-fill-hover"
                   >
                     {p.call} {property.lister.phone}
                   </a>
@@ -392,7 +392,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                     href={`https://wa.me/${property.lister.whatsapp.replace(/\D/g, "")}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="press inline-flex h-12 items-center justify-center rounded-full px-5 font-medium text-success ring-1 ring-inset ring-success/40 hover:bg-success/10"
+                    className="press inline-flex h-12 items-center justify-center rounded-[var(--radius-control)] px-5 font-medium text-success ring-1 ring-inset ring-success/40 hover:bg-success/10"
                   >
                     {p.whatsapp}
                   </a>
@@ -427,7 +427,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             {property.can_edit && (
               <Link
                 href={`/studio?property_id=${property.id}`}
-                className="press surface-1 inline-flex h-10 items-center rounded-full px-4 text-sm font-medium text-ink"
+                className="press surface-1 inline-flex h-10 items-center rounded-[var(--radius-control)] px-4 text-sm font-medium text-ink"
                 data-testid="studio-link"
               >
                 {dict.studio.title}
@@ -436,7 +436,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             {property.can_edit && (
               <Link
                 href={`/dashboard/properties/${property.id}`}
-                className="press surface-1 inline-flex h-10 items-center rounded-full px-4 text-sm font-medium text-ink"
+                className="press surface-1 inline-flex h-10 items-center rounded-[var(--radius-control)] px-4 text-sm font-medium text-ink"
               >
                 {dict.myListings.edit}
               </Link>

@@ -472,7 +472,7 @@ function RangeBar({
       className="relative ms-auto mt-2 block h-1.5 w-full max-w-[12rem] rounded-full bg-fill"
     >
       <span
-        className="absolute inset-y-0 rounded-full bg-spatial-fill/55"
+        className="absolute inset-y-0 rounded-[var(--radius-control)] bg-spatial-fill/55"
         style={{ insetInlineStart: pct(low), width: `calc(${pct(high)} - ${pct(low)})` }}
       />
       {mid !== null && (

@@ -25,13 +25,13 @@ export default async function NotFound() {
       <div className="reveal mt-8 flex flex-wrap justify-center gap-2" style={stagger(3)}>
         <Link
           href="/"
-          className="press inline-flex h-11 items-center rounded-full bg-accent-fill px-5 font-medium text-on-accent hover:bg-accent-fill-hover"
+          className="press inline-flex h-11 items-center rounded-[var(--radius-control)] bg-accent-fill px-5 font-medium text-on-accent hover:bg-accent-fill-hover"
         >
           {dict.nav.home}
         </Link>
         <Link
           href="/map"
-          className="press surface-1 inline-flex h-11 items-center gap-2 rounded-full px-5 font-medium text-ink"
+          className="press surface-1 inline-flex h-11 items-center gap-2 rounded-[var(--radius-control)] px-5 font-medium text-ink"
         >
           <Icon name="map" className="size-4 text-spatial" />
           {dict.nav.map}

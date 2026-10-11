@@ -11,7 +11,7 @@ export default function Loading() {
       <Skeleton className="aspect-[4/3] w-full rounded-[var(--radius-media)] sm:aspect-[2/1]" />
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12">
         <div className="flex flex-col gap-3">
-          <Skeleton className="h-5 w-24 rounded-full" />
+          <Skeleton className="h-5 w-24 rounded-[var(--radius-control)]" />
           <Skeleton className="h-10 w-3/4" />
           <Skeleton className="h-5 w-1/2" />
           <div className="mt-4 flex gap-10">

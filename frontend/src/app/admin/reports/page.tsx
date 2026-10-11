@@ -46,7 +46,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
             key={s}
             href={`/admin/reports?status=${s}`}
             aria-current={s === status ? "page" : undefined}
-            className={`rounded-full border px-3 py-1 text-sm ${s === status ? "border-brand-600 bg-brand-600 text-on-accent" : "border-sand-200 bg-surface"}`}
+            className={`rounded-[var(--radius-control)] border px-3 py-1 text-sm ${s === status ? "border-brand-600 bg-brand-600 text-on-accent" : "border-sand-200 bg-surface"}`}
           >
             {a.reportStatuses[s]}
           </Link>

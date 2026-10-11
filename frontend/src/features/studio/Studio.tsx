@@ -171,7 +171,7 @@ export function Studio({
 
   const ext = result?.blob.type.includes("mp4") ? "mp4" : "webm";
   const pill = (active: boolean) =>
-    `h-9 rounded-full px-3.5 text-sm font-medium transition ${active ? "bg-ink text-surface" : "bg-fill text-ink-2 hover:text-ink"}`;
+    `h-9 rounded-[var(--radius-control)] px-3.5 text-sm font-medium transition ${active ? "bg-ink text-surface" : "bg-fill text-ink-2 hover:text-ink"}`;
 
   if (listings.length === 0) return <p className="text-ink-2">{s.noListings}</p>;
 
@@ -236,7 +236,7 @@ export function Studio({
             type="file"
             accept="video/mp4,video/webm,video/quicktime"
             onChange={(e) => setDrone(e.target.files?.[0] ?? null)}
-            className="text-sm text-ink-2 file:me-3 file:rounded-full file:border-0 file:bg-fill file:px-4 file:py-2 file:text-ink"
+            className="text-sm text-ink-2 file:me-3 file:rounded-[var(--radius-control)] file:border-0 file:bg-fill file:px-4 file:py-2 file:text-ink"
           />
           <span className="text-xs font-normal text-ink-3">{s.droneHint}</span>
         </label>
@@ -290,7 +290,7 @@ export function Studio({
             <a
               href={result.url}
               download={`property-video.${ext}`}
-              className="inline-flex h-10 items-center rounded-full px-4 text-sm font-medium text-ink ring-1 ring-inset ring-hairline hover:bg-fill"
+              className="inline-flex h-10 items-center rounded-[var(--radius-control)] px-4 text-sm font-medium text-ink ring-1 ring-inset ring-hairline hover:bg-fill"
             >
               {s.download}
             </a>

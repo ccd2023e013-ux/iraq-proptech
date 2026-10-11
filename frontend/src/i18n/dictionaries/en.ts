@@ -1331,6 +1331,8 @@ const en: Dictionary = {
     listTitle: "Have a property?",
     listBody: "List it for free in front of buyers and renters across Iraq.",
     listButton: "Add your property",
+    heroMapCaption: "{n} Basra listings on the map now",
+    openMap: "Open the map",
   },
   footer: {
     tagline: "Property intelligence that understands place.",
@@ -1338,6 +1340,9 @@ const en: Dictionary = {
       "All current listings are DEMO listings that demonstrate the platform, not real offers.",
     status: "System status",
     pricing: "Plans",
+    explore: "Explore",
+    platform: "Platform",
+    mapCredits: "Map data © OpenStreetMap contributors and OpenFreeMap",
   },
   roles: {
     SUPER_ADMIN: "Super administrator",
