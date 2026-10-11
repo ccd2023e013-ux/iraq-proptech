@@ -40,49 +40,65 @@ LICENCE_OK = re.compile(
     r"^(public domain|pd(-.*)?|cc0( 1\.0)?|cc[- ]by(-sa)?[- ](2\.0|2\.5|3\.0|4\.0)( .*)?)$", re.I
 )
 CATEGORIES = [
-    "Houses in Iraq",
-    "Houses in Baghdad",
-    "Houses in Basra",
-    "Houses in Erbil",
-    "Houses in Iraqi Kurdistan",
-    "Residential buildings in Iraq",
-    "Residential buildings in Baghdad",
-    "Residential buildings in Erbil",
-    "Apartment buildings in Iraq",
-    "Buildings in Basra",
-    "Buildings in Erbil",
-    "Buildings in Sulaymaniyah",
-    "Buildings in Najaf",
-    "Buildings in Karbala",
-    "Buildings in Mosul",
-    "Shops in Iraq",
-    "Shops in Baghdad",
-    "Office buildings in Iraq",
-    "Villas in Iraq",
-    "Farms in Iraq",
-    "Agriculture in Iraq",
-    "Date palms in Iraq",
-    "Streets in Basra",
-    "Streets in Baghdad",
-    "Streets in Erbil",
+    "Neighbourhoods of Baghdad",
+    "Neighborhoods of Baghdad",
+    "Neighbourhoods of Basra",
+    "Neighbourhoods of Erbil",
+    "Districts of Baghdad",
+    "Residential areas in Iraq",
+    "Housing estates in Iraq",
+    "Gated communities in Iraq",
+    "English Village (Erbil)",
+    "Italian Village (Erbil)",
+    "Dream City (Erbil)",
+    "Empire World (Erbil)",
+    "Bismayah New City",
+    "Apartment buildings in Erbil",
+    "Apartment buildings in Baghdad",
+    "Houses in Sulaymaniyah",
+    "Houses in Duhok",
+    "Architecture of Basra",
+    "Architecture of Erbil",
+    "Al-Mansour",
+    "Karrada",
+    "Zayouna",
+    "Streets in Sulaymaniyah",
+    "Streets in Najaf",
+    "Streets in Karbala",
+    "Markets in Baghdad",
+    "Commercial buildings in Iraq",
+    "Construction in Iraq",
+    "Agricultural land in Iraq",
+    "Date palm plantations in Iraq",
 ]
 SEARCHES = [
-    "house Basra",
-    "houses Baghdad street",
-    "residential house Iraq",
-    "residential building Erbil",
-    "apartment building Baghdad",
-    "apartment complex Erbil",
-    "villa Erbil",
-    "Sulaymaniyah houses",
-    "Najaf residential",
-    "Karbala houses",
-    "Mosul houses",
-    "shop Baghdad street",
-    "office building Baghdad",
-    "empty land Iraq",
-    "farm Iraq palm",
+    "Erbil residential complex",
+    "Erbil villas",
+    "Duhok houses",
+    "Sulaymaniyah residential",
+    "Baghdad residential area",
+    "Mansour Baghdad street",
+    "Zayouna Baghdad",
+    "Basra residential street",
+    "Basra apartments",
+    "Basra Jazair",
+    "Najaf street houses",
+    "Karbala residential",
+    "Mosul new houses",
+    "Kirkuk residential",
+    "Nasiriyah street",
+    "Amarah houses",
+    "Hillah street",
+    "Iraq apartment complex construction",
+    "Erbil skyline apartments",
+    "Iraq farmland palm grove",
 ]
+# Military/official photography and archive scans are not suitable as homes.
+EXCLUDE = re.compile(
+    r"DVIDS|Operation|U\.S\. Army|Department of (Defense|State)|Sgt\.|Spc\.|Embassy|DPLA|"
+    r"soldier|Marines|Airmen|Navy|ruin|destroy|damage|Jewish|Mosque|Shrine|Church|Museum",
+    re.I,
+)
 
 
 def api(params: dict) -> dict:
@@ -171,9 +187,23 @@ def acceptable(c: dict, min_width: int = 1000) -> str | None:
 
 def survey(out: Path) -> None:
     titles: dict[str, str] = {}
+    cats = list(CATEGORIES)
     for cat in CATEGORIES:
+        data = api(
+            {
+                "action": "query",
+                "list": "categorymembers",
+                "cmtitle": f"Category:{cat}",
+                "cmtype": "subcat",
+                "cmlimit": "40",
+            }
+        )
+        for m in data.get("query", {}).get("categorymembers", []):
+            cats.append(m["title"].removeprefix("Category:"))
+    print(f"{len(cats)} categories", flush=True)
+    for cat in cats:
         cont: dict = {}
-        for _ in range(3):
+        for _ in range(2):
             data = api(
                 {
                     "action": "query",
@@ -200,6 +230,8 @@ def survey(out: Path) -> None:
     keep, rejected = [], {}
     for c in metas:
         reason = acceptable(c)
+        if not reason and EXCLUDE.search(f"{c['title']} {c['author']} {c['description']}"):
+            reason = "excluded subject"
         if reason:
             rejected[reason.split(" ")[0]] = rejected.get(reason.split(" ")[0], 0) + 1
             continue

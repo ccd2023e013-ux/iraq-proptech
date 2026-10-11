@@ -1,1 +1,2 @@
 survey
+# round 2: neighbourhoods, housing estates, Kurdistan, military/heritage excluded
