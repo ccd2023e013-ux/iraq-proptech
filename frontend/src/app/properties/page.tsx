@@ -38,10 +38,10 @@ export default async function PropertiesPage({
   const s = dict.search;
 
   return (
-    <div className="mx-auto grid max-w-[1320px] gap-6 px-4 py-8 sm:px-6 md:py-12 lg:grid-cols-12 lg:gap-8 lg:px-8">
+    <div className="mx-auto grid max-w-[1320px] grid-cols-[minmax(0,1fr)] gap-6 px-4 py-8 sm:px-6 md:py-12 lg:grid-cols-12 lg:gap-8 lg:px-8">
       {/* Filters are a ruled column on the page, not a box. Phones start with
           them folded so results lead; desktops keep them open. */}
-      <aside className="lg:sticky lg:top-[calc(var(--header-h)+1.5rem)] lg:col-span-3 lg:max-h-[calc(100dvh-var(--header-h)-3rem)] lg:self-start lg:overflow-y-auto lg:border-e lg:border-hairline lg:pe-6 quiet-scroll">
+      <aside className="min-w-0 lg:sticky lg:top-[calc(var(--header-h)+1.5rem)] lg:col-span-3 lg:max-h-[calc(100dvh-var(--header-h)-3rem)] lg:self-start lg:overflow-y-auto lg:border-e lg:border-hairline lg:pe-6 quiet-scroll">
         <details className="border-y border-hairline py-3 lg:border-0 lg:py-0" open={!phone}>
           <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-medium text-ink lg:hidden [&::-webkit-details-marker]:hidden">
             <span className="flex items-center gap-2">
@@ -102,7 +102,7 @@ export default async function PropertiesPage({
           <EmptyState title={s.noResults} glyph="search" />
         ) : (
           <>
-            <ul className="grid gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
+            <ul className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
               {result.items.map((card, i) => (
                 <li key={card.id} className="reveal" style={stagger(i)}>
                   <PropertyCard

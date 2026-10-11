@@ -363,7 +363,7 @@ p {
    with more leading; Latin display is tight. Labels are sentence case. */
 .display-xl {
   font-family: var(--font-display);
-  font-size: clamp(2.75rem, 1.7rem + 3.9vw, 5rem);
+  font-size: clamp(2.5rem, 1.6rem + 3vw, 4.25rem);
   line-height: 1.04;
   letter-spacing: -0.03em;
   font-weight: 600;
@@ -387,7 +387,7 @@ p {
   line-height: 1.25;
 }
 :lang(ar) .display-xl {
-  font-size: clamp(3rem, 1.85rem + 4.3vw, 5.5rem);
+  font-size: clamp(2.75rem, 1.75rem + 3.4vw, 4.75rem);
 }
 :lang(ar) .display-lg {
   font-size: clamp(2.3rem, 1.75rem + 2.2vw, 3.6rem);

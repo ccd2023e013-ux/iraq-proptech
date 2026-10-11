@@ -107,11 +107,12 @@ def shoot(page: Page, name: str, path: str, tag: str) -> None:
         resp = page.goto(WEB + path, wait_until="load", timeout=90_000)
         status = resp.status if resp else None
         settle(page, path)
+        # Against the configured viewport: on phones the layout viewport grows
+        # to fit overflowing content, so innerWidth would hide the overflow.
         overflow = page.evaluate(
             "() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth,"
-            " document.querySelector('main') ? document.querySelector('main').scrollWidth : 0)"
-            " - window.innerWidth"
-        )
+            " window.innerWidth)"
+        ) - page.viewport_size["width"]
         height = page.evaluate("() => document.documentElement.scrollHeight")
         file = OUT / f"{tag}--{name}.jpg"
         clip_h = min(height, MAX_H) if FULL else page.viewport_size["height"]

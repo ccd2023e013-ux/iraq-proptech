@@ -50,15 +50,15 @@ function Section({
   return (
     <section
       aria-labelledby={id}
-      className="rule-top grid gap-8 pt-10 md:grid-cols-12 md:gap-6 md:pt-12"
+      className="rule-top grid grid-cols-[minmax(0,1fr)] gap-8 pt-10 md:grid-cols-12 md:gap-6 md:pt-12"
     >
-      <div className="flex flex-col gap-3 md:col-span-4 lg:col-span-3">
+      <div className="flex min-w-0 flex-col gap-3 md:col-span-4 lg:col-span-3">
         <h2 id={id} className="display-md text-ink">
           {title}
         </h2>
         {aside}
       </div>
-      <div className="md:col-span-8 lg:col-span-9">{children}</div>
+      <div className="min-w-0 md:col-span-8 lg:col-span-9">{children}</div>
     </section>
   );
 }
@@ -118,8 +118,8 @@ export default async function HomePage() {
       {/* Hero: the headline and search at the start; a live, quiet map of Basra's
           listings at the end, bleeding to the page edge. */}
       <section className="relative isolate overflow-hidden">
-        <div className="mx-auto grid max-w-[1320px] gap-10 px-4 pt-10 pb-12 sm:px-6 md:grid-cols-12 md:gap-6 md:pt-16 lg:min-h-[min(80vh,46rem)] lg:px-8 lg:pb-20">
-          <div className="relative z-10 flex flex-col justify-center gap-7 md:col-span-6 lg:col-span-5">
+        <div className="mx-auto grid max-w-[1320px] grid-cols-[minmax(0,1fr)] gap-10 px-4 pt-10 pb-12 sm:px-6 md:grid-cols-12 md:gap-6 md:pt-16 lg:min-h-[min(80vh,46rem)] lg:px-8 lg:pb-20">
+          <div className="relative z-10 flex min-w-0 flex-col justify-center gap-7 md:col-span-6">
             <h1 className="reveal display-xl text-ink">{h.heroTitle}</h1>
             <p className="reveal max-w-[34rem] text-[17px] text-ink-2" style={stagger(1)}>
               {h.heroSubtitle}
@@ -141,7 +141,7 @@ export default async function HomePage() {
             )}
           </div>
           {points.length > 0 && (
-            <figure className="fade-in relative md:col-span-6 md:-me-6 lg:col-span-7 lg:-me-8 xl:-me-[calc((100vw-1320px)/2+2rem)]">
+            <figure className="fade-in relative min-w-0 md:col-span-6 md:-me-6 lg:-me-8 xl:-me-[calc((100vw-1320px)/2+2rem)]">
               <MapPreview
                 config={mapConfig}
                 dense
@@ -323,7 +323,7 @@ export default async function HomePage() {
                     {stat.label}
                     <span className="block text-ink-3">{stat.sub}</span>
                   </dt>
-                  <dd className="kpi mt-2 text-5xl text-ink">
+                  <dd className="kpi mt-2 text-4xl text-ink sm:text-5xl">
                     {stat.value && Number.isFinite(Number(stat.value)) ? (
                       <AnimatedNumber value={Number(stat.value)} as="price-iqd" locale={locale} />
                     ) : (

@@ -193,7 +193,7 @@ export function SearchFilters({
       </fieldset>
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-1 text-xs font-medium text-sand-700">{s.priceRange}</legend>
-        <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2">
           <input
             className={input}
             inputMode="numeric"

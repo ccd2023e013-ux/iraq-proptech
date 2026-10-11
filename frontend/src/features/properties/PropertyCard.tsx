@@ -148,7 +148,7 @@ export function PropertyCard({
         )}
         {!compact && (
           <div className="relative z-20 mt-2 flex items-center justify-between gap-3">
-            <span className="caption truncate">{card.agency_name}</span>
+            <span className="caption min-w-0 truncate">{card.agency_name}</span>
             <CompareToggle id={card.id} dict={dict} />
           </div>
         )}
