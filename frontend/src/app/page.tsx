@@ -170,7 +170,7 @@ export default async function HomePage() {
             {/* Legibility: the canvas washes in under the text column only. */}
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-y-0 start-0 hidden w-[min(58%,820px)] bg-gradient-to-r from-canvas via-canvas/90 to-transparent md:block rtl:bg-gradient-to-l"
+              className="pointer-events-none absolute inset-y-0 start-0 hidden w-[min(68%,960px)] bg-gradient-to-r from-canvas from-40% via-canvas/85 to-transparent md:block rtl:bg-gradient-to-l"
             />
             <div
               aria-hidden
