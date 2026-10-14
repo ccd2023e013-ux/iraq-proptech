@@ -169,6 +169,9 @@ export function MapPreview({
             return { id: String(i), x: at.x - width / 2, y: at.y - 34, width, height: 26 };
           });
           const shown = placeTags(boxes, 24, 8);
+          // Diagnostics for automated checks: candidates and tags placed.
+          el.dataset.tagsTotal = String(boxes.length);
+          el.dataset.tagsShown = String(shown.size);
           let order = 0;
           tagEls.forEach(({ el }, i) => {
             const on = shown.has(String(i));
@@ -209,14 +212,19 @@ export function MapPreview({
         // Fade in once the tiles are drawn, not while the basemap is half-loaded.
         m.once("idle", () => {
           setReady(true);
+          el.dataset.phase = "intro";
           const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
           if (intro && !reduce) {
             const target = { zoom: m.getZoom(), center: m.getCenter() };
             m.jumpTo({ zoom: target.zoom - 0.9 });
-            m.once("moveend", placeAll);
+            m.once("moveend", () => {
+              placeAll();
+              el.dataset.phase = "settled";
+            });
             m.easeTo({ ...target, duration: 2400, easing: easeStandard });
           } else {
             placeAll();
+            el.dataset.phase = "settled";
           }
         });
       });

@@ -352,12 +352,53 @@ def map_states(browser: Browser, lang: str, view: str) -> None:
     ctx.close()
 
 
+def hero_timeline(browser: Browser) -> None:
+    """Reproduce the home hero map in real time: phase, tags placed, tags visible.
+
+    Samples every 250 ms for 9 s after navigation in each theme, so a missing
+    price tag can be told apart from a capture taken mid-animation.
+    """
+    for lang, theme in (("en", "dark"), ("en", "light"), ("ar", "dark"), ("ar", "light")):
+        ctx = context(browser, lang, theme, "1440")
+        page = ctx.new_page()
+        samples: list[dict] = []
+        try:
+            t0 = time.monotonic()
+            page.goto(WEB + "/", wait_until="load", timeout=90_000)
+            for _ in range(36):
+                state = page.evaluate(
+                    """() => {
+                      const el = document.querySelector('[data-testid=map-preview]');
+                      if (!el) return null;
+                      const tags = [...el.querySelectorAll('.map-tag')];
+                      const vw = window.innerWidth, vh = window.innerHeight;
+                      const seen = tags.filter((t) => {
+                        const r = t.getBoundingClientRect();
+                        const st = getComputedStyle(t.parentElement);
+                        return st.visibility !== 'hidden' && parseFloat(getComputedStyle(t).opacity) > 0.5
+                          && r.right > 0 && r.left < vw && r.bottom > 0 && r.top < vh;
+                      }).length;
+                      return {ready: el.dataset.ready, phase: el.dataset.phase || null,
+                              total: el.dataset.tagsTotal || null, shown: el.dataset.tagsShown || null,
+                              candidates: tags.length, visible: seen};
+                    }"""
+                )
+                samples.append({"t": round(time.monotonic() - t0, 2), **(state or {})})
+                page.wait_for_timeout(250)
+            page.screenshot(path=str(OUT / f"{lang}-{theme}-1440--hero-9s.jpg"), type="jpeg", quality=72)
+        except Exception as exc:  # recorded, the run continues
+            samples.append({"error": f"{type(exc).__name__}: {str(exc)[:200]}"})
+        REPORT.append({"shot": f"{lang}-{theme}-1440--hero-timeline", "hero_timeline": samples})
+        ctx.close()
+
+
 def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     with sync_playwright() as p:
         browser = p.chromium.launch(
             args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
         )
+        hero_timeline(browser)
         listing = first_listing(browser)
         pages = [(n, listing if n == "listing" else path) for n, path in PUBLIC]
         pages = [(n, path) for n, path in pages if path]
