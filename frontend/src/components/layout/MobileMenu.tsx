@@ -2,15 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 
 /** Phone navigation: a small sheet that closes itself after navigating. */
 export function MobileMenu({
   label,
   links,
+  footer,
 }: {
   label: string;
   links: { href: string; label: string }[];
+  /** Controls that leave the crowded phone header (e.g. the theme). */
+  footer?: ReactNode;
 }) {
   const ref = useRef<HTMLDetailsElement>(null);
   const pathname = usePathname();
@@ -50,6 +53,7 @@ export function MobileMenu({
             {l.label}
           </Link>
         ))}
+        {footer && <div className="border-t border-hairline-strong pt-1">{footer}</div>}
       </nav>
     </details>
   );

@@ -112,7 +112,7 @@ export default async function HomePage() {
   const flats = segment("APARTMENT", "RENT");
   const n = (v: number) => v.toLocaleString(locale === "ar" ? "ar-IQ-u-nu-latn" : "en-US");
   const counts = Object.fromEntries(cities.map((c) => [c.slug, c.listings]));
-  const card = (c: (typeof all)[number], compact = false) => (
+  const card = (c: (typeof all)[number], compact = false, feature = false) => (
     <PropertyCard
       card={c}
       dict={dict}
@@ -121,6 +121,7 @@ export default async function HomePage() {
       favorite={favorites.has(c.id)}
       signedIn={!!me}
       compact={compact}
+      feature={feature}
     />
   );
 
@@ -131,14 +132,14 @@ export default async function HomePage() {
           fills the stage behind; on phones it follows the search. */}
       <section aria-labelledby="hero-title" className="relative isolate overflow-hidden">
         <div className="page relative z-10 flex flex-col justify-center gap-7 pt-10 pb-8 md:min-h-[min(82vh,840px)] md:py-20">
-          <div className="flex max-w-[35rem] flex-col gap-7">
+          <div className="flex max-w-[48rem] flex-col gap-7">
             <h1 id="hero-title" className="reveal display-xl text-ink">
               {h.heroTitle}
             </h1>
-            <p className="reveal lede" style={stagger(1)}>
+            <p className="reveal lede max-w-[36rem]" style={stagger(1)}>
               {h.heroSubtitle}
             </p>
-            <div className="reveal" style={stagger(2)}>
+            <div className="reveal max-w-[36rem]" style={stagger(2)}>
               <IntelligentSearch
                 dict={dict}
                 cities={cities.map((c) => ({ value: c.city_id, label: name(c) }))}
@@ -148,7 +149,7 @@ export default async function HomePage() {
               />
             </div>
             {anyDemo && (
-              <p className="reveal caption flex items-start gap-2" style={stagger(3)}>
+              <p className="reveal caption flex max-w-[36rem] items-start gap-2" style={stagger(3)}>
                 <TrustBadge kind="demo">{dict.listing.demo}</TrustBadge>
                 {dict.footer.demoNotice}
               </p>
@@ -211,8 +212,8 @@ export default async function HomePage() {
               }
             />
             <div className="grid grid-cols-1 gap-x-6 gap-y-10 lg:grid-cols-12">
-              <div className="lg:col-span-7">{card(lead)}</div>
-              <ul className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2 lg:col-span-5">
+              <div className="lg:col-span-7">{card(lead, false, true)}</div>
+              <ul className="grid grid-cols-1 content-start gap-x-6 gap-y-8 sm:grid-cols-2 lg:col-span-5">
                 {rest.map((c) => (
                   <li key={c.id}>{card(c, true)}</li>
                 ))}
@@ -265,7 +266,7 @@ export default async function HomePage() {
                     <span className="font-medium text-ink">{stat.label}</span>
                     <span className="meta">{stat.sub}</span>
                   </dt>
-                  <dd className="kpi text-5xl text-ink lg:text-6xl">
+                  <dd className="kpi text-4xl whitespace-nowrap text-ink xl:text-[2.75rem]">
                     {stat.value && Number.isFinite(Number(stat.value)) ? (
                       <AnimatedNumber value={Number(stat.value)} as="price-iqd" locale={locale} />
                     ) : (

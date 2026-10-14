@@ -98,7 +98,10 @@ export function SiteHeader({
               {dict.nav.addProperty}
             </Link>
           )}
-          <ThemeToggle initial={theme} labels={dict.theme} />
+          {/* Phones: the theme moves into the menu sheet to free the header. */}
+          <span className="hidden sm:contents">
+            <ThemeToggle initial={theme} labels={dict.theme} />
+          </span>
           <LanguageSwitcher current={locale} label={dict.nav.switchLanguage} />
           {me && (
             <Link
@@ -134,6 +137,7 @@ export function SiteHeader({
               ...personal,
               ...(me ? [] : [{ href: "/login", label: dict.nav.login }]),
             ]}
+            footer={<ThemeToggle initial={theme} labels={dict.theme} showLabel />}
           />
         </div>
       </div>

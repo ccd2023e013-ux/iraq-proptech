@@ -34,6 +34,7 @@ export function PropertyCard({
   favorite,
   signedIn,
   compact = false,
+  feature = false,
 }: {
   card: Card;
   dict: Dictionary;
@@ -43,6 +44,8 @@ export function PropertyCard({
   signedIn: boolean;
   /** Smaller tile for dense editorial layouts (no facts row). */
   compact?: boolean;
+  /** Lead tile in an editorial layout: wider photograph on large screens. */
+  feature?: boolean;
 }) {
   const title = locale === "en" && card.title_en ? card.title_en : card.title_ar;
   const where = [
@@ -69,7 +72,9 @@ export function PropertyCard({
         className="absolute inset-0 z-10 rounded-[var(--radius-card)]"
         aria-label={title}
       />
-      <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-media)] bg-fill shadow-[inset_0_0_0_1px_var(--hairline)]">
+      <div
+        className={`relative ${feature ? "aspect-[4/3] lg:aspect-[16/9]" : "aspect-[4/3]"} overflow-hidden rounded-[var(--radius-media)] bg-fill shadow-[inset_0_0_0_1px_var(--hairline)]`}
+      >
         {card.cover_url ? (
           <SafeImage
             src={card.cover_url}

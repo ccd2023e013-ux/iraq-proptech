@@ -24,9 +24,12 @@ const ICONS: Record<ThemeChoice, string> = {
 export function ThemeToggle({
   initial,
   labels,
+  showLabel = false,
 }: {
   initial: ThemeChoice;
   labels: Record<ThemeChoice, string>;
+  /** Spell the current choice out next to the glyph (phone menu). */
+  showLabel?: boolean;
 }) {
   const [choice, setChoice] = useState<ThemeChoice>(initial);
   const next = nextTheme(choice);
@@ -40,7 +43,7 @@ export function ThemeToggle({
       title={labels[choice]}
       aria-label={labels[choice]}
       data-theme-choice={choice}
-      className="icon-btn size-9"
+      className={showLabel ? "btn btn-quiet h-12 w-full justify-start px-0" : "icon-btn size-9"}
     >
       {/* Keyed by choice: the new glyph turns in when the theme changes. */}
       <svg
@@ -56,6 +59,7 @@ export function ThemeToggle({
         {choice === "system" && <circle cx="12" cy="12" r="9" fill="none" strokeWidth={1.8} />}
         <path d={ICONS[choice]} />
       </svg>
+      {showLabel && <span>{labels[choice]}</span>}
     </button>
   );
 }
