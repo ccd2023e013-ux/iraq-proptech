@@ -203,6 +203,15 @@ def ov_candidate(r: dict) -> dict:
     }
 
 
+LOG: list[str] = []
+
+
+def log(line: str) -> None:
+    """Printed, and kept for log.txt in the output (runner logs may be unreadable)."""
+    print(line, flush=True)
+    LOG.append(line)
+
+
 def ov_survey() -> list[dict]:
     found: dict[str, dict] = {}
     for q in OV_SEARCHES:
@@ -212,14 +221,15 @@ def ov_survey() -> list[dict]:
         try:
             data = ov_get(f"{OV_API}?{query}")
         except Exception as exc:  # one search failing does not stop the survey
-            print(f"openverse {q!r}: {type(exc).__name__}", flush=True)
+            log(f"openverse {q!r}: {type(exc).__name__}: {str(exc)[:200]}")
             continue
+        log(f"openverse {q!r}: {len(data.get('results', []))} results")
         for r in data.get("results", []):
             c = ov_candidate(r)
             c["source"] = f"openverse: {q}"
             found.setdefault(c["title"], c)
         time.sleep(1.5)
-    print(f"{len(found)} Openverse results", flush=True)
+    log(f"{len(found)} Openverse results")
     return list(found.values())
 
 
@@ -287,10 +297,10 @@ def acceptable(c: dict, min_width: int = 1000) -> str | None:
     return None
 
 
-def survey(out: Path) -> None:
+def survey(out: Path, commons: bool = True) -> None:
     titles: dict[str, str] = {}
-    cats = list(CATEGORIES)
-    for cat in CATEGORIES:
+    cats = list(CATEGORIES) if commons else []
+    for cat in cats[:]:
         data = api(
             {
                 "action": "query",
@@ -321,14 +331,14 @@ def survey(out: Path) -> None:
             cont = data.get("continue", {})
             if not cont:
                 break
-    for q in SEARCHES:
+    for q in SEARCHES if commons else []:
         data = api(
             {"action": "query", "list": "search", "srsearch": f"{q} filetype:bitmap", "srnamespace": "6", "srlimit": "60"}
         )
         for m in data.get("query", {}).get("search", []):
             titles.setdefault(m["title"], f"search: {q}")
     print(f"{len(titles)} titles found", flush=True)
-    metas = info(list(titles), 400)
+    metas = info(list(titles), 400) if titles else []
     for c in metas:
         c["source"] = titles[c["title"]]
     metas += ov_survey()
@@ -343,7 +353,7 @@ def survey(out: Path) -> None:
             rejected[reason.split(" ")[0]] = rejected.get(reason.split(" ")[0], 0) + 1
             continue
         keep.append(c)
-    print(f"{len(keep)} acceptable; rejected: {rejected}", flush=True)
+    log(f"{len(keep)} acceptable; rejected: {rejected}")
     out.mkdir(parents=True, exist_ok=True)
     font = ImageFont.load_default(size=22)
     per_sheet, cols, tw, th = 24, 6, 400, 300
@@ -364,6 +374,7 @@ def survey(out: Path) -> None:
             time.sleep(0.2)
         sheet.save(out / f"sheet-{s // per_sheet:02d}.jpg", quality=80)
     (out / "candidates.json").write_text(json.dumps(keep, indent=1, ensure_ascii=False))
+    (out / "log.txt").write_text("\n".join(LOG) + "\n")
 
 
 def fetch(spec: str, out: Path) -> None:
@@ -421,5 +432,7 @@ if __name__ == "__main__":
     target = Path(sys.argv[2])
     if mode == "survey":
         survey(target)
+    elif mode == "openverse":
+        survey(target, commons=False)
     else:
         fetch(os.environ["PHOTOS"], target)

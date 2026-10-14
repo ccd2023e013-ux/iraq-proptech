@@ -996,12 +996,16 @@ p {
   --tag-ink: var(--ink);
   --tag-edge: rgb(11 15 23 / 0.14);
   --tag-shadow: 0 1px 2px rgb(11 15 23 / 0.12), 0 6px 14px -6px rgb(11 15 23 / 0.28);
+  --tag-more-bg: #d4ecf3;
+  --tag-more-ink: #0d5568;
 }
 :root[data-theme="dark"] {
   --tag-bg: #efe9de;
   --tag-ink: #0b0f17;
   --tag-edge: rgb(0 0 0 / 0.35);
   --tag-shadow: 0 1px 0 rgb(255 255 255 / 0.5) inset, 0 8px 18px -8px rgb(0 0 0 / 0.8);
+  --tag-more-bg: #123e4b;
+  --tag-more-ink: #a5e8f5;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -1009,6 +1013,8 @@ p {
     --tag-ink: #0b0f17;
     --tag-edge: rgb(0 0 0 / 0.35);
     --tag-shadow: 0 1px 0 rgb(255 255 255 / 0.5) inset, 0 8px 18px -8px rgb(0 0 0 / 0.8);
+    --tag-more-bg: #123e4b;
+    --tag-more-ink: #a5e8f5;
   }
 }
 .map-tag-anchor {
@@ -1074,11 +1080,14 @@ p {
   display: grid;
   place-items: center;
   border-radius: 999px;
-  background: var(--spatial-fill);
-  color: #03202a;
-  font: 700 10.5px/1 var(--font-sans);
+  background: var(--tag-more-bg);
+  color: var(--tag-more-ink);
+  font: 650 10px/1 var(--font-sans);
   font-variant-numeric: tabular-nums;
-  box-shadow: 0 0 0 2px var(--canvas);
+  /* "+3" reads the same in Arabic and English. */
+  direction: ltr;
+  unicode-bidi: isolate;
+  box-shadow: 0 0 0 1.5px var(--tag-bg);
 }
 .map-tag:hover {
   transform: translateY(-2px);
