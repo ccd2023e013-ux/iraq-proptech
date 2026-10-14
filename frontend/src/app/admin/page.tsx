@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import { getDictionary } from "@/i18n";
 import { getRequestLocale } from "@/i18n/server";
 import { serverApiFetch } from "@/lib/api/server";
@@ -41,7 +42,7 @@ export default async function AdminOverview() {
   ];
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="display-md text-ink">{a.overview}</h1>
+      <PageHeader title={a.overview} size="md" />
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
         {tiles.map(([label, value, alert]) => (
           <div key={label} className="surface-1 rounded-[var(--radius-card)] p-4">

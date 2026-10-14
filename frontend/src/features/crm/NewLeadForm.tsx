@@ -84,7 +84,7 @@ export function NewLeadForm({ dict }: { dict: Dictionary }) {
         <select
           value={source}
           onChange={(e) => setSource(e.target.value as LeadSource)}
-          className="h-11 surface-1 rounded-2xl px-3"
+          className="field"
         >
           {SOURCES.map((s) => (
             <option key={s} value={s}>

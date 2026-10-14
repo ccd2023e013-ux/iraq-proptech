@@ -136,7 +136,7 @@ export function VisionStudio({
   const label = v.label;
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
       <form onSubmit={submit} className="flex flex-col gap-5" data-testid="vision-form">
         {propertyTitle && (
           <p className="rounded-[var(--radius-control)] bg-fill px-4 py-3 text-sm text-ink-2">
@@ -205,7 +205,7 @@ export function VisionStudio({
                 max={200}
                 value={form[key]}
                 onChange={(e) => set(key, Number(e.target.value))}
-                className="h-11 rounded-[var(--radius-control)] bg-fill px-3 text-ink tabular ring-1 ring-transparent ring-inset focus:bg-surface focus:ring-2 focus:ring-accent focus:outline-none"
+                className="field tabular"
                 dir="ltr"
               />
             </label>

@@ -665,7 +665,11 @@ export function MapSearch({
         <div
           className={`quiet-scroll flex min-h-0 flex-1 flex-col overflow-y-auto border-t border-hairline transition-opacity duration-[var(--duration-base)] ${busy ? "opacity-70" : ""}`}
         >
-          {items.length === 0 && <EmptyState title={dict.search.noResults} glyph="map" />}
+          {items.length === 0 && (
+            <div className="p-3">
+              <EmptyState compact title={dict.search.noResults} glyph="map" />
+            </div>
+          )}
           <ul className="flex flex-col">
             {items.map((card) => {
               const title = locale === "en" && card.title_en ? card.title_en : card.title_ar;
@@ -1155,7 +1159,7 @@ function SelectionSheet({
           )}
           <Link
             href={`/properties/${encodeURIComponent(id)}`}
-            className="press mt-auto inline-flex h-8 w-fit items-center gap-1.5 rounded-[var(--radius-control)] bg-accent-fill px-3.5 text-[13px] font-medium text-on-accent hover:bg-accent-fill-hover"
+            className="btn btn-primary btn-sm mt-auto w-fit"
           >
             {dict.map.openListing}
             <Icon name="arrow" className="size-3.5" />

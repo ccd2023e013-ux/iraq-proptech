@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import { formatDateTime } from "@/features/crm/labels";
 import { getDictionary } from "@/i18n";
 import { getRequestLocale } from "@/i18n/server";
@@ -27,7 +28,7 @@ export default async function JobsPage() {
   ]);
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="display-md text-ink">{a.jobs}</h1>
+      <PageHeader title={a.jobs} size="md" />
       <section>
         <h2 className="mb-2 font-semibold">{a.deliveryCounts}</h2>
         <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">

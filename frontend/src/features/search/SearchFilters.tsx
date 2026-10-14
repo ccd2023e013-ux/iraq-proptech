@@ -104,8 +104,8 @@ export function SearchFilters({
     );
   }
 
-  const input = "h-10 w-full surface-1 rounded-2xl px-3 text-sm";
-  const label = "flex flex-col gap-1 text-xs font-medium text-sand-700";
+  const input = "field";
+  const label = "label flex flex-col gap-1.5";
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4" aria-label={s.filters}>
@@ -183,7 +183,7 @@ export function SearchFilters({
                       : [...form.property_types, t.code],
                   })
                 }
-                className={`rounded-[var(--radius-tag)] border px-3 py-1 text-xs transition ${on ? "border-brand-600 bg-brand-600 text-on-accent" : "border-sand-200 bg-surface text-sand-700 hover:border-brand-300"}`}
+                className="chip h-9"
               >
                 {name(t)}
               </button>

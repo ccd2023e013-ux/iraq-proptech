@@ -14,8 +14,9 @@ import { getCurrentUser } from "@/lib/auth/session";
 
 // Fonts are self-hosted from npm (@fontsource): builds work offline and no
 // third-party font CDN is contacted at build or run time.
-// MAKAN type: Readex Pro for Arabic, Inter for English and numerals.
-import "@fontsource-variable/inter/index.css";
+// MAKAN type: Readex Pro for Arabic; Inter (with optical sizes: the display
+// cut at headline sizes) for English and numerals.
+import "@fontsource-variable/inter/opsz.css";
 import "@fontsource-variable/readex-pro/index.css";
 import "./globals.css";
 
@@ -31,7 +32,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
+    { media: "(prefers-color-scheme: light)", color: "#f4f5f7" },
     { media: "(prefers-color-scheme: dark)", color: "#0b0f17" },
   ],
 };

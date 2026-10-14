@@ -59,26 +59,26 @@ export function PropertyCard({
   const area = formatArea(card.area_m2, locale);
   if (area) facts.push({ icon: "area", text: area });
 
-  // Survey card: the photograph is the figure; everything else sits on the
-  // page as type. Only the save control floats on the image, and DEMO is a
-  // gold tag on the image's bottom edge (where trust labels always live).
+  // The photograph is the figure; everything else is type on the page.
+  // Only the save control floats on the image, and DEMO sits on the image's
+  // bottom edge (where trust labels always live).
   return (
-    <article className="group relative flex flex-col gap-3">
+    <article className="group relative flex flex-col gap-4">
       <Link
         href={`/properties/${card.id}`}
         className="absolute inset-0 z-10 rounded-[var(--radius-card)]"
         aria-label={title}
       />
-      <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-card)] bg-fill shadow-[inset_0_0_0_1px_var(--hairline)]">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-media)] bg-fill shadow-[inset_0_0_0_1px_var(--hairline)]">
         {card.cover_url ? (
           <SafeImage
             src={card.cover_url}
             alt=""
             fallbackLabel={dict.listing.noImage}
-            className="size-full object-cover transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:scale-[1.02]"
+            className="photo size-full object-cover transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:scale-[1.025]"
           />
         ) : (
-          <div className="flex size-full flex-col items-center justify-center gap-2 text-[13px] text-ink-3">
+          <div className="flex size-full flex-col items-center justify-center gap-2 text-sm text-ink-3">
             <Icon name="home" className="size-6 opacity-70" />
             {dict.listing.noImage}
           </div>
@@ -86,15 +86,15 @@ export function PropertyCard({
         {(card.is_demo || card.is_featured) && (
           <div className="absolute start-0 bottom-0 flex">
             {card.is_demo && (
-              <span className="rounded-se-[var(--radius-tag)] bg-gold-500 px-2 py-0.5 text-[11px] font-semibold text-[#1d1405]">
+              <span className="flex items-center gap-1.5 rounded-se-[var(--radius-tag)] bg-gold-500 px-2.5 py-1 text-xs font-semibold text-[#1d1405]">
                 {dict.listing.demo}
-                {card.cover_url && (
-                  <span className="font-medium"> · {dict.listing.representativePhoto}</span>
+                {card.cover_url && !compact && (
+                  <span className="font-medium opacity-80">{dict.listing.representativePhoto}</span>
                 )}
               </span>
             )}
             {card.is_featured && (
-              <span className="bg-canvas/80 px-2 py-0.5 text-[11px] font-medium text-ink backdrop-blur-md">
+              <span className="bg-canvas/80 px-2.5 py-1 text-xs font-medium text-ink backdrop-blur-md">
                 {dict.listing.promoted}
               </span>
             )}
@@ -113,41 +113,41 @@ export function PropertyCard({
           />
         </div>
       </div>
-      <div className="flex flex-col gap-0.5">
+      <div className="flex flex-col gap-1.5">
         <div className="flex items-baseline justify-between gap-3">
-          <p className={`kpi text-ink ${compact ? "text-base" : "text-xl"}`}>
+          <p className={`kpi text-ink ${compact ? "text-xl" : "text-[1.625rem]"}`}>
             {priceLabel(card, dict, locale)}
           </p>
-          <span className="caption shrink-0">
-            {dict.listing.purposes[card.purpose]}
-            {card.verified && (
-              <span className="ms-2 inline-flex items-center gap-1 text-accent">
-                <Icon name="check" className="size-3.5" strokeWidth={2.2} />
-                {dict.listing.verified}
-              </span>
-            )}
-          </span>
+          <span className="meta shrink-0">{dict.listing.purposes[card.purpose]}</span>
         </div>
         <h3
-          className={`line-clamp-1 text-ink-2 transition-colors group-hover:text-ink ${compact ? "text-sm" : "text-[15px]"}`}
+          className={`line-clamp-1 text-ink transition-colors group-hover:text-accent ${compact ? "text-[15px]" : "text-base font-medium"}`}
         >
           {title}
         </h3>
-        {!compact && (
-          <p className="meta flex min-w-0 items-center gap-x-3 tabular">
-            <span className="truncate">{[typeName, where].filter(Boolean).join(" · ")}</span>
-            {facts.length > 0 && (
-              <span className="flex shrink-0 items-center gap-2.5">
-                {facts.map((f) => (
-                  <span key={f.icon} className="flex items-center gap-1">
-                    <Icon name={f.icon} className="size-3.5 text-ink-3" strokeWidth={1.8} />
-                    {f.text}
-                    {f.label && <span className="sr-only">{f.label}</span>}
-                  </span>
-                ))}
-              </span>
-            )}
+        {(where || typeName) && (
+          <p className="meta flex min-w-0 items-center gap-1.5">
+            <Icon name="pin" className="size-4 shrink-0 text-spatial" strokeWidth={1.7} />
+            <span className="truncate">{where || typeName}</span>
           </p>
+        )}
+        {!compact && (facts.length > 0 || card.verified) && (
+          <ul className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-2 tabular">
+            {typeName && <li>{typeName}</li>}
+            {facts.map((f) => (
+              <li key={f.icon} className="flex items-center gap-1.5">
+                <Icon name={f.icon} className="size-4 text-ink-3" strokeWidth={1.7} />
+                {f.text}
+                {f.label && <span className="sr-only">{f.label}</span>}
+              </li>
+            ))}
+            {card.verified && (
+              <li className="flex items-center gap-1 text-accent">
+                <Icon name="check" className="size-4" strokeWidth={2} />
+                {dict.listing.verified}
+              </li>
+            )}
+          </ul>
         )}
         {!compact && (
           <div className="relative z-20 mt-2 flex items-center justify-between gap-3">

@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import Link from "next/link";
 
 import { TaskPanel } from "@/features/crm/LeadPanels";
@@ -24,12 +25,12 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
   );
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6">
+    <div className="page flex flex-col gap-6 pb-8">
       <div>
         <Link href="/dashboard/crm" className="text-sm text-accent">
           {c.dashboard}
         </Link>
-        <h1 className="display-md text-ink">{c.tasks}</h1>
+        <PageHeader title={c.tasks} />
       </div>
       <nav className="flex flex-wrap gap-2" aria-label={c.tasks}>
         {FILTERS.map((f) => (

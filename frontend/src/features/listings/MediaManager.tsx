@@ -168,11 +168,7 @@ export function DocumentManager({
         ))}
       </ul>
       <div className="flex flex-wrap items-center gap-3">
-        <select
-          value={docType}
-          onChange={(e) => setDocType(e.target.value)}
-          className="h-10 surface-1 rounded-2xl px-3 text-sm"
-        >
+        <select value={docType} onChange={(e) => setDocType(e.target.value)} className="field">
           {Object.entries(dict.listing.docTypes).map(([code, label]) => (
             <option key={code} value={code}>
               {label}

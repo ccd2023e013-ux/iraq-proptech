@@ -1,3 +1,5 @@
+import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { redirect } from "next/navigation";
 
 import { PropertyCard } from "@/features/properties/PropertyCard";
@@ -26,12 +28,15 @@ export default async function FavoritesPage() {
   const typeNames = new Map(types.map((t) => [t.code, locale === "ar" ? t.name_ar : t.name_en]));
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6">
-      <h1 className="display-md text-ink">{dict.favorites.title}</h1>
+    <div className="page flex flex-col gap-6 pb-8">
+      <PageHeader title={dict.favorites.title} />
       {page.items.length === 0 ? (
-        <p className="rounded-[var(--radius-card)] border border-dashed border-sand-200 py-16 text-center text-sand-500">
-          {dict.favorites.empty}
-        </p>
+        <EmptyState
+          title={dict.favorites.empty}
+          glyph="heart"
+          action={{ href: "/properties", label: dict.nav.properties }}
+          secondary={{ href: "/map", label: dict.nav.map }}
+        />
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {page.items.map((card) => (

@@ -195,7 +195,7 @@ function Select({
         required={required}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
-        className="h-11 surface-1 rounded-2xl px-3 font-normal disabled:bg-sand-100"
+        className="field font-normal disabled:bg-sand-100"
       >
         {children}
       </select>

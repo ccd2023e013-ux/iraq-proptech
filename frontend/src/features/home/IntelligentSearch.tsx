@@ -61,16 +61,15 @@ export function IntelligentSearch({
     router.push(searchDestination({ ai, q, purpose, cityId, type }));
   }
 
-  const select =
-    "h-11 min-w-0 rounded-[var(--radius-control)] bg-fill px-4 text-sm text-ink outline-none ring-accent transition focus-visible:ring-2";
+  const select = "field min-w-0 bg-fill shadow-none";
 
   return (
     <form
       onSubmit={onSubmit}
       role="search"
-      className="surface-float w-full rounded-[var(--radius-media)] p-2"
+      className="surface-float flex w-full flex-col gap-2 rounded-[var(--radius-card)] p-2.5"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 px-1 pt-1 pb-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-0.5 pb-1">
         <div
           role="radiogroup"
           aria-label={dict.property.purpose}
@@ -103,9 +102,24 @@ export function IntelligentSearch({
           {h.aiToggle}
         </label>
       </div>
+      {/* The question first, large; then the place and type, and the action. */}
+      <label className="relative block">
+        <span className="sr-only">{ai ? h.aiPlaceholder : h.searchPlaceholder}</span>
+        <Icon
+          name={ai ? "insight" : "search"}
+          className="pointer-events-none absolute start-4 top-1/2 size-5 -translate-y-1/2 text-ink-3"
+        />
+        <input
+          type="search"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder={ai ? h.aiPlaceholder : h.searchPlaceholder}
+          className="field h-14 bg-fill ps-12 text-[1.0625rem] shadow-none"
+        />
+      </label>
       <div className="flex flex-col gap-2 sm:flex-row">
         {!ai && (
-          <div className="grid grid-cols-2 gap-2 sm:flex">
+          <div className="grid flex-1 grid-cols-2 gap-2">
             <select
               aria-label={h.anyCity}
               value={cityId}
@@ -134,18 +148,7 @@ export function IntelligentSearch({
             </select>
           </div>
         )}
-        <input
-          type="search"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder={ai ? h.aiPlaceholder : h.searchPlaceholder}
-          aria-label={ai ? h.aiPlaceholder : h.searchPlaceholder}
-          className="h-11 w-full min-w-0 shrink-0 rounded-[var(--radius-control)] sm:w-auto sm:flex-1 bg-fill px-4 text-ink outline-none ring-accent transition-shadow placeholder:text-ink-3 focus-visible:ring-2"
-        />
-        <button
-          type="submit"
-          className="press inline-flex h-11 items-center justify-center gap-2 rounded-[var(--radius-control)] bg-accent-fill px-6 font-medium text-on-accent shadow-[inset_0_1px_0_rgb(255_255_255/0.25)] hover:bg-accent-fill-hover"
-        >
+        <button type="submit" className={`btn btn-primary h-12 px-6 ${ai ? "flex-1" : ""}`}>
           <Icon name="search" className="size-[18px]" strokeWidth={2} />
           {h.search}
         </button>

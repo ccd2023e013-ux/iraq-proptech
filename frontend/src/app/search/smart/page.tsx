@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/ui/EmptyState";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -76,10 +77,7 @@ export default async function SmartSearchPage({
           maxLength={300}
           className="h-11 min-w-0 flex-1 bg-transparent text-ink outline-none placeholder:text-ink-3"
         />
-        <button
-          type="submit"
-          className="press inline-flex h-11 shrink-0 items-center rounded-[var(--radius-control)] bg-accent-fill px-5 font-medium text-on-accent hover:bg-accent-fill-hover"
-        >
+        <button type="submit" className="btn btn-primary shrink-0">
           {dict.landing.heroCta}
         </button>
       </form>
@@ -142,9 +140,7 @@ export default async function SmartSearchPage({
             {data.total} {dict.search.results}
           </p>
           {data.items.length === 0 ? (
-            <p className="rounded-[var(--radius-card)] border border-dashed border-sand-200 py-12 text-center text-sand-500">
-              {dict.search.noResults}
-            </p>
+            <EmptyState compact title={dict.search.noResults} glyph="search" />
           ) : (
             <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {data.items.map((card) => (

@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import { notFound } from "next/navigation";
 
 import { Alert } from "@/components/ui/Alert";
@@ -45,10 +46,10 @@ export default async function EditListingPage({ params }: { params: Promise<{ id
   const f = dict.listingForm;
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6">
+    <div className="page flex flex-col gap-6 pb-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="display-md text-ink">{f.editTitle}</h1>
+          <PageHeader title={f.editTitle} />
           <p className="font-mono text-xs text-sand-500" dir="ltr">
             {property.reference_code}
           </p>

@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import Link from "next/link";
 
 import { ActionButton } from "@/features/admin/ActionButton";
@@ -29,7 +30,7 @@ export default async function VerificationPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="display-md text-ink">{a.verification}</h1>
+      <PageHeader title={a.verification} size="md" />
       {me.permissions.includes("agencies.verify") && (
         <section className="flex flex-col gap-2">
           <h2 className="font-semibold">{dict.agency.title}</h2>

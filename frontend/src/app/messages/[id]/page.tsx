@@ -32,7 +32,7 @@ export default async function ThreadPage({ params }: { params: Promise<{ id: str
   );
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-8 sm:px-6">
+    <div className="page flex flex-col gap-4 pb-8">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Link href="/messages" className="text-sm text-accent">
           {m.back}

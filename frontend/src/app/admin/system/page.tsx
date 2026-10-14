@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import { formatDateTime } from "@/features/crm/labels";
 import { getDictionary } from "@/i18n";
 import { getRequestLocale } from "@/i18n/server";
@@ -45,7 +46,7 @@ export default async function SystemPage() {
   ];
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="display-md text-ink">{a.system}</h1>
+      <PageHeader title={a.system} size="md" />
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {rows.map(([k, v]) => (
           <div key={k} className="surface-1 rounded-2xl p-3">

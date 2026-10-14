@@ -1,3 +1,5 @@
+import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
 import Link from "next/link";
 
 import { formatDateTime } from "@/features/crm/labels";
@@ -17,12 +19,14 @@ export default async function MessagesPage() {
   const conversations = await serverApiFetch<Conversation[]>("/api/v1/me/conversations");
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6">
-      <h1 className="display-md text-ink">{m.title}</h1>
+    <div className="page flex flex-col gap-6 pb-8">
+      <PageHeader title={m.title} />
       {conversations.length === 0 ? (
-        <p className="rounded-[var(--radius-card)] border border-dashed border-sand-200 py-12 text-center text-sand-500">
-          {m.empty}
-        </p>
+        <EmptyState
+          title={m.empty}
+          glyph="list"
+          action={{ href: "/properties", label: dict.nav.properties }}
+        />
       ) : (
         <ul className="flex flex-col divide-y divide-sand-100 surface-1 rounded-[var(--radius-card)]">
           {conversations.map((c) => {

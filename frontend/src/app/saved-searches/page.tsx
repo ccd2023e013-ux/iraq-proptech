@@ -1,3 +1,5 @@
+import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
@@ -29,12 +31,14 @@ export default async function SavedSearchesPage() {
   const rows = await serverApiFetch<SavedSearch[]>("/api/v1/me/saved-searches");
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6">
-      <h1 className="display-md text-ink">{s.title}</h1>
+    <div className="page flex flex-col gap-6 pb-8">
+      <PageHeader title={s.title} />
       {rows.length === 0 ? (
-        <p className="rounded-[var(--radius-card)] border border-dashed border-sand-200 py-12 text-center text-sand-500">
-          {s.empty}
-        </p>
+        <EmptyState
+          title={s.empty}
+          glyph="bookmark"
+          action={{ href: "/properties", label: dict.nav.properties }}
+        />
       ) : (
         <ul className="flex flex-col gap-3">
           {rows.map((row) => (

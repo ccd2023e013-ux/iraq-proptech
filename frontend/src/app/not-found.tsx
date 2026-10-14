@@ -23,10 +23,7 @@ export default async function NotFound() {
         {dict.errors.NOT_FOUND}
       </h1>
       <div className="reveal mt-8 flex flex-wrap justify-center gap-2" style={stagger(3)}>
-        <Link
-          href="/"
-          className="press inline-flex h-11 items-center rounded-[var(--radius-control)] bg-accent-fill px-5 font-medium text-on-accent hover:bg-accent-fill-hover"
-        >
+        <Link href="/" className="btn btn-primary">
           {dict.nav.home}
         </Link>
         <Link

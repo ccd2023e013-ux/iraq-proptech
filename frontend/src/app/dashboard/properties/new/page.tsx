@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import { ListingForm } from "@/features/listings/ListingForm";
 import { loadListingReference } from "@/features/listings/reference";
 import { getDictionary } from "@/i18n";
@@ -13,8 +14,8 @@ export default async function NewListingPage() {
   const dict = getDictionary(locale);
   const reference = await loadListingReference();
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6">
-      <h1 className="display-md text-ink">{dict.listingForm.newTitle}</h1>
+    <div className="page flex flex-col gap-6 pb-8">
+      <PageHeader title={dict.listingForm.newTitle} />
       <ListingForm
         dict={dict}
         locale={locale}

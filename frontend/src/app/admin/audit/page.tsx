@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import { formatDateTime } from "@/features/crm/labels";
 import { getDictionary } from "@/i18n";
 import { getRequestLocale } from "@/i18n/server";
@@ -28,7 +29,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
   );
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="display-md text-ink">{a.audit}</h1>
+      <PageHeader title={a.audit} size="md" />
       <form method="get">
         <input
           name="action"

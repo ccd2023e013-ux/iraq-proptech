@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -104,14 +105,18 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
   };
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-12 px-4 py-10 sm:px-6">
+    <div className="page flex flex-col gap-12 pb-8">
       <header className="flex flex-col gap-4">
-        <h1 className="font-display text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
-          {t.title}
-          <span className="block text-ink-3">{scopeName}</span>
-        </h1>
-        <p className="max-w-2xl text-lg text-ink-2">{t.subtitle}</p>
-        <p className="max-w-2xl rounded-[var(--radius-control)] bg-fill px-4 py-3 text-sm text-ink-2">
+        <PageHeader
+          title={
+            <>
+              {t.title}
+              <span className="block text-ink-3">{scopeName}</span>
+            </>
+          }
+          lede={t.subtitle}
+        />
+        <p className="max-w-2xl rounded-[var(--radius-control)] bg-gold-100 px-4 py-3 text-sm text-ink-2 shadow-[inset_0_0_0_1px_var(--gold-line)]">
           {t.honesty}
         </p>
         <form
@@ -125,7 +130,7 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
             <select
               name="city_id"
               defaultValue={city && UUID.test(city) ? city : ""}
-              className="h-11 min-w-56 rounded-[var(--radius-control)] border border-hairline bg-surface px-3 text-ink"
+              className="field min-w-56"
             >
               <option value="">{t.allIraq}</option>
               {cities.map((c) => (
@@ -147,10 +152,7 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
             <input type="hidden" name="demo" value="0" />
             {t.includeDemo}
           </label>
-          <button
-            type="submit"
-            className="h-11 rounded-[var(--radius-control)] bg-accent-fill px-5 text-sm font-semibold text-on-accent"
-          >
+          <button type="submit" className="btn btn-primary">
             {t.show}
           </button>
         </form>

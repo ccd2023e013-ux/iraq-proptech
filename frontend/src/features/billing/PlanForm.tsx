@@ -8,7 +8,7 @@ import type { Dictionary } from "@/i18n";
 import { apiFetch } from "@/lib/api/client";
 import { describeError } from "@/lib/errors";
 
-const INPUT = "rounded border border-sand-300 px-2 py-1";
+const INPUT = "field";
 
 export function PlanForm({ dict }: { dict: Dictionary }) {
   const router = useRouter();

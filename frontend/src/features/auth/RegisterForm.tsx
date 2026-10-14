@@ -78,10 +78,7 @@ export function RegisterForm({
             {dict.auth.emailUnavailable}
           </Alert>
         )}
-        <Link
-          href="/login"
-          className="inline-flex h-12 items-center justify-center rounded-[var(--radius-control)] bg-accent-fill px-6 font-medium text-on-accent transition hover:bg-accent-fill-hover"
-        >
+        <Link href="/login" className="btn btn-primary btn-lg">
           {dict.auth.submitLogin}
         </Link>
       </div>

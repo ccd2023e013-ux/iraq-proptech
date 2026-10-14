@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import Link from "next/link";
 
 import { ActionButton } from "@/features/admin/ActionButton";
@@ -39,7 +40,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="display-md text-ink">{a.reports}</h1>
+      <PageHeader title={a.reports} size="md" />
       <nav className="flex flex-wrap gap-2">
         {STATUSES.map((s) => (
           <Link

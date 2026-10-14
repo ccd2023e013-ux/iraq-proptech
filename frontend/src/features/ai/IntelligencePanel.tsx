@@ -218,7 +218,7 @@ export function IntelligencePanel({
             onChange={(e) => setQuestion(e.target.value)}
             maxLength={300}
             placeholder={i.askPlaceholder}
-            className="h-11 min-w-0 flex-1 rounded-[var(--radius-control)] bg-fill px-4 text-ink ring-1 ring-transparent ring-inset placeholder:text-ink-3 focus:bg-surface focus:ring-2 focus:ring-accent focus:outline-none"
+            className="field min-w-0 flex-1"
           />
           <Button type="submit" loading={asking} data-testid="intelligence-ask">
             {i.askButton}

@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import Link from "next/link";
 
 import { Card } from "@/components/ui/Card";
@@ -19,9 +20,9 @@ export default async function MyListingsPage() {
   const m = dict.myListings;
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6">
+    <div className="page flex flex-col gap-6 pb-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="display-md text-ink">{m.title}</h1>
+        <PageHeader title={m.title} />
         <Link
           href="/dashboard/properties/new"
           className="rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-on-accent hover:bg-brand-600"

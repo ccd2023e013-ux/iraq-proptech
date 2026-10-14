@@ -28,9 +28,9 @@ export function SiteFooter({ dict, locale }: { dict: Dictionary; locale: Locale 
     },
   ];
   return (
-    <footer className="mt-32 border-t border-hairline">
-      <div className="mx-auto grid max-w-[1320px] gap-10 px-4 py-12 sm:px-6 md:grid-cols-12 lg:px-8">
-        <div className="flex flex-col gap-3 md:col-span-6 lg:col-span-5">
+    <footer className="mt-24 border-t border-hairline bg-surface/40">
+      <div className="page grid gap-10 py-12 md:grid-cols-12">
+        <div className="flex flex-col gap-3 md:col-span-6 lg:col-span-6">
           <p className="flex items-center gap-2.5 font-display text-lg font-semibold text-ink">
             <BrandMark className="size-6" />
             {locale === "ar" ? "مَكان" : "MAKAN"}
@@ -39,17 +39,13 @@ export function SiteFooter({ dict, locale }: { dict: Dictionary; locale: Locale 
           <p className="caption max-w-sm">{dict.footer.demoNotice}</p>
         </div>
         {columns.map((col) => (
-          <nav
-            key={col.title}
-            aria-label={col.title}
-            className="flex flex-col md:col-span-3 lg:col-span-2 lg:col-start-auto"
-          >
-            <p className="meta mb-2 font-medium text-ink-2">{col.title}</p>
+          <nav key={col.title} aria-label={col.title} className="flex flex-col gap-1 md:col-span-3">
+            <p className="label mb-2 text-ink">{col.title}</p>
             {col.links.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
-                className="border-b border-hairline py-2.5 text-sm text-ink-2 transition-colors hover:text-ink"
+                className="w-fit py-1.5 text-[15px] text-ink-2 transition-colors hover:text-ink"
               >
                 {l.label}
               </Link>
@@ -58,9 +54,7 @@ export function SiteFooter({ dict, locale }: { dict: Dictionary; locale: Locale 
         ))}
       </div>
       <div className="border-t border-hairline">
-        <p className="caption mx-auto max-w-[1320px] px-4 py-4 sm:px-6 lg:px-8">
-          {dict.footer.mapCredits}
-        </p>
+        <p className="caption page py-5">{dict.footer.mapCredits}</p>
       </div>
     </footer>
   );

@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import { ActionButton } from "@/features/admin/ActionButton";
 import { WebhookForm } from "@/features/admin/WebhookForm";
 import { formatDateTime } from "@/features/crm/labels";
@@ -30,7 +31,7 @@ export default async function WebhooksPage() {
   ]);
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="display-md text-ink">{a.webhooks}</h1>
+      <PageHeader title={a.webhooks} size="md" />
       <p className="text-sm text-sand-600">{a.n8nHint}</p>
       {hooks.length === 0 ? (
         <p className="text-sm text-sand-500">{a.noWebhooks}</p>

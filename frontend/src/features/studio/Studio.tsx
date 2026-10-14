@@ -176,14 +176,14 @@ export function Studio({
   if (listings.length === 0) return <p className="text-ink-2">{s.noListings}</p>;
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
       <div className="flex flex-col gap-5">
         <label className="flex flex-col gap-1.5 text-sm font-medium text-ink">
           {s.pick}
           <select
             value={propertyId}
             onChange={(e) => setPropertyId(e.target.value)}
-            className="h-11 rounded-[var(--radius-control)] bg-fill px-3 text-ink"
+            className="field w-full min-w-0"
             data-testid="studio-listing"
           >
             {listings.map((l) => (

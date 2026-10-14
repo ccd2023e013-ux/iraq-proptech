@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import { ActionButton } from "@/features/admin/ActionButton";
 import { PlanForm } from "@/features/billing/PlanForm";
 import type { BillingConfig, Payment, Plan } from "@/features/billing/types";
@@ -28,7 +29,7 @@ export default async function AdminBillingPage() {
   ]);
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="display-md text-ink">{dict.admin.billing}</h1>
+      <PageHeader title={dict.admin.billing} size="md" />
       <p className="font-mono text-xs" dir="ltr">
         PAYMENT_PROVIDER={config.provider} · enabled={String(config.enabled)}
       </p>

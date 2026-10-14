@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import Link from "next/link";
 
 import { AnalyticsReport, RangeForm } from "@/features/analytics/AnalyticsReport";
@@ -26,8 +27,8 @@ export default async function MyAnalyticsPage({
     `/api/v1/analytics/overview?${rangeQuery(params, { scope })}`,
   );
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6">
-      <h1 className="display-md text-ink">{t.title}</h1>
+    <div className="page flex flex-col gap-6 pb-8">
+      <PageHeader title={t.title} />
       {canAgency && (
         <nav className="flex gap-2 text-sm">
           {(["me", "agency"] as const).map((s) => (

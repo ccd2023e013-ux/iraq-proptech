@@ -125,7 +125,7 @@ export function InquiryForm({
         <select
           value={preferred}
           onChange={(e) => setPreferred(e.target.value as (typeof PREFERENCES)[number])}
-          className="h-10 surface-1 rounded-2xl px-3 text-sm"
+          className="field"
         >
           {PREFERENCES.map((p) => (
             <option key={p} value={p}>

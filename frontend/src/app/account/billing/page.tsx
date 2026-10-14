@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import Link from "next/link";
 
 import { Alert } from "@/components/ui/Alert";
@@ -23,8 +24,8 @@ export default async function MyBillingPage() {
   const sub = data.subscription;
   const plan = data.subscription_plan;
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6">
-      <h1 className="display-md text-ink">{b.myBilling}</h1>
+    <div className="page flex flex-col gap-6 pb-8">
+      <PageHeader title={b.myBilling} size="md" />
       {config.demo && <Alert tone="warning">{b.demoBanner}</Alert>}
       <section className="surface-1 rounded-2xl p-4">
         <h2 className="mb-2 font-semibold">{b.subscription}</h2>

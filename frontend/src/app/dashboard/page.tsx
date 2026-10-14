@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import Link from "next/link";
 
 import { Alert } from "@/components/ui/Alert";
@@ -42,11 +43,8 @@ export default async function DashboardPage() {
   ];
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6">
-      <div className="flex flex-col gap-1">
-        <p className="meta">{dict.dashboard.welcome}</p>
-        <h1 className="display-md text-ink">{me.user.full_name}</h1>
-      </div>
+    <div className="page flex flex-col gap-8 pb-8">
+      <PageHeader context={dict.dashboard.welcome} title={me.user.full_name} />
       {!me.user.email_verified && <Alert tone="warning">{dict.dashboard.emailNotVerified}</Alert>}
       <section aria-labelledby="quick-links" className="flex flex-col gap-4">
         <h2 id="quick-links" className="text-sm font-semibold text-ink-2">

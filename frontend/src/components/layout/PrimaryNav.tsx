@@ -22,7 +22,7 @@ export function isActive(pathname: string, href: string): boolean {
 export function PrimaryNav({ items, label }: { items: NavItem[]; label: string }) {
   const pathname = usePathname() ?? "/";
   return (
-    <nav aria-label={label} className="hidden h-full items-stretch gap-1 text-[14px] md:flex">
+    <nav aria-label={label} className="hidden h-full items-stretch gap-0.5 text-[15px] md:flex">
       {items.map((item) => {
         const active = isActive(pathname, item.href);
         return (
@@ -30,14 +30,14 @@ export function PrimaryNav({ items, label }: { items: NavItem[]; label: string }
             key={item.href}
             href={item.href}
             aria-current={active ? "page" : undefined}
-            className={`group relative flex items-center px-3 whitespace-nowrap transition-colors duration-[var(--duration-quick)] ${
+            className={`group relative flex items-center px-3.5 whitespace-nowrap transition-colors duration-[var(--duration-quick)] ${
               active ? "font-medium text-ink" : "text-ink-2 hover:text-ink"
             }`}
           >
             {item.label}
             <span
               aria-hidden
-              className={`absolute inset-x-3 -bottom-px h-0.5 origin-center transition-[transform,background-color] duration-[var(--duration-base)] ease-[var(--ease-standard)] ${
+              className={`absolute inset-x-3.5 -bottom-px h-0.5 origin-center transition-[transform,background-color] duration-[var(--duration-base)] ease-[var(--ease-standard)] ${
                 active
                   ? "scale-x-100 bg-accent-fill"
                   : "scale-x-0 bg-hairline-strong group-hover:scale-x-100"

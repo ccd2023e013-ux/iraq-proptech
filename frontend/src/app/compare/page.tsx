@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -133,8 +134,8 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
   const title = (p: Property) => (locale === "en" && p.title_en ? p.title_en : p.title_ar);
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 sm:px-6">
-      <h1 className="display-md text-ink">{c.title}</h1>
+    <div className="page flex flex-col gap-4 pb-8">
+      <PageHeader title={c.title} />
       {!data.same_currency && <Alert tone="info">{c.differentCurrencies}</Alert>}
       <div className="overflow-x-auto surface-1 rounded-[var(--radius-card)]">
         <table className="w-full min-w-[640px] text-sm">

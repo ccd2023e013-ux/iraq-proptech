@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -49,7 +50,7 @@ export default async function CrmPage() {
   return (
     <div className="mx-auto flex max-w-[1500px] flex-col gap-6 px-4 py-8 sm:px-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="display-md text-ink">{c.dashboard}</h1>
+        <PageHeader title={c.dashboard} />
         <nav className="flex flex-wrap gap-2 text-sm">
           <Link href="/dashboard/crm/tasks" className="field py-1.5">
             {c.tasks}

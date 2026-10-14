@@ -18,16 +18,12 @@ export function Card({
   className?: string;
 }) {
   return (
-    <section className={`surface-1 rounded-[var(--radius-card)] p-5 sm:p-6 ${className}`}>
+    <section className={`panel p-6 sm:p-8 ${className}`}>
       {(title || actions) && (
-        <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
           <div>
-            {title && (
-              <h2 className="font-display text-[17px] font-semibold tracking-tight text-ink">
-                {title}
-              </h2>
-            )}
-            {description && <p className="mt-1 text-sm text-ink-3">{description}</p>}
+            {title && <h2 className="title text-ink">{title}</h2>}
+            {description && <p className="meta mt-1">{description}</p>}
           </div>
           {actions}
         </header>

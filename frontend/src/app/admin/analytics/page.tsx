@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import { AnalyticsReport, RangeForm } from "@/features/analytics/AnalyticsReport";
 import { type AnalyticsOverview, type RangeParams, rangeQuery } from "@/features/analytics/types";
 import { getDictionary } from "@/i18n";
@@ -21,7 +22,7 @@ export default async function PlatformAnalyticsPage({
   );
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="display-md text-ink">{dict.analytics.platformTitle}</h1>
+      <PageHeader title={dict.analytics.platformTitle} size="md" />
       <RangeForm dict={dict} data={data} />
       <AnalyticsReport data={data} dict={dict} locale={locale} />
     </div>

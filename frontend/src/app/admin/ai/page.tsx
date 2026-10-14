@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import { getDictionary } from "@/i18n";
 import { getRequestLocale } from "@/i18n/server";
 import { serverApiFetch } from "@/lib/api/server";
@@ -22,7 +23,7 @@ export default async function AiUsagePage() {
   const rows = await serverApiFetch<Usage[]>("/api/v1/admin/ai/usage?days=30");
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="display-md text-ink">{a.aiUsage}</h1>
+      <PageHeader title={a.aiUsage} size="md" />
       <div className="overflow-x-auto surface-1 rounded-[var(--radius-card)]">
         <table className="w-full min-w-[640px] text-sm">
           <thead>

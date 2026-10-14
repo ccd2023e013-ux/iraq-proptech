@@ -5,6 +5,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef, useState } from "react";
 
 import { type LayerInfo, applyBasemapTone } from "@/lib/map/basemap";
+import { easeStandard, placeTags } from "@/lib/map/camera";
 import type { MapConfig } from "@/lib/map/provider";
 import { maplibreWorkerUrl } from "@/lib/map/worker";
 
@@ -16,7 +17,7 @@ export interface PreviewPoint {
   /** "exact" draws a pin-head dot; "area" a soft disc that never reads as a site. */
   precision: "exact" | "area";
   tone?: PreviewTone;
-  /** Short visible label (e.g. a number keyed to a list). */
+  /** Short visible label (e.g. a number keyed to a list, or a price tag). */
   label?: string;
 }
 
@@ -43,6 +44,9 @@ export function MapPreview({
   label,
   className = "h-56 sm:h-64",
   dense = false,
+  tags = false,
+  intro = false,
+  startInset = 0,
 }: {
   config: MapConfig;
   points: PreviewPoint[];
@@ -50,6 +54,15 @@ export function MapPreview({
   className?: string;
   /** Many points (e.g. a city's listings): small dots without halos. */
   dense?: boolean;
+  /** Labelled points are drawn as price tags (the map page's tags), placed
+   * without overlap once the camera settles. */
+  tags?: boolean;
+  /** One orchestrated arrival: the camera settles in from slightly wider
+   * (instant under reduced motion). Used once, on the home page. */
+  intro?: boolean;
+  /** On wide screens, keep this share of the width (at the reading start)
+   * clear of points: the map composes itself beside the text. */
+  startInset?: number;
 }) {
   const container = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
@@ -65,6 +78,14 @@ export function MapPreview({
       maplibre.setWorkerUrl(maplibreWorkerUrl(maplibre.getVersion()));
       const dark = isDark();
       const single = points.length === 1 ? points[0] : null;
+      const el = container.current;
+      const framePadding = () => {
+        const wide = window.matchMedia("(min-width: 768px)").matches;
+        if (!startInset || !wide) return 56;
+        const start = Math.round(el.clientWidth * startInset);
+        const rtl = document.documentElement.dir === "rtl";
+        return { top: 96, bottom: 96, left: rtl ? 72 : start, right: rtl ? start : 72 };
+      };
       const lons = points.map((p) => p.lon);
       const lats = points.map((p) => p.lat);
       map = new maplibre.Map({
@@ -80,7 +101,7 @@ export function MapPreview({
                 [Math.min(...lons), Math.min(...lats)],
                 [Math.max(...lons), Math.max(...lats)],
               ] as [[number, number], [number, number]],
-              fitBoundsOptions: { padding: 56, maxZoom: 13 },
+              fitBoundsOptions: { padding: framePadding(), maxZoom: 13 },
             }),
         interactive: false,
         attributionControl: { compact: true },
@@ -121,7 +142,55 @@ export function MapPreview({
             },
           });
         }
+        // Price tags: positioned as markers, shown only where they fit.
+        const tagEls: { el: HTMLDivElement; p: PreviewPoint; width: number }[] = [];
         for (const p of points) {
+          if (!(tags && p.label && p.precision === "exact")) continue;
+          const el = document.createElement("div");
+          el.className = "map-tag-anchor";
+          el.setAttribute("aria-hidden", "true");
+          el.style.visibility = "hidden";
+          const tag = document.createElement("span");
+          tag.className = "map-tag";
+          tag.style.pointerEvents = "none";
+          tag.style.animation = "none"; // arrives when it is placed (below)
+          tag.textContent = p.label;
+          el.appendChild(tag);
+          new maplibre.Marker({ element: el, anchor: "bottom", offset: [0, -7] })
+            .setLngLat([p.lon, p.lat])
+            .addTo(m);
+          tagEls.push({ el, p, width: 0 });
+        }
+        const placeAll = () => {
+          if (!tagEls.length) return;
+          const boxes = tagEls.map(({ el, p }, i) => {
+            const at = m.project([p.lon, p.lat]);
+            const width = (el.firstElementChild as HTMLElement).offsetWidth || 80;
+            return { id: String(i), x: at.x - width / 2, y: at.y - 34, width, height: 26 };
+          });
+          const shown = placeTags(boxes, 24, 8);
+          let order = 0;
+          tagEls.forEach(({ el }, i) => {
+            const on = shown.has(String(i));
+            el.style.visibility = on ? "visible" : "hidden";
+            if (on) {
+              // A short, ordered arrival — the one staged moment on the page.
+              const tag = el.firstElementChild as HTMLElement;
+              tag.style.animation = "";
+              tag.style.animationDelay = `${order * 70}ms`;
+              order += 1;
+            }
+          });
+        };
+        for (const p of points) {
+          if (tags && p.label && p.precision === "exact") {
+            // The dot under each tag marks the exact spot.
+            const dot = document.createElement("div");
+            dot.setAttribute("aria-hidden", "true");
+            dot.style.cssText = `width:7px;height:7px;border-radius:999px;background:var(--spatial-fill);box-shadow:0 0 0 2px var(--canvas);`;
+            new maplibre.Marker({ element: dot }).setLngLat([p.lon, p.lat]).addTo(m);
+            continue;
+          }
           const el = document.createElement("div");
           el.setAttribute("aria-hidden", "true");
           const color = TONE[p.tone ?? "accent"];
@@ -138,7 +207,18 @@ export function MapPreview({
           new maplibre.Marker({ element: el }).setLngLat([p.lon, p.lat]).addTo(m);
         }
         // Fade in once the tiles are drawn, not while the basemap is half-loaded.
-        m.once("idle", () => setReady(true));
+        m.once("idle", () => {
+          setReady(true);
+          const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          if (intro && !reduce) {
+            const target = { zoom: m.getZoom(), center: m.getCenter() };
+            m.jumpTo({ zoom: target.zoom - 0.9 });
+            m.once("moveend", placeAll);
+            m.easeTo({ ...target, duration: 2400, easing: easeStandard });
+          } else {
+            placeAll();
+          }
+        });
       });
     })().catch(() => undefined);
     return () => {
@@ -147,7 +227,7 @@ export function MapPreview({
     };
     // `key` captures the points; config is static per page.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, config, dense]);
+  }, [key, config, dense, tags, intro, startInset]);
 
   return (
     <div

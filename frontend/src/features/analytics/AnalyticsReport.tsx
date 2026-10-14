@@ -234,21 +234,11 @@ export function RangeForm({
       ))}
       <label className="flex flex-col gap-1">
         {t.from}
-        <input
-          type="date"
-          name="date_from"
-          defaultValue={data.date_from}
-          className="rounded border border-sand-300 px-2 py-1"
-        />
+        <input type="date" name="date_from" defaultValue={data.date_from} className="field" />
       </label>
       <label className="flex flex-col gap-1">
         {t.to}
-        <input
-          type="date"
-          name="date_to"
-          defaultValue={data.date_to}
-          className="rounded border border-sand-300 px-2 py-1"
-        />
+        <input type="date" name="date_to" defaultValue={data.date_to} className="field" />
       </label>
       <label className="flex items-center gap-2">
         <input type="checkbox" name="include_demo" value="1" defaultChecked={data.include_demo} />

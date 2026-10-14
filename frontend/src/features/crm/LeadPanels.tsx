@@ -20,7 +20,7 @@ import {
 
 import { formatDateTime, fromLocalInput, toLocalInput } from "./labels";
 
-const field = "h-10 w-full surface-1 rounded-2xl px-3 text-sm";
+const field = "field";
 const labelCls = "flex flex-col gap-1 text-xs font-medium text-sand-700";
 
 function useAction(dict: Dictionary) {
@@ -411,7 +411,7 @@ export function AppointmentPanel({
             {canManage ? (
               <select
                 aria-label={c.status}
-                className="h-8 rounded-md border border-sand-200 bg-surface px-2 text-xs"
+                className="field h-9 w-auto text-sm"
                 value={a.status}
                 disabled={busy}
                 onChange={(e) =>
@@ -497,7 +497,7 @@ export function ReplyDraft({ dict, leadId }: { dict: Dictionary; leadId: string 
           value={text}
           rows={6}
           aria-label={dict.ai.replyDraft}
-          className="surface-1 rounded-2xl p-2 text-sm"
+          className="field"
         />
       )}
     </div>

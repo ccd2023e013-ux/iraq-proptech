@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 
@@ -32,13 +33,8 @@ export default async function StudioPage({ searchParams }: { searchParams: Promi
   const host = (await headers()).get("host") ?? "iraq-proptech-web.onrender.com";
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-6">
-      <header className="flex max-w-2xl flex-col gap-3">
-        <h1 className="font-display text-4xl font-semibold tracking-tight text-ink">
-          {dict.studio.title}
-        </h1>
-        <p className="text-lg text-ink-2">{dict.studio.subtitle}</p>
-      </header>
+    <div className="page flex flex-col gap-8 pb-8">
+      <PageHeader title={dict.studio.title} lede={dict.studio.subtitle} />
       <Studio
         dict={dict}
         locale={locale}

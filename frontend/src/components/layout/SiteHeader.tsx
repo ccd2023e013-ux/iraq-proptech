@@ -74,15 +74,15 @@ export function SiteHeader({
     // A full-width bar with a hairline base. It is an overlay when content
     // scrolls under it (and on the map), so it is translucent with a blur.
     <header className="sticky top-0 z-[var(--z-header)] h-[var(--header-h)] border-b border-hairline bg-canvas/85 backdrop-blur-xl backdrop-saturate-150">
-      <div className="mx-auto flex h-full max-w-[1320px] items-stretch justify-between gap-4 px-4 sm:px-6 lg:px-8">
+      <div className="page flex h-full items-stretch justify-between gap-4">
         <div className="flex min-w-0 items-stretch gap-6 lg:gap-8">
           <Link
             href="/"
             className="press flex items-center gap-2.5 self-center rounded-[var(--radius-control)]"
             aria-label={dict.nav.home}
           >
-            <BrandMark />
-            <span className="font-display text-[19px] leading-none font-semibold tracking-tight whitespace-nowrap text-ink max-[380px]:hidden">
+            <BrandMark className="size-8" />
+            <span className="font-display text-[21px] leading-none font-semibold tracking-tight whitespace-nowrap text-ink max-[380px]:hidden">
               {locale === "ar" ? "مَكان" : "MAKAN"}
             </span>
           </Link>
@@ -92,7 +92,7 @@ export function SiteHeader({
           {me && (
             <Link
               href="/dashboard/properties/new"
-              className="press hidden h-9 items-center gap-1.5 rounded-[var(--radius-control)] px-3 text-sm font-medium text-accent hover:bg-accent-tint lg:inline-flex"
+              className="btn btn-quiet btn-sm hidden text-accent hover:text-accent lg:inline-flex"
             >
               <Icon name="plus" className="size-4" strokeWidth={2} />
               {dict.nav.addProperty}
@@ -104,7 +104,7 @@ export function SiteHeader({
             <Link
               href="/notifications"
               aria-label={`${dict.notifications.title}${unread ? ` (${unread})` : ""}`}
-              className="icon-btn relative size-9"
+              className="icon-btn relative"
             >
               <Icon name="bell" className="size-[18px]" />
               {unread > 0 && (
@@ -118,16 +118,10 @@ export function SiteHeader({
             <UserMenu dict={dict} name={me.user.full_name} />
           ) : (
             <>
-              <Link
-                href="/login"
-                className="press hidden h-9 items-center rounded-[var(--radius-control)] px-3 text-sm font-medium text-ink-2 hover:bg-fill hover:text-ink sm:inline-flex"
-              >
+              <Link href="/login" className="btn btn-quiet btn-sm hidden sm:inline-flex">
                 {dict.nav.login}
               </Link>
-              <Link
-                href="/register"
-                className="press ms-1 inline-flex h-9 items-center rounded-[var(--radius-control)] bg-accent-fill px-3.5 text-sm font-medium whitespace-nowrap text-on-accent shadow-[inset_0_1px_0_rgb(255_255_255/0.18)] hover:bg-accent-fill-hover"
-              >
+              <Link href="/register" className="btn btn-secondary btn-sm ms-1">
                 {dict.nav.register}
               </Link>
             </>

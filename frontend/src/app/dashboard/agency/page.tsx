@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { AgencyTeam, CreateAgencyForm, PendingInvitations } from "@/features/agency/AgencyPanels";
@@ -23,8 +24,8 @@ export default async function AgencyPage() {
   const a = dict.agency;
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6">
-      <h1 className="display-md text-ink">{a.title}</h1>
+    <div className="page flex flex-col gap-6 pb-8">
+      <PageHeader title={a.title} />
       <PendingInvitations dict={dict} invitations={invitations} />
       {agency ? (
         <>

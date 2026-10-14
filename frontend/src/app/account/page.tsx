@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import { Card } from "@/components/ui/Card";
 import {
   ChangePasswordForm,
@@ -19,8 +20,8 @@ export default async function AccountPage() {
   const { user } = me;
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-8 sm:px-6">
-      <h1 className="display-md text-ink">{dict.account.title}</h1>
+    <div className="page flex flex-col gap-6 pb-8">
+      <PageHeader title={dict.account.title} size="md" />
 
       {!user.email_verified && (
         <Alert tone="warning" title={dict.auth.verifyPending}>

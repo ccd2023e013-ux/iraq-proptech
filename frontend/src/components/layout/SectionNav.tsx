@@ -24,9 +24,9 @@ export function SectionNav({
   return (
     <nav
       aria-label={title}
-      className="flex min-w-0 flex-col gap-2 lg:sticky lg:top-24 lg:self-start"
+      className="flex min-w-0 flex-col gap-2 lg:sticky lg:top-[calc(var(--header-h)+2rem)] lg:self-start"
     >
-      <p className="meta font-medium max-lg:sr-only">{title}</p>
+      <p className="label mb-2 max-lg:sr-only">{title}</p>
       <ul className="quiet-scroll -mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 lg:mx-0 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:px-0">
         {items.map(({ href, label }) => {
           const active = current(href);
@@ -35,7 +35,7 @@ export function SectionNav({
               <Link
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={`press relative flex h-9 items-center rounded-[var(--radius-control)] px-3.5 text-sm whitespace-nowrap transition-colors lg:h-10 lg:rounded-xl ${
+                className={`press relative flex h-10 items-center rounded-[var(--radius-control)] px-3.5 text-[15px] whitespace-nowrap transition-colors lg:h-11 ${
                   active
                     ? "bg-fill font-medium text-ink lg:before:absolute lg:before:inset-y-2.5 lg:before:start-0 lg:before:w-0.5 lg:before:rounded-full lg:before:bg-accent-fill"
                     : "text-ink-2 ring-1 ring-inset ring-hairline hover:bg-fill hover:text-ink lg:ring-0"

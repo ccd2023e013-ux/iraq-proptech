@@ -73,7 +73,7 @@ export function NearYou({ dict, locale }: { dict: Dictionary; locale: Locale }) 
   return (
     <section
       aria-labelledby="near-heading"
-      className="rule-top grid grid-cols-1 gap-8 pt-10 md:grid-cols-12 md:gap-6 md:pt-12"
+      className="grid grid-cols-1 gap-8 md:grid-cols-12 md:gap-6"
     >
       <div className="flex min-w-0 flex-col items-start gap-3 md:col-span-4 lg:col-span-3">
         <h2 id="near-heading" className="display-md text-ink">

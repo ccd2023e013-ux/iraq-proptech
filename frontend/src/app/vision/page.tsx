@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -37,11 +38,8 @@ export default async function VisionPage({ searchParams }: { searchParams: Promi
   const next = `/vision${propertyId ? `?property_id=${propertyId}` : ""}`;
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-6">
-      <header className="flex max-w-2xl flex-col gap-3">
-        <h1 className="font-display text-4xl font-semibold tracking-tight text-ink">{v.title}</h1>
-        <p className="text-lg text-ink-2">{v.subtitle}</p>
-      </header>
+    <div className="page flex flex-col gap-8 pb-8">
+      <PageHeader title={v.title} lede={v.subtitle} />
       {me ? (
         <VisionStudio
           dict={dict}
@@ -51,15 +49,12 @@ export default async function VisionPage({ searchParams }: { searchParams: Promi
           recent={propertyId ? recent.filter((c) => c.property_id === propertyId) : recent}
         />
       ) : (
-        <div className="flex flex-col items-start gap-4 rounded-[var(--radius-card)] bg-fill p-6">
-          <p className="rounded-[var(--radius-control)] bg-ink px-4 py-2 text-xs font-semibold text-surface">
+        <div className="flex max-w-2xl flex-col items-start gap-4 rounded-[var(--radius-card)] bg-surface p-8 shadow-[inset_0_0_0_1px_var(--hairline)]">
+          <p className="rounded-[var(--radius-tag)] bg-gold-100 px-2.5 py-1 text-xs font-semibold text-gold-700 shadow-[inset_0_0_0_1px_var(--gold-line)]">
             {v.label}
           </p>
-          <p className="text-ink-2">{v.signIn}</p>
-          <Link
-            href={`/login?next=${encodeURIComponent(next)}`}
-            className="inline-flex h-11 items-center rounded-[var(--radius-control)] bg-accent-fill px-5 font-medium text-on-accent hover:bg-accent-fill-hover"
-          >
+          <p className="text-lg text-ink-2">{v.signIn}</p>
+          <Link href={`/login?next=${encodeURIComponent(next)}`} className="btn btn-primary">
             {v.signInButton}
           </Link>
         </div>

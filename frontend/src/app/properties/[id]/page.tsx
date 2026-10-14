@@ -381,7 +381,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                   <a
                     href={`tel:${property.lister.phone}`}
                     dir="ltr"
-                    className="press inline-flex h-12 items-center justify-center gap-2 rounded-[var(--radius-control)] bg-accent-fill px-5 font-medium text-on-accent shadow-[inset_0_1px_0_rgb(255_255_255/0.25)] hover:bg-accent-fill-hover"
+                    className="btn btn-primary btn-lg"
                   >
                     {p.call} {property.lister.phone}
                   </a>

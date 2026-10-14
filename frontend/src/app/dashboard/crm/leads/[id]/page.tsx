@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -58,13 +59,13 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
   };
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6">
+    <div className="page flex flex-col gap-6 pb-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <Link href="/dashboard/crm" className="text-sm text-accent">
             {c.dashboard}
           </Link>
-          <h1 className="display-md text-ink">{customer.full_name}</h1>
+          <PageHeader title={customer.full_name} />
           <p className="text-sm text-sand-500">
             {statusName(statuses, lead.status_code, locale)} · {c.sources[lead.source]} ·{" "}
             {formatDateTime(lead.created_at, locale)}

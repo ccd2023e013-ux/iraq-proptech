@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/ui/PageHeader";
 import { notFound } from "next/navigation";
 
 import { Alert } from "@/components/ui/Alert";
@@ -28,7 +29,7 @@ export default async function DemoCheckoutPage({ params }: { params: Promise<{ i
   if (!data.payment.is_demo) notFound();
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-5 px-4 py-10 sm:px-6">
-      <h1 className="display-md text-ink">{b.checkoutTitle}</h1>
+      <PageHeader title={b.checkoutTitle} size="md" />
       <Alert tone="warning">{b.demoBanner}</Alert>
       <dl className="surface-1 rounded-2xl p-4 text-sm">
         <dt className="text-sand-500">{b.plans}</dt>

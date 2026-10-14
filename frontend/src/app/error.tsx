@@ -36,11 +36,7 @@ export default function GlobalError({
         Something went wrong on our side. Your data is safe.
       </p>
       <div className="reveal mt-8 flex flex-wrap justify-center gap-2" style={stagger(3)}>
-        <button
-          type="button"
-          onClick={reset}
-          className="press inline-flex h-11 items-center gap-2 rounded-[var(--radius-control)] bg-accent-fill px-5 font-medium text-on-accent hover:bg-accent-fill-hover"
-        >
+        <button type="button" onClick={reset} className="btn btn-primary">
           <Icon name="refresh" className="size-4" />
           إعادة المحاولة / Try again
         </button>
