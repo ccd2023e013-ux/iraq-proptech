@@ -886,7 +886,22 @@ export function PropertyMap(props: PropertyMapProps) {
           );
         };
         map.on("moveend", report);
-        map.once("load", report);
+        map.once("load", () => {
+          // Phones opening on the default area would see one grouped disc:
+          // open them at the zoom where prices appear, on the same centre.
+          // (An area from the URL — a shared link — is kept exactly.)
+          const { initialBbox, config: cfg } = latest.current;
+          const isDefault = initialBbox.every((v, i) => v === cfg.defaultBbox[i]);
+          if (
+            map &&
+            isDefault &&
+            map.getCanvas().clientWidth < 640 &&
+            map.getZoom() < BUBBLE_MIN_ZOOM
+          ) {
+            map.jumpTo({ zoom: BUBBLE_MIN_ZOOM + 0.4 });
+          }
+          report();
+        });
         // Tags are re-placed when the camera settles (they ride with the map
         // while it moves, so nothing is recomputed per frame).
         map.on("moveend", () => syncRef.current());

@@ -74,7 +74,7 @@ export const NIGHT: Plate = {
   water: "#0a2a3a",
   shore: "#1e5a6e",
   glow: "#22d3ee",
-  waterway: "#124a5e",
+  waterway: "#0e3848",
   aeroway: "#151e30",
   // Streets are neutral slate a step above the land: structure, not wireframe.
   roadMinor: "#1a212d",
@@ -378,7 +378,7 @@ export function makanStyle({
         "line-color": P.shore,
         "line-width": ["interpolate", ["linear"], ["zoom"], 9, 0.5, 15, 1.2],
         "line-opacity": dark
-          ? ["interpolate", ["linear"], ["zoom"], 9, 0.9, 14, 0.5, 17, 0.3]
+          ? ["interpolate", ["linear"], ["zoom"], 9, 0.9, 12, 0.6, 14, 0.2, 16, 0.1]
           : 0.9,
       },
     },

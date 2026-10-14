@@ -99,7 +99,14 @@ export default async function HomePage() {
       : [],
   );
   // Photographed listings lead; one large, four smaller.
-  const photographed = all.filter((c) => c.cover_url);
+  // Varied photographs: demo covers come from a small licensed library drawn
+  // by property type, so one listing per type first keeps the same picture
+  // from appearing twice in one composition; the rest follow.
+  const withPhoto = all.filter((c) => c.cover_url);
+  const firstOfType = withPhoto.filter(
+    (c, i) => withPhoto.findIndex((o) => o.property_type_code === c.property_type_code) === i,
+  );
+  const photographed = [...firstOfType, ...withPhoto.filter((c) => !firstOfType.includes(c))];
   const lead = photographed[0] ?? all[0];
   const rest = (photographed.length > 1 ? photographed : all).filter((c) => c !== lead).slice(0, 4);
   const anyDemo = cities.some((c) => c.includes_demo);
