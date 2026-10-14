@@ -1,0 +1,1672 @@
+[
+ {
+  "shot": "ar-dark-1440--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 11.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1294/841.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1294/842.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1294/840.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1296/840.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1296/842.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1295/842.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/12/2590/1683.pbf net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-dark-1440--map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 28.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 5.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/d7f6490c-7cfc-438e-9e73-586546804029",
+  "status": 200,
+  "seconds": 8.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/future",
+  "status": 200,
+  "seconds": 4.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--market",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/market",
+  "status": 200,
+  "seconds": 2.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--pricing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/pricing",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--login",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/login",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--register",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/register",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--smart",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--compare",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--studio",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/studio",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--vision",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/vision",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--credits",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/credits",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--status",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/status",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--forgot",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/forgot-password",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--notfound",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/this-page-does-not-exist",
+  "status": 404,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 11.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 31.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 5.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/d7f6490c-7cfc-438e-9e73-586546804029",
+  "status": 200,
+  "seconds": 7.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/future",
+  "status": 200,
+  "seconds": 4.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--market",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/market",
+  "status": 200,
+  "seconds": 2.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--pricing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/pricing",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--login",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/login",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--register",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/register",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--smart",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--compare",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--studio",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/studio",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--vision",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/vision",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--credits",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/credits",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--status",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/status",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--forgot",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/forgot-password",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--notfound",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/this-page-does-not-exist",
+  "status": 404,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 9.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/10/647/421.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/10/648/421.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/10/648/420.pbf net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-dark-390--map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 34.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 5.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/d7f6490c-7cfc-438e-9e73-586546804029",
+  "status": 200,
+  "seconds": 4.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/future",
+  "status": 200,
+  "seconds": 4.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--market",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/market",
+  "status": 200,
+  "seconds": 3.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--pricing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/pricing",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--login",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/login",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--register",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/register",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--smart",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--compare",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--studio",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/studio",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--vision",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/vision",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--credits",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/credits",
+  "status": 200,
+  "seconds": 1.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--status",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/status",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--forgot",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/forgot-password",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--notfound",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/this-page-does-not-exist",
+  "status": 404,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 8.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 34.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 4.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/d7f6490c-7cfc-438e-9e73-586546804029",
+  "status": 200,
+  "seconds": 7.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/future",
+  "status": 200,
+  "seconds": 4.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--market",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/market",
+  "status": 200,
+  "seconds": 3.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--pricing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/pricing",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--login",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/login",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--register",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/register",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--smart",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--compare",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--studio",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/studio",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--vision",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/vision",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--credits",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/credits",
+  "status": 200,
+  "seconds": 1.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--status",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/status",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--forgot",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/forgot-password",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--notfound",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/this-page-does-not-exist",
+  "status": 404,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-1440--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 9.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1294/841.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1294/842.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1294/840.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1296/840.pbf net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-light-1440--map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 26.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-1440--properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 5.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-1440--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/d7f6490c-7cfc-438e-9e73-586546804029",
+  "status": 200,
+  "seconds": 6.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-1440--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/future",
+  "status": 200,
+  "seconds": 4.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-390--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 7.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-390--map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 35.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-390--properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 5.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-390--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/d7f6490c-7cfc-438e-9e73-586546804029",
+  "status": 200,
+  "seconds": 4.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-390--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/future",
+  "status": 200,
+  "seconds": 5.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1920--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 12.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1920--map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 52.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1920--properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 4.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1920--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/d7f6490c-7cfc-438e-9e73-586546804029",
+  "status": 200,
+  "seconds": 7.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1920--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/future",
+  "status": 200,
+  "seconds": 5.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--map-states",
+  "states": {
+   "selected": "ok",
+   "list-hover": "ok",
+   "zoomed": "ok",
+   "3d": "ok",
+   "layers": "ok",
+   "drawing": "ok"
+  },
+  "console_errors": []
+ },
+ {
+  "shot": "ar-dark-390--map-states",
+  "states": {
+   "selected": "ok",
+   "zoomed": "ok",
+   "3d": "ok",
+   "layers": "ok",
+   "sheet-open": "ok",
+   "drawing": "ok"
+  },
+  "console_errors": []
+ },
+ {
+  "shot": "en-dark-390--map-states",
+  "states": {
+   "selected": "ok",
+   "zoomed": "ok",
+   "3d": "ok",
+   "layers": "ok",
+   "sheet-open": "ok",
+   "drawing": "ok"
+  },
+  "console_errors": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_dashboard",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard",
+  "status": 200,
+  "seconds": 2.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_dashboard_properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/properties",
+  "status": 200,
+  "seconds": 1.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_dashboard_properties_new",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/properties/new",
+  "status": 200,
+  "seconds": 2.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_dashboard_crm",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/crm",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_dashboard_analytics",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/analytics",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_dashboard_agency",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/agency",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_account",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/account",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_account_billing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/account/billing",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_favorites",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/favorites",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_saved-searches",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/saved-searches",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_notifications",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/notifications",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_messages",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/messages",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_studio",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/studio",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_vision",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/vision",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_dashboard",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_dashboard_properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/properties",
+  "status": 200,
+  "seconds": 2.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_dashboard_properties_new",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/properties/new",
+  "status": 200,
+  "seconds": 2.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_dashboard_crm",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/crm",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_dashboard_analytics",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/analytics",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_dashboard_agency",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/agency",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_account",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/account",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_account_billing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/account/billing",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_favorites",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/favorites",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_saved-searches",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/saved-searches",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_notifications",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/notifications",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_messages",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/messages",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_studio",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/studio",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_vision",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/vision",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin",
+  "status": 200,
+  "seconds": 2.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_users",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/users",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_moderation",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/moderation",
+  "status": 200,
+  "seconds": 1.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_verification",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/verification",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_ai",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/ai",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_analytics",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/analytics",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_reports",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/reports",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_billing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/billing",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_jobs",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/jobs",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_audit",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/audit",
+  "status": 200,
+  "seconds": 1.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_system",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/system",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_settings",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/settings",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_webhooks",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/webhooks",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_users",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/users",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_moderation",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/moderation",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_verification",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/verification",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_ai",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/ai",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_analytics",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/analytics",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_reports",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/reports",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_billing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/billing",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_jobs",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/jobs",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_audit",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/audit",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_system",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/system",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_settings",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/settings",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_webhooks",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/webhooks",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--public-home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 11.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/10/648/421.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/10/647/421.pbf net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-dark-390--public-map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 35.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--public-home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 9.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1294/841.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1294/842.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1294/840.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1297/840.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1296/842.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1295/842.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1297/841.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/12/2590/1683.pbf net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-dark-1440--public-map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 28.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ }
+]
