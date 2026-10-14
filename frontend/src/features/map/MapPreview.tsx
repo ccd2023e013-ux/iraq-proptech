@@ -168,7 +168,7 @@ export function MapPreview({
           tag.style.pointerEvents = "none";
           tag.style.animation = "none"; // arrives when it is revealed (below)
           const value = document.createElement("span");
-          value.textContent = p.label;
+          value.textContent = p.label ?? "";
           const badge = document.createElement("span");
           badge.className = "map-tag-more";
           tag.append(value, badge);
