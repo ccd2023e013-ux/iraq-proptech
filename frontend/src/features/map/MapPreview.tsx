@@ -4,9 +4,9 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 import { useEffect, useRef, useState } from "react";
 
-import { type LayerInfo, applyBasemapTone } from "@/lib/map/basemap";
-import { easeStandard, placeTags } from "@/lib/map/camera";
+import { easeStandard, placeTagsBalanced } from "@/lib/map/camera";
 import type { MapConfig } from "@/lib/map/provider";
+import { styleFor } from "@/lib/map/style";
 import { maplibreWorkerUrl } from "@/lib/map/worker";
 
 export type PreviewTone = "accent" | "gold" | "muted";
@@ -20,6 +20,9 @@ export interface PreviewPoint {
   /** Short visible label (e.g. a number keyed to a list, or a price tag). */
   label?: string;
 }
+
+/** The home arrival: one camera move (ms). */
+const INTRO_MS = 1800;
 
 const TONE: Record<PreviewTone, string> = {
   accent: "#10b981",
@@ -90,7 +93,11 @@ export function MapPreview({
       const lats = points.map((p) => p.lat);
       map = new maplibre.Map({
         container: container.current,
-        style: ((dark && config.darkStyle) || config.style) as never,
+        style: styleFor(
+          config,
+          dark,
+          document.documentElement.lang === "en" ? "en" : "ar",
+        ) as never,
         ...(single
           ? {
               center: [single.lon, single.lat] as [number, number],
@@ -108,13 +115,6 @@ export function MapPreview({
       });
       const m = map;
       m.on("style.load", () => {
-        if (config.provider === "openfreemap") {
-          applyBasemapTone(
-            { setPaintProperty: (l, p, v) => m.setPaintProperty(l, p as never, v as never) },
-            m.getStyle().layers as LayerInfo[],
-            dark,
-          );
-        }
         const areas = points.filter((p) => p.precision === "area");
         if (areas.length) {
           m.addSource("preview-areas", {
@@ -142,10 +142,23 @@ export function MapPreview({
             },
           });
         }
-        // Price tags: positioned as markers, shown only where they fit.
-        const tagEls: { el: HTMLDivElement; p: PreviewPoint; width: number }[] = [];
-        for (const p of points) {
-          if (!(tags && p.label && p.precision === "exact")) continue;
+        // Price tags: the map page's markers, hidden until placed.
+        const tagEls: {
+          el: HTMLDivElement;
+          tag: HTMLElement;
+          badge: HTMLElement;
+          p: PreviewPoint;
+        }[] = [];
+        const tagged = points.filter((p) => tags && p.label && p.precision === "exact");
+        // Every listing's dot first, so no dot is ever drawn over a tag.
+        for (const p of tagged) {
+          const dot = document.createElement("div");
+          dot.setAttribute("aria-hidden", "true");
+          dot.style.cssText =
+            "width:7px;height:7px;border-radius:999px;background:var(--spatial-fill);box-shadow:0 0 0 1.5px var(--canvas);";
+          new maplibre.Marker({ element: dot }).setLngLat([p.lon, p.lat]).addTo(m);
+        }
+        for (const p of tagged) {
           const el = document.createElement("div");
           el.className = "map-tag-anchor";
           el.setAttribute("aria-hidden", "true");
@@ -153,77 +166,95 @@ export function MapPreview({
           const tag = document.createElement("span");
           tag.className = "map-tag";
           tag.style.pointerEvents = "none";
-          tag.style.animation = "none"; // arrives when it is placed (below)
-          tag.textContent = p.label;
+          tag.style.animation = "none"; // arrives when it is revealed (below)
+          const value = document.createElement("span");
+          value.textContent = p.label;
+          const badge = document.createElement("span");
+          badge.className = "map-tag-more";
+          tag.append(value, badge);
           el.appendChild(tag);
-          new maplibre.Marker({ element: el, anchor: "bottom", offset: [0, -7] })
+          new maplibre.Marker({ element: el, anchor: "bottom", offset: [0, -8] })
             .setLngLat([p.lon, p.lat])
             .addTo(m);
-          tagEls.push({ el, p, width: 0 });
+          tagEls.push({ el, tag, badge, p });
         }
-        const placeAll = () => {
-          if (!tagEls.length) return;
-          const boxes = tagEls.map(({ el, p }, i) => {
-            const at = m.project([p.lon, p.lat]);
-            const width = (el.firstElementChild as HTMLElement).offsetWidth || 80;
-            return { id: String(i), x: at.x - width / 2, y: at.y - 34, width, height: 26 };
-          });
-          const shown = placeTags(boxes, 24, 8);
-          // Diagnostics for automated checks: candidates and tags placed.
-          el.dataset.tagsTotal = String(boxes.length);
-          el.dataset.tagsShown = String(shown.size);
-          let order = 0;
-          tagEls.forEach(({ el }, i) => {
-            const on = shown.has(String(i));
-            el.style.visibility = on ? "visible" : "hidden";
-            if (on) {
-              // A short, ordered arrival — the one staged moment on the page.
-              const tag = el.firstElementChild as HTMLElement;
-              tag.style.animation = "";
-              tag.style.animationDelay = `${order * 70}ms`;
-              order += 1;
-            }
-          });
-        };
+        // Other points: area discs carry only their key number; exact points
+        // are dots (dense) or numbered pins.
         for (const p of points) {
-          if (tags && p.label && p.precision === "exact") {
-            // The dot under each tag marks the exact spot.
-            const dot = document.createElement("div");
-            dot.setAttribute("aria-hidden", "true");
-            dot.style.cssText = `width:7px;height:7px;border-radius:999px;background:var(--spatial-fill);box-shadow:0 0 0 2px var(--canvas);`;
-            new maplibre.Marker({ element: dot }).setLngLat([p.lon, p.lat]).addTo(m);
-            continue;
-          }
+          if (tags && p.label && p.precision === "exact") continue;
           const el = document.createElement("div");
           el.setAttribute("aria-hidden", "true");
           const color = TONE[p.tone ?? "accent"];
           if (p.precision === "area") {
-            // Only the key number, never a dot: the disc already says "around here".
             if (!p.label) continue;
-            el.style.cssText = `color:${color};font:700 12px/1 var(--font-sans);text-shadow:0 0 3px ${dark ? "#0b0f17" : "#ffffff"};`;
+            el.style.cssText = `color:${color};font:700 12px/1 var(--font-sans);text-shadow:0 0 3px var(--canvas);`;
           } else {
             el.style.cssText = dense
-              ? `width:8px;height:8px;border-radius:999px;background:${color};box-shadow:0 0 0 2px ${dark ? "#0a0c0f" : "#ffffff"};`
-              : `display:grid;place-items:center;min-width:${p.label ? 22 : 14}px;height:${p.label ? 22 : 14}px;padding:0 5px;border-radius:999px;background:${color};color:#04130d;font:600 11px/1 var(--font-sans);border:2px solid ${dark ? "#0a0c0f" : "#ffffff"};box-shadow:0 0 0 6px ${color}2e;`;
+              ? `width:8px;height:8px;border-radius:999px;background:${color};box-shadow:0 0 0 2px var(--canvas);`
+              : `display:grid;place-items:center;min-width:${p.label ? 22 : 14}px;height:${p.label ? 22 : 14}px;padding:0 5px;border-radius:999px;background:${color};color:#04130d;font:600 11px/1 var(--font-sans);border:2px solid var(--canvas);box-shadow:0 0 0 6px ${color}2e;`;
           }
           if (p.label) el.textContent = p.label;
           new maplibre.Marker({ element: el }).setLngLat([p.lon, p.lat]).addTo(m);
         }
+        // Placement is computed for the camera's final position, so it is
+        // right whether or not the arrival move runs (and never waits for it).
+        const place = () => {
+          const boxes = tagEls.map(({ tag, p }, i) => {
+            const at = m.project([p.lon, p.lat]);
+            const width = tag.offsetWidth || 80;
+            return { id: String(i), x: at.x - width / 2, y: at.y - 36, width, height: 28 };
+          });
+          // Only tags fully inside the open part of the frame (not under the
+          // text column on wide screens, not cut by an edge).
+          const w = el.clientWidth;
+          const h = el.clientHeight;
+          const wide = window.matchMedia("(min-width: 768px)").matches;
+          const inset = startInset && wide ? w * startInset : 0;
+          const rtl = document.documentElement.dir === "rtl";
+          const visibleBoxes = boxes.filter(
+            (b) =>
+              b.x > (rtl ? 8 : inset + 8) &&
+              b.x + b.width < (rtl ? w - inset - 8 : w - 8) &&
+              b.y > 8 &&
+              b.y + b.height < h - 48,
+          );
+          const placed = placeTagsBalanced(visibleBoxes, 18, { gap: 8, cell: 120, absorb: 56 });
+          el.dataset.tagsTotal = String(boxes.length);
+          el.dataset.tagsShown = String(placed.shown.size);
+          return placed;
+        };
+        const reveal = ({ shown, more }: ReturnType<typeof place>, stagger: number) => {
+          let order = 0;
+          tagEls.forEach(({ el: anchor, tag, badge }, i) => {
+            const on = shown.has(String(i));
+            anchor.style.visibility = on ? "visible" : "hidden";
+            const extra = more.get(String(i)) ?? 0;
+            badge.textContent = extra > 0 ? `+${extra}` : "";
+            if (on) {
+              tag.style.animation = "";
+              tag.style.animationDelay = `${order * stagger}ms`;
+              order += 1;
+            }
+          });
+        };
         // Fade in once the tiles are drawn, not while the basemap is half-loaded.
         m.once("idle", () => {
           setReady(true);
-          el.dataset.phase = "intro";
+          const placed = place();
           const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
           if (intro && !reduce) {
+            // One arrival: the camera settles in from slightly wider, and the
+            // prices rise in order as it lands (most of the move is early).
+            el.dataset.phase = "intro";
             const target = { zoom: m.getZoom(), center: m.getCenter() };
-            m.jumpTo({ zoom: target.zoom - 0.9 });
+            m.jumpTo({ zoom: target.zoom - 0.8 });
+            m.easeTo({ ...target, duration: INTRO_MS, easing: easeStandard });
+            window.setTimeout(() => reveal(placed, 60), INTRO_MS * 0.35);
             m.once("moveend", () => {
-              placeAll();
               el.dataset.phase = "settled";
             });
-            m.easeTo({ ...target, duration: 2400, easing: easeStandard });
           } else {
-            placeAll();
+            reveal(placed, 0);
             el.dataset.phase = "settled";
           }
         });

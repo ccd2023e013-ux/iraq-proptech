@@ -91,11 +91,59 @@ export interface TagBox {
  * pixels of air) is skipped — its exact spot is still marked by a dot.
  */
 export function placeTags(boxes: TagBox[], limit: number, gap = 4): Set<string> {
+  return placeTagsBalanced(boxes, limit, { gap }).shown;
+}
+
+export interface Placement {
+  /** Tags drawn. */
+  shown: Set<string>;
+  /** For a drawn tag: how many hidden listings sit close to it ("+N"). */
+  more: Map<string, number>;
+}
+
+/** Where a tag points: the middle of its lower edge. */
+function anchorOf(b: TagBox): [number, number] {
+  return [b.x + b.width / 2, b.y + b.height];
+}
+
+/**
+ * Balanced placement. Greedy collision as `placeTags`, but candidates are
+ * taken round-robin across a screen grid of `cell` px, so prices spread over
+ * the whole view instead of piling into the first dense neighbourhood. A
+ * listing whose tag does not fit is counted on the nearest drawn tag within
+ * `absorb` px (shown as "+N"), so no listing is silently dropped.
+ */
+export function placeTagsBalanced(
+  boxes: TagBox[],
+  limit: number,
+  { gap = 4, cell = 0, absorb = 0 }: { gap?: number; cell?: number; absorb?: number } = {},
+): Placement {
+  const pinned = boxes.filter((b) => b.pinned);
+  let rest = boxes.filter((b) => !b.pinned);
+  if (cell > 0 && rest.length > 1) {
+    const buckets = new Map<string, TagBox[]>();
+    for (const b of rest) {
+      const [ax, ay] = anchorOf(b);
+      const key = `${Math.floor(ax / cell)}:${Math.floor(ay / cell)}`;
+      const list = buckets.get(key);
+      if (list) list.push(b);
+      else buckets.set(key, [b]);
+    }
+    const lists = [...buckets.values()];
+    const spread: TagBox[] = [];
+    for (let round = 0; spread.length < rest.length; round++) {
+      for (const list of lists) if (round < list.length) spread.push(list[round]!);
+    }
+    rest = spread;
+  }
   const placed: TagBox[] = [];
-  const out = new Set<string>();
-  const ordered = [...boxes.filter((b) => b.pinned), ...boxes.filter((b) => !b.pinned)];
-  for (const b of ordered) {
-    if (out.size >= limit && !b.pinned) break;
+  const shown = new Set<string>();
+  const hidden: TagBox[] = [];
+  for (const b of [...pinned, ...rest]) {
+    if (shown.size >= limit && !b.pinned) {
+      hidden.push(b);
+      continue;
+    }
     const hit = placed.some(
       (p) =>
         b.x < p.x + p.width + gap &&
@@ -103,9 +151,29 @@ export function placeTags(boxes: TagBox[], limit: number, gap = 4): Set<string> 
         b.y < p.y + p.height + gap &&
         b.y + b.height + gap > p.y,
     );
-    if (hit && !b.pinned) continue;
+    if (hit && !b.pinned) {
+      hidden.push(b);
+      continue;
+    }
     placed.push(b);
-    out.add(b.id);
+    shown.add(b.id);
   }
-  return out;
+  const more = new Map<string, number>();
+  if (absorb > 0) {
+    for (const h of hidden) {
+      const [hx, hy] = anchorOf(h);
+      let best: TagBox | null = null;
+      let bestD = absorb * absorb;
+      for (const p of placed) {
+        const [px, py] = anchorOf(p);
+        const d = (px - hx) ** 2 + (py - hy) ** 2;
+        if (d <= bestD) {
+          bestD = d;
+          best = p;
+        }
+      }
+      if (best) more.set(best.id, (more.get(best.id) ?? 0) + 1);
+    }
+  }
+  return { shown, more };
 }

@@ -1,4 +1,4 @@
-"""Source representative DEMO listing photos from Wikimedia Commons.
+"""Source representative DEMO listing photos from Wikimedia Commons and Openverse.
 
 Two modes (run by .github/workflows/demo-photos.yml on a GitHub runner, since
 the photos must be fetched from the internet):
@@ -12,6 +12,10 @@ the photos must be fetched from the internet):
           licence, resize to 1600 px, strip all metadata (EXIF/GPS) and write
           backend/app/demo_photos/<n>.jpg with manifest.json holding the full
           attribution (title, author, source page, licence and licence URL).
+
+Openverse entries (openly licensed images, mostly Flickr) are surveyed too and
+fetched as KIND|openverse:<id>; their licence comes from Openverse's record
+and is checked the same way.
 
 Accepted licences: public domain, CC0, CC BY and CC BY-SA (2.0-4.0). Files
 with "restrictions" (personality rights, trademarks...) or flagged NonFree
@@ -70,6 +74,15 @@ CATEGORIES = [
     "Construction in Iraq",
     "Agricultural land in Iraq",
     "Date palm plantations in Iraq",
+    "Houses in Iraq",
+    "Buildings in Basra",
+    "Streets in Basra",
+    "Streets in Baghdad",
+    "Streets in Erbil",
+    "Az Zubayr",
+    "Nasiriyah",
+    "Amarah",
+    "Kut",
 ]
 SEARCHES = [
     "Erbil residential complex",
@@ -92,6 +105,38 @@ SEARCHES = [
     "Iraq apartment complex construction",
     "Erbil skyline apartments",
     "Iraq farmland palm grove",
+    "Basra house facade",
+    "Basra Ashar street",
+    "Basra Tannumah",
+    "Zubair houses",
+    "Iraq house exterior",
+    "Iraqi villa",
+    "Erbil new residential",
+]
+# Openverse (openverse.org): openly licensed images, mostly from Flickr, with
+# the licence recorded per image. Same free licences only; no API key.
+OV_API = "https://api.openverse.org/v1/images/"
+OV_LICENCES = {"by", "by-sa", "cc0", "pdm"}
+OV_SEARCHES = [
+    "Basra house",
+    "Basra street",
+    "Basra apartments",
+    "Basra Iraq buildings",
+    "Iraq house",
+    "Iraq villa",
+    "Iraq apartment building",
+    "Iraq residential street",
+    "Erbil houses",
+    "Erbil apartments",
+    "Baghdad houses",
+    "Baghdad street",
+    "Najaf street",
+    "Karbala street",
+    "Sulaymaniyah houses",
+    "Duhok houses",
+    "Iraq shops street",
+    "Iraq palm grove farm",
+    "Iraq construction housing",
 ]
 # Military/official photography and archive scans are not suitable as homes.
 EXCLUDE = re.compile(
@@ -119,6 +164,63 @@ def download(url: str) -> bytes:
     req = urllib.request.Request(url, headers={"User-Agent": UA})
     with urllib.request.urlopen(req, timeout=120) as resp:  # noqa: S310 - Commons upload host
         return resp.read()
+
+
+def ov_get(url: str) -> dict:
+    req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "application/json"})
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:  # noqa: S310 - fixed https host
+                return json.load(resp)
+        except Exception:  # retried (rate limits), then raised
+            if attempt == 3:
+                raise
+            time.sleep(5 + attempt * 10)
+    return {}
+
+
+def ov_candidate(r: dict) -> dict:
+    """An Openverse result in the same shape as a Commons candidate."""
+    lic = (r.get("license") or "").lower()
+    version = r.get("license_version") or ""
+    licence = {"cc0": "CC0 1.0", "pdm": "Public domain"}.get(lic, f"CC {lic.upper()} {version}".strip())
+    filetype = (r.get("filetype") or "").lower()
+    return {
+        "title": f"openverse:{r['id']}",
+        "page": r.get("foreign_landing_url"),
+        "url": r.get("url"),
+        "width": r.get("width") or 0,
+        "height": r.get("height") or 0,
+        "mime": "image/png" if filetype == "png" else "image/jpeg" if filetype in ("", "jpg", "jpeg") else filetype,
+        "licence": licence if lic in OV_LICENCES else lic,
+        "licence_url": r.get("license_url"),
+        "author": clean(r.get("creator")),
+        "credit": clean(r.get("provider")),
+        "restrictions": "mature" if r.get("mature") else "",
+        "non_free": "",
+        "description": clean(r.get("title"))[:200],
+        "tags": " ".join(t.get("name", "") for t in (r.get("tags") or []))[:300],
+    }
+
+
+def ov_survey() -> list[dict]:
+    found: dict[str, dict] = {}
+    for q in OV_SEARCHES:
+        query = urllib.parse.urlencode(
+            {"q": q, "license": ",".join(sorted(OV_LICENCES)), "page_size": "40", "mature": "false"}
+        )
+        try:
+            data = ov_get(f"{OV_API}?{query}")
+        except Exception as exc:  # one search failing does not stop the survey
+            print(f"openverse {q!r}: {type(exc).__name__}", flush=True)
+            continue
+        for r in data.get("results", []):
+            c = ov_candidate(r)
+            c["source"] = f"openverse: {q}"
+            found.setdefault(c["title"], c)
+        time.sleep(1.5)
+    print(f"{len(found)} Openverse results", flush=True)
+    return list(found.values())
 
 
 def clean(value: str | None) -> str:
@@ -227,15 +329,19 @@ def survey(out: Path) -> None:
             titles.setdefault(m["title"], f"search: {q}")
     print(f"{len(titles)} titles found", flush=True)
     metas = info(list(titles), 400)
+    for c in metas:
+        c["source"] = titles[c["title"]]
+    metas += ov_survey()
     keep, rejected = [], {}
     for c in metas:
         reason = acceptable(c)
-        if not reason and EXCLUDE.search(f"{c['title']} {c['author']} {c['description']}"):
+        if not reason and EXCLUDE.search(
+            f"{c['title']} {c['author']} {c['description']} {c.get('tags', '')}"
+        ):
             reason = "excluded subject"
         if reason:
             rejected[reason.split(" ")[0]] = rejected.get(reason.split(" ")[0], 0) + 1
             continue
-        c["source"] = titles[c["title"]]
         keep.append(c)
     print(f"{len(keep)} acceptable; rejected: {rejected}", flush=True)
     out.mkdir(parents=True, exist_ok=True)
@@ -267,7 +373,10 @@ def fetch(spec: str, out: Path) -> None:
         if line:
             kind, title = line.split("|", 1)
             wanted.append((kind.strip().upper(), title.strip()))
-    metas = {c["title"]: c for c in info([t for _, t in wanted], 1600)}
+    metas = {c["title"]: c for c in info([t for _, t in wanted if t.startswith("File:")], 1600)}
+    for _, t in wanted:
+        if t.startswith("openverse:"):
+            metas[t] = ov_candidate(ov_get(f"{OV_API}{t.removeprefix('openverse:')}/"))
     out.mkdir(parents=True, exist_ok=True)
     manifest = []
     for i, (kind, title) in enumerate(wanted):
@@ -290,7 +399,9 @@ def fetch(spec: str, out: Path) -> None:
             {
                 "file": name,
                 "kind": kind,
-                "title": c["title"].removeprefix("File:"),
+                "title": c["title"].removeprefix("File:")
+                if c["title"].startswith("File:")
+                else c["description"] or c["title"],
                 "author": c["author"][:120],
                 "licence": c["licence"],
                 "licence_url": c["licence_url"],

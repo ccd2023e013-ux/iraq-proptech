@@ -131,6 +131,13 @@ def settle(page: Page, path: str) -> None:
         ):
             break
         page.wait_for_timeout(500)
+    for _ in range(12):  # a preview with an arrival move: until it has landed
+        if previews.count() == 0 or all(
+            previews.nth(i).get_attribute("data-phase") in (None, "settled")
+            for i in range(previews.count())
+        ):
+            break
+        page.wait_for_timeout(250)
     # Lazy images only load when they near the viewport, and a full-page
     # screenshot does not scroll: walk the page so every image is requested,
     # then wait until each one has loaded and faded in (or failed).
@@ -247,10 +254,10 @@ def sign_in(page: Page, email: str, password: str) -> bool:
         return False
 
 
-def map_states(browser: Browser, lang: str, view: str) -> None:
+def map_states(browser: Browser, lang: str, view: str, theme: str = "dark") -> None:
     """Interaction states on /map: layers panel, drawing, phone sheet, a selection."""
-    tag = f"{lang}-dark-{view}"
-    ctx = context(browser, lang, "dark", view)
+    tag = f"{lang}-{theme}-{view}"
+    ctx = context(browser, lang, theme, view)
     page = ctx.new_page()
     errors: list[str] = []
     page.on("console", lambda m: errors.append(m.text[:200]) if m.type == "error" else None)
@@ -419,8 +426,14 @@ def main() -> int:
                 page = ctx.new_page()
                 shoot(page, name, path, tag)
                 ctx.close()
-        for lang, view in (("ar", "1440"), ("ar", "390"), ("en", "390")):
-            map_states(browser, lang, view)
+        for lang, view, theme in (
+            ("ar", "1440", "dark"),
+            ("ar", "390", "dark"),
+            ("en", "390", "dark"),
+            ("en", "1440", "light"),
+            ("ar", "390", "light"),
+        ):
+            map_states(browser, lang, view, theme)
         for who, email, env, paths in SIGNED_IN:
             password = os.environ.get(env)
             if not password:

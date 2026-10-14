@@ -2,7 +2,7 @@
 
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import type { LngLatBoundsLike, Map as MapLibreMap, Marker, StyleSpecification } from "maplibre-gl";
+import type { LngLatBoundsLike, Map as MapLibreMap, Marker } from "maplibre-gl";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
@@ -10,6 +10,7 @@ import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
 import { apiFetch } from "@/lib/api/client";
 import type { MapConfig } from "@/lib/map/provider";
+import { styleFor } from "@/lib/map/style";
 import { maplibreWorkerUrl } from "@/lib/map/worker";
 
 interface PlaceSummary {
@@ -74,15 +75,25 @@ export function LocationPicker({
       const start = lat !== null && lon !== null;
       map = new maplibre.Map({
         container: container.current,
-        style: config.style as string | StyleSpecification,
+        style: styleFor(
+          config,
+          document.documentElement.dataset.theme === "dark" ||
+            (!document.documentElement.dataset.theme &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches),
+          document.documentElement.lang === "en" ? "en" : "ar",
+        ),
         ...(start
           ? { center: [lon as number, lat as number] as [number, number], zoom: 15 }
           : { bounds: config.defaultBbox as LngLatBoundsLike }),
-        attributionControl: { compact: true, customAttribution: config.attribution },
+        attributionControl: {
+          compact: true,
+          // OpenFreeMap tiles carry their own credits; avoid printing them twice.
+          customAttribution: config.provider === "openfreemap" ? undefined : config.attribution,
+        },
       });
       mapRef.current = map;
       map.addControl(new maplibre.NavigationControl({ showCompass: false }), "top-left");
-      const marker = new maplibre.Marker({ draggable: true, color: "#1d504d" });
+      const marker = new maplibre.Marker({ draggable: true, color: "#10b981" });
       markerRef.current = marker;
       if (start) marker.setLngLat([lon as number, lat as number]).addTo(map);
       marker.on("dragend", () => {

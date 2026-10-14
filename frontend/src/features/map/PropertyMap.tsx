@@ -9,24 +9,23 @@ import type {
   MapGeoJSONFeature,
   MapMouseEvent,
   Marker as MapLibreMarker,
-  StyleSpecification,
 } from "maplibre-gl";
 import { type RefObject, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
-import { type LayerInfo, applyBasemapTone } from "@/lib/map/basemap";
 import { parseHex, tagLabel } from "@/lib/map/bubbles";
 import {
   cameraDuration,
   easeStandard,
   focusZoom,
   openAreaOffset,
-  placeTags,
+  placeTagsBalanced,
   type TagBox,
 } from "@/lib/map/camera";
 import { type Bbox, closedRing, type LonLat, readBboxProperty } from "@/lib/map/geo";
 import type { MapConfig } from "@/lib/map/provider";
+import { extrusionColor, styleFor } from "@/lib/map/style";
 import { maplibreWorkerUrl } from "@/lib/map/worker";
 import type { Feature, FeatureCollection, Point } from "geojson";
 
@@ -81,6 +80,14 @@ const EMPTY: FeatureCollection = { type: "FeatureCollection", features: [] };
 const BUBBLE_MIN_ZOOM = 10.5;
 /** At most this many tags at once; the rest are marked by their dot. */
 const TAG_LIMIT = 140;
+/** Tag geometry (px): height, and how far its body sits above the spot. */
+const TAG_H = 28;
+const TAG_RISE = 8;
+/** Balanced placement: grid cell, and the reach for counting hidden neighbours. */
+const TAG_CELL = 150;
+const TAG_ABSORB = 64;
+/** The selected listing's ground halo, by zoom. */
+const SELECTION_RADIUS = ["interpolate", ["linear"], ["zoom"], 11, 16, 17, 30];
 
 /** POI colours by category family (also used by the layers panel legend). */
 export const POI_COLORS: Record<string, string> = {
@@ -136,10 +143,6 @@ function cssVar(name: string): string {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
 
-function styleFor(config: MapConfig, dark: boolean): string | StyleSpecification {
-  return ((dark && config.darkStyle) || config.style) as string | StyleSpecification;
-}
-
 /** Fade a group of layers to visible (`on`) or to zero. */
 function fadeLayers(map: MapLibreMap, layers: readonly string[], on: boolean, instant = false) {
   const duration = instant || reducedMotion() ? 0 : FADE_MS;
@@ -165,7 +168,6 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
   const dark = isDark();
   const ink = cssVar("--ink") || (dark ? "#edeeef" : "#0e1114");
   const canvas = cssVar("--canvas") || (dark ? "#0a0c0f" : "#f2f3f1");
-  const raised = cssVar("--surface-raised") || (dark ? "#181c21" : "#ffffff");
   const spatialRgba = parseHex(cssVar("--spatial-fill"), [20, 180, 204, 255]);
   const spatial = `rgb(${spatialRgba[0]} ${spatialRgba[1]} ${spatialRgba[2]})`;
   const gold = cssVar("--gold-fill") || "#c49640";
@@ -348,8 +350,11 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
   });
 
   const countOf = ["coalesce", ["get", "total"], ["get", "point_count"]];
-  // Groups: a raised disc with a cyan rim and the count in ink — the same
-  // material as the price tags, so a group reads as "several tags here".
+  // Groups: the price tags' material (limestone on the night chart, white on
+  // the limestone plate) with a cyan rim and a soft halo sized by count, so a
+  // group reads as "several tags here".
+  const tagBg = dark ? "#efe9de" : "#ffffff";
+  const tagInk = dark ? "#0b0f17" : ink;
   for (const [suffix, source, range] of [
     ["", "properties-grouped", { maxzoom: BUBBLE_MIN_ZOOM }],
     ["-server", "properties", { minzoom: BUBBLE_MIN_ZOOM }],
@@ -362,8 +367,9 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
       filter: ["has", "point_count"],
       paint: {
         "circle-color": spatial,
-        "circle-opacity": 0.12,
-        "circle-radius": ["step", countOf, 22, 10, 26, 50, 31, 200, 37] as never,
+        "circle-opacity": 0.16,
+        "circle-blur": 0.35,
+        "circle-radius": ["step", countOf, 24, 10, 29, 50, 35, 200, 42] as never,
       },
     });
     map.addLayer({
@@ -373,9 +379,9 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
       ...range,
       filter: ["has", "point_count"],
       paint: {
-        "circle-color": raised,
+        "circle-color": tagBg,
         "circle-stroke-color": spatial,
-        "circle-stroke-width": 1.5,
+        "circle-stroke-width": 2,
         "circle-radius": ["step", countOf, 15, 10, 18, 50, 22, 200, 27] as never,
       },
     });
@@ -391,7 +397,7 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
         "text-font": ["Noto Sans Bold"],
         "text-allow-overlap": true,
       },
-      paint: { "text-color": ink },
+      paint: { "text-color": tagInk },
     });
   }
   // Single listings below tag zoom: small cyan dots (prices appear when zooming in).
@@ -418,7 +424,7 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
     paint: {
       "circle-color": cssVar("--accent-fill") || "#14b07f",
       "circle-opacity": 0.16,
-      "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 14, 17, 26],
+      "circle-radius": SELECTION_RADIUS as never,
       "circle-stroke-color": cssVar("--accent-fill") || "#14b07f",
       "circle-stroke-opacity": 0.55,
       "circle-stroke-width": 1,
@@ -426,6 +432,22 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
   });
   // The exact spot of every listing (the tag's tail points at it); approximate
   // locations are hollow rings.
+  const approx = ["boolean", ["get", "approximate"], false];
+  map.addLayer({
+    id: "points-area",
+    type: "circle",
+    source: "properties",
+    minzoom: BUBBLE_MIN_ZOOM,
+    filter: ["all", ["!", ["has", "point_count"]], approx] as never,
+    paint: {
+      "circle-color": spatial,
+      "circle-opacity": 0.14,
+      "circle-radius": ["interpolate", ["exponential", 1.6], ["zoom"], 11, 7, 15, 16, 18, 40],
+      "circle-stroke-color": spatial,
+      "circle-stroke-opacity": 0.35,
+      "circle-stroke-width": 1,
+    },
+  });
   map.addLayer({
     id: "points-under",
     type: "circle",
@@ -433,19 +455,9 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
     minzoom: BUBBLE_MIN_ZOOM,
     filter: ["!", ["has", "point_count"]],
     paint: {
-      "circle-color": [
-        "case",
-        ["boolean", ["get", "approximate"], false],
-        canvas,
-        spatial,
-      ] as never,
-      "circle-radius": 3.5,
-      "circle-stroke-color": [
-        "case",
-        ["boolean", ["get", "approximate"], false],
-        spatial,
-        canvas,
-      ] as never,
+      "circle-color": spatial,
+      "circle-radius": ["case", approx, 2.5, 3.5] as never,
+      "circle-stroke-color": canvas,
       "circle-stroke-width": 1.5,
     },
   });
@@ -455,6 +467,8 @@ interface Tag {
   marker: MapLibreMarker;
   el: HTMLDivElement;
   button: HTMLButtonElement;
+  value: HTMLSpanElement;
+  badge: HTMLSpanElement;
   width: number;
   leaving?: ReturnType<typeof setTimeout>;
 }
@@ -510,19 +524,25 @@ class PriceTags {
           p.rent_period,
           locale,
         );
-        const width = this.tags.get(id)?.width || label.length * 7 + 20;
+        const width = this.tags.get(id)?.width || label.length * 7.4 + 22;
         byId.set(id, f);
         boxes.push({
           id,
           x: at.x - width / 2,
-          y: at.y - 34,
+          y: at.y - TAG_RISE - TAG_H,
           width,
-          height: 26,
+          height: TAG_H,
           pinned: id === selectedId || id === highlightId,
         });
       }
     }
-    const visible = placeTags(boxes, TAG_LIMIT);
+    // Balanced: one tag per screen cell first, so prices cover the whole view;
+    // a listing without room is counted on its nearest tag ("+N").
+    const { shown: visible, more } = placeTagsBalanced(boxes, TAG_LIMIT, {
+      gap: 6,
+      cell: TAG_CELL,
+      absorb: TAG_ABSORB,
+    });
     // Departures: fade out, then remove.
     for (const [id, tag] of this.tags) {
       if (visible.has(id)) {
@@ -556,21 +576,30 @@ class PriceTags {
         const button = document.createElement("button");
         button.type = "button";
         button.className = "map-tag";
+        const value = document.createElement("span");
+        const badge = document.createElement("span");
+        badge.className = "map-tag-more";
+        button.append(value, badge);
         // Keyboard and screen-reader users choose listings from the results
         // list ("Show on map"); the tags are a pointer shortcut to the same.
         button.tabIndex = -1;
         button.setAttribute("aria-hidden", "true");
         el.appendChild(button);
         button.addEventListener("click", () => this.onPick(id));
-        const marker = new this.Marker({ element: el, anchor: "bottom", offset: [0, -7] })
+        const marker = new this.Marker({ element: el, anchor: "bottom", offset: [0, -TAG_RISE] })
           .setLngLat(coords)
           .addTo(map);
-        tag = { marker, el, button, width: 0 };
+        tag = { marker, el, button, value, badge, width: 0 };
         this.tags.set(id, tag);
       } else {
         tag.marker.setLngLat(coords);
       }
-      if (tag.button.textContent !== label) tag.button.textContent = label;
+      if (tag.value.textContent !== label) tag.value.textContent = label;
+      const extra = more.get(id) ?? 0;
+      const badgeText = extra > 0 ? `+${extra}` : "";
+      if (tag.badge.textContent !== badgeText) tag.badge.textContent = badgeText;
+      if (extra > 0) tag.button.dataset.more = String(extra);
+      else delete tag.button.dataset.more;
       if (p.approximate === true) tag.button.dataset.approx = "1";
       else delete tag.button.dataset.approx;
       const state = id === selectedId ? "selected" : id === highlightId ? "hover" : "";
@@ -628,7 +657,7 @@ export function PropertyMap(props: PropertyMapProps) {
         dark = isDark();
         map = new maplibre.Map({
           container: container.current,
-          style: styleFor(config, dark),
+          style: styleFor(config, dark, latest.current.locale),
           bounds: latest.current.initialBbox as LngLatBoundsLike,
           fitBoundsOptions: { padding: 24 },
           attributionControl: {
@@ -678,16 +707,6 @@ export function PropertyMap(props: PropertyMapProps) {
 
         map.on("style.load", () => {
           if (!map) return;
-          if (latest.current.config.provider === "openfreemap") {
-            const m = map;
-            applyBasemapTone(
-              {
-                setPaintProperty: (l, prop, v) => m.setPaintProperty(l, prop as never, v as never),
-              },
-              m.getStyle().layers as LayerInfo[],
-              isDark(),
-            );
-          }
           installOverlays(map, latest.current.config);
           setStyleVersion((v) => v + 1);
           setReady(true);
@@ -696,9 +715,11 @@ export function PropertyMap(props: PropertyMapProps) {
         // Follow the site theme (toggle or system change) with the matching basemap.
         const onTheme = () => {
           const next = isDark();
-          if (!map || next === dark || !config.darkStyle) return;
+          if (!map || next === dark) return;
+          if (config.provider !== "openfreemap" && !config.darkStyle) return;
           dark = next;
-          map.setStyle(styleFor(config, dark));
+          // A full reload (no diff), so `style.load` fires and our overlays return.
+          map.setStyle(styleFor(config, dark, latest.current.locale), { diff: false });
         };
         const observer = new MutationObserver(onTheme);
         observer.observe(document.documentElement, { attributeFilter: ["data-theme"] });
@@ -713,7 +734,7 @@ export function PropertyMap(props: PropertyMapProps) {
           const wide = window.matchMedia("(min-width: 1024px)").matches;
           const rail = document.querySelector<HTMLElement>("[data-map-rail]");
           const railWidth = wide && rail ? rail.getBoundingClientRect().width : 0;
-          return { railWidth, bottom: wide ? 160 : 240 };
+          return { railWidth, bottom: wide ? 160 : 240, wide };
         };
         const padding = (base: number) => {
           const { railWidth } = cover();
@@ -727,7 +748,22 @@ export function PropertyMap(props: PropertyMapProps) {
         // untouched, centred in the open part of the map.
         focusRef.current = (coords) => {
           if (!map) return;
-          const { railWidth, bottom } = cover();
+          const { railWidth, bottom, wide } = cover();
+          // Respect the reader's framing: a listing already well inside the
+          // open part of the map, close enough to read, is not moved to.
+          const at = map.project(coords);
+          const w = map.getCanvas().clientWidth;
+          const h = map.getCanvas().clientHeight;
+          const startEdge = rtl() ? w - railWidth : railWidth;
+          const inX = rtl()
+            ? at.x > 56 && at.x < startEdge - 56
+            : at.x > startEdge + 56 && at.x < w - 56;
+          // On wide screens the preview card stands at the bottom of the start side.
+          const fromStart = rtl() ? startEdge - at.x : at.x - startEdge;
+          const underCard = wide && fromStart < 420 && at.y > h - 480;
+          if (inX && !underCard && at.y > 96 && at.y < h - bottom - 48 && map.getZoom() >= 13) {
+            return;
+          }
           map.easeTo({
             center: coords,
             zoom: focusZoom(map.getZoom()),
@@ -904,6 +940,28 @@ export function PropertyMap(props: PropertyMapProps) {
     }
   }, [ready, styleVersion, props.selectedId, props.highlightId, props.locale]);
 
+  // A new selection marks its ground: the halo opens from the spot once.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!ready || !map || !props.selectedId || !map.getLayer("selection-halo")) return;
+    const d = reducedMotion() ? 0 : 650;
+    map.setPaintProperty("selection-halo", "circle-radius-transition", { duration: 0, delay: 0 });
+    map.setPaintProperty("selection-halo", "circle-radius", 2);
+    map.setPaintProperty("selection-halo", "circle-opacity-transition", { duration: 0, delay: 0 });
+    map.setPaintProperty("selection-halo", "circle-opacity", 0.4);
+    const frame = requestAnimationFrame(() => {
+      if (!map.getLayer("selection-halo")) return;
+      map.setPaintProperty("selection-halo", "circle-radius-transition", { duration: d, delay: 0 });
+      map.setPaintProperty("selection-halo", "circle-radius", SELECTION_RADIUS as never);
+      map.setPaintProperty("selection-halo", "circle-opacity-transition", {
+        duration: d,
+        delay: 0,
+      });
+      map.setPaintProperty("selection-halo", "circle-opacity", 0.16);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [ready, styleVersion, props.selectedId]);
+
   // Overlays fade in when switched on and fade out before their data is cleared.
   useFadedData(
     mapRef,
@@ -958,7 +1016,8 @@ export function PropertyMap(props: PropertyMapProps) {
             "source-layer": "building",
             minzoom: 13,
             paint: {
-              "fill-extrusion-color": isDark() ? "#1d2228" : "#dcdfdb",
+              "fill-extrusion-color": extrusionColor(isDark()),
+              "fill-extrusion-vertical-gradient": true,
               "fill-extrusion-height": ["coalesce", ["get", "render_height"], 0],
               "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
               "fill-extrusion-opacity": 0.88,

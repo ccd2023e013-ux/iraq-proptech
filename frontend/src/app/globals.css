@@ -984,57 +984,101 @@ p {
   }
 }
 
-/* ── Map price tags (HTML markers, see PropertyMap) ──────────────────────────
-   A tag is a small raised surface with a tail pointing at the listing's exact
-   spot. MapLibre positions .map-tag-anchor; the button inside animates, so
-   arrival/departure never fights the marker's own transform. */
+/* ── Map price tags (HTML markers, see PropertyMap and MapPreview) ──────────
+   The price is the marker. On the night chart tags are limestone on navy (the
+   brightest thing on the map after the river); on the limestone plate they are
+   white with a drawn edge. A short tail points at the listing's dot. Selected
+   = emerald and lifted; a cyan "+N" counts listings close by without a tag.
+   MapLibre positions .map-tag-anchor; the button inside animates, so arrival
+   and departure never fight the marker's own transform. */
+:root {
+  --tag-bg: #ffffff;
+  --tag-ink: var(--ink);
+  --tag-edge: rgb(11 15 23 / 0.14);
+  --tag-shadow: 0 1px 2px rgb(11 15 23 / 0.12), 0 6px 14px -6px rgb(11 15 23 / 0.28);
+}
+:root[data-theme="dark"] {
+  --tag-bg: #efe9de;
+  --tag-ink: #0b0f17;
+  --tag-edge: rgb(0 0 0 / 0.35);
+  --tag-shadow: 0 1px 0 rgb(255 255 255 / 0.5) inset, 0 8px 18px -8px rgb(0 0 0 / 0.8);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --tag-bg: #efe9de;
+    --tag-ink: #0b0f17;
+    --tag-edge: rgb(0 0 0 / 0.35);
+    --tag-shadow: 0 1px 0 rgb(255 255 255 / 0.5) inset, 0 8px 18px -8px rgb(0 0 0 / 0.8);
+  }
+}
 .map-tag-anchor {
   pointer-events: none;
+  z-index: 1;
 }
 .map-tag {
   pointer-events: auto;
   position: relative;
   display: inline-flex;
   align-items: center;
-  height: 26px;
-  padding: 0 9px;
-  border-radius: var(--radius-control);
-  background: var(--surface-raised);
-  color: var(--ink);
-  font: 600 12.5px/1 var(--font-sans);
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 9px;
+  background: var(--tag-bg);
+  color: var(--tag-ink);
+  font: 650 13px/1 var(--font-sans);
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0;
+  letter-spacing: -0.005em;
   white-space: nowrap;
   cursor: pointer;
   box-shadow:
-    0 0 0 1px var(--hairline-strong),
-    0 6px 16px -8px rgb(0 0 0 / 0.55);
-  transform-origin: 50% calc(100% + 7px);
+    0 0 0 1px var(--tag-edge),
+    var(--tag-shadow);
+  transform-origin: 50% calc(100% + 8px);
   transition:
     transform var(--duration-base) var(--ease-standard),
     background-color var(--duration-quick) var(--ease-standard),
     color var(--duration-quick) var(--ease-standard),
     box-shadow var(--duration-quick) var(--ease-standard),
     opacity var(--duration-quick) var(--ease-standard);
-  animation: tag-in var(--duration-base) var(--ease-standard) backwards;
+  animation: tag-in var(--duration-spatial) var(--ease-spring) backwards;
 }
 :lang(ar) .map-tag {
-  font-size: 12px;
+  font-size: 12.5px;
+  font-weight: 600;
 }
-/* The tail: a small diamond in the tag's own colour, outlined on its two
-   lower edges, pointing at the dot. */
+/* The tail: a small triangle in the tag's own colour. */
 .map-tag::after {
   content: "";
   position: absolute;
   inset-inline-start: 50%;
-  bottom: -4px;
-  width: 8px;
-  height: 8px;
-  margin-inline-start: -4px;
-  background: inherit;
-  border-radius: 1px;
-  transform: rotate(45deg);
-  box-shadow: 1px 1px 0 0 var(--hairline-strong);
+  bottom: -5px;
+  width: 0;
+  height: 0;
+  margin-inline-start: -5px;
+  border-inline: 5px solid transparent;
+  border-top: 6px solid var(--tag-bg);
+  filter: drop-shadow(0 1px 0 var(--tag-edge));
+  transition: border-color var(--duration-quick) var(--ease-standard);
+}
+/* "+N": listings close by that have no tag of their own. */
+.map-tag-more:empty {
+  display: none;
+}
+.map-tag-more {
+  position: absolute;
+  top: -7px;
+  inset-inline-end: -7px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--spatial-fill);
+  color: #03202a;
+  font: 700 10.5px/1 var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 0 2px var(--canvas);
 }
 .map-tag:hover {
   transform: translateY(-2px);
@@ -1042,25 +1086,25 @@ p {
 .map-tag[data-state="hover"] {
   transform: translateY(-2px);
   box-shadow:
-    0 0 0 1.5px var(--accent),
-    0 8px 18px -8px rgb(0 0 0 / 0.6);
+    0 0 0 2px var(--accent-fill),
+    var(--tag-shadow);
 }
 .map-tag[data-state="selected"] {
   background: var(--accent-fill);
   color: var(--on-accent);
-  transform: translateY(-3px) scale(1.08);
+  transform: translateY(-4px) scale(1.1);
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--accent-fill) 70%, black),
-    0 10px 22px -8px rgb(0 0 0 / 0.65);
+    0 12px 26px -10px rgb(0 0 0 / 0.7);
 }
 .map-tag[data-state="selected"]::after {
-  box-shadow: 1px 1px 0 0 color-mix(in srgb, var(--accent-fill) 70%, black);
+  border-top-color: var(--accent-fill);
 }
-/* Approximate location: the tag says so with a dashed edge. */
+/* Approximate location: a dashed edge (its ground is a soft disc, not a dot). */
 .map-tag[data-approx] {
-  box-shadow: 0 6px 16px -8px rgb(0 0 0 / 0.55);
-  outline: 1px dashed var(--hairline-strong);
-  outline-offset: 0;
+  box-shadow: var(--tag-shadow);
+  outline: 1.5px dashed color-mix(in srgb, var(--tag-ink) 35%, transparent);
+  outline-offset: -3px;
 }
 .map-tag-anchor[data-leaving] .map-tag {
   animation: tag-out var(--duration-quick) var(--ease-exit) forwards;
@@ -1074,13 +1118,13 @@ p {
 @keyframes tag-in {
   from {
     opacity: 0;
-    transform: translateY(6px) scale(0.94);
+    transform: translateY(8px) scale(0.86);
   }
 }
 @keyframes tag-out {
   to {
     opacity: 0;
-    transform: translateY(4px) scale(0.94);
+    transform: translateY(4px) scale(0.92);
   }
 }
 

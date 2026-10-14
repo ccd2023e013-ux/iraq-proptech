@@ -1,18 +1,1 @@
-fetch
-HOUSE|File:Sumel, Iraq - panoramio.jpg
-HOUSE|File:حي العامل شارع 30.jpg
-HOUSE|File:الكرادة الشرقية.jpg
-HOUSE|File:حي الإرشاد الزراعي - جبله.jpg
-VILLA|File:Şaqlāwīyah Housing. - panoramio.jpg
-APARTMENT|File:Basimiyah Roads.jpg
-APARTMENT|File:Residential buildings in Baghdad - DJI 0068.png
-APARTMENT|File:2009 Baghdad 4248731998.jpg
-APARTMENT|File:Hilla New apartments 2010 - panoramio.jpg
-APARTMENT|File:Hilla New apartments - panoramio.jpg
-LAND|File:ابراهيم - جبله 2013.jpg
-LAND|File:Farm in shulla city, Baghdad.jpg
-SHOP|File:الكرادة خارج.jpg
-SHOP|File:2012 Baghdad 7109726603.jpg
-SHOP|File:المهندسين، حله، Iraq - panoramio.jpg
-OFFICE|File:Al Mansour District Baghdad 2010 - panoramio.jpg
-OFFICE|File:14 Ramadhan Street.jpg
+survey

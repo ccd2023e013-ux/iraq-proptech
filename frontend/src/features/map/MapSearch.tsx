@@ -457,6 +457,11 @@ export function MapSearch({
     setSheet(next);
     setSheetY(`${sheetOffset(next)}px`);
   }
+  // The header itself changes height between positions: settle on the new one.
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setSheetY(`${sheetOffset(sheetNow.current)}px`));
+    return () => cancelAnimationFrame(frame);
+  }, [sheet]);
   useEffect(() => {
     const measure = () => setSheetY(`${sheetOffset(sheetNow.current)}px`);
     const frame = requestAnimationFrame(measure);
@@ -618,7 +623,10 @@ export function MapSearch({
               {busy ? m.updating : ""}
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Phones at peek show only the count and the filters: the map stays open. */}
+          <div
+            className={`flex flex-wrap items-center gap-2 ${sheet === "peek" && !polygon && !nearActive ? "max-lg:hidden" : ""}`}
+          >
             <label className="flex cursor-pointer items-center gap-2.5 text-[13px] text-ink-2">
               <input
                 type="checkbox"
@@ -1081,7 +1089,12 @@ function ProjectSheet({
   );
 }
 
-/** The selected listing as a card over the open part of the map. */
+/**
+ * The selected listing, previewed over the open part of the map. Wide screens:
+ * a photo-led card (the picture, then price, place and facts). Phones: a
+ * compact row above the bottom edge, so the selection and its surroundings
+ * stay visible. Rises in with the camera's glide; replays per listing.
+ */
 function SelectionSheet({
   props,
   card,
@@ -1112,60 +1125,98 @@ function SelectionSheet({
         .filter(Boolean)
         .join("، ")
     : null;
+  const facts: { icon: IconName; text: string }[] = [];
+  if (card?.bedrooms != null) facts.push({ icon: "bed", text: String(card.bedrooms) });
+  if (card?.bathrooms != null) facts.push({ icon: "bath", text: String(card.bathrooms) });
+  if (area) facts.push({ icon: "area", text: area });
+  const demo = props.is_demo === true;
+
+  // Escape closes the preview (the map keeps its place).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   return (
     <div
       role="dialog"
       aria-label={title}
       data-testid="map-selection"
-      className="pointer-events-none absolute inset-x-2 bottom-2 z-[var(--z-float)] flex justify-center lg:start-[calc(400px+1.5rem)] lg:end-20 lg:bottom-5"
+      className="pointer-events-none absolute inset-x-2 bottom-2 z-[var(--z-float)] flex justify-center lg:start-[calc(400px+1.5rem)] lg:end-auto lg:bottom-6 lg:justify-start"
     >
       {/* Keyed by listing: choosing another property replays the arrival. */}
-      <div
+      <article
         key={id}
-        className="surface-focus sheet-in pointer-events-auto flex w-full max-w-[30rem] gap-4 rounded-[var(--radius-card)] p-2.5"
+        className="surface-focus sheet-in pointer-events-auto relative flex w-full max-w-[34rem] gap-3.5 overflow-hidden rounded-[var(--radius-card)] p-2.5 lg:w-[22.5rem] lg:flex-col lg:gap-0 lg:p-0"
       >
         <button
           type="button"
           onClick={onClose}
           aria-label={dict.map.close}
-          className="icon-btn absolute end-2 top-2 z-10 size-8"
+          className="icon-btn absolute end-2 top-2 z-10 size-9 lg:bg-canvas/70 lg:backdrop-blur-md"
         >
           <Icon name="close" className="size-4" />
         </button>
-        <div className="relative aspect-[4/3] w-32 shrink-0 overflow-hidden rounded-[var(--radius-control)] bg-fill sm:w-36">
+        <div className="relative aspect-[4/3] w-28 shrink-0 overflow-hidden rounded-[var(--radius-control)] bg-fill sm:w-36 lg:aspect-[16/10] lg:w-full lg:rounded-none">
           {cover ? (
-            <SafeImage src={cover} alt="" fallbackLabel="—" className="size-full object-cover" />
+            <SafeImage
+              src={cover}
+              alt=""
+              fallbackLabel="—"
+              className="photo size-full object-cover"
+            />
           ) : (
             <span className="grid size-full place-items-center text-ink-3">
               <Icon name="home" className="size-6 opacity-70" />
             </span>
           )}
-          {props.is_demo === true && (
-            <span className="absolute start-0 bottom-0 rounded-se-[var(--radius-tag)] bg-gold-500 px-1.5 py-px text-[10px] font-semibold text-[#1d1405]">
+          {demo && (
+            <span className="absolute start-0 bottom-0 flex items-center gap-1.5 rounded-se-[var(--radius-tag)] bg-gold-500 px-2 py-0.5 text-[11px] font-semibold text-[#1d1405]">
               {dict.listing.demo}
+              {cover && (
+                <span className="hidden font-medium opacity-80 lg:inline">
+                  {dict.listing.representativePhoto}
+                </span>
+              )}
             </span>
           )}
         </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-1 py-1 pe-8">
-          <p className="kpi text-xl text-ink">{price}</p>
-          <p className="line-clamp-2 text-sm leading-snug text-ink-2">{title}</p>
-          {(where || area) && (
-            <p className="caption truncate">{[where, area].filter(Boolean).join(" · ")}</p>
+        <div className="flex min-w-0 flex-1 flex-col gap-1 py-1 pe-9 lg:gap-1.5 lg:p-5 lg:pe-5">
+          <p className="kpi text-xl text-ink lg:text-[1.625rem]">{price}</p>
+          <p className="line-clamp-2 text-sm leading-snug text-ink-2 lg:text-[15px] lg:text-ink">
+            {title}
+          </p>
+          {where && (
+            <p className="meta flex min-w-0 items-center gap-1.5">
+              <Icon name="pin" className="size-4 shrink-0 text-spatial" strokeWidth={1.7} />
+              <span className="truncate">{where}</span>
+            </p>
+          )}
+          {facts.length > 0 && (
+            <ul className="hidden flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-2 tabular lg:mt-1 lg:flex">
+              {facts.map((f) => (
+                <li key={f.icon} className="flex items-center gap-1.5">
+                  <Icon name={f.icon} className="size-4 text-ink-3" strokeWidth={1.7} />
+                  {f.text}
+                </li>
+              ))}
+            </ul>
           )}
           {props.approximate === true && (
-            <span>
+            <span className="mt-0.5">
               <TrustBadge kind="estimate">{dict.map.approximate}</TrustBadge>
             </span>
           )}
           <Link
             href={`/properties/${encodeURIComponent(id)}`}
-            className="btn btn-primary btn-sm mt-auto w-fit"
+            className="btn btn-primary btn-sm mt-auto w-fit lg:mt-3 lg:h-11 lg:w-full"
           >
             {dict.map.openListing}
-            <Icon name="arrow" className="size-3.5" />
+            <Icon name="arrow" className="size-4" />
           </Link>
         </div>
-      </div>
+      </article>
     </div>
   );
 }

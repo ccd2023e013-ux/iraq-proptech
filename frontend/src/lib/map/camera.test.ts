@@ -8,6 +8,7 @@ import {
   focusZoom,
   openAreaOffset,
   placeTags,
+  placeTagsBalanced,
 } from "./camera";
 
 describe("map camera", () => {
@@ -58,6 +59,31 @@ describe("map camera", () => {
     expect(shown.has("b")).toBe(false);
     expect(shown.has("c")).toBe(true);
     expect(placeTags([box("a", 0), box("b", 100), box("c", 200)], 2).size).toBe(2);
+  });
+
+  it("spreads tags across the view and counts the hidden ones on a neighbour", () => {
+    const at = (id: string, x: number, y: number) => ({ id, x, y, width: 60, height: 24 });
+    // Four listings piled in one corner, one far away; room for only two tags.
+    const boxes = [
+      at("a", 0, 0),
+      at("b", 10, 30),
+      at("c", 20, 60),
+      at("d", 5, 90),
+      at("z", 600, 400),
+    ];
+    const greedy = placeTagsBalanced(boxes, 2, { gap: 4 });
+    expect([...greedy.shown]).toEqual(["a", "b"]); // the pile takes every slot
+    const balanced = placeTagsBalanced(boxes, 2, { gap: 4, cell: 200, absorb: 120 });
+    expect(balanced.shown.has("a")).toBe(true);
+    expect(balanced.shown.has("z")).toBe(true); // the far listing gets a tag
+    expect(balanced.more.get("a")).toBe(3); // b, c, d are counted on "a"
+    expect(balanced.more.has("z")).toBe(false);
+  });
+
+  it("never counts a hidden listing on a tag that is too far away", () => {
+    const at = (id: string, x: number) => ({ id, x, y: 0, width: 60, height: 24 });
+    const { more } = placeTagsBalanced([at("a", 0), at("b", 20)], 1, { absorb: 10 });
+    expect(more.size).toBe(0);
   });
 });
 
