@@ -1,0 +1,163 @@
+  ✓ [ar-light-1440] MapLibre created its canvas
+  ✓ [ar-light-1440] MapLibre canvas draws Basra price bubbles (7)
+  ✓ [ar-light-1440] MapLibre worker served by the site itself (same origin, 200, JavaScript): [(200, 'application/javascript; charset=UTF-8')]
+  ✓ [ar-light-1440] no third-party script (no RTL plugin from unpkg) []
+  ✓ [ar-light-1440] theme is light
+  ✓ [ar-light-1440] page is ar/rtl
+  ✓ [ar-light-1440] attribution control credits OpenStreetMap
+  ✓ [ar-light-1440] attribution has no event handlers or active content ([], 0)
+  ✓ [ar-light-1440] no horizontal overflow
+  ✓ [ar-light-390] MapLibre created its canvas
+  ✓ [ar-light-390] MapLibre canvas draws Basra listings (0 bubbles, 4 clusters)
+  ✓ [ar-light-390] MapLibre worker served by the site itself (same origin, 200, JavaScript): [(200, 'application/javascript; charset=UTF-8')]
+  ✓ [ar-light-390] no third-party script (no RTL plugin from unpkg) []
+  ✓ [ar-light-390] theme is light
+  ✓ [ar-light-390] page is ar/rtl
+  ✓ [ar-light-390] attribution control credits OpenStreetMap
+  ✓ [ar-light-390] attribution has no event handlers or active content ([], 0)
+  ✓ [ar-light-390] no horizontal overflow
+  ✓ [ar-dark-1440] MapLibre created its canvas
+  ✓ [ar-dark-1440] MapLibre canvas draws Basra price bubbles (7)
+  ✓ [ar-dark-1440] MapLibre worker served by the site itself (same origin, 200, JavaScript): [(200, 'application/javascript; charset=UTF-8')]
+  ✓ [ar-dark-1440] no third-party script (no RTL plugin from unpkg) []
+  ✓ [ar-dark-1440] theme is dark
+  ✓ [ar-dark-1440] page is ar/rtl
+  ✓ [ar-dark-1440] attribution control credits OpenStreetMap
+  ✓ [ar-dark-1440] attribution has no event handlers or active content ([], 0)
+  ✓ [ar-dark-1440] no horizontal overflow
+  ✓ [ar-dark-390] MapLibre created its canvas
+  ✓ [ar-dark-390] MapLibre canvas draws Basra listings (0 bubbles, 4 clusters)
+  ✓ [ar-dark-390] MapLibre worker served by the site itself (same origin, 200, JavaScript): [(200, 'application/javascript; charset=UTF-8')]
+  ✓ [ar-dark-390] no third-party script (no RTL plugin from unpkg) []
+  ✓ [ar-dark-390] theme is dark
+  ✓ [ar-dark-390] page is ar/rtl
+  ✓ [ar-dark-390] attribution control credits OpenStreetMap
+  ✓ [ar-dark-390] attribution has no event handlers or active content ([], 0)
+  ✓ [ar-dark-390] no horizontal overflow
+  ✓ [en-light-1440] MapLibre created its canvas
+  ✓ [en-light-1440] MapLibre canvas draws Basra price bubbles (8)
+  ✓ [en-light-1440] MapLibre worker served by the site itself (same origin, 200, JavaScript): [(200, 'application/javascript; charset=UTF-8')]
+  ✓ [en-light-1440] no third-party script (no RTL plugin from unpkg) []
+  ✓ [en-light-1440] theme is light
+  ✓ [en-light-1440] page is en/ltr
+  ✓ [en-light-1440] attribution control credits OpenStreetMap
+  ✓ [en-light-1440] attribution has no event handlers or active content ([], 0)
+  ✓ [en-light-1440] no horizontal overflow
+  ✓ [en-light-390] MapLibre created its canvas
+  ✓ [en-light-390] MapLibre canvas draws Basra listings (0 bubbles, 4 clusters)
+  ✓ [en-light-390] MapLibre worker served by the site itself (same origin, 200, JavaScript): [(200, 'application/javascript; charset=UTF-8')]
+  ✓ [en-light-390] no third-party script (no RTL plugin from unpkg) []
+  ✓ [en-light-390] theme is light
+  ✓ [en-light-390] page is en/ltr
+  ✓ [en-light-390] attribution control credits OpenStreetMap
+  ✓ [en-light-390] attribution has no event handlers or active content ([], 0)
+  ✓ [en-light-390] no horizontal overflow
+  ✓ [en-dark-1440] MapLibre created its canvas
+  ✓ [en-dark-1440] MapLibre canvas draws Basra price bubbles (8)
+  ✓ [en-dark-1440] MapLibre worker served by the site itself (same origin, 200, JavaScript): [(200, 'application/javascript; charset=UTF-8')]
+  ✓ [en-dark-1440] no third-party script (no RTL plugin from unpkg) []
+  ✓ [en-dark-1440] theme is dark
+  ✓ [en-dark-1440] page is en/ltr
+  ✓ [en-dark-1440] attribution control credits OpenStreetMap
+  ✓ [en-dark-1440] attribution has no event handlers or active content ([], 0)
+  ✓ [en-dark-1440] no horizontal overflow
+  ✓ [en-dark-390] MapLibre created its canvas
+  ✓ [en-dark-390] MapLibre canvas draws Basra listings (0 bubbles, 4 clusters)
+  ✓ [en-dark-390] MapLibre worker served by the site itself (same origin, 200, JavaScript): [(200, 'application/javascript; charset=UTF-8')]
+  ✓ [en-dark-390] no third-party script (no RTL plugin from unpkg) []
+  ✓ [en-dark-390] theme is dark
+  ✓ [en-dark-390] page is en/ltr
+  ✓ [en-dark-390] attribution control credits OpenStreetMap
+  ✓ [en-dark-390] attribution has no event handlers or active content ([], 0)
+  ✓ [en-dark-390] no horizontal overflow
+  ✓ [theme] starts light
+  ✓ [theme] bubbles before the switch
+  ✓ [theme] bubbles redrawn after setStyle to the dark basemap (7)
+  ✓ [draw 1] landed=True kept=True urls=['/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.70,30.40,47.92,30.62', '/map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3B47.810000%2C30.479071'] pan_first=False moved_while_drawing=[] trace=['rsc> /map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3B47.810000%2C30.479071&_rsc=poo-EUk6BbVhB2nh', 'rsc✗ /map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3… net::ERR_ABORTED']
+  ✓ [draw 2] landed=True kept=True urls=['/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.60529%2C30.39380%2C48.01471%2C30.62619', '/map?polygon=47.787495%2C30.540631%3B47.862424%2C30.538049%3B47.823461%2C30.486407'] pan_first=True moved_while_drawing=[] trace=['rsc> /map?polygon=47.787495%2C30.540631%3B47.862424%2C30.538049%3B47.823461%2C30.486407&_rsc=poo-EUk6BbVhB2nh', 'rsc< /map?polygon=47.787495%2C30.540631%3B47.862424%2C30.538049%3… done']
+  ✓ [draw 3] landed=True kept=True urls=['/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.60529%2C30.39380%2C48.01471%2C30.62619', '/map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3B47.810000%2C30.479071'] pan_first=False moved_while_drawing=[] trace=['rsc> /map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3B47.810000%2C30.479071&_rsc=poo-EUk6BbVhB2nh', 'rsc< /map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3… done']
+  ✓ [draw 4] landed=True kept=True urls=['/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.60529%2C30.39380%2C48.01471%2C30.62619', '/map?polygon=47.786370%2C30.540001%3B47.861298%2C30.537420%3B47.822335%2C30.485778'] pan_first=True moved_while_drawing=[] trace=['rsc> /map?polygon=47.786370%2C30.540001%3B47.861298%2C30.537420%3B47.822335%2C30.485778&_rsc=poo-EUk6BbVhB2nh', 'rsc✗ /map?polygon=47.786370%2C30.540001%3B47.861298%2C30.537420%3… net::ERR_ABORTED']
+  ✓ [draw 5] landed=True kept=True urls=['/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.60529%2C30.39380%2C48.01471%2C30.62619', '/map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3B47.810000%2C30.479071'] pan_first=False moved_while_drawing=[] trace=['rsc> /map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3B47.810000%2C30.479071&_rsc=poo-EUk6BbVhB2nh', 'rsc< /map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3… done']
+  ✓ [draw 6] landed=True kept=True urls=['/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.60529%2C30.39380%2C48.01471%2C30.62619', '/map?polygon=47.786023%2C30.539753%3B47.860951%2C30.537171%3B47.821989%2C30.485529'] pan_first=True moved_while_drawing=[] trace=['rsc> /map?polygon=47.786023%2C30.539753%3B47.860951%2C30.537171%3B47.821989%2C30.485529&_rsc=poo-EUk6BbVhB2nh', 'rsc✗ /map?polygon=47.786023%2C30.539753%3B47.860951%2C30.537171%3… net::ERR_ABORTED']
+  ✓ [draw 7] landed=True kept=True urls=['/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.70,30.40,47.92,30.62', '/map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3B47.810000%2C30.479071'] pan_first=False moved_while_drawing=[] trace=['rsc> /map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3B47.810000%2C30.479071&_rsc=poo-EUk6BbVhB2nh', 'rsc✗ /map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3… net::ERR_ABORTED']
+  ✓ [draw 8] landed=True kept=True urls=['/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.60529%2C30.39380%2C48.01471%2C30.62619', '/map?polygon=47.786241%2C30.539909%3B47.861169%2C30.537327%3B47.822206%2C30.485685'] pan_first=True moved_while_drawing=[] trace=['rsc> /map?polygon=47.786241%2C30.539909%3B47.861169%2C30.537327%3B47.822206%2C30.485685&_rsc=poo-EUk6BbVhB2nh', 'rsc< /map?polygon=47.786241%2C30.539909%3B47.861169%2C30.537327%3… done']
+  ✓ [draw 9] landed=True kept=True urls=['/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.70,30.40,47.92,30.62', '/map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3B47.810000%2C30.479071'] pan_first=False moved_while_drawing=[] trace=['rsc> /map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3B47.810000%2C30.479071&_rsc=poo-EUk6BbVhB2nh', 'rsc< /map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3… done']
+  ✓ [draw 10] landed=True kept=True urls=['/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.60529%2C30.39380%2C48.01471%2C30.62619', '/map?polygon=47.787531%2C30.540652%3B47.862460%2C30.538071%3B47.823497%2C30.486429'] pan_first=True moved_while_drawing=[] trace=['rsc> /map?polygon=47.787531%2C30.540652%3B47.862460%2C30.538071%3B47.823497%2C30.486429&_rsc=poo-EUk6BbVhB2nh', 'rsc✗ /map?polygon=47.787531%2C30.540652%3B47.862460%2C30.538071%3… net::ERR_ABORTED']
+  ✓ [draw 11] landed=True kept=True urls=['/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.70,30.40,47.92,30.62', '/map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3B47.810000%2C30.479071'] pan_first=False moved_while_drawing=[] trace=['rsc> /map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3B47.810000%2C30.479071&_rsc=poo-EUk6BbVhB2nh', 'rsc✗ /map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3… net::ERR_ABORTED']
+  ✓ [draw 12] landed=True kept=True urls=['/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.60529%2C30.39380%2C48.01471%2C30.62619', '/map?polygon=47.787531%2C30.540652%3B47.862460%2C30.538071%3B47.823497%2C30.486429'] pan_first=True moved_while_drawing=[] trace=['rsc> /map?polygon=47.787531%2C30.540652%3B47.862460%2C30.538071%3B47.823497%2C30.486429&_rsc=poo-EUk6BbVhB2nh', 'rsc✗ /map?polygon=47.787531%2C30.540652%3B47.862460%2C30.538071%3… net::ERR_ABORTED']
+  ✓ [draw 13] landed=True kept=True urls=['/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.70,30.40,47.92,30.62', '/map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3B47.810000%2C30.479071'] pan_first=False moved_while_drawing=[] trace=['rsc> /map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3B47.810000%2C30.479071&_rsc=poo-EUk6BbVhB2nh', 'rsc< /map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3… done']
+  ✓ [draw 14] landed=True kept=True urls=['/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.60529%2C30.39380%2C48.01471%2C30.62619', '/map?polygon=47.786398%2C30.540022%3B47.861327%2C30.537440%3B47.822364%2C30.485798'] pan_first=True moved_while_drawing=[] trace=['rsc> /map?polygon=47.786398%2C30.540022%3B47.861327%2C30.537440%3B47.822364%2C30.485798&_rsc=poo-EUk6BbVhB2nh', 'rsc✗ /map?polygon=47.786398%2C30.540022%3B47.861327%2C30.537440%3… net::ERR_ABORTED']
+  ✓ [draw 15] landed=True kept=True urls=['/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.60529%2C30.39380%2C48.01471%2C30.62619', '/map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3B47.810000%2C30.479071'] pan_first=False moved_while_drawing=[] trace=['rsc> /map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3B47.810000%2C30.479071&_rsc=poo-EUk6BbVhB2nh', 'rsc< /map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3… done']
+  ✓ [draw 16] landed=True kept=True urls=['/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.60529%2C30.39380%2C48.01471%2C30.62619', '/map?polygon=47.787395%2C30.540571%3B47.862324%2C30.537989%3B47.823361%2C30.486347'] pan_first=True moved_while_drawing=[] trace=['rsc> /map?polygon=47.787395%2C30.540571%3B47.862324%2C30.537989%3B47.823361%2C30.486347&_rsc=poo-EUk6BbVhB2nh', 'rsc< /map?polygon=47.787395%2C30.540571%3B47.862324%2C30.537989%3… done']
+  ✓ [draw 17] landed=True kept=True urls=['/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.70,30.40,47.92,30.62', '/map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3B47.810000%2C30.479071'] pan_first=False moved_while_drawing=[] trace=['rsc> /map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3B47.810000%2C30.479071&_rsc=poo-EUk6BbVhB2nh', 'rsc✗ /map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3… net::ERR_ABORTED']
+  ✓ [draw 18] landed=True kept=True urls=['/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.60529%2C30.39380%2C48.01471%2C30.62619', '/map?polygon=47.787461%2C30.540610%3B47.862389%2C30.538029%3B47.823427%2C30.486387'] pan_first=True moved_while_drawing=[] trace=['rsc> /map?polygon=47.787461%2C30.540610%3B47.862389%2C30.538029%3B47.823427%2C30.486387&_rsc=poo-EUk6BbVhB2nh', 'rsc✗ /map?polygon=47.787461%2C30.540610%3B47.862389%2C30.538029%3… net::ERR_ABORTED']
+  ✓ [draw 19] landed=True kept=True urls=['/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.60529%2C30.39380%2C48.01471%2C30.62619', '/map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3B47.810000%2C30.479071'] pan_first=False moved_while_drawing=[] trace=['rsc> /map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3B47.810000%2C30.479071&_rsc=poo-EUk6BbVhB2nh', 'rsc< /map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3… done']
+  ✓ [draw 20] landed=True kept=True urls=['/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.70,30.40,47.92,30.62', '/map?bbox=47.60529%2C30.39380%2C48.01471%2C30.62619', '/map?polygon=47.787634%2C30.540713%3B47.862562%2C30.538132%3B47.823600%2C30.486490'] pan_first=True moved_while_drawing=[] trace=['rsc> /map?polygon=47.787634%2C30.540713%3B47.862562%2C30.538132%3B47.823600%2C30.486490&_rsc=poo-EUk6BbVhB2nh', 'rsc< /map?polygon=47.787634%2C30.540713%3B47.862562%2C30.538132%3… done']
+::notice title=draw trace (pass)::attempt 1: ['rsc> /map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3B47.810000%2C30.479071&_rsc=poo-EUk6BbVhB2nh', 'rsc✗ /map?polygon=47.774034%2C30.533299%3B47.848963%2C30.530717%3… net::ERR_ABORTED']
+  ✓ draw-area search works (20/20 attempts) — see https://github.com/ccd2023e013-ux/iraq-proptech/issues/4
+  ✓ no CSP violations ([])
+  ✓ no worker errors ([])
+  ✓ no uncaught page errors ([])
+  console: [ar-light-1440] requestfailed http://localhost:3000/?_rsc=GwwRtTerPLiEJR6D net::ERR_ABORTED
+  console: [ar-light-1440] requestfailed http://localhost:3000/properties?_rsc=GwwRtTerPLiEJR6D net::ERR_ABORTED
+  console: [ar-light-1440] requestfailed http://localhost:3000/market?_rsc=GwwRtTerPLiEJR6D net::ERR_ABORTED
+  console: [ar-light-1440] requestfailed http://localhost:3000/future?_rsc=GwwRtTerPLiEJR6D net::ERR_ABORTED
+  console: [ar-light-1440] requestfailed http://localhost:3000/register?_rsc=GwwRtTerPLiEJR6D net::ERR_ABORTED
+  console: [ar-light-1440] requestfailed http://localhost:3000/?_rsc=d4Wif2ZBQ3Psxrbk net::ERR_ABORTED
+  console: [ar-light-1440] requestfailed http://localhost:3000/pricing?_rsc=GwwRtTerPLiEJR6D net::ERR_ABORTED
+  console: [ar-light-1440] requestfailed http://localhost:3000/login?_rsc=GwwRtTerPLiEJR6D net::ERR_ABORTED
+  console: [ar-light-1440] requestfailed http://localhost:3000/map?_rsc=d4Wif2ZBQ3Psxrbk net::ERR_ABORTED
+  console: [ar-light-1440] requestfailed http://localhost:3000/market?_rsc=d4Wif2ZBQ3Psxrbk net::ERR_ABORTED
+  console: [ar-light-1440] requestfailed http://localhost:3000/properties?_rsc=1fiZKKbcyW4EZRjb net::ERR_ABORTED
+  console: [ar-light-1440] requestfailed http://localhost:3000/future?_rsc=d4Wif2ZBQ3Psxrbk net::ERR_ABORTED
+  console: [ar-light-1440] requestfailed http://localhost:3000/login?_rsc=d4Wif2ZBQ3Psxrbk net::ERR_ABORTED
+  console: [ar-light-1440] requestfailed http://localhost:3000/pricing?_rsc=d4Wif2ZBQ3Psxrbk net::ERR_ABORTED
+  console: [ar-light-1440] requestfailed http://localhost:3000/register?_rsc=d4Wif2ZBQ3Psxrbk net::ERR_ABORTED
+  console: [ar-light-1440] console warning: The maxzoom value "18" is expected to be greater than the clusterMaxZoom value "22".
+  console: [ar-light-1440] console warning: layers[highway-shield-non-us].filter[1]: Expected value to be of type number, but found null instead. Falling back to false.
+  console: [ar-light-1440] console warning: layers[highway-shield-us-interstate].filter[1]: Expected value to be of type number, but found null instead. Falling back to false.
+  console: [ar-light-1440] console warning: layers[road_shield_us].filter[1]: Expected value to be of type number, but found null instead. Falling back to false.
+  console: [ar-light-1440] requestfailed http://localhost:3000/map?bbox=47.59421%2C30.39380%2C48.02579%2C30.62619&_rsc=poo-EUk6BbVhB2nh net::ERR_ABORTED
+  console: [ar-light-390] requestfailed http://localhost:3000/?_rsc=GwwRtTerPLiEJR6D net::ERR_ABORTED
+  console: [ar-light-390] requestfailed http://localhost:3000/future?_rsc=GwwRtTerPLiEJR6D net::ERR_ABORTED
+  console: [ar-light-390] requestfailed http://localhost:3000/register?_rsc=GwwRtTerPLiEJR6D net::ERR_ABORTED
+  console: [ar-light-390] requestfailed http://localhost:3000/properties?_rsc=GwwRtTerPLiEJR6D net::ERR_ABORTED
+  console: [ar-light-390] requestfailed http://localhost:3000/login?_rsc=GwwRtTerPLiEJR6D net::ERR_ABORTED
+  console: [ar-light-390] requestfailed http://localhost:3000/?_rsc=d4Wif2ZBQ3Psxrbk net::ERR_ABORTED
+  console: [ar-light-390] requestfailed http://localhost:3000/register?_rsc=d4Wif2ZBQ3Psxrbk net::ERR_ABORTED
+  console: [ar-light-390] requestfailed http://localhost:3000/login?_rsc=d4Wif2ZBQ3Psxrbk net::ERR_ABORTED
+  console: [ar-light-390] requestfailed http://localhost:3000/future?_rsc=d4Wif2ZBQ3Psxrbk net::ERR_ABORTED
+  console: [ar-light-390] console warning: The maxzoom value "18" is expected to be greater than the clusterMaxZoom value "22".
+  console: [ar-light-390] console warning: layers[highway-shield-non-us].filter[1]: Expected value to be of type number, but found null instead. Falling back to false.
+  console: [ar-light-390] console warning: layers[highway-shield-us-interstate].filter[1]: Expected value to be of type number, but found null instead. Falling back to false.
+  console: [ar-light-390] console warning: layers[road_shield_us].filter[1]: Expected value to be of type number, but found null instead. Falling back to false.
+  console: [ar-dark-1440] requestfailed http://localhost:3000/market?_rsc=GwwRtTerPLiEJR6D net::ERR_ABORTED
+  console: [ar-dark-1440] requestfailed http://localhost:3000/?_rsc=GwwRtTerPLiEJR6D net::ERR_ABORTED
+  console: [ar-dark-1440] requestfailed http://localhost:3000/properties?_rsc=GwwRtTerPLiEJR6D net::ERR_ABORTED
+  console: [ar-dark-1440] requestfailed http://localhost:3000/register?_rsc=GwwRtTerPLiEJR6D net::ERR_ABORTED
+  console: [ar-dark-1440] requestfailed http://localhost:3000/?_rsc=d4Wif2ZBQ3Psxrbk net::ERR_ABORTED
+  console: [ar-dark-1440] requestfailed http://localhost:3000/map?_rsc=d4Wif2ZBQ3Psxrbk net::ERR_ABORTED
+  console: [ar-dark-1440] requestfailed http://localhost:3000/market?_rsc=d4Wif2ZBQ3Psxrbk net::ERR_ABORTED
+  console: [ar-dark-1440] requestfailed http://localhost:3000/future?_rsc=d4Wif2ZBQ3Psxrbk net::ERR_ABORTED
+  console: [ar-dark-1440] requestfailed http://localhost:3000/properties?_rsc=1fiZKKbcyW4EZRjb net::ERR_ABORTED
+  console: [ar-dark-1440] requestfailed http://localhost:3000/login?_rsc=d4Wif2ZBQ3Psxrbk net::ERR_ABORTED
+  console: [ar-dark-1440] requestfailed http://localhost:3000/register?_rsc=d4Wif2ZBQ3Psxrbk net::ERR_ABORTED
+  console: [ar-dark-1440] requestfailed http://localhost:3000/pricing?_rsc=d4Wif2ZBQ3Psxrbk net::ERR_ABORTED
+  console: [ar-dark-1440] console warning: The maxzoom value "18" is expected to be greater than the clusterMaxZoom value "22".
+  console: [ar-dark-1440] console warning: Image "wood-pattern" could not be loaded. Please make sure you have added the image before it is needed with map.addImage(), resolved it with map.setMissingStyleImageResolver(), or included it in a "sprite" property in your style.
+  console: [ar-dark-1440] requestfailed http://localhost:3000/map?bbox=47.59421%2C30.39380%2C48.02579%2C30.62619&_rsc=poo-EUk6BbVhB2nh net::ERR_ABORTED
+  console: [ar-dark-390] requestfailed http://localhost:3000/register?_rsc=GwwRtTerPLiEJR6D net::ERR_ABORTED
+  console: [ar-dark-390] requestfailed http://localhost:3000/?_rsc=GwwRtTerPLiEJR6D net::ERR_ABORTED
+  console: [ar-dark-390] requestfailed http://localhost:3000/future?_rsc=GwwRtTerPLiEJR6D net::ERR_ABORTED
+  console: [ar-dark-390] requestfailed http://localhost:3000/properties?_rsc=GwwRtTerPLiEJR6D net::ERR_ABORTED
+  console: [ar-dark-390] requestfailed http://localhost:3000/login?_rsc=GwwRtTerPLiEJR6D net::ERR_ABORTED
+  console: [ar-dark-390] requestfailed http://localhost:3000/map?_rsc=d4Wif2ZBQ3Psxrbk net::ERR_ABORTED
+  console: [ar-dark-390] requestfailed http://localhost:3000/?_rsc=d4Wif2ZBQ3Psxrbk net::ERR_ABORTED
+  console: [ar-dark-390] requestfailed http://localhost:3000/register?_rsc=d4Wif2ZBQ3Psxrbk net::ERR_ABORTED
+  console: [ar-dark-390] requestfailed http://localhost:3000/future?_rsc=d4Wif2ZBQ3Psxrbk net::ERR_ABORTED
+  console: [ar-dark-390] console warning: The maxzoom value "18" is expected to be greater than the clusterMaxZoom value "22".
+  console: [ar-dark-390] console warning: Image "wood-pattern" could not be loaded. Please make sure you have added the image before it is needed with map.addImage(), resolved it with map.setMissingStyleImageResolver(), or included it in a "sprite" property in your style.
+  console: [ar-dark-390] requestfailed http://localhost:3000/map?bbox=47.68456%2C30.30812%2C47.93544%2C30.71158&_rsc=poo-EUk6BbVhB2nh net::ERR_ABORTED
+  ✓ all 8 MapLibre states visited (8)
+MAPLIBRE CHECK OK
+exit=0
