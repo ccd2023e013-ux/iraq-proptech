@@ -22,7 +22,7 @@ export function isActive(pathname: string, href: string): boolean {
 export function PrimaryNav({ items, label }: { items: NavItem[]; label: string }) {
   const pathname = usePathname() ?? "/";
   return (
-    <nav aria-label={label} className="hidden h-full items-stretch gap-0.5 text-[15px] md:flex">
+    <nav aria-label={label} className="hidden h-full items-stretch gap-0.5 text-[15px] lg:flex">
       {items.map((item) => {
         const active = isActive(pathname, item.href);
         return (

@@ -151,6 +151,16 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
     ] as [string, string, IconName][]
   ).filter(([, v]) => v !== "");
 
+  const facts: [string, string, IconName][] = [
+    ...keyStats,
+    ...((property.floors
+      ? [[p.floors, String(property.floors), "building"]]
+      : property.year_built
+        ? [[p.yearBuilt, String(property.year_built), "calendar"]]
+        : []) as [string, string, IconName][]),
+  ].slice(0, 4);
+  // The band's columns follow the number of facts, so it never has empty cells.
+
   // Future scenarios: plots and houses with a known area, priced against the
   // market report's apartment median for the city (when there is one).
   const plotM2 = Number(property.land_area_m2 ?? property.area_m2 ?? 0);
@@ -277,30 +287,32 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
       </div>
 
       {/* Key facts: the numbers people scan first, as one band. */}
-      {keyStats.length > 0 && (
+      {facts.length > 0 && (
         <div className="page">
           <dl
             aria-label={p.keyFacts}
-            className="mt-6 grid grid-cols-2 overflow-hidden rounded-[var(--radius-card)] bg-hairline [gap:1px] sm:grid-cols-4"
+            className={`mt-6 grid overflow-hidden rounded-[var(--radius-card)] bg-hairline [gap:1px] ${
+              facts.length < 3
+                ? facts.length === 1
+                  ? "grid-cols-1"
+                  : "grid-cols-2"
+                : facts.length === 3
+                  ? "grid-cols-3"
+                  : "grid-cols-2 sm:grid-cols-4"
+            }`}
           >
-            {[
-              ...keyStats,
-              ...((property.floors
-                ? [[p.floors, String(property.floors), "building"]]
-                : property.year_built
-                  ? [[p.yearBuilt, String(property.year_built), "calendar"]]
-                  : []) as [string, string, IconName][]),
-            ]
-              .slice(0, 4)
-              .map(([k, val, icon]) => (
-                <div key={k} className="flex items-center gap-4 bg-surface px-5 py-5">
-                  <Icon name={icon} className="size-6 shrink-0 text-ink-3" strokeWidth={1.6} />
-                  <div className="min-w-0">
-                    <dd className="kpi truncate text-2xl text-ink">{val}</dd>
-                    <dt className="meta">{k}</dt>
-                  </div>
+            {facts.map(([k, val, icon]) => (
+              <div
+                key={k}
+                className="flex items-center gap-4 bg-surface px-5 py-5 max-sm:flex-col max-sm:items-start max-sm:gap-2 max-sm:px-4"
+              >
+                <Icon name={icon} className="size-6 shrink-0 text-ink-3" strokeWidth={1.6} />
+                <div className="min-w-0">
+                  <dd className="kpi truncate text-2xl text-ink">{val}</dd>
+                  <dt className="meta">{k}</dt>
                 </div>
-              ))}
+              </div>
+            ))}
           </dl>
         </div>
       )}

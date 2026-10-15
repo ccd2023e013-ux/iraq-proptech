@@ -35,6 +35,7 @@ PUBLIC = [
     ("smart", "/search/smart"),
     ("compare", "/compare"),
     ("compare-3", None),  # three listings, resolved at run time
+    ("flight", None),  # the first listing's drone flight, resolved at run time
     ("studio", "/studio"),
     ("vision", "/vision"),
     ("credits", "/credits"),
@@ -295,10 +296,24 @@ def map_states(browser: Browser, lang: str, view: str, theme: str = "dark") -> N
         # A selected listing: click each price tag position until a selection opens.
         if box:
             found = False
+            # Click only in the open map, never on the docked results rail
+            # (a click there opens a listing and ends the run).
+            x0, x1 = box["x"], box["x"] + box["width"]
+            rail = page.locator("section:has([data-testid=map-total])").first
+            rb = rail.bounding_box() if rail.count() and view != "390" else None
+            if rb:
+                if rb["x"] - x0 < x1 - (rb["x"] + rb["width"]):
+                    x0 = rb["x"] + rb["width"]
+                else:
+                    x1 = rb["x"]
             for fx in (0.35, 0.45, 0.5, 0.55, 0.62, 0.4, 0.58):
                 for fy in (0.3, 0.38, 0.45, 0.52, 0.6):
-                    page.mouse.click(box["x"] + box["width"] * fx, box["y"] + box["height"] * fy)
+                    page.mouse.click(x0 + (x1 - x0) * fx, box["y"] + box["height"] * fy)
                     page.wait_for_timeout(250)
+                    if "/map" not in page.url:
+                        page.go_back(wait_until="load")
+                        settle(page, "/map")
+                        continue
                     if page.locator("[data-testid=map-selection]").count():
                         found = True
                         break
@@ -338,7 +353,7 @@ def map_states(browser: Browser, lang: str, view: str, theme: str = "dark") -> N
                 page.mouse.move(5, 5)
         if box:
             # Closer in: tags spread out; then 3D buildings with a pitched camera.
-            page.mouse.move(box["x"] + box["width"] * 0.62, box["y"] + box["height"] * 0.45)
+            page.mouse.move(x0 + (x1 - x0) * 0.62, box["y"] + box["height"] * 0.45)
             for _ in range(6 if view == "390" else 3):
                 page.mouse.wheel(0, -320)
                 page.wait_for_timeout(350)
@@ -457,7 +472,11 @@ def main() -> int:
         compare = (
             "/compare?ids=" + ",".join(h.rsplit("/", 1)[1] for h in three) if len(three) == 3 else None
         )
-        resolved = {"listing": listing, "compare-3": compare}
+        resolved = {
+            "listing": listing,
+            "compare-3": compare,
+            "flight": f"{listing}/flight" if listing else None,
+        }
         pages = [(n, resolved.get(n, path)) for n, path in PUBLIC]
         pages = [(n, path) for n, path in pages if path]
         combos = [
@@ -478,7 +497,7 @@ def main() -> int:
                 shoot(page, name, path, tag)
                 ctx.close()
         # The product pages in the other themes and on a tablet.
-        key = {n: path for n, path in pages if n in ("listing", "compare-3", "market", "smart")}
+        key = {n: path for n, path in pages if n in ("listing", "compare-3", "market", "smart", "flight")}
         for lang, theme, view in (
             ("en", "light", "1440"),
             ("ar", "light", "390"),

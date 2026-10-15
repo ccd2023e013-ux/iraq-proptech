@@ -162,7 +162,11 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
   const ppm2Best = data.same_currency ? bestIndex(ppm2, { better: "low" }) : null;
   const query = (all: boolean) =>
     `/compare?ids=${encodeURIComponent(ids.join(","))}${all ? "&all=1" : ""}`;
-  const grid = { gridTemplateColumns: `minmax(9rem,13rem) repeat(${n}, minmax(13rem, 1fr))` };
+  const grid = {
+    gridTemplateColumns: `minmax(7.5rem,12rem) repeat(${n}, minmax(0, 1fr))`,
+    // Columns share the width; below this the sheet scrolls sideways.
+    minWidth: `${7.5 + n * 11}rem`,
+  };
 
   return (
     <div className="page flex flex-col gap-6 pb-10">
@@ -185,23 +189,27 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
       {/* One sheet: properties as columns, details as rows. The label column
           stays put while the properties scroll sideways on small screens. */}
       <div className="quiet-scroll -mx-[var(--gutter)] overflow-x-auto px-[var(--gutter)]">
-        <div className="grid min-w-max" style={grid} role="table" aria-label={c.title}>
+        <div className="grid w-full" style={grid} role="table" aria-label={c.title}>
           <div role="row" className="contents">
             <div role="columnheader" className="sticky start-0 z-10 bg-canvas" />
             {data.items.map((p) => {
               const photo = cover(p);
               return (
-                <div key={p.id} role="columnheader" className="flex flex-col gap-3 px-3 pb-5">
+                <div
+                  key={p.id}
+                  role="columnheader"
+                  className="flex min-w-0 flex-col gap-3 px-3 pb-5"
+                >
                   <Link
                     href={`/properties/${p.id}`}
-                    className="group relative block aspect-[4/3] overflow-hidden rounded-[var(--radius-media)] bg-fill"
+                    className="group relative block aspect-[4/3] w-full shrink-0 overflow-hidden rounded-[var(--radius-media)] bg-fill"
                   >
                     {photo ? (
                       <SafeImage
                         src={photo.thumbnail_url ?? photo.url}
                         alt=""
                         fallbackLabel="—"
-                        className="photo size-full object-cover transition-transform duration-[var(--duration-slow)] group-hover:scale-[1.03]"
+                        className="photo absolute inset-0 size-full object-cover transition-transform duration-[var(--duration-slow)] group-hover:scale-[1.03]"
                       />
                     ) : (
                       <span className="grid size-full place-items-center text-ink-3">
@@ -282,7 +290,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
                     <div
                       key={p.id}
                       role="cell"
-                      className={`flex flex-col justify-center gap-1.5 border-t border-hairline px-3 py-4 ${best === i ? "bg-accent-tint/40" : ""}`}
+                      className={`flex min-w-0 flex-col justify-center gap-1.5 border-t border-hairline px-3 py-4 [overflow-wrap:anywhere] ${best === i ? "bg-accent-tint/40" : ""}`}
                     >
                       <span
                         className={`tabular text-[15px] ${v === null || v === "" ? "text-ink-3" : "text-ink"} ${best === i ? "font-semibold" : ""}`}

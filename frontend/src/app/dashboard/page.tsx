@@ -168,7 +168,7 @@ export default async function DashboardPage() {
       />
       {!me.user.email_verified && <Alert tone="warning">{d.emailNotVerified}</Alert>}
 
-      <div className="grid gap-10 lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 [&>*]:min-w-0">
         {/* What needs action, most urgent first. */}
         <section aria-labelledby="attention" className="flex flex-col gap-4 lg:col-span-7">
           <h2 id="attention" className="title text-ink">

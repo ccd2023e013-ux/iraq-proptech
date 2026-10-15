@@ -295,7 +295,7 @@ export default async function AssistantPage({
             maxLength={300}
             required
             autoFocus={turns.length === 0}
-            className="h-12 min-w-0 flex-1 bg-transparent text-[16px] text-ink outline-none placeholder:text-ink-3"
+            className="h-12 min-w-0 flex-1 bg-transparent text-[16px] text-ink outline-none! placeholder:text-ink-3"
           />
           <button type="submit" className="btn btn-primary shrink-0" aria-label={s.send}>
             <Icon name="send" className="size-4" />

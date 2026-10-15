@@ -555,13 +555,13 @@ function RangeChart({
             </span>
             {r.low !== null && r.high !== null && max > 0 ? (
               <span
-                className="relative h-8"
+                className="relative h-10"
                 title={`${r.label}: ${format(r.low)} – ${format(r.high)}${r.mid !== null ? ` · ${format(r.mid)}` : ""}`}
               >
-                <span aria-hidden className="absolute inset-x-0 top-1/2 h-px bg-hairline" />
+                <span aria-hidden className="absolute inset-x-0 top-[70%] h-px bg-hairline" />
                 <span
                   aria-hidden
-                  className="absolute top-1/2 h-2.5 -translate-y-1/2 rounded-[4px] bg-spatial-fill/45"
+                  className="absolute top-[70%] h-2.5 -translate-y-1/2 rounded-[4px] bg-spatial-fill/45"
                   style={{
                     insetInlineStart: pct(r.low),
                     width: `calc(${pct(r.high)} - ${pct(r.low)})`,
@@ -570,13 +570,13 @@ function RangeChart({
                 {r.mid !== null && (
                   <span
                     aria-hidden
-                    className="absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-spatial-fill shadow-[0_0_0_2px_var(--canvas)] rtl:translate-x-1/2"
+                    className="absolute top-[70%] size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-spatial-fill shadow-[0_0_0_2px_var(--canvas)] rtl:translate-x-1/2"
                     style={{ insetInlineStart: pct(r.mid) }}
                   />
                 )}
                 {r.mid !== null && (
                   <span
-                    className="absolute -top-1 text-[12.5px] font-semibold whitespace-nowrap text-ink tabular"
+                    className="absolute top-0 text-[12.5px] leading-4 font-semibold whitespace-nowrap text-ink tabular"
                     style={{ insetInlineStart: `min(${pct(r.mid)}, calc(100% - 4.5rem))` }}
                   >
                     {format(r.mid)}
@@ -596,7 +596,7 @@ function RangeChart({
             {ticks.map((v, i) => (
               <span
                 key={v}
-                className={`absolute whitespace-nowrap ${i === 1 ? "-translate-x-1/2 rtl:translate-x-1/2" : ""}`}
+                className={`absolute whitespace-nowrap ${i === 1 ? "-translate-x-1/2 max-sm:hidden rtl:translate-x-1/2" : ""}`}
                 style={{
                   insetInlineStart: i === ticks.length - 1 ? undefined : pct(v),
                   insetInlineEnd: i === ticks.length - 1 ? 0 : undefined,

@@ -21,7 +21,7 @@ export function MobileMenu({
     if (ref.current) ref.current.open = false;
   }, [pathname]);
   return (
-    <details ref={ref} className="relative md:hidden">
+    <details ref={ref} className="relative lg:hidden">
       <summary
         aria-label={label}
         className="icon-btn size-9 cursor-pointer list-none [&::-webkit-details-marker]:hidden"
