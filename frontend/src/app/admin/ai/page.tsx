@@ -25,7 +25,7 @@ export default async function AiUsagePage() {
     <div className="flex flex-col gap-4">
       <PageHeader title={a.aiUsage} size="md" />
       <div className="overflow-x-auto surface-1 rounded-[var(--radius-card)]">
-        <table className="w-full min-w-[640px] text-sm">
+        <table className="data-table w-full min-w-[640px] text-sm">
           <thead>
             <tr className="border-b border-sand-200 text-xs text-sand-500">
               <th className="p-2 text-start">{a.feature}</th>

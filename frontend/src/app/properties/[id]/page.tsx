@@ -461,6 +461,16 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                     <Icon name="insight" className="size-4 text-accent" />
                     {dict.vision.title}
                   </Link>
+                  {property.display_location && property.location_privacy !== "HIDDEN" && (
+                    <Link
+                      href={`/properties/${property.id}/flight`}
+                      className="btn btn-secondary btn-sm"
+                      data-testid="flight-link"
+                    >
+                      <Icon name="video" className="size-4 text-spatial" />
+                      {dict.flight.open}
+                    </Link>
+                  )}
                 </div>
               </div>
             </Section>

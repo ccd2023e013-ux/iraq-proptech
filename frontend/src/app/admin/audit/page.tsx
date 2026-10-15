@@ -41,7 +41,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
         />
       </form>
       <div className="overflow-x-auto surface-1 rounded-[var(--radius-card)]">
-        <table className="w-full min-w-[800px] text-xs">
+        <table className="data-table w-full min-w-[800px] text-xs">
           <thead>
             <tr className="border-b border-sand-200 text-sand-500">
               <th className="p-2 text-start">{a.time}</th>

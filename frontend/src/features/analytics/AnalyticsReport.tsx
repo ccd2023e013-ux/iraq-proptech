@@ -41,7 +41,7 @@ function DailyChart({ data, dict }: { data: AnalyticsOverview; dict: Dictionary 
       </p>
       <details className="mt-2 text-sm">
         <summary className="cursor-pointer text-accent">{t.perDay}</summary>
-        <table className="mt-2 w-full text-xs">
+        <table className="data-table mt-2 w-full text-xs">
           <thead>
             <tr className="text-sand-500">
               <th className="text-start">—</th>
@@ -123,7 +123,7 @@ export function AnalyticsReport({
           {data.top_listings.length === 0 ? (
             <p className="text-sm text-sand-500">{t.noData}</p>
           ) : (
-            <table className="w-full text-sm">
+            <table className="data-table w-full text-sm">
               <thead>
                 <tr className="text-xs text-sand-500">
                   <th className="text-start">—</th>
@@ -158,7 +158,7 @@ export function AnalyticsReport({
       {data.agents && data.agents.length > 0 && (
         <section className="surface-1 rounded-2xl p-4">
           <h2 className="mb-3 font-semibold">{t.agents}</h2>
-          <table className="w-full text-sm">
+          <table className="data-table w-full text-sm">
             <thead>
               <tr className="text-xs text-sand-500">
                 <th className="text-start">{t.agent}</th>

@@ -35,7 +35,7 @@ export default async function MyListingsPage() {
           <p className="py-10 text-center text-sand-500">{m.empty}</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-start text-sm">
+            <table className="data-table w-full text-start text-sm">
               <thead className="text-xs text-sand-500">
                 <tr className="border-b border-sand-200">
                   <th className="py-2 text-start font-medium">{m.reference}</th>
