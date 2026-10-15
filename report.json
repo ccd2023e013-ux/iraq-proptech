@@ -1,0 +1,3303 @@
+[
+ {
+  "shot": "en-dark-1440--hero-timeline",
+  "hero_timeline": [
+   {
+    "t": 0.38,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 0,
+    "visible": 0
+   },
+   {
+    "t": 0.7,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 0.99,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 2.83,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 3.11,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 3.37,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 3.62,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 3.88,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 4.14,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 4
+   },
+   {
+    "t": 4.4,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 7
+   },
+   {
+    "t": 4.66,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 12
+   },
+   {
+    "t": 4.93,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.19,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.45,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.7,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.96,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.21,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.47,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.72,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.98,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.24,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.49,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.75,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.01,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.26,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.52,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.78,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.03,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.29,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.54,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.79,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 10.05,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 10.3,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 10.55,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 10.81,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 11.06,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   }
+  ]
+ },
+ {
+  "shot": "en-light-1440--hero-timeline",
+  "hero_timeline": [
+   {
+    "t": 0.4,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 0,
+    "visible": 0
+   },
+   {
+    "t": 0.76,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 1.04,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 2.93,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 3.2,
+    "ready": "0",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 3.48,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 3.74,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 3.99,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 4.25,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 4.51,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 3
+   },
+   {
+    "t": 4.77,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 3
+   },
+   {
+    "t": 5.03,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 11
+   },
+   {
+    "t": 5.29,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.54,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.8,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.06,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.31,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.57,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.83,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.09,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.35,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.6,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.86,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.11,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.37,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.62,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.88,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.13,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.39,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.64,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.9,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 10.15,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 10.41,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 10.66,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 10.91,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 11.17,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   }
+  ]
+ },
+ {
+  "shot": "ar-dark-1440--hero-timeline",
+  "hero_timeline": [
+   {
+    "t": 0.33,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 0,
+    "visible": 0
+   },
+   {
+    "t": 0.67,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 0.93,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 2.33,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 2.61,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 2.87,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 3.13,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 3.38,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 3.64,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 3
+   },
+   {
+    "t": 3.9,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 6
+   },
+   {
+    "t": 4.15,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 11
+   },
+   {
+    "t": 4.41,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 4.66,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 4.92,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.17,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.43,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.69,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.94,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.2,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.46,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.71,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.97,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.23,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.49,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.74,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.0,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.25,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.5,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.76,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.01,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.26,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.51,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.77,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 10.02,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 10.27,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 10.53,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   }
+  ]
+ },
+ {
+  "shot": "ar-light-1440--hero-timeline",
+  "hero_timeline": [
+   {
+    "t": 0.3,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 0,
+    "visible": 0
+   },
+   {
+    "t": 0.68,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 0.94,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 2.33,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 2.61,
+    "ready": "0",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 2.88,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 3.14,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 3.41,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 3.67,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 3
+   },
+   {
+    "t": 3.93,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 7
+   },
+   {
+    "t": 4.18,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 12
+   },
+   {
+    "t": 4.44,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 4.7,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 4.95,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.21,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.46,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.72,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.98,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.24,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.49,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.75,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.0,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.26,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.52,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.77,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.03,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.28,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.54,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.79,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.05,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.3,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.55,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.81,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 10.06,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 10.31,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 10.57,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   }
+  ]
+ },
+ {
+  "shot": "ar-dark-1440--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 10.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 29.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1295/840.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1296/840.pbf net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-dark-1440--properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 5.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/98e5ff4f-8dae-4de9-8331-ed069c72f28b",
+  "status": 200,
+  "seconds": 8.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/future",
+  "status": 200,
+  "seconds": 4.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--market",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/market",
+  "status": 200,
+  "seconds": 2.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--pricing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/pricing",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--login",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/login",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--register",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/register",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--smart",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--compare",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--compare-3",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare?ids=98e5ff4f-8dae-4de9-8331-ed069c72f28b,87801f8b-6c26-4bd1-99ea-36b8f63c2c53,2f6b79e7-eb2f-4c0a-b2be-5b1f51fe7da0",
+  "status": 200,
+  "seconds": 2.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--flight",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties/98e5ff4f-8dae-4de9-8331-ed069c72f28b/flight",
+  "status": 200,
+  "seconds": 4.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--studio",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/studio",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--vision",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/vision",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--credits",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/credits",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--status",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/status",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--forgot",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/forgot-password",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--notfound",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/this-page-does-not-exist",
+  "status": 404,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 9.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 28.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1294/841.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1294/842.pbf net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "en-dark-1440--properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 5.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/98e5ff4f-8dae-4de9-8331-ed069c72f28b",
+  "status": 200,
+  "seconds": 7.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/future",
+  "status": 200,
+  "seconds": 4.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--market",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/market",
+  "status": 200,
+  "seconds": 2.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--pricing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/pricing",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--login",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/login",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--register",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/register",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--smart",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--compare",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--compare-3",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare?ids=98e5ff4f-8dae-4de9-8331-ed069c72f28b,87801f8b-6c26-4bd1-99ea-36b8f63c2c53,2f6b79e7-eb2f-4c0a-b2be-5b1f51fe7da0",
+  "status": 200,
+  "seconds": 2.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--flight",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties/98e5ff4f-8dae-4de9-8331-ed069c72f28b/flight",
+  "status": 200,
+  "seconds": 2.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--studio",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/studio",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--vision",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/vision",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--credits",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/credits",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--status",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/status",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--forgot",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/forgot-password",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--notfound",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/this-page-does-not-exist",
+  "status": 404,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 6.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 16.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/9/324/210.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/9/323/210.pbf net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-dark-390--properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 5.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/98e5ff4f-8dae-4de9-8331-ed069c72f28b",
+  "status": 200,
+  "seconds": 5.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/future",
+  "status": 200,
+  "seconds": 3.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--market",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/market",
+  "status": 200,
+  "seconds": 3.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--pricing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/pricing",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--login",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/login",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--register",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/register",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--smart",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--compare",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--compare-3",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare?ids=98e5ff4f-8dae-4de9-8331-ed069c72f28b,87801f8b-6c26-4bd1-99ea-36b8f63c2c53,2f6b79e7-eb2f-4c0a-b2be-5b1f51fe7da0",
+  "status": 200,
+  "seconds": 2.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--flight",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties/98e5ff4f-8dae-4de9-8331-ed069c72f28b/flight",
+  "status": 200,
+  "seconds": 1.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--studio",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/studio",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--vision",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/vision",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--credits",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/credits",
+  "status": 200,
+  "seconds": 1.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--status",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/status",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--forgot",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/forgot-password",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--notfound",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/this-page-does-not-exist",
+  "status": 404,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 6.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 16.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/9/323/209.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/9/323/210.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/9/324/210.pbf net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "en-dark-390--properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 5.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/98e5ff4f-8dae-4de9-8331-ed069c72f28b",
+  "status": 200,
+  "seconds": 5.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/future",
+  "status": 200,
+  "seconds": 3.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--market",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/market",
+  "status": 200,
+  "seconds": 3.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--pricing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/pricing",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--login",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/login",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--register",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/register",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--smart",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--compare",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--compare-3",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare?ids=98e5ff4f-8dae-4de9-8331-ed069c72f28b,87801f8b-6c26-4bd1-99ea-36b8f63c2c53,2f6b79e7-eb2f-4c0a-b2be-5b1f51fe7da0",
+  "status": 200,
+  "seconds": 2.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--flight",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties/98e5ff4f-8dae-4de9-8331-ed069c72f28b/flight",
+  "status": 200,
+  "seconds": 2.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--studio",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/studio",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--vision",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/vision",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--credits",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/credits",
+  "status": 200,
+  "seconds": 1.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--status",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/status",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--forgot",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/forgot-password",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--notfound",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/this-page-does-not-exist",
+  "status": 404,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-1440--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 10.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-1440--map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 27.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/12/2590/1683.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/12/2590/1682.pbf net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-light-1440--properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 5.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-1440--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/98e5ff4f-8dae-4de9-8331-ed069c72f28b",
+  "status": 200,
+  "seconds": 7.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-1440--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/future",
+  "status": 200,
+  "seconds": 4.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-390--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 6.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-390--map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 15.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-390--properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 5.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-390--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/98e5ff4f-8dae-4de9-8331-ed069c72f28b",
+  "status": 200,
+  "seconds": 5.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-390--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/future",
+  "status": 200,
+  "seconds": 4.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1920--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 10.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/12/2594/1683.pbf net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-dark-1920--map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 34.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1920--properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 5.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1920--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/98e5ff4f-8dae-4de9-8331-ed069c72f28b",
+  "status": 200,
+  "seconds": 8.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1920--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/future",
+  "status": 200,
+  "seconds": 4.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-1440--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/98e5ff4f-8dae-4de9-8331-ed069c72f28b",
+  "status": 200,
+  "seconds": 7.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-1440--market",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/market",
+  "status": 200,
+  "seconds": 2.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-1440--smart",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-1440--compare-3",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare?ids=98e5ff4f-8dae-4de9-8331-ed069c72f28b,87801f8b-6c26-4bd1-99ea-36b8f63c2c53,2f6b79e7-eb2f-4c0a-b2be-5b1f51fe7da0",
+  "status": 200,
+  "seconds": 1.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-1440--flight",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties/98e5ff4f-8dae-4de9-8331-ed069c72f28b/flight",
+  "status": 200,
+  "seconds": 4.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-390--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/98e5ff4f-8dae-4de9-8331-ed069c72f28b",
+  "status": 200,
+  "seconds": 4.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-390--market",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/market",
+  "status": 200,
+  "seconds": 3.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-390--smart",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-390--compare-3",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare?ids=98e5ff4f-8dae-4de9-8331-ed069c72f28b,87801f8b-6c26-4bd1-99ea-36b8f63c2c53,2f6b79e7-eb2f-4c0a-b2be-5b1f51fe7da0",
+  "status": 200,
+  "seconds": 2.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-390--flight",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties/98e5ff4f-8dae-4de9-8331-ed069c72f28b/flight",
+  "status": 200,
+  "seconds": 2.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-768--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/98e5ff4f-8dae-4de9-8331-ed069c72f28b",
+  "status": 200,
+  "seconds": 5.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-768--market",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/market",
+  "status": 200,
+  "seconds": 2.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-768--smart",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-768--compare-3",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare?ids=98e5ff4f-8dae-4de9-8331-ed069c72f28b,87801f8b-6c26-4bd1-99ea-36b8f63c2c53,2f6b79e7-eb2f-4c0a-b2be-5b1f51fe7da0",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-768--flight",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties/98e5ff4f-8dae-4de9-8331-ed069c72f28b/flight",
+  "status": 200,
+  "seconds": 1.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--map-states",
+  "states": {
+   "selected": "ok",
+   "list-hover": "ok",
+   "zoomed": "ok",
+   "3d": "ok",
+   "layers": "ok",
+   "drawing": "ok"
+  },
+  "console_errors": []
+ },
+ {
+  "shot": "ar-dark-390--map-states",
+  "states": {
+   "selected": "ok",
+   "zoomed": "ok",
+   "3d": "ok",
+   "layers": "ok",
+   "sheet-open": "ok",
+   "sheet-dragged": "ok",
+   "touch-drag (emulated)": "peek->half->peek",
+   "drawing": "ok"
+  },
+  "console_errors": []
+ },
+ {
+  "shot": "en-dark-390--map-states",
+  "states": {
+   "selected": "ok",
+   "zoomed": "ok",
+   "3d": "ok",
+   "layers": "ok",
+   "sheet-open": "ok",
+   "sheet-dragged": "ok",
+   "touch-drag (emulated)": "peek->half->peek",
+   "drawing": "ok"
+  },
+  "console_errors": []
+ },
+ {
+  "shot": "en-light-1440--map-states",
+  "states": {
+   "selected": "ok",
+   "list-hover": "ok",
+   "zoomed": "ok",
+   "3d": "ok",
+   "layers": "ok",
+   "drawing": "ok"
+  },
+  "console_errors": []
+ },
+ {
+  "shot": "ar-light-390--map-states",
+  "states": {
+   "selected": "ok",
+   "zoomed": "ok",
+   "3d": "ok",
+   "layers": "ok",
+   "sheet-open": "ok",
+   "sheet-dragged": "ok",
+   "touch-drag (emulated)": "peek->half->peek",
+   "drawing": "ok"
+  },
+  "console_errors": []
+ },
+ {
+  "shot": "en-dark-768--map-states",
+  "states": {
+   "selected": "ok",
+   "list-hover": "ok",
+   "zoomed": "ok",
+   "3d": "ok",
+   "layers": "ok",
+   "drawing": "ok"
+  },
+  "console_errors": []
+ },
+ {
+  "shot": "ar-light-768--map-states",
+  "states": {
+   "selected": "ok",
+   "list-hover": "ok",
+   "zoomed": "ok",
+   "3d": "ok",
+   "layers": "ok",
+   "drawing": "ok"
+  },
+  "console_errors": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_dashboard",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard",
+  "status": 200,
+  "seconds": 2.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_dashboard_properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/properties",
+  "status": 200,
+  "seconds": 2.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_dashboard_properties_new",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/properties/new",
+  "status": 200,
+  "seconds": 3.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_dashboard_crm",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/crm",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_dashboard_analytics",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/analytics",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_dashboard_agency",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/agency",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_account",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/account",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_account_billing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/account/billing",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_favorites",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/favorites",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_saved-searches",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/saved-searches",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_notifications",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/notifications",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_messages",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/messages",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_studio",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/studio",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_vision",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/vision",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_dashboard",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard",
+  "status": 200,
+  "seconds": 1.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_dashboard_properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/properties",
+  "status": 200,
+  "seconds": 2.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_dashboard_properties_new",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/properties/new",
+  "status": 200,
+  "seconds": 2.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_dashboard_crm",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/crm",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_dashboard_analytics",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/analytics",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_dashboard_agency",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/agency",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_account",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/account",
+  "status": 200,
+  "seconds": 1.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_account_billing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/account/billing",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_favorites",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/favorites",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_saved-searches",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/saved-searches",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_notifications",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/notifications",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_messages",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/messages",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_studio",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/studio",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_vision",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/vision",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin",
+  "status": 200,
+  "seconds": 2.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_users",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/users",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_moderation",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/moderation",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_verification",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/verification",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_ai",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/ai",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_analytics",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/analytics",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_reports",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/reports",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_billing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/billing",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_jobs",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/jobs",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_audit",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/audit",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_system",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/system",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_settings",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/settings",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_webhooks",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/webhooks",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_users",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/users",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_moderation",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/moderation",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_verification",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/verification",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_ai",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/ai",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_analytics",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/analytics",
+  "status": 200,
+  "seconds": 1.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_reports",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/reports",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_billing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/billing",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_jobs",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/jobs",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_audit",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/audit",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_system",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/system",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_settings",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/settings",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_webhooks",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/webhooks",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--public-home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 8.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/10/647/421.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/10/648/421.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/10/647/420.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/10/648/420.pbf net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-dark-390--public-map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 17.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/9/324/210.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/9/323/210.pbf net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-dark-1440--public-home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 9.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1297/840.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1297/842.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1297/841.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/12/2590/1683.pbf net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-dark-1440--public-map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 27.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ }
+]
