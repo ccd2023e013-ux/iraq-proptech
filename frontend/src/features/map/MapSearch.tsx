@@ -16,7 +16,6 @@ import {
 } from "react";
 
 import { Button } from "@/components/ui/Button";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { TrustBadge } from "@/components/ui/TrustBadge";

@@ -2,7 +2,7 @@
 
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import type { GeoJSONSource, Map as MapLibreMap } from "maplibre-gl";
+import type { Map as MapLibreMap } from "maplibre-gl";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import { Icon } from "@/components/ui/Icon";
@@ -237,8 +237,9 @@ export function Flight({
       return;
     }
     setPlaying(true);
-    const t0 = performance.now();
+    let t0 = -1;
     const tick = (now: number) => {
+      if (t0 < 0) t0 = now;
       const t = Math.min(1, (now - t0) / duration);
       const cam = cameraAt(path, t, linear);
       map.jumpTo({
