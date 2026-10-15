@@ -387,7 +387,8 @@ const en: Dictionary = {
     documentNotChecked: "Not checked by MAKAN. Ask to see the original before paying anything.",
     documentChecked: "Checked by MAKAN",
     intelligence: "MAKAN intelligence",
-    intelligenceLede: "Analysis from listing data. Every statement is labelled with its kind and source.",
+    intelligenceLede:
+      "Analysis from listing data. Every statement is labelled with its kind and source.",
     openOnMap: "Open on the map",
     contactCta: "Contact",
     priceHistoryNote: "Asking prices on MAKAN over time.",
