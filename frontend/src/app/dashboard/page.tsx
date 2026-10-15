@@ -48,7 +48,7 @@ export default async function DashboardPage() {
   for (const p of listings?.items ?? []) byStatus.set(p.status, (byStatus.get(p.status) ?? 0) + 1);
   const unread = conversations.reduce((n, c2) => n + (c2.unread ?? 0), 0);
 
-  const rows: Row[] = [
+  const candidates: Row[] = [
     ...(board
       ? [
           {
@@ -109,7 +109,8 @@ export default async function DashboardPage() {
           },
         ]
       : []),
-  ].filter((r) => r.count > 0);
+  ];
+  const rows = candidates.filter((r) => r.count > 0);
   rows.sort((a, b) => Number(!!b.urgent) - Number(!!a.urgent));
 
   const STATUS_TONE: Record<string, string> = {
