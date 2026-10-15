@@ -1,0 +1,21 @@
+openverse 'Basra house': 20 results
+openverse 'Basra street': 20 results
+openverse 'Basra apartments': 1 results
+openverse 'Basra Iraq buildings': 17 results
+openverse 'Iraq house': 20 results
+openverse 'Iraq villa': 3 results
+openverse 'Iraq apartment building': 4 results
+openverse 'Iraq residential street': 1 results
+openverse 'Erbil houses': 20 results
+openverse 'Erbil apartments': 6 results
+openverse 'Baghdad houses': 20 results
+openverse 'Baghdad street': 20 results
+openverse 'Najaf street': 20 results
+openverse 'Karbala street': 10 results
+openverse 'Sulaymaniyah houses': 14 results
+openverse 'Duhok houses': 2 results
+openverse 'Iraq shops street': 20 results
+openverse 'Iraq palm grove farm': 0 results
+openverse 'Iraq construction housing': 20 results
+222 Openverse results
+87 acceptable; rejected: {'excluded': 60, 'not': 17, 'too': 57, 'no': 1}
