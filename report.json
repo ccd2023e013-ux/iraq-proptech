@@ -1,0 +1,3308 @@
+[
+ {
+  "shot": "en-dark-1440--hero-timeline",
+  "hero_timeline": [
+   {
+    "t": 0.35,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 0,
+    "visible": 0
+   },
+   {
+    "t": 0.68,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 0.94,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 2.36,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 2.63,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 2.88,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 3.14,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 3.39,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 3.65,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 4
+   },
+   {
+    "t": 3.91,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 7
+   },
+   {
+    "t": 4.16,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 11
+   },
+   {
+    "t": 4.42,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 4.67,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 4.93,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.19,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.44,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.7,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.95,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.21,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.46,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.72,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.97,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.22,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.47,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.73,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.98,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.23,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.49,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.74,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.99,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.24,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.5,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.75,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 10.0,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 10.26,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 10.51,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   }
+  ]
+ },
+ {
+  "shot": "en-light-1440--hero-timeline",
+  "hero_timeline": [
+   {
+    "t": 0.24,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 0,
+    "visible": 0
+   },
+   {
+    "t": 0.52,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 0.79,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 1.11,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 2.3,
+    "ready": "0",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 2.57,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 2.83,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 3.08,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 3.33,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 3.59,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 5
+   },
+   {
+    "t": 3.84,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 9
+   },
+   {
+    "t": 4.1,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 12
+   },
+   {
+    "t": 4.35,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 4.61,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 4.86,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.12,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.37,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.63,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.89,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.14,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.4,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.65,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.91,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.17,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.43,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.68,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.94,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.19,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.45,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.7,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.95,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.2,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.46,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.71,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.96,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 10.21,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   }
+  ]
+ },
+ {
+  "shot": "ar-dark-1440--hero-timeline",
+  "hero_timeline": [
+   {
+    "t": 0.23,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 0,
+    "visible": 0
+   },
+   {
+    "t": 0.54,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 0.81,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 1.09,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 1.89,
+    "ready": "0",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 2.16,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 2.41,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 2.67,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 2.92,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 1
+   },
+   {
+    "t": 3.17,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 6
+   },
+   {
+    "t": 3.43,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 10
+   },
+   {
+    "t": 3.68,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 3.94,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 4.2,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 4.45,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 4.71,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 4.97,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.22,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.47,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.74,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.99,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.25,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.5,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.75,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.0,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.26,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.51,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.76,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.01,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.27,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.52,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.77,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.02,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.28,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.53,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.78,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   }
+  ]
+ },
+ {
+  "shot": "ar-light-1440--hero-timeline",
+  "hero_timeline": [
+   {
+    "t": 0.29,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 0,
+    "visible": 0
+   },
+   {
+    "t": 0.6,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 0.85,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 1.17,
+    "ready": "0",
+    "phase": null,
+    "total": null,
+    "shown": null,
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 2.23,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 0
+   },
+   {
+    "t": 2.49,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 4
+   },
+   {
+    "t": 2.74,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 7
+   },
+   {
+    "t": 3.0,
+    "ready": "1",
+    "phase": "intro",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 11
+   },
+   {
+    "t": 3.25,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 3.51,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 3.76,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 4.02,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 4.27,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 4.53,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 4.78,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.04,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.29,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.54,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 5.8,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.06,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.31,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.56,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 6.82,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.08,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.33,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.58,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 7.83,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.09,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.34,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.59,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 8.84,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.1,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.35,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.6,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 9.85,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   },
+   {
+    "t": 10.11,
+    "ready": "1",
+    "phase": "settled",
+    "total": "48",
+    "shown": "13",
+    "candidates": 48,
+    "visible": 13
+   }
+  ]
+ },
+ {
+  "shot": "ar-dark-1440--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 8.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1295/840.pbf net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-dark-1440--map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 22.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1295/840.pbf net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-dark-1440--properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 4.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/24da1d52-6fae-43e3-ac36-6ecb91103628",
+  "status": 200,
+  "seconds": 6.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/future",
+  "status": 200,
+  "seconds": 3.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--market",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/market",
+  "status": 200,
+  "seconds": 2.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--pricing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/pricing",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--login",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/login",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--register",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/register",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--smart",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--compare",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--compare-3",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare?ids=24da1d52-6fae-43e3-ac36-6ecb91103628,d063fef8-99dd-4564-908f-2e5cd3dd80f6,bb271990-5865-4c68-8e94-79b088e7e057",
+  "status": 200,
+  "seconds": 1.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--flight",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties/24da1d52-6fae-43e3-ac36-6ecb91103628/flight",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--studio",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/studio",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--vision",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/vision",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--credits",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/credits",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--status",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/status",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--forgot",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/forgot-password",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--notfound",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/this-page-does-not-exist",
+  "status": 404,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 7.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 22.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1295/840.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1296/840.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1294/840.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1295/842.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1296/842.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1294/841.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1294/842.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1295/841.pbf net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "en-dark-1440--properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 3.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/24da1d52-6fae-43e3-ac36-6ecb91103628",
+  "status": 200,
+  "seconds": 6.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/future",
+  "status": 200,
+  "seconds": 3.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--market",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/market",
+  "status": 200,
+  "seconds": 2.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--pricing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/pricing",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--login",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/login",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--register",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/register",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--smart",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--compare",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--compare-3",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare?ids=24da1d52-6fae-43e3-ac36-6ecb91103628,d063fef8-99dd-4564-908f-2e5cd3dd80f6,bb271990-5865-4c68-8e94-79b088e7e057",
+  "status": 200,
+  "seconds": 1.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--flight",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties/24da1d52-6fae-43e3-ac36-6ecb91103628/flight",
+  "status": 200,
+  "seconds": 2.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--studio",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/studio",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--vision",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/vision",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--credits",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/credits",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--status",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/status",
+  "status": 200,
+  "seconds": 1.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--forgot",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/forgot-password",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-1440--notfound",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/this-page-does-not-exist",
+  "status": 404,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 6.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 14.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 4.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/24da1d52-6fae-43e3-ac36-6ecb91103628",
+  "status": 200,
+  "seconds": 4.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/future",
+  "status": 200,
+  "seconds": 4.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--market",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/market",
+  "status": 200,
+  "seconds": 3.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--pricing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/pricing",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--login",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/login",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--register",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/register",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--smart",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--compare",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--compare-3",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare?ids=24da1d52-6fae-43e3-ac36-6ecb91103628,d063fef8-99dd-4564-908f-2e5cd3dd80f6,bb271990-5865-4c68-8e94-79b088e7e057",
+  "status": 200,
+  "seconds": 1.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--flight",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties/24da1d52-6fae-43e3-ac36-6ecb91103628/flight",
+  "status": 200,
+  "seconds": 1.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--studio",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/studio",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--vision",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/vision",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--credits",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/credits",
+  "status": 200,
+  "seconds": 1.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--status",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/status",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--forgot",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/forgot-password",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--notfound",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/this-page-does-not-exist",
+  "status": 404,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 6.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 14.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 4.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/24da1d52-6fae-43e3-ac36-6ecb91103628",
+  "status": 200,
+  "seconds": 4.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/future",
+  "status": 200,
+  "seconds": 3.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--market",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/market",
+  "status": 200,
+  "seconds": 3.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--pricing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/pricing",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--login",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/login",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--register",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/register",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--smart",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--compare",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--compare-3",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare?ids=24da1d52-6fae-43e3-ac36-6ecb91103628,d063fef8-99dd-4564-908f-2e5cd3dd80f6,bb271990-5865-4c68-8e94-79b088e7e057",
+  "status": 200,
+  "seconds": 1.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--flight",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties/24da1d52-6fae-43e3-ac36-6ecb91103628/flight",
+  "status": 200,
+  "seconds": 1.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--studio",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/studio",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--vision",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/vision",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--credits",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/credits",
+  "status": 200,
+  "seconds": 1.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--status",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/status",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--forgot",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/forgot-password",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-390--notfound",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/this-page-does-not-exist",
+  "status": 404,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-1440--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 7.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-1440--map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 21.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-1440--properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 3.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-1440--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/24da1d52-6fae-43e3-ac36-6ecb91103628",
+  "status": 200,
+  "seconds": 5.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-1440--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/future",
+  "status": 200,
+  "seconds": 3.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-390--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 6.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-390--map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 14.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-390--properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 3.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-390--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/24da1d52-6fae-43e3-ac36-6ecb91103628",
+  "status": 200,
+  "seconds": 4.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-390--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/future",
+  "status": 200,
+  "seconds": 4.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1920--home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 8.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1296/840.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1295/840.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1297/840.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1294/841.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1294/842.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1294/840.pbf net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-dark-1920--map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 24.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1920--properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties",
+  "status": 200,
+  "seconds": 3.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1920--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/24da1d52-6fae-43e3-ac36-6ecb91103628",
+  "status": 200,
+  "seconds": 5.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1920--future",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/future",
+  "status": 200,
+  "seconds": 4.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-1440--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/24da1d52-6fae-43e3-ac36-6ecb91103628",
+  "status": 200,
+  "seconds": 5.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-1440--market",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/market",
+  "status": 200,
+  "seconds": 2.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-1440--smart",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-1440--compare-3",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare?ids=24da1d52-6fae-43e3-ac36-6ecb91103628,d063fef8-99dd-4564-908f-2e5cd3dd80f6,bb271990-5865-4c68-8e94-79b088e7e057",
+  "status": 200,
+  "seconds": 1.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-light-1440--flight",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties/24da1d52-6fae-43e3-ac36-6ecb91103628/flight",
+  "status": 200,
+  "seconds": 1.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-390--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/24da1d52-6fae-43e3-ac36-6ecb91103628",
+  "status": 200,
+  "seconds": 4.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-390--market",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/market",
+  "status": 200,
+  "seconds": 3.2,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-390--smart",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-390--compare-3",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare?ids=24da1d52-6fae-43e3-ac36-6ecb91103628,d063fef8-99dd-4564-908f-2e5cd3dd80f6,bb271990-5865-4c68-8e94-79b088e7e057",
+  "status": 200,
+  "seconds": 1.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-light-390--flight",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties/24da1d52-6fae-43e3-ac36-6ecb91103628/flight",
+  "status": 200,
+  "seconds": 1.8,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-768--listing",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/properties/24da1d52-6fae-43e3-ac36-6ecb91103628",
+  "status": 200,
+  "seconds": 4.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-768--market",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/market",
+  "status": 200,
+  "seconds": 2.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-768--smart",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/search/smart",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-768--compare-3",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/compare?ids=24da1d52-6fae-43e3-ac36-6ecb91103628,d063fef8-99dd-4564-908f-2e5cd3dd80f6,bb271990-5865-4c68-8e94-79b088e7e057",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "en-dark-768--flight",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/properties/24da1d52-6fae-43e3-ac36-6ecb91103628/flight",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--map-states",
+  "states": {
+   "selected": "ok",
+   "list-hover": "ok",
+   "zoomed": "ok",
+   "3d": "ok",
+   "layers": "ok",
+   "drawing": "ok"
+  },
+  "console_errors": []
+ },
+ {
+  "shot": "ar-dark-390--map-states",
+  "states": {
+   "selected": "ok",
+   "zoomed": "ok",
+   "3d": "ok",
+   "layers": "ok",
+   "sheet-open": "ok",
+   "sheet-dragged": "ok",
+   "touch-drag (emulated)": "peek->half->peek",
+   "drawing": "ok"
+  },
+  "console_errors": []
+ },
+ {
+  "shot": "en-dark-390--map-states",
+  "states": {
+   "selected": "ok",
+   "zoomed": "ok",
+   "3d": "ok",
+   "layers": "ok",
+   "sheet-open": "ok",
+   "sheet-dragged": "ok",
+   "touch-drag (emulated)": "peek->half->peek",
+   "drawing": "ok"
+  },
+  "console_errors": []
+ },
+ {
+  "shot": "en-light-1440--map-states",
+  "states": {
+   "selected": "ok",
+   "list-hover": "ok",
+   "zoomed": "ok",
+   "3d": "ok",
+   "layers": "ok",
+   "drawing": "ok"
+  },
+  "console_errors": []
+ },
+ {
+  "shot": "ar-light-390--map-states",
+  "states": {
+   "selected": "ok",
+   "zoomed": "ok",
+   "3d": "ok",
+   "layers": "ok",
+   "sheet-open": "ok",
+   "sheet-dragged": "ok",
+   "touch-drag (emulated)": "peek->half->peek",
+   "drawing": "ok"
+  },
+  "console_errors": []
+ },
+ {
+  "shot": "en-dark-768--map-states",
+  "states": {
+   "selected": "ok",
+   "list-hover": "ok",
+   "zoomed": "ok",
+   "3d": "ok",
+   "layers": "ok",
+   "drawing": "ok"
+  },
+  "console_errors": []
+ },
+ {
+  "shot": "ar-light-768--map-states",
+  "states": {
+   "selected": "ok",
+   "list-hover": "ok",
+   "zoomed": "ok",
+   "3d": "ok",
+   "layers": "ok",
+   "drawing": "ok"
+  },
+  "console_errors": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_dashboard",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard",
+  "status": 200,
+  "seconds": 1.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_dashboard_properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/properties",
+  "status": 200,
+  "seconds": 1.9,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_dashboard_properties_new",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/properties/new",
+  "status": 200,
+  "seconds": 2.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_dashboard_crm",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/crm",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_dashboard_analytics",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/analytics",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_dashboard_agency",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/agency",
+  "status": 200,
+  "seconds": 1.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_account",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/account",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_account_billing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/account/billing",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_favorites",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/favorites",
+  "status": 200,
+  "seconds": 1.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_saved-searches",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/saved-searches",
+  "status": 200,
+  "seconds": 1.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_notifications",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/notifications",
+  "status": 200,
+  "seconds": 1.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_messages",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/messages",
+  "status": 200,
+  "seconds": 1.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_studio",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/studio",
+  "status": 200,
+  "seconds": 1.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--agent_vision",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/vision",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_dashboard",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_dashboard_properties",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/properties",
+  "status": 200,
+  "seconds": 2.1,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_dashboard_properties_new",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/properties/new",
+  "status": 200,
+  "seconds": 2.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_dashboard_crm",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/crm",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_dashboard_analytics",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/analytics",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_dashboard_agency",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/dashboard/agency",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_account",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/account",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_account_billing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/account/billing",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_favorites",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/favorites",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_saved-searches",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/saved-searches",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_notifications",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/notifications",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_messages",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/messages",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_studio",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/studio",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--agent_vision",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/vision",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin",
+  "status": 200,
+  "seconds": 1.7,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_users",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/users",
+  "status": 200,
+  "seconds": 1.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_moderation",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/moderation",
+  "status": 200,
+  "seconds": 1.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_verification",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/verification",
+  "status": 200,
+  "seconds": 1.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_ai",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/ai",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_analytics",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/analytics",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_reports",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/reports",
+  "status": 200,
+  "seconds": 1.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_billing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/billing",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_jobs",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/jobs",
+  "status": 200,
+  "seconds": 1.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_audit",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/audit",
+  "status": 200,
+  "seconds": 1.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_system",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/system",
+  "status": 200,
+  "seconds": 1.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_settings",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/settings",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-1440--admin_admin_webhooks",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/webhooks",
+  "status": 200,
+  "seconds": 1.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_users",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/users",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_moderation",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/moderation",
+  "status": 200,
+  "seconds": 1.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_verification",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/verification",
+  "status": 200,
+  "seconds": 1.3,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_ai",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/ai",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_analytics",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/analytics",
+  "status": 200,
+  "seconds": 1.6,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_reports",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/reports",
+  "status": 200,
+  "seconds": 1.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_billing",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/billing",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_jobs",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/jobs",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_audit",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/audit",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_system",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/system",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_settings",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/settings",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--admin_admin_webhooks",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/admin/webhooks",
+  "status": 200,
+  "seconds": 1.5,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--public-home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 9.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": []
+ },
+ {
+  "shot": "ar-dark-390--public-map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 16.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/9/323/209.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/9/324/209.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/9/324/210.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/9/323/210.pbf net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-dark-1440--public-home",
+  "map_previews_ready": [
+   "1"
+  ],
+  "broken_images": [],
+  "path": "/",
+  "status": 200,
+  "seconds": 8.0,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1297/840.pbf net::ERR_ABORTED"
+  ]
+ },
+ {
+  "shot": "ar-dark-1440--public-map",
+  "map_previews_ready": [],
+  "broken_images": [],
+  "path": "/map",
+  "status": 200,
+  "seconds": 21.4,
+  "overflow_px": 0,
+  "console_errors": [],
+  "failed_requests": [
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1297/841.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1297/842.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1297/840.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1294/841.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1294/842.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1294/840.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1295/840.pbf net::ERR_ABORTED",
+   "https://tiles.openfreemap.org/planet/20261011_080001_pt/11/1296/840.pbf net::ERR_ABORTED"
+  ]
+ }
+]
