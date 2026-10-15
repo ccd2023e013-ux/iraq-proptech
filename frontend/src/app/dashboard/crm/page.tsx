@@ -48,24 +48,24 @@ export default async function CrmPage() {
   ];
 
   return (
-    <div className="mx-auto flex max-w-[1500px] flex-col gap-6 px-4 py-8 sm:px-6">
+    <div className="page flex flex-col gap-8 pb-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <PageHeader title={c.dashboard} />
         <nav className="flex flex-wrap gap-2 text-sm">
-          <Link href="/dashboard/crm/tasks" className="field py-1.5">
+          <Link href="/dashboard/crm/tasks" className="btn btn-secondary btn-sm">
             {c.tasks}
           </Link>
-          <Link href="/messages" className="field py-1.5">
+          <Link href="/messages" className="btn btn-secondary btn-sm">
             {dict.messages.title}
           </Link>
         </nav>
       </div>
 
-      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-[var(--radius-card)] bg-hairline sm:grid-cols-3 lg:grid-cols-6">
         {stats.map(([label, value, tone]) => (
-          <div key={label} className="surface-1 rounded-[var(--radius-card)] p-4">
-            <dt className="text-xs text-sand-500">{label}</dt>
-            <dd className={`text-2xl font-bold tabular ${tone || "text-brand-900"}`}>{value}</dd>
+          <div key={label} className="flex flex-col gap-1 bg-surface p-4">
+            <dt className="meta">{label}</dt>
+            <dd className={`kpi text-2xl ${tone || "text-ink"}`}>{value}</dd>
           </div>
         ))}
       </dl>
@@ -73,9 +73,9 @@ export default async function CrmPage() {
       {canManage && <NewLeadForm dict={dict} />}
 
       <section aria-labelledby="pipeline-heading" className="flex flex-col gap-3">
-        <h2 id="pipeline-heading" className="text-lg font-semibold text-brand-900">
+        <h2 id="pipeline-heading" className="title text-ink">
           {c.pipeline}
-          <span className="ms-2 text-sm font-normal text-sand-500 tabular">
+          <span className="caption ms-2 tabular">
             {c.won}: {board.won} · {c.lost}: {board.lost}
           </span>
         </h2>
@@ -85,32 +85,32 @@ export default async function CrmPage() {
             return (
               <div
                 key={column.code}
-                className="flex w-72 shrink-0 flex-col gap-2 rounded-[var(--radius-card)] bg-sand-100 p-3"
+                className="flex w-72 shrink-0 flex-col gap-2 rounded-[var(--radius-card)] bg-fill/60 p-3"
               >
-                <h3 className="flex justify-between text-sm font-semibold text-sand-900">
+                <h3 className="flex justify-between px-1 pb-1 text-sm font-medium text-ink">
                   {locale === "ar" ? column.name_ar : column.name_en}
-                  <span className="text-sand-500 tabular">{inColumn.length}</span>
+                  <span className="text-ink-3 tabular">{inColumn.length}</span>
                 </h3>
-                {inColumn.length === 0 && <p className="text-xs text-sand-500">{c.noLeads}</p>}
+                {inColumn.length === 0 && <p className="caption px-1">{c.noLeads}</p>}
                 {inColumn.map((lead) => (
                   <article
                     key={lead.id}
-                    className="flex flex-col gap-1.5 rounded-lg bg-surface p-3 shadow-sm"
+                    className="flex flex-col gap-1.5 rounded-[var(--radius-control)] bg-surface p-3 shadow-[inset_0_0_0_1px_var(--hairline),0_1px_2px_rgb(0_0_0/0.08)]"
                   >
                     <Link
                       href={`/dashboard/crm/leads/${lead.id}`}
-                      className="font-semibold text-brand-800 hover:underline"
+                      className="font-medium text-ink hover:text-accent"
                     >
                       {lead.customer.full_name}
                     </Link>
                     {lead.property && (
-                      <span className="truncate text-xs text-sand-500">
+                      <span className="truncate text-xs text-ink-3">
                         {locale === "en" && lead.property.title_en
                           ? lead.property.title_en
                           : lead.property.title_ar}
                       </span>
                     )}
-                    <span className="text-xs text-sand-500">
+                    <span className="text-xs text-ink-3">
                       {c.sources[lead.source]}
                       {lead.priority === "HIGH" && (
                         <span className="ms-1 font-semibold text-danger">
@@ -120,13 +120,13 @@ export default async function CrmPage() {
                     </span>
                     {lead.next_follow_up_at && (
                       <span
-                        className={`text-xs ${new Date(lead.next_follow_up_at) < new Date() ? "text-danger" : "text-sand-700"}`}
+                        className={`text-xs ${new Date(lead.next_follow_up_at) < new Date() ? "text-danger" : "text-ink-2"}`}
                       >
                         {c.followUp}: {formatDateTime(lead.next_follow_up_at, locale)}
                       </span>
                     )}
                     {lead.assigned_to && (
-                      <span className="text-xs text-sand-500">
+                      <span className="text-xs text-ink-3">
                         {c.assignedTo}: {lead.assigned_to.full_name}
                       </span>
                     )}
@@ -172,7 +172,7 @@ export default async function CrmPage() {
 
       <Card title={c.upcoming}>
         {board.upcoming_appointments.length === 0 ? (
-          <p className="text-sm text-sand-500">{c.noUpcoming}</p>
+          <p className="text-sm text-ink-3">{c.noUpcoming}</p>
         ) : (
           <ul className="flex flex-col gap-2 text-sm">
             {board.upcoming_appointments.map((a) => (
@@ -183,7 +183,7 @@ export default async function CrmPage() {
                 >
                   {formatDateTime(a.starts_at, locale)}
                 </Link>
-                <span className="text-sand-500">{a.location_text}</span>
+                <span className="text-ink-3">{a.location_text}</span>
                 <span>{c.appointmentStatuses[a.status]}</span>
               </li>
             ))}
