@@ -73,6 +73,9 @@ export interface PropertyMapProps {
   onDrawPoint: (point: LonLat) => void;
   /** Edge-to-edge (map-first stage): no rounded frame, no minimum height. */
   bleed?: boolean;
+  /** Opening view: once data arrives, frame the listings that fall inside
+   * `initialBbox` (the launch area) instead of the whole configured box. */
+  fitToData?: boolean;
 }
 
 const EMPTY: FeatureCollection = { type: "FeatureCollection", features: [] };
@@ -461,6 +464,36 @@ function installOverlays(map: MapLibreMap, config: MapConfig): void {
       "circle-stroke-width": 1.5,
     },
   });
+
+  // Price tags are HTML, so the map's label engine cannot see them. These
+  // invisible symbols (one per drawn tag, the tag's size) sit on top of every
+  // layer: placed first, they make overlapping district and road names step
+  // aside — prices win over street labels; the river and city names, placed
+  // where no tag is, stay.
+  if (!map.hasImage("tag-block")) {
+    map.addImage("tag-block", { width: 1, height: 1, data: new Uint8Array(4) });
+  }
+  map.addSource("tag-blockers", { type: "geojson", data: EMPTY });
+  map.addLayer({
+    id: "tag-blockers",
+    type: "symbol",
+    source: "tag-blockers",
+    layout: {
+      "text-field": ["get", "label"],
+      "text-font": ["Noto Sans Bold"],
+      "text-size": 13,
+      "text-anchor": "bottom",
+      "text-offset": [0, -1],
+      "text-allow-overlap": true,
+      "text-ignore-placement": false,
+      "icon-image": "tag-block",
+      "icon-text-fit": "both",
+      "icon-text-fit-padding": [8, 14, 8, 14],
+      "icon-allow-overlap": true,
+      "icon-ignore-placement": false,
+    },
+    paint: { "text-opacity": 0, "icon-opacity": 0 },
+  });
 }
 
 interface Tag {
@@ -470,6 +503,8 @@ interface Tag {
   value: HTMLSpanElement;
   badge: HTMLSpanElement;
   width: number;
+  coords: [number, number];
+  label: string;
   leaving?: ReturnType<typeof setTimeout>;
 }
 
@@ -589,10 +624,12 @@ class PriceTags {
         const marker = new this.Marker({ element: el, anchor: "bottom", offset: [0, -TAG_RISE] })
           .setLngLat(coords)
           .addTo(map);
-        tag = { marker, el, button, value, badge, width: 0 };
+        tag = { marker, el, button, value, badge, width: 0, coords, label };
         this.tags.set(id, tag);
       } else {
         tag.marker.setLngLat(coords);
+        tag.coords = coords;
+        tag.label = label;
       }
       if (tag.value.textContent !== label) tag.value.textContent = label;
       const extra = more.get(id) ?? 0;
@@ -611,6 +648,23 @@ class PriceTags {
       if (!tag.width) tag.width = tag.button.offsetWidth || label.length * 7 + 20;
     }
     return visible.size;
+  }
+
+  /**
+   * Invisible stand-ins for the drawn tags in the map's own label collision:
+   * basemap labels (districts, roads) yield to a price where they would meet.
+   */
+  blockers(): FeatureCollection {
+    const features: Feature[] = [];
+    for (const tag of this.tags.values()) {
+      if (tag.leaving) continue;
+      features.push({
+        type: "Feature",
+        properties: { label: tag.label },
+        geometry: { type: "Point", coordinates: tag.coords },
+      });
+    }
+    return { type: "FeatureCollection", features };
   }
 
   destroy(): void {
@@ -638,6 +692,8 @@ export function PropertyMap(props: PropertyMapProps) {
   const points = useRef<Feature[]>([]);
   const syncRef = useRef<() => void>(() => undefined);
   const focusRef = useRef<(coords: [number, number]) => void>(() => undefined);
+  const fitRef = useRef<(bbox: Bbox) => void>(() => undefined);
+  const fitted = useRef(false);
 
   // Create the map once; overlays are (re)installed on every style load.
   useEffect(() => {
@@ -693,6 +749,9 @@ export function PropertyMap(props: PropertyMapProps) {
             locale: latest.current.locale,
           });
           if (container.current) container.current.dataset.bubbles = String(shown);
+          (map?.getSource("tag-blockers") as GeoJSONSource | undefined)?.setData(
+            tagLayer.blockers(),
+          );
         };
         // Zoom buttons at the bottom of the end side (wide screens; phones pinch).
         map.addControl(
@@ -731,10 +790,13 @@ export function PropertyMap(props: PropertyMapProps) {
         const rtl = () => document.documentElement.dir === "rtl";
         /** Space covered by the results rail (wide screens) and a bottom card. */
         const cover = () => {
+          // Tablets and up dock the results rail; wide screens also stand the
+          // preview card at the bottom of the start side.
+          const docked = window.matchMedia("(min-width: 768px)").matches;
           const wide = window.matchMedia("(min-width: 1024px)").matches;
           const rail = document.querySelector<HTMLElement>("[data-map-rail]");
-          const railWidth = wide && rail ? rail.getBoundingClientRect().width : 0;
-          return { railWidth, bottom: wide ? 160 : 240, wide };
+          const railWidth = docked && rail ? rail.getBoundingClientRect().width : 0;
+          return { railWidth, bottom: wide ? 160 : docked ? 160 : 240, wide };
         };
         const padding = (base: number) => {
           const { railWidth } = cover();
@@ -742,6 +804,24 @@ export function PropertyMap(props: PropertyMapProps) {
           return rtl()
             ? { top: base, bottom: base, left: base, right: start }
             : { top: base, bottom: base, left: start, right: base };
+        };
+
+        // The opening view settles on the listings themselves (never zooming
+        // past street scale), beside the results rail.
+        fitRef.current = (b) => {
+          if (!map) return;
+          map.fitBounds(
+            [
+              [b[0], b[1]],
+              [b[2], b[3]],
+            ],
+            {
+              padding: padding(64),
+              maxZoom: 14,
+              duration: cameraDuration(reducedMotion(), 900),
+              easing: easeStandard,
+            },
+          );
         };
 
         // Selecting a listing glides to it: at most two zoom levels, bearing
@@ -886,22 +966,7 @@ export function PropertyMap(props: PropertyMapProps) {
           );
         };
         map.on("moveend", report);
-        map.once("load", () => {
-          // Phones opening on the default area would see one grouped disc:
-          // open them at the zoom where prices appear, on the same centre.
-          // (An area from the URL — a shared link — is kept exactly.)
-          const { initialBbox, config: cfg } = latest.current;
-          const isDefault = initialBbox.every((v, i) => v === cfg.defaultBbox[i]);
-          if (
-            map &&
-            isDefault &&
-            map.getCanvas().clientWidth < 640 &&
-            map.getZoom() < BUBBLE_MIN_ZOOM
-          ) {
-            map.jumpTo({ zoom: BUBBLE_MIN_ZOOM + 0.4 });
-          }
-          report();
-        });
+        map.once("load", report);
         // Tags are re-placed when the camera settles (they ride with the map
         // while it moves, so nothing is recomputed per frame).
         map.on("moveend", () => syncRef.current());
@@ -936,6 +1001,24 @@ export function PropertyMap(props: PropertyMapProps) {
     if (!ready || !map) return;
     const data = (props.data as FeatureCollection | null) ?? EMPTY;
     points.current = data.features;
+    if (props.fitToData && !fitted.current && data.features.length > 0) {
+      fitted.current = true;
+      const [w0, s0, e0, n0] = props.initialBbox;
+      const inside = data.features
+        .filter((f) => f.geometry.type === "Point")
+        .map((f) => (f.geometry as Point).coordinates as [number, number])
+        .filter(([lon, lat]) => lon >= w0 && lon <= e0 && lat >= s0 && lat <= n0);
+      if (inside.length > 1) {
+        const lons = inside.map((c) => c[0]);
+        const lats = inside.map((c) => c[1]);
+        fitRef.current([
+          Math.min(...lons),
+          Math.min(...lats),
+          Math.max(...lons),
+          Math.max(...lats),
+        ]);
+      }
+    }
     (map.getSource("properties") as GeoJSONSource | undefined)?.setData(data);
     (map.getSource("properties-grouped") as GeoJSONSource | undefined)?.setData(data);
     syncRef.current();

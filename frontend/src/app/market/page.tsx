@@ -2,6 +2,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { Icon } from "@/components/ui/Icon";
 import { TrustBadge, type TrustKind } from "@/components/ui/TrustBadge";
 import {
   fill,
@@ -13,7 +14,7 @@ import {
 import { getDictionary } from "@/i18n";
 import { getRequestLocale } from "@/i18n/server";
 import { serverApiFetch } from "@/lib/api/server";
-import { formatPrice } from "@/lib/format";
+import { formatCompactPrice, formatPrice } from "@/lib/format";
 import type { MarketCity, MarketKind, MarketReport, MarketStatement } from "@/types/market";
 
 export const dynamic = "force-dynamic";
@@ -104,58 +105,88 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
     return `/market?${q}`;
   };
 
+  // Segments grouped by what can share a scale: one purpose, one currency.
+  const groups = new Map<string, NonNullable<typeof report>["segments"]>();
+  for (const seg of report?.segments ?? []) {
+    const key = `${seg.purpose}-${seg.currency}`;
+    groups.set(key, [...(groups.get(key) ?? []), seg]);
+  }
+  const purposeName = (code: string) =>
+    (dict.listing.purposes as Record<string, string>)[code] ?? code;
+  const sortedBars = [...bars].sort(
+    (a, b) => Number(b.median_price_per_m2) - Number(a.median_price_per_m2),
+  );
+
   return (
-    <div className="page flex flex-col gap-12 pb-8">
-      <header className="flex flex-col gap-4">
+    <div className="page flex flex-col gap-14 pb-10">
+      <header className="flex flex-col gap-6">
         <PageHeader
           title={
             <>
               {t.title}
-              <span className="block text-ink-3">{scopeName}</span>
+              <span className="block text-spatial">{scopeName}</span>
             </>
           }
           lede={t.subtitle}
-        />
-        <p className="max-w-2xl rounded-[var(--radius-control)] bg-gold-100 px-4 py-3 text-sm text-ink-2 shadow-[inset_0_0_0_1px_var(--gold-line)]">
-          {t.honesty}
-        </p>
-        <form
-          method="get"
-          action="/market"
-          className="flex flex-wrap items-end gap-3"
-          data-testid="market-controls"
-        >
-          <label className="flex flex-col gap-1 text-sm text-ink-2">
-            {t.area}
-            <select
-              name="city_id"
-              defaultValue={city && UUID.test(city) ? city : ""}
-              className="field min-w-56"
+          actions={
+            <form
+              method="get"
+              action="/market"
+              className="flex flex-wrap items-center gap-2"
+              data-testid="market-controls"
             >
-              <option value="">{t.allIraq}</option>
-              {cities.map((c) => (
-                <option key={c.city_id} value={c.city_id}>
-                  {name(c)} ({num(c.listings, locale)})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex h-11 items-center gap-2 text-sm text-ink-2">
-            <input
-              type="checkbox"
-              name="demo"
-              value="1"
-              defaultChecked={includeDemo}
-              className="size-4 accent-[var(--accent-fill)]"
+              <label className="flex flex-col gap-1">
+                <span className="sr-only">{t.area}</span>
+                <select
+                  name="city_id"
+                  defaultValue={city && UUID.test(city) ? city : ""}
+                  className="field min-w-52"
+                >
+                  <option value="">{t.allIraq}</option>
+                  {cities.map((c) => (
+                    <option key={c.city_id} value={c.city_id}>
+                      {name(c)} ({num(c.listings, locale)})
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex h-12 items-center gap-2 px-1 text-sm text-ink-2">
+                <input
+                  type="checkbox"
+                  name="demo"
+                  value="1"
+                  defaultChecked={includeDemo}
+                  className="size-4"
+                />
+                {/* Sent after the checkbox: when it is ticked, "1" comes first and wins. */}
+                <input type="hidden" name="demo" value="0" />
+                {t.includeDemo}
+              </label>
+              <button type="submit" className="btn btn-primary">
+                {t.show}
+              </button>
+            </form>
+          }
+        />
+        {/* How to read: every number on this page carries one of these labels. */}
+        <details className="group max-w-3xl rounded-[var(--radius-card)] bg-gold-100 px-5 py-4 shadow-[inset_0_0_0_1px_var(--gold-line)]">
+          <summary className="flex cursor-pointer list-none items-center gap-2 font-medium text-ink [&::-webkit-details-marker]:hidden">
+            <Icon name="info" className="size-4 text-gold-700" />
+            {t.readGuide}
+            <Icon
+              name="chevron-down"
+              className="ms-auto size-4 transition-transform group-open:rotate-180"
             />
-            {/* Sent after the checkbox: when it is ticked, "1" comes first and wins. */}
-            <input type="hidden" name="demo" value="0" />
-            {t.includeDemo}
-          </label>
-          <button type="submit" className="btn btn-primary">
-            {t.show}
-          </button>
-        </form>
+          </summary>
+          <p className="mt-3 text-sm leading-relaxed text-ink-2">{t.honesty}</p>
+          <p className="mt-3 flex flex-wrap gap-2">
+            {(Object.keys(KIND_BADGE) as MarketKind[]).map((k) => (
+              <TrustBadge key={k} kind={KIND_BADGE[k]}>
+                {t.kinds[k]}
+              </TrustBadge>
+            ))}
+          </p>
+        </details>
       </header>
 
       {!report && <p className="text-ink-2">{dict.errors.UNKNOWN}</p>}
@@ -165,43 +196,210 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
         </p>
       )}
 
-      {report && !empty && (
+      {report && !empty && p && (
         <>
-          {ai?.text && (
-            <section
-              aria-labelledby="market-ai"
-              className="flex flex-col gap-3 border-s-4 border-accent-fill ps-5"
-              data-testid="market-ai"
-            >
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 id="market-ai" className="sr-only">
-                  {t.sections.interpretation}
-                </h2>
-                <TrustBadge kind="ai">{t.kinds.AI_INTERPRETATION}</TrustBadge>
-                {ai.demo && <TrustBadge kind="demo">{dict.listing.demo}</TrustBadge>}
+          {/* The reading in one paragraph (labelled AI), beside the facts it rests on. */}
+          <section className="grid gap-8 lg:grid-cols-12 lg:gap-12">
+            {ai?.text ? (
+              <div className="flex flex-col gap-3 lg:col-span-7" data-testid="market-ai">
+                <h2 className="sr-only">{t.sections.interpretation}</h2>
+                <div className="flex flex-wrap items-center gap-2">
+                  <TrustBadge kind="ai">{t.kinds.AI_INTERPRETATION}</TrustBadge>
+                  {ai.demo && <TrustBadge kind="demo">{dict.listing.demo}</TrustBadge>}
+                </div>
+                <p className="font-display text-[1.375rem] leading-[1.55] text-ink md:text-2xl">
+                  {ai.text}
+                </p>
+                <p className="caption" title={methodText(ai, dict)}>
+                  {provenanceLine(ai, dict, locale)}
+                </p>
               </div>
-              <p className="max-w-3xl text-lg text-ink">{ai.text}</p>
-              <p className="text-xs text-ink-3" title={methodText(ai, dict)}>
-                {provenanceLine(ai, dict, locale)}
-              </p>
+            ) : (
+              <div className="lg:col-span-7" />
+            )}
+            <dl className="grid grid-cols-2 gap-px self-start overflow-hidden rounded-[var(--radius-card)] bg-hairline lg:col-span-5">
+              {[
+                [t.headline.listings, num(p.sample_listings, locale)],
+                [t.headline.period, `${date(p.observation_from)} – ${date(p.observation_to)}`],
+                [t.headline.demoShare, `${num(Math.round(p.demo_share * 100), locale)}%`],
+                [t.headline.confidence, t.confidence[p.confidence]],
+              ].map(([k, val], i) => (
+                <div key={k} className="flex flex-col gap-1 bg-surface p-5">
+                  <dt className="meta">{k}</dt>
+                  <dd
+                    className={`text-ink ${i === 0 ? "kpi text-3xl" : "text-[15px] font-medium"}`}
+                  >
+                    {val}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+
+          {groups.size > 0 && (
+            <section aria-labelledby="market-segments-title" className="flex flex-col gap-6">
+              <div className="flex flex-col gap-1">
+                <h2 id="market-segments-title" className="display-md text-ink">
+                  {t.segmentsTitle}
+                </h2>
+                <p className="meta max-w-3xl">
+                  {t.chartRange} {t.segmentsNote}
+                </p>
+              </div>
+              <div className="grid gap-10 lg:grid-cols-2">
+                {[...groups.entries()].map(([key, segs]) => (
+                  <RangeChart
+                    key={key}
+                    title={`${purposeName(segs[0]!.purpose)} · ${segs[0]!.currency}`}
+                    rows={segs.map((seg) => ({
+                      label: locale === "ar" ? seg.type_ar : seg.type_en,
+                      listings: seg.listings,
+                      low: seg.p25_price ? Number(seg.p25_price) : null,
+                      high: seg.p75_price ? Number(seg.p75_price) : null,
+                      mid: seg.median_price ? Number(seg.median_price) : null,
+                    }))}
+                    max={rangeMax.get(key) ?? 0}
+                    format={(v) => formatCompactPrice(v, segs[0]!.currency, locale) ?? ""}
+                    listingsLabel={(n) => fill(t.sample, { n: num(n, locale) })}
+                    notEnough={t.notEnough}
+                  />
+                ))}
+              </div>
+              <details className="group">
+                <summary className="chip w-fit cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                  {t.showTable}
+                  <Icon name="chevron-down" className="size-3.5 group-open:rotate-180" />
+                </summary>
+                <div className="quiet-scroll mt-4 overflow-x-auto">
+                  <table
+                    className="w-full min-w-[40rem] text-start text-sm"
+                    data-testid="market-segments"
+                  >
+                    <thead className="text-ink-3">
+                      <tr className="border-b border-hairline">
+                        <th className="py-2 pe-4 text-start font-medium">{t.cols.segment}</th>
+                        <th className="py-2 pe-4 text-end font-medium">{t.cols.listings}</th>
+                        <th className="py-2 pe-4 text-end font-medium">{t.cols.median}</th>
+                        <th className="py-2 pe-4 text-end font-medium">{t.cols.range}</th>
+                        <th className="py-2 text-end font-medium">{t.cols.perM2}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-hairline">
+                      {report.segments.map((seg) => (
+                        <tr key={`${seg.property_type_code}-${seg.purpose}-${seg.currency}`}>
+                          <td className="py-3 pe-4 text-ink">
+                            {locale === "ar" ? seg.type_ar : seg.type_en}{" "}
+                            <span className="text-ink-3">
+                              {purposeName(seg.purpose)} · {seg.currency}
+                            </span>
+                          </td>
+                          <td className="py-3 pe-4 text-end tabular text-ink-2">
+                            {num(seg.listings, locale)}
+                          </td>
+                          <td className="py-3 pe-4 text-end tabular text-ink">
+                            {seg.median_price
+                              ? formatPrice(seg.median_price, seg.currency, locale)
+                              : t.notEnough}
+                          </td>
+                          <td className="py-3 pe-4 text-end tabular text-ink-2">
+                            {seg.p25_price && seg.p75_price
+                              ? `${formatPrice(seg.p25_price, seg.currency, locale)} – ${formatPrice(seg.p75_price, seg.currency, locale)}`
+                              : "—"}
+                          </td>
+                          <td className="py-3 text-end tabular text-ink-2">
+                            {seg.median_price_per_m2
+                              ? formatPrice(seg.median_price_per_m2, seg.currency, locale)
+                              : "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </details>
+            </section>
+          )}
+
+          {report.areas.length > 0 && (
+            <section aria-labelledby="market-areas" className="flex flex-col gap-5">
+              <div className="flex flex-col gap-1">
+                <h2 id="market-areas" className="display-md text-ink">
+                  {t.areasTitle}
+                </h2>
+                <p className="meta max-w-3xl">
+                  {t.chartAreas}{" "}
+                  {report.areas_basis &&
+                    fill(t.areasBasis, {
+                      type:
+                        locale === "ar" ? report.areas_basis.type_ar : report.areas_basis.type_en,
+                      purpose: purposeName(report.areas_basis.purpose),
+                      currency: report.areas_basis.currency,
+                    })}
+                </p>
+              </div>
+              <ul className="flex flex-col" data-testid="market-areas">
+                {[...sortedBars, ...report.areas.filter((a) => !sortedBars.includes(a))].map(
+                  (a) => {
+                    const value =
+                      a.median_price_per_m2 && a.currency === basisCurrency
+                        ? Number(a.median_price_per_m2)
+                        : null;
+                    const shown = value
+                      ? formatPrice(a.median_price_per_m2, basisCurrency, locale)
+                      : null;
+                    return (
+                      <li
+                        key={a.id}
+                        className="grid grid-cols-[minmax(0,8.5rem)_minmax(0,1fr)] items-center gap-4 border-t border-hairline py-3 sm:grid-cols-[minmax(0,13rem)_minmax(0,1fr)]"
+                      >
+                        <Link
+                          href={areaHref(a.id, a.level)}
+                          className="flex min-w-0 flex-col text-ink hover:text-accent"
+                          aria-label={fill(t.openArea, { name: name(a) })}
+                        >
+                          <span className="truncate font-medium">{name(a)}</span>
+                          <span className="caption tabular">
+                            {fill(t.areaListings, { n: num(a.active_listings, locale) })}
+                          </span>
+                        </Link>
+                        {value && shown ? (
+                          <div
+                            className="flex min-w-0 items-center gap-3"
+                            title={`${name(a)}: ${shown} · ${fill(t.sample, { n: num(a.sample, locale) })}`}
+                          >
+                            <span
+                              aria-hidden
+                              className="h-2.5 shrink-0 rounded-e-[4px] bg-spatial-fill"
+                              style={{ width: `${Math.max(2, (value / maxBar) * 62)}%` }}
+                            />
+                            <span className="truncate text-sm text-ink tabular">{shown}</span>
+                          </div>
+                        ) : (
+                          <span className="caption">
+                            {t.notEnough} ({fill(t.sample, { n: num(a.sample, locale) })})
+                          </span>
+                        )}
+                      </li>
+                    );
+                  },
+                )}
+              </ul>
             </section>
           )}
 
           <section aria-labelledby="market-statements" className="flex flex-col gap-6">
-            <h2 id="market-statements" className="sr-only">
-              {t.title}
+            <h2 id="market-statements" className="display-md text-ink">
+              {t.evidenceTitle}
             </h2>
-            <div className="grid gap-x-10 gap-y-8 md:grid-cols-2">
+            <div className="grid gap-x-10 gap-y-10 md:grid-cols-2 xl:grid-cols-3">
               {SECTION_ORDER.filter((k) => bySection.has(k)).map((section) => (
                 <div key={section} className="flex flex-col gap-3">
-                  <h3 className="font-display text-xl font-semibold text-ink">
-                    {t.sections[section]}
-                  </h3>
+                  <h3 className="label">{t.sections[section]}</h3>
                   <ul className="flex flex-col divide-y divide-hairline border-y border-hairline">
                     {(bySection.get(section) ?? []).map(({ s, text }) => (
                       <li
                         key={`${s.key}-${text}`}
-                        className="flex flex-col gap-1.5 py-3"
+                        className="flex flex-col gap-1.5 py-3.5"
                         data-testid="market-statement"
                         data-kind={s.kind}
                       >
@@ -209,14 +407,14 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
                           <TrustBadge kind={KIND_BADGE[s.kind]}>{t.kinds[s.kind]}</TrustBadge>
                           {s.demo && <TrustBadge kind="demo">{dict.listing.demo}</TrustBadge>}
                           {s.sample ? (
-                            <span className="text-xs text-ink-3 tabular">
+                            <span className="caption tabular">
                               {fill(t.sample, { n: num(s.sample, locale) })}
                             </span>
                           ) : null}
                         </div>
-                        <p className="text-ink">{text}</p>
+                        <p className="text-[15px] leading-relaxed text-ink">{text}</p>
                         <p
-                          className="text-xs text-ink-3"
+                          className="caption"
                           title={methodText(s, dict)}
                           data-testid="market-statement-provenance"
                         >
@@ -229,166 +427,25 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
               ))}
             </div>
           </section>
-
-          {report.segments.length > 0 && (
-            <section aria-labelledby="market-segments" className="flex flex-col gap-3">
-              <h2
-                id="market-segments"
-                className="font-display text-2xl font-semibold tracking-tight text-ink"
-              >
-                {t.segmentsTitle}
-              </h2>
-              <p className="text-sm text-ink-3">{t.segmentsNote}</p>
-              <div className="overflow-x-auto">
-                <table
-                  className="w-full min-w-[40rem] text-start text-sm"
-                  data-testid="market-segments"
-                >
-                  <thead className="text-ink-3">
-                    <tr className="border-b border-hairline">
-                      <th className="py-2 pe-4 text-start font-medium">{t.cols.segment}</th>
-                      <th className="py-2 pe-4 text-end font-medium">{t.cols.listings}</th>
-                      <th className="py-2 pe-4 text-end font-medium">{t.cols.median}</th>
-                      <th className="py-2 pe-4 text-end font-medium">{t.cols.range}</th>
-                      <th className="py-2 text-end font-medium">{t.cols.perM2}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-hairline">
-                    {report.segments.map((s) => (
-                      <tr key={`${s.property_type_code}-${s.purpose}-${s.currency}`}>
-                        <td className="py-3 pe-4 text-ink">
-                          {locale === "ar" ? s.type_ar : s.type_en}{" "}
-                          <span className="text-ink-3">
-                            {(dict.listing.purposes as Record<string, string>)[s.purpose] ??
-                              s.purpose}{" "}
-                            · {s.currency}
-                          </span>
-                        </td>
-                        <td className="py-3 pe-4 text-end tabular text-ink-2">
-                          {num(s.listings, locale)}
-                        </td>
-                        <td className="py-3 pe-4 text-end tabular text-ink">
-                          {s.median_price ? (
-                            formatPrice(s.median_price, s.currency, locale)
-                          ) : (
-                            <span className="text-ink-3">{t.notEnough}</span>
-                          )}
-                        </td>
-                        <td className="py-3 pe-4 text-end tabular text-ink-2">
-                          {s.p25_price && s.p75_price
-                            ? `${formatPrice(s.p25_price, s.currency, locale)} – ${formatPrice(s.p75_price, s.currency, locale)}`
-                            : "—"}
-                          {s.p25_price && s.p75_price && (
-                            <RangeBar
-                              low={Number(s.p25_price)}
-                              high={Number(s.p75_price)}
-                              mid={s.median_price ? Number(s.median_price) : null}
-                              max={rangeMax.get(`${s.purpose}-${s.currency}`) ?? 0}
-                            />
-                          )}
-                        </td>
-                        <td className="py-3 text-end tabular text-ink-2">
-                          {s.median_price_per_m2
-                            ? formatPrice(s.median_price_per_m2, s.currency, locale)
-                            : "—"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          )}
-
-          {report.areas.length > 0 && (
-            <section aria-labelledby="market-areas" className="flex flex-col gap-3">
-              <h2
-                id="market-areas"
-                className="font-display text-2xl font-semibold tracking-tight text-ink"
-              >
-                {t.areasTitle}
-              </h2>
-              {report.areas_basis && (
-                <p className="text-sm text-ink-3">
-                  {fill(t.areasBasis, {
-                    type: locale === "ar" ? report.areas_basis.type_ar : report.areas_basis.type_en,
-                    purpose:
-                      (dict.listing.purposes as Record<string, string>)[
-                        report.areas_basis.purpose
-                      ] ?? report.areas_basis.purpose,
-                    currency: report.areas_basis.currency,
-                  })}
-                </p>
-              )}
-              <ul
-                className="flex flex-col divide-y divide-hairline border-y border-hairline"
-                data-testid="market-areas"
-              >
-                {report.areas.map((a) => {
-                  const value =
-                    a.median_price_per_m2 && a.currency === basisCurrency
-                      ? Number(a.median_price_per_m2)
-                      : null;
-                  const label = value
-                    ? formatPrice(a.median_price_per_m2, basisCurrency, locale)
-                    : null;
-                  return (
-                    <li
-                      key={a.id}
-                      className="grid grid-cols-[minmax(0,10rem)_minmax(0,1fr)] items-center gap-4 py-3 sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)]"
-                    >
-                      <Link
-                        href={areaHref(a.id, a.level)}
-                        className="flex flex-col text-ink hover:text-accent"
-                        aria-label={fill(t.openArea, { name: name(a) })}
-                      >
-                        <span className="truncate font-medium">{name(a)}</span>
-                        <span className="text-xs text-ink-3 tabular">
-                          {fill(t.areaListings, { n: num(a.active_listings, locale) })}
-                        </span>
-                      </Link>
-                      {value && label ? (
-                        <div
-                          className="flex items-center gap-3"
-                          title={`${name(a)}: ${label} · ${fill(t.sample, { n: num(a.sample, locale) })}`}
-                        >
-                          <span
-                            className="h-3 rounded-e-[4px] bg-accent-fill"
-                            style={{ width: `${Math.max(2, (value / maxBar) * 70)}%` }}
-                            aria-hidden
-                          />
-                          <span className="shrink-0 text-sm text-ink tabular">{label}</span>
-                        </div>
-                      ) : (
-                        <span className="text-sm text-ink-3">
-                          {t.notEnough} ({fill(t.sample, { n: num(a.sample, locale) })})
-                        </span>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
-          )}
         </>
       )}
 
       {report && report.unavailable.length > 0 && (
         <section
           aria-labelledby="market-gaps"
-          className="flex flex-col gap-3"
+          className="flex flex-col gap-4"
           data-testid="market-unavailable"
         >
-          <h2
-            id="market-gaps"
-            className="font-display text-2xl font-semibold tracking-tight text-ink"
-          >
+          <h2 id="market-gaps" className="display-md text-ink">
             {t.unavailableTitle}
           </h2>
-          <ul className="flex flex-col gap-2">
+          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {report.unavailable.map((u) => (
-              <li key={u.metric} className="flex flex-col gap-0.5 text-sm sm:flex-row sm:gap-3">
-                <span className="font-medium text-ink sm:w-60 sm:shrink-0">
+              <li
+                key={u.metric}
+                className="flex flex-col gap-1 rounded-[var(--radius-control)] bg-fill/60 p-4 text-sm"
+              >
+                <span className="font-medium text-ink">
                   {(t.metrics as Record<string, string>)[u.metric] ?? u.metric}
                 </span>
                 <span className="text-ink-2">
@@ -407,13 +464,13 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
       {p && (
         <section
           aria-labelledby="market-provenance"
-          className="flex flex-col gap-4 rounded-[var(--radius-card)] bg-surface p-6 ring-1 ring-hairline"
+          className="flex flex-col gap-5 rounded-[var(--radius-card)] bg-surface p-6 shadow-[inset_0_0_0_1px_var(--hairline)] md:p-8"
           data-testid="market-provenance"
         >
-          <h2 id="market-provenance" className="font-display text-xl font-semibold text-ink">
+          <h2 id="market-provenance" className="title text-ink">
             {t.provenanceTitle}
           </h2>
-          <dl className="grid gap-x-8 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
+          <dl className="grid gap-x-8 gap-y-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
             {[
               [t.prov.source, t.sourceText],
               [t.prov.coverage, scopeName],
@@ -429,13 +486,13 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
               [t.prov.updated, date(p.last_update)],
             ].map(([k, v]) => (
               <div key={k} className="flex flex-col gap-0.5">
-                <dt className="text-ink-3">{k}</dt>
+                <dt className="meta">{k}</dt>
                 <dd className="text-ink">{v}</dd>
               </div>
             ))}
           </dl>
           <div className="flex flex-col gap-1 text-sm">
-            <p className="text-ink-3">{t.prov.methodology}</p>
+            <p className="meta">{t.prov.methodology}</p>
             <ul className="list-disc ps-5 text-ink-2">
               {t.methodLines.map((line) => (
                 <li key={line}>{line}</li>
@@ -443,7 +500,7 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
             </ul>
           </div>
           {p.includes_demo && (
-            <p className="flex items-center gap-2 text-xs text-ink-3">
+            <p className="caption flex items-center gap-2">
               <TrustBadge kind="demo">{dict.listing.demo}</TrustBadge>
               {dict.footer.demoNotice}
             </p>
@@ -454,35 +511,103 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
   );
 }
 
-/** The middle half of asking prices (P25–P75) with the median tick, on a shared scale. */
-function RangeBar({
-  low,
-  high,
-  mid,
+/**
+ * Asking-price ranges on one shared scale (one purpose, one currency): for each
+ * property type the middle half (P25–P75) as a bar and the median as a dot,
+ * with the median written at the end. Rows without enough data say so.
+ */
+function RangeChart({
+  title,
+  rows,
   max,
+  format,
+  listingsLabel,
+  notEnough,
 }: {
-  low: number;
-  high: number;
-  mid: number | null;
+  title: string;
+  rows: {
+    label: string;
+    listings: number;
+    low: number | null;
+    high: number | null;
+    mid: number | null;
+  }[];
   max: number;
+  format: (v: number) => string;
+  listingsLabel: (n: number) => string;
+  notEnough: string;
 }) {
-  if (!(max > 0) || !(high >= low)) return null;
-  const pct = (v: number) => `${Math.min(100, Math.max(0, (v / max) * 100))}%`;
+  const scale = max > 0 ? max * 1.08 : 1;
+  const pct = (v: number) => `${Math.min(100, Math.max(0, (v / scale) * 100))}%`;
+  const ticks = max > 0 ? [0, scale / 2, scale] : [];
   return (
-    <span
-      aria-hidden
-      className="relative ms-auto mt-2 block h-1.5 w-full max-w-[12rem] rounded-full bg-fill"
-    >
-      <span
-        className="absolute inset-y-0 rounded-[var(--radius-control)] bg-spatial-fill/55"
-        style={{ insetInlineStart: pct(low), width: `calc(${pct(high)} - ${pct(low)})` }}
-      />
-      {mid !== null && (
-        <span
-          className="absolute -inset-y-1 w-0.5 rounded-full bg-ink"
-          style={{ insetInlineStart: pct(mid) }}
-        />
+    <figure className="flex flex-col gap-3">
+      <figcaption className="label">{title}</figcaption>
+      <ul className="flex flex-col">
+        {rows.map((r) => (
+          <li
+            key={r.label}
+            className="grid grid-cols-[minmax(0,7.5rem)_minmax(0,1fr)] items-center gap-4 border-t border-hairline py-3 sm:grid-cols-[minmax(0,9rem)_minmax(0,1fr)]"
+          >
+            <span className="flex min-w-0 flex-col">
+              <span className="truncate text-[15px] text-ink">{r.label}</span>
+              <span className="caption tabular">{listingsLabel(r.listings)}</span>
+            </span>
+            {r.low !== null && r.high !== null && max > 0 ? (
+              <span
+                className="relative h-8"
+                title={`${r.label}: ${format(r.low)} – ${format(r.high)}${r.mid !== null ? ` · ${format(r.mid)}` : ""}`}
+              >
+                <span aria-hidden className="absolute inset-x-0 top-1/2 h-px bg-hairline" />
+                <span
+                  aria-hidden
+                  className="absolute top-1/2 h-2.5 -translate-y-1/2 rounded-[4px] bg-spatial-fill/45"
+                  style={{
+                    insetInlineStart: pct(r.low),
+                    width: `calc(${pct(r.high)} - ${pct(r.low)})`,
+                  }}
+                />
+                {r.mid !== null && (
+                  <span
+                    aria-hidden
+                    className="absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-spatial-fill shadow-[0_0_0_2px_var(--canvas)] rtl:translate-x-1/2"
+                    style={{ insetInlineStart: pct(r.mid) }}
+                  />
+                )}
+                {r.mid !== null && (
+                  <span
+                    className="absolute -top-1 text-[12.5px] font-semibold whitespace-nowrap text-ink tabular"
+                    style={{ insetInlineStart: `min(${pct(r.mid)}, calc(100% - 4.5rem))` }}
+                  >
+                    {format(r.mid)}
+                  </span>
+                )}
+              </span>
+            ) : (
+              <span className="caption">{notEnough}</span>
+            )}
+          </li>
+        ))}
+      </ul>
+      {ticks.length > 0 && (
+        <div className="grid grid-cols-[minmax(0,7.5rem)_minmax(0,1fr)] gap-4 sm:grid-cols-[minmax(0,9rem)_minmax(0,1fr)]">
+          <span />
+          <span className="caption relative h-4 tabular">
+            {ticks.map((v, i) => (
+              <span
+                key={v}
+                className={`absolute whitespace-nowrap ${i === 1 ? "-translate-x-1/2 rtl:translate-x-1/2" : ""}`}
+                style={{
+                  insetInlineStart: i === ticks.length - 1 ? undefined : pct(v),
+                  insetInlineEnd: i === ticks.length - 1 ? 0 : undefined,
+                }}
+              >
+                {format(v)}
+              </span>
+            ))}
+          </span>
+        </div>
       )}
-    </span>
+    </figure>
   );
 }

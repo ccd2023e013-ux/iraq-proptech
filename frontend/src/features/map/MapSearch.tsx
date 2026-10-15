@@ -34,6 +34,7 @@ import {
   polygonBbox,
 } from "@/lib/map/geo";
 import { PLACE_GROUPS, bboxAround, placesAllowed } from "@/lib/map/places";
+import { canTransition, isPlainClick, navigateWithTransition } from "@/lib/viewTransition";
 import { type MapConfig, parseBbox } from "@/lib/map/provider";
 import { type RawParams, first, toApiQuery, withParam } from "@/lib/search";
 import type { PropertyCard } from "@/types/property";
@@ -159,14 +160,30 @@ export function MapSearch({
     return toApiQuery(filters);
   }, [params]);
 
+  // `?selected=<id>` (from a property page's "Open on the map"): select that
+  // listing once its point is loaded, and glide to it.
+  const selectedApplied = useRef<string | null>(null);
   const load = useCallback(async (query: string, zoom: number) => {
     setLoadingData(true);
     try {
       const sep = query ? "&" : "";
-      setData(
-        await apiFetch<MapFeatureCollection>(`/api/v1/map/properties?${query}${sep}zoom=${zoom}`),
+      const result = await apiFetch<MapFeatureCollection>(
+        `/api/v1/map/properties?${query}${sep}zoom=${zoom}`,
       );
+      setData(result);
       setError(false);
+      const wanted = first(paramsRef.current.selected);
+      if (wanted && selectedApplied.current !== wanted) {
+        const hit = result.features.find(
+          (f) => f.geometry.type === "Point" && String(f.properties?.id) === wanted,
+        );
+        if (hit) {
+          selectedApplied.current = wanted;
+          const [lon, lat] = (hit.geometry as { coordinates: [number, number] }).coordinates;
+          setSelected((hit.properties ?? {}) as Record<string, unknown>);
+          setFocusRequest((r) => ({ id: wanted, lon, lat, n: (r?.n ?? 0) + 1 }));
+        }
+      }
     } catch {
       setError(true);
     } finally {
@@ -406,7 +423,7 @@ export function MapSearch({
     return Math.max(0, full - visible);
   }
   function onSheetPointerDown(event: ReactPointerEvent) {
-    if (window.matchMedia("(min-width: 1024px)").matches) return;
+    if (window.matchMedia("(min-width: 768px)").matches) return;
     if ((event.target as Element).closest("input,select,label,details,a")) return;
     drag.current = {
       y: event.clientY,
@@ -491,6 +508,15 @@ export function MapSearch({
       ? bboxAround(nearLon, nearLat, Number(first(params.radius_km)) || 3)
       : (parseBbox(first(params.bbox)) ?? initialBbox);
   const busy = loadingData || navigating;
+  // No area asked for (no link, drawing, place or "near me"): open on where the
+  // listings actually are inside the launch area, not on the whole box.
+  const fitToData =
+    !polygon &&
+    !nearActive &&
+    !first(params.bbox) &&
+    !first(params.city_id) &&
+    !first(params.governorate_id) &&
+    !first(params.district_id);
   const hideSheet = !!(selected || project);
   const sheetOpen = sheet !== "peek";
   const selectedId = selected ? String(selected.id) : null;
@@ -521,10 +547,11 @@ export function MapSearch({
   //   end side    — one instrument column (layers, draw, near me, 3D)
   //   bottom      — the selected listing or project, in the open part of the map
   return (
-    <div className="relative size-full overflow-hidden">
+    <div className="relative size-full overflow-hidden [--rail:0px] md:[--rail:340px] lg:[--rail:400px]">
       <div className="absolute inset-0">
         <PropertyMap
           bleed
+          fitToData={fitToData}
           config={config}
           dict={dict}
           locale={locale}
@@ -551,7 +578,7 @@ export function MapSearch({
 
       {/* Drawing and location status float at the top centre of the open map. */}
       {(drawing || geoError) && (
-        <div className="pointer-events-none absolute inset-x-4 top-[calc(var(--map-top)+0.75rem)] z-[var(--z-float)] flex justify-center lg:start-[calc(400px+1rem)]">
+        <div className="pointer-events-none absolute inset-x-4 top-[calc(var(--map-top)+0.75rem)] z-[var(--z-float)] flex justify-center md:start-[calc(var(--rail)+1rem)]">
           <div
             role="status"
             className={`surface-float pop-in pointer-events-auto flex max-w-md items-center gap-3 rounded-[var(--radius-control)] px-3.5 py-2 text-[13px] ${geoError ? "text-danger" : "text-ink"}`}
@@ -574,14 +601,16 @@ export function MapSearch({
         </div>
       )}
 
-      {/* Results: a docked rail on wide screens, a draggable sheet on phones. */}
+      {/* Results: a docked rail on tablets and wide screens, a draggable sheet
+          on phones. One surface with the map: its rows mirror the map's tags
+          (hover a row → the tag lifts; "show on map" → the camera glides). */}
       <section
         ref={sheetRef}
         aria-label={m.results}
         data-map-rail
         data-sheet={sheet}
         style={{ "--sheet-y": hideSheet ? "110%" : sheetY } as CSSProperties}
-        className="absolute z-[var(--z-float)] flex flex-col overflow-hidden transition-transform duration-[var(--duration-spatial)] ease-[var(--ease-standard)] max-lg:inset-x-0 max-lg:bottom-0 max-lg:h-[90%] max-lg:translate-y-[var(--sheet-y)] max-lg:rounded-t-[var(--radius-sheet)] max-lg:bg-raised/95 max-lg:shadow-[0_-12px_40px_-16px_rgb(0_0_0/0.6)] max-lg:backdrop-blur-xl lg:start-0 lg:top-[var(--map-top)] lg:bottom-0 lg:w-[400px] lg:border-e lg:border-hairline lg:bg-canvas/95 lg:backdrop-blur-xl"
+        className="absolute z-[var(--z-float)] flex flex-col overflow-hidden transition-transform duration-[var(--duration-spatial)] ease-[var(--ease-standard)] max-md:inset-x-0 max-md:bottom-0 max-md:h-[90%] max-md:translate-y-[var(--sheet-y)] max-md:rounded-t-[var(--radius-sheet)] max-md:bg-raised/95 max-md:shadow-[0_-12px_40px_-16px_rgb(0_0_0/0.6)] max-md:backdrop-blur-xl md:start-0 md:top-[var(--map-top)] md:bottom-0 md:w-[var(--rail)] md:border-e md:border-hairline md:bg-canvas/95 md:backdrop-blur-xl"
       >
         {/* A thin progress line while results update; the map stays usable. */}
         <div
@@ -591,7 +620,7 @@ export function MapSearch({
           <div className="map-progress h-full w-1/3 bg-spatial-fill" />
         </div>
         <header
-          className="flex shrink-0 touch-none flex-col gap-3 px-4 pt-2 pb-3 select-none lg:touch-auto lg:px-5 lg:pt-5 lg:select-auto"
+          className="flex shrink-0 touch-none flex-col gap-3 px-4 pt-2 pb-3 select-none md:touch-auto md:px-5 md:pt-5 md:select-auto"
           onPointerDown={onSheetPointerDown}
           onPointerMove={onSheetPointerMove}
           onPointerUp={onSheetPointerUp}
@@ -603,15 +632,20 @@ export function MapSearch({
             onClick={() => goSheet(sheetOpen ? "peek" : "half")}
             aria-expanded={sheetOpen}
             aria-label={sheetOpen ? m.showMap : m.showList}
-            className="mx-auto -mb-1 flex h-5 w-16 items-center justify-center lg:hidden"
+            data-testid="sheet-handle"
+            className="mx-auto -mb-1 flex h-6 w-20 items-center justify-center md:hidden"
           >
-            <span aria-hidden className="h-1 w-9 rounded-full bg-hairline-strong" />
+            <span aria-hidden className="h-1 w-10 rounded-full bg-hairline-strong" />
           </button>
           <div className="flex items-end justify-between gap-3">
-            <div className="flex min-w-0 flex-col gap-0.5">
-              <h1 className="title text-ink">{m.title}</h1>
-              <p className="meta tabular" data-testid="map-total">
-                <span className="font-semibold text-ink">{total}</span> {m.inView}
+            <div className="flex min-w-0 items-baseline gap-2">
+              <h1 className="sr-only">{m.title}</h1>
+              <p className="kpi text-[1.75rem] leading-none text-ink" data-testid="map-total">
+                {total}
+                <span className="sr-only"> {m.inView}</span>
+              </p>
+              <p aria-hidden className="meta">
+                {m.inViewShort}
               </p>
             </div>
             <p
@@ -623,75 +657,117 @@ export function MapSearch({
               {busy ? m.updating : ""}
             </p>
           </div>
-          {/* Phones at peek show only the count and the filters: the map stays open. */}
+          {/* Phones at peek show only the count: the map stays open. */}
           <div
-            className={`flex flex-wrap items-center gap-2 ${sheet === "peek" && !polygon && !nearActive ? "max-lg:hidden" : ""}`}
+            className={`flex flex-col gap-3 ${sheet === "peek" && !polygon && !nearActive ? "max-md:hidden" : ""}`}
           >
-            <label className="flex cursor-pointer items-center gap-2.5 text-[13px] text-ink-2">
-              <input
-                type="checkbox"
-                checked={followMap}
-                disabled={!!polygon || nearActive || !!drawing}
-                onChange={(e) => {
-                  const follow = e.target.checked;
-                  mode.current = { ...mode.current, follow };
-                  if (!follow) cancelViewportUpdate();
-                  setFollowMap(follow);
-                }}
-                className="peer sr-only"
-              />
-              <span
-                aria-hidden
-                className="relative h-5 w-9 shrink-0 rounded-full bg-fill-strong transition-colors duration-[var(--duration-quick)] peer-checked:bg-accent-fill peer-focus-visible:ring-2 peer-focus-visible:ring-accent peer-disabled:opacity-40 after:absolute after:start-0.5 after:top-0.5 after:size-4 after:rounded-full after:bg-white after:shadow after:transition-transform after:duration-[var(--duration-base)] peer-checked:after:translate-x-4 rtl:peer-checked:after:-translate-x-4"
-              />
-              {m.searchAsMove}
-            </label>
-            {(polygon || nearActive) && !drawing && (
-              <button type="button" onClick={clearArea} className="chip ms-auto" data-active="true">
-                {nearActive ? `${m.nearMeActive} · ${m.clearNear}` : m.clearArea}
-                <Icon name="close" className="size-3.5" />
-              </button>
+            <div className="flex items-center justify-between gap-2">
+              <div role="group" aria-label={dict.property.purpose} className="seg">
+                {(["", "SALE", "RENT"] as const).map((value) => (
+                  <button
+                    key={value || "all"}
+                    type="button"
+                    aria-pressed={(first(params.purpose) ?? "") === value}
+                    onClick={() => navigate(withParam(paramsRef.current, "purpose", value))}
+                    className="!h-8 !px-3 !text-[13px]"
+                  >
+                    {value ? dict.listing.purposes[value] : m.allPurposes}
+                  </button>
+                ))}
+              </div>
+              <label className="flex min-w-0 items-center gap-2">
+                <span className="sr-only">{m.sortBy}</span>
+                <select
+                  value={first(params.sort) ?? "newest"}
+                  onChange={(e) => navigate(withParam(paramsRef.current, "sort", e.target.value))}
+                  className="field h-9 w-auto min-w-0 bg-fill pe-8 text-[13px] shadow-none"
+                >
+                  {(["newest", "price_asc", "price_desc", "area_desc"] as const).map((sort) => (
+                    <option key={sort} value={sort}>
+                      {dict.search.sorts[sort]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="flex cursor-pointer items-center gap-2.5 text-[13px] text-ink-2">
+                <input
+                  type="checkbox"
+                  checked={followMap}
+                  disabled={!!polygon || nearActive || !!drawing}
+                  onChange={(e) => {
+                    const follow = e.target.checked;
+                    mode.current = { ...mode.current, follow };
+                    if (!follow) cancelViewportUpdate();
+                    setFollowMap(follow);
+                  }}
+                  className="peer sr-only"
+                />
+                <span
+                  aria-hidden
+                  className="relative h-5 w-9 shrink-0 rounded-full bg-fill-strong transition-colors duration-[var(--duration-quick)] peer-checked:bg-accent-fill peer-focus-visible:ring-2 peer-focus-visible:ring-accent peer-disabled:opacity-40 after:absolute after:start-0.5 after:top-0.5 after:size-4 after:rounded-full after:bg-white after:shadow after:transition-transform after:duration-[var(--duration-base)] peer-checked:after:translate-x-4 rtl:peer-checked:after:-translate-x-4"
+                />
+                {m.searchAsMove}
+              </label>
+              {(polygon || nearActive) && !drawing && (
+                <button
+                  type="button"
+                  onClick={clearArea}
+                  className="chip ms-auto"
+                  data-active="true"
+                >
+                  {nearActive ? `${m.nearMeActive} · ${m.clearNear}` : m.clearArea}
+                  <Icon name="close" className="size-3.5" />
+                </button>
+              )}
+            </div>
+            {filters && (
+              <details className="group" onToggle={(e) => e.currentTarget.open && goSheet("full")}>
+                <summary className="chip w-fit cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                  <Icon name="filter" className="size-4" />
+                  {dict.search.filters}
+                  <Icon
+                    name="chevron-down"
+                    className="size-3.5 transition-transform duration-[var(--duration-base)] group-open:rotate-180"
+                  />
+                </summary>
+                <div className="fade-in quiet-scroll mt-3 max-h-[40vh] overflow-y-auto pe-1">
+                  {filters}
+                </div>
+              </details>
             )}
           </div>
-          {filters && (
-            <details className="group" onToggle={(e) => e.currentTarget.open && goSheet("full")}>
-              <summary className="chip w-fit cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-                <Icon name="filter" className="size-4" />
-                {dict.search.filters}
-                <Icon
-                  name="chevron-down"
-                  className="size-3.5 transition-transform duration-[var(--duration-base)] group-open:rotate-180"
-                />
-              </summary>
-              <div className="fade-in quiet-scroll mt-3 max-h-[40vh] overflow-y-auto pe-1">
-                {filters}
-              </div>
-            </details>
-          )}
         </header>
 
         <div
           className={`quiet-scroll flex min-h-0 flex-1 flex-col overflow-y-auto border-t border-hairline transition-opacity duration-[var(--duration-base)] ${busy ? "opacity-70" : ""}`}
         >
           {items.length === 0 && (
-            <div className="p-3">
-              <EmptyState compact title={dict.search.noResults} glyph="map" />
+            <div className="flex flex-col items-start gap-3 px-5 py-8">
+              <span className="grid size-11 place-items-center rounded-full bg-fill text-spatial">
+                <Icon name="map" className="size-5" />
+              </span>
+              <p className="max-w-[18rem] text-[15px] leading-relaxed text-ink-2">{m.noneInView}</p>
             </div>
           )}
-          <ul className="flex flex-col">
+          <ul className="flex flex-col gap-0.5 py-2">
             {items.map((card) => {
               const title = locale === "en" && card.title_en ? card.title_en : card.title_ar;
               const active = highlightId === card.id || selectedId === card.id;
               const area = formatArea(card.area_m2, locale);
+              const where = [placeName(card.district ?? null, locale), placeName(card.city, locale)]
+                .filter(Boolean)
+                .join("، ");
               return (
-                <li key={card.id} className="border-b border-hairline">
+                <li key={card.id}>
                   <div
                     data-active={active || undefined}
-                    className="group relative flex items-center gap-2 px-3 transition-colors duration-[var(--duration-quick)] hover:bg-fill/60 data-[active]:bg-accent-tint/60 lg:px-4"
+                    className="group relative mx-2 flex items-center gap-1 rounded-[var(--radius-control)] transition-colors duration-[var(--duration-quick)] hover:bg-fill/70 data-[active]:bg-accent-tint/60"
                   >
                     <span
                       aria-hidden
-                      className="absolute inset-y-2 start-0 w-0.5 origin-center scale-y-0 bg-accent-fill transition-transform duration-[var(--duration-base)] ease-[var(--ease-standard)] group-data-[active]:scale-y-100"
+                      className="absolute inset-y-3 -start-2 w-[3px] origin-center scale-y-0 rounded-full bg-accent-fill transition-transform duration-[var(--duration-base)] ease-[var(--ease-standard)] group-data-[active]:scale-y-100"
                     />
                     <a
                       href={`/properties/${card.id}`}
@@ -700,15 +776,15 @@ export function MapSearch({
                       onFocus={() => setHighlightId(card.id)}
                       onBlur={() => setHighlightId(null)}
                       aria-current={selectedId === card.id ? "true" : undefined}
-                      className="flex min-w-0 flex-1 gap-3 py-3"
+                      className="flex min-w-0 flex-1 gap-3.5 p-2"
                     >
-                      <span className="relative h-[66px] w-[88px] shrink-0 overflow-hidden rounded-[var(--radius-control)] bg-fill">
+                      <span className="relative aspect-[4/3] w-[104px] shrink-0 overflow-hidden rounded-[10px] bg-fill">
                         {card.cover_url ? (
                           <SafeImage
                             src={card.cover_url}
                             alt=""
                             fallbackLabel="—"
-                            className="size-full object-cover"
+                            className="photo size-full object-cover transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:scale-[1.04]"
                           />
                         ) : (
                           <span className="grid size-full place-items-center text-ink-3">
@@ -716,23 +792,37 @@ export function MapSearch({
                           </span>
                         )}
                         {card.is_demo && (
-                          <span className="absolute start-0 bottom-0 rounded-se-[var(--radius-tag)] bg-gold-500 px-1.5 py-px text-[10px] font-semibold text-[#1d1405]">
+                          <span className="absolute start-0 bottom-0 rounded-se-[6px] bg-gold-500 px-1.5 py-px text-[10px] font-semibold text-[#1d1405]">
                             {dict.listing.demo}
                           </span>
                         )}
                       </span>
-                      <span className="flex min-w-0 flex-col justify-center gap-0.5">
-                        <span className="kpi text-[17px] text-ink">
-                          {priceLabel(card, dict, locale)}
+                      <span className="flex min-w-0 flex-col justify-center gap-1">
+                        <span className="flex min-w-0 items-baseline gap-2">
+                          <span className="kpi truncate text-[17px] text-ink">
+                            {priceLabel(card, dict, locale)}
+                          </span>
+                          <span className="caption shrink-0">
+                            {dict.listing.purposes[card.purpose]}
+                          </span>
                         </span>
-                        <span className="truncate text-sm text-ink-2 group-hover:text-ink">
+                        <span className="truncate text-[13.5px] text-ink-2 group-hover:text-ink">
                           {title}
                         </span>
-                        <span className="caption truncate">
-                          {[placeName(card.district ?? null, locale), placeName(card.city, locale)]
-                            .filter(Boolean)
-                            .join("، ")}
-                          {area ? ` · ${area}` : ""}
+                        <span className="caption flex min-w-0 items-center gap-3 text-ink-3">
+                          {where && (
+                            <span className="flex min-w-0 items-center gap-1">
+                              <Icon name="pin" className="size-3.5 shrink-0 text-spatial" />
+                              <span className="truncate">{where}</span>
+                            </span>
+                          )}
+                          {card.bedrooms != null && (
+                            <span className="flex shrink-0 items-center gap-1 tabular">
+                              <Icon name="bed" className="size-3.5" />
+                              {card.bedrooms}
+                            </span>
+                          )}
+                          {area && <span className="shrink-0 tabular">{area}</span>}
                         </span>
                       </span>
                     </a>
@@ -743,7 +833,7 @@ export function MapSearch({
                         aria-label={`${m.showOnMap}: ${title}`}
                         data-testid="show-on-map"
                         title={m.showOnMap}
-                        className="icon-btn size-9 shrink-0 text-ink-3 opacity-70 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                        className="icon-btn me-1 size-9 shrink-0 text-ink-3 opacity-60 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
                       >
                         <Icon name="locate" className="size-[18px] text-spatial" />
                       </button>
@@ -756,13 +846,13 @@ export function MapSearch({
           {total > items.length && (
             <a
               href={`/properties?${toApiQuery(params)}`}
-              className="link mx-4 mt-4 inline-flex w-fit items-center gap-1.5 text-sm font-medium"
+              className="link mx-5 mt-2 inline-flex w-fit items-center gap-1.5 text-sm font-medium"
             >
               {dict.landing.viewAll}
               <Icon name="arrow" className="size-4" />
             </a>
           )}
-          <div className="mt-auto px-4 pt-5 pb-4 lg:px-5">{footnotes}</div>
+          <div className="mt-auto px-5 pt-5 pb-4">{footnotes}</div>
         </div>
       </section>
 
@@ -1052,7 +1142,7 @@ function ProjectSheet({
       role="dialog"
       aria-label={name}
       data-testid="map-project"
-      className="pointer-events-none absolute inset-x-2 bottom-2 z-[var(--z-float)] flex justify-center lg:start-[calc(400px+1.5rem)] lg:end-20 lg:bottom-5"
+      className="pointer-events-none absolute inset-x-2 bottom-2 z-[var(--z-float)] flex justify-center md:start-[calc(var(--rail)+1.5rem)] md:end-20 md:bottom-5"
     >
       <div className="surface-focus sheet-in pointer-events-auto flex w-full max-w-md flex-col gap-2.5 rounded-[var(--radius-card)] p-4 text-sm">
         <div className="flex items-start justify-between gap-3">
@@ -1130,6 +1220,7 @@ function SelectionSheet({
   if (card?.bathrooms != null) facts.push({ icon: "bath", text: String(card.bathrooms) });
   if (area) facts.push({ icon: "area", text: area });
   const demo = props.is_demo === true;
+  const router = useRouter();
 
   // Escape closes the preview (the map keeps its place).
   useEffect(() => {
@@ -1143,7 +1234,7 @@ function SelectionSheet({
       role="dialog"
       aria-label={title}
       data-testid="map-selection"
-      className="pointer-events-none absolute inset-x-2 bottom-2 z-[var(--z-float)] flex justify-center lg:start-[calc(400px+1.5rem)] lg:end-auto lg:bottom-6 lg:justify-start"
+      className="pointer-events-none absolute inset-x-2 bottom-2 z-[var(--z-float)] flex justify-center md:start-[calc(var(--rail)+1rem)] md:end-4 md:bottom-4 lg:start-[calc(var(--rail)+1.5rem)] lg:end-auto lg:bottom-6 lg:justify-start"
     >
       {/* Keyed by listing: choosing another property replays the arrival. */}
       <article
@@ -1158,7 +1249,10 @@ function SelectionSheet({
         >
           <Icon name="close" className="size-4" />
         </button>
-        <div className="relative aspect-[4/3] w-28 shrink-0 overflow-hidden rounded-[var(--radius-control)] bg-fill sm:w-36 lg:aspect-[16/10] lg:w-full lg:rounded-none">
+        <div
+          style={{ viewTransitionName: "property-photo" }}
+          className="relative aspect-[4/3] w-28 shrink-0 overflow-hidden rounded-[var(--radius-control)] bg-fill sm:w-36 lg:aspect-[16/10] lg:w-full lg:rounded-none"
+        >
           {cover ? (
             <SafeImage
               src={cover}
@@ -1210,6 +1304,14 @@ function SelectionSheet({
           )}
           <Link
             href={`/properties/${encodeURIComponent(id)}`}
+            onClick={(event) => {
+              // The preview's photo becomes the detail page's hero (where the
+              // browser supports it and motion is welcome); otherwise a
+              // normal navigation. New tab / copy link stay untouched.
+              if (!isPlainClick(event) || !canTransition()) return;
+              event.preventDefault();
+              navigateWithTransition(router.push, `/properties/${encodeURIComponent(id)}`, id);
+            }}
             className="btn btn-primary btn-sm mt-auto w-fit lg:mt-3 lg:h-11 lg:w-full"
           >
             {dict.map.openListing}

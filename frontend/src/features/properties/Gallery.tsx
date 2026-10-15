@@ -18,6 +18,8 @@ export function Gallery({
   emptyLabel,
   labels = { prev: "‹", next: "›" },
   creditsLabel,
+  transitionName,
+  stamp,
 }: {
   media: Media[];
   title: string;
@@ -25,6 +27,11 @@ export function Gallery({
   labels?: { prev: string; next: string };
   /** Link text to the photo credits, shown under credited (Commons) photos. */
   creditsLabel?: string;
+  /** `view-transition-name` of the main photo (the map preview's photo
+   * travels into it). */
+  transitionName?: string;
+  /** A label printed on the photo itself (e.g. "DEMO · representative"). */
+  stamp?: string;
 }) {
   const images = media.filter((m) => m.kind !== "VIDEO");
   const videos = media.filter((m) => m.kind === "VIDEO");
@@ -67,7 +74,8 @@ export function Gallery({
           aria-label={title}
           tabIndex={images.length > 1 ? 0 : -1}
           onKeyDown={onKey}
-          className="group relative overflow-hidden rounded-[var(--radius-media)] bg-fill shadow-[inset_0_0_0_1px_var(--hairline)]"
+          style={transitionName && index === 0 ? { viewTransitionName: transitionName } : undefined}
+          className="group relative overflow-hidden rounded-[var(--radius-card)] bg-fill shadow-[inset_0_0_0_1px_var(--hairline)]"
         >
           <SafeImage
             key={current.id}
@@ -75,8 +83,13 @@ export function Gallery({
             alt={current.caption ?? title}
             fallbackLabel={emptyLabel}
             loading="eager"
-            className="aspect-[4/3] w-full object-cover sm:aspect-[16/9] lg:aspect-[21/9]"
+            className="photo aspect-[4/3] w-full object-cover sm:aspect-[16/9] lg:aspect-[2.25/1]"
           />
+          {stamp && (
+            <span className="absolute start-0 bottom-0 rounded-se-[var(--radius-control)] bg-gold-500 px-3 py-1.5 text-[13px] font-semibold text-[#1d1405]">
+              {stamp}
+            </span>
+          )}
           {images.length > 1 && (
             <>
               <button

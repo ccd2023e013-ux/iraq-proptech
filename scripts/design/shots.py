@@ -34,6 +34,7 @@ PUBLIC = [
     ("register", "/register"),
     ("smart", "/search/smart"),
     ("compare", "/compare"),
+    ("compare-3", None),  # three listings, resolved at run time
     ("studio", "/studio"),
     ("vision", "/vision"),
     ("credits", "/credits"),
@@ -88,6 +89,7 @@ VIEWS = {
     "1440": {"width": 1440, "height": 900},
     "1920": {"width": 1920, "height": 1080},
     "390": {"width": 390, "height": 844},
+    "768": {"width": 768, "height": 1024},
 }
 REPORT: list[dict] = []
 
@@ -228,6 +230,22 @@ def shoot(page: Page, name: str, path: str, tag: str) -> None:
     )
 
 
+def listing_paths(browser: Browser, n: int) -> list[str]:
+    """The first ``n`` listing pages on /properties (distinct ids)."""
+    ctx = browser.new_context()
+    page = ctx.new_page()
+    page.goto(WEB + "/properties", wait_until="load", timeout=90_000)
+    hrefs = page.eval_on_selector_all(
+        "a[href^='/properties/']", "els => els.map(e => e.getAttribute('href'))"
+    )
+    ctx.close()
+    out: list[str] = []
+    for h in hrefs:
+        if re.fullmatch(r"/properties/[0-9a-f-]{36}", h or "") and h not in out:
+            out.append(h)
+    return out[:n]
+
+
 def first_listing(browser: Browser) -> str | None:
     ctx = browser.new_context()
     page = ctx.new_page()
@@ -344,6 +362,34 @@ def map_states(browser: Browser, lang: str, view: str, theme: str = "dark") -> N
                 handle.click()
                 snap("sheet-open")
                 handle.click()
+                page.wait_for_timeout(600)
+            # Touch drag of the sheet (emulated touch through the DevTools
+            # protocol — not a real device): up from peek, then back down.
+            grip = page.locator("[data-testid=sheet-handle]")
+            hb = grip.bounding_box() if grip.count() else None
+            if hb:
+                cdp = ctx.new_cdp_session(page)
+                x, y = hb["x"] + hb["width"] / 2, hb["y"] + hb["height"] / 2
+
+                def swipe(dy: float) -> str:
+                    cdp.send("Input.dispatchTouchEvent", {"type": "touchStart", "touchPoints": [{"x": x, "y": y}]})
+                    for i in range(1, 13):
+                        cdp.send(
+                            "Input.dispatchTouchEvent",
+                            {"type": "touchMove", "touchPoints": [{"x": x, "y": y + dy * i / 12}]},
+                        )
+                        page.wait_for_timeout(16)
+                    cdp.send("Input.dispatchTouchEvent", {"type": "touchEnd", "touchPoints": []})
+                    page.wait_for_timeout(700)
+                    return page.locator("[data-sheet]").first.get_attribute("data-sheet") or "?"
+
+                up = swipe(-330)
+                snap("sheet-dragged")
+                hb2 = grip.bounding_box()
+                if hb2:
+                    x, y = hb2["x"] + hb2["width"] / 2, hb2["y"] + hb2["height"] / 2
+                down = swipe(330)
+                states["touch-drag (emulated)"] = f"peek->{up}->{down}"
         draw = page.locator("[data-testid=draw-area]")
         if draw.count() and box:
             draw.click()
@@ -407,7 +453,12 @@ def main() -> int:
         )
         hero_timeline(browser)
         listing = first_listing(browser)
-        pages = [(n, listing if n == "listing" else path) for n, path in PUBLIC]
+        three = listing_paths(browser, 3)
+        compare = (
+            "/compare?ids=" + ",".join(h.rsplit("/", 1)[1] for h in three) if len(three) == 3 else None
+        )
+        resolved = {"listing": listing, "compare-3": compare}
+        pages = [(n, resolved.get(n, path)) for n, path in PUBLIC]
         pages = [(n, path) for n, path in pages if path]
         combos = [
             ("ar", "dark", "1440"),
@@ -426,12 +477,26 @@ def main() -> int:
                 page = ctx.new_page()
                 shoot(page, name, path, tag)
                 ctx.close()
+        # The product pages in the other themes and on a tablet.
+        key = {n: path for n, path in pages if n in ("listing", "compare-3", "market", "smart")}
+        for lang, theme, view in (
+            ("en", "light", "1440"),
+            ("ar", "light", "390"),
+            ("en", "dark", "768"),
+        ):
+            for name, path in key.items():
+                ctx = context(browser, lang, theme, view)
+                page = ctx.new_page()
+                shoot(page, name, path, f"{lang}-{theme}-{view}")
+                ctx.close()
         for lang, view, theme in (
             ("ar", "1440", "dark"),
             ("ar", "390", "dark"),
             ("en", "390", "dark"),
             ("en", "1440", "light"),
             ("ar", "390", "light"),
+            ("en", "768", "dark"),
+            ("ar", "768", "light"),
         ):
             map_states(browser, lang, view, theme)
         for who, email, env, paths in SIGNED_IN:

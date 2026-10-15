@@ -977,7 +977,7 @@ p {
   opacity: 0.75;
 }
 /* Phones zoom with two fingers; the sheet owns the bottom edge. */
-@media (max-width: 1023px) {
+@media (max-width: 767px) {
   .maplibregl-ctrl-bottom-left .maplibregl-ctrl-group,
   .maplibregl-ctrl-bottom-right .maplibregl-ctrl-group {
     display: none;
@@ -1137,7 +1137,22 @@ p {
   }
 }
 
+/* Map preview → property page: the photo travels; the rest cross-fades. */
+::view-transition-group(property-photo) {
+  animation-duration: 460ms;
+  animation-timing-function: var(--ease-standard);
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 240ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
   *,
   *::before,
   *::after {

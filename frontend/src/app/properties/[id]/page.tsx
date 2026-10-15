@@ -149,99 +149,215 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
     ] as [string, string, IconName][]
   ).filter(([, v]) => v !== "");
 
-  return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
-      {property.status === "APPROVED" && <ViewBeacon propertyId={property.id} />}
-      {property.status !== "APPROVED" && (
-        <Alert tone="info">{dict.listing.statuses[property.status]}</Alert>
-      )}
+  const representative = property.media.some((m) => m.caption?.includes("Wikimedia Commons"));
+  const v = p.provenance;
+  const passed = verifications.filter((x) => x.result === "PASSED").map((x) => x.kind);
+  const documentChecked = passed.includes("DOCUMENT") || passed.includes("OWNERSHIP");
+  const mapHref = property.display_location
+    ? `/map?bbox=${formatBbox(bboxAround(property.display_location.lon, property.display_location.lat, 1.5))}&selected=${property.id}`
+    : "/map";
+  const areaName =
+    (locale === "en" && property.district?.name_en) ||
+    property.district?.name_ar ||
+    (locale === "en" && property.city.name_en) ||
+    property.city.name_ar;
 
-      <div className="reveal">
+  return (
+    <div data-vt-ready={property.id} className="flex flex-col pb-28 md:pb-12">
+      {property.status === "APPROVED" && <ViewBeacon propertyId={property.id} />}
+
+      {/* Title band: where we are, what it is, what it costs. */}
+      <div className="page flex flex-col gap-6 pt-6 pb-6 md:pt-10">
+        {property.status !== "APPROVED" && (
+          <Alert tone="info">{dict.listing.statuses[property.status]}</Alert>
+        )}
+        <nav aria-label={p.location} className="meta flex flex-wrap items-center gap-1.5">
+          <Link href={mapHref} className="inline-flex items-center gap-1.5 hover:text-ink">
+            <Icon name="map" className="size-4 text-spatial" />
+            {p.backToMap}
+          </Link>
+          <Icon name="chevron" className="size-3.5 opacity-60" />
+          <Link href={`/properties?city_id=${property.city.id}`} className="hover:text-ink">
+            {placeName(property.city, locale)}
+          </Link>
+          {property.district && (
+            <>
+              <Icon name="chevron" className="size-3.5 opacity-60" />
+              <span>{placeName(property.district, locale)}</span>
+            </>
+          )}
+        </nav>
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
+          <div className="reveal flex min-w-0 flex-col gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-[var(--radius-tag)] bg-fill px-2.5 py-1 text-[13px] font-medium text-ink">
+                {dict.listing.purposes[property.purpose]}
+              </span>
+              <span className="rounded-[var(--radius-tag)] bg-fill px-2.5 py-1 text-[13px] text-ink-2">
+                {label(types, property.property_type_code)}
+              </span>
+              {property.verified && (
+                <span className="inline-flex items-center gap-1 rounded-[var(--radius-tag)] bg-accent-tint px-2.5 py-1 text-[13px] font-medium text-accent">
+                  <Icon name="check" className="size-3.5" strokeWidth={2.2} />
+                  {dict.listing.verified}
+                </span>
+              )}
+              {property.is_demo && <TrustBadge kind="demo">{dict.listing.demo}</TrustBadge>}
+              <span className="caption tabular" dir="ltr">
+                {property.reference_code}
+              </span>
+            </div>
+            <h1 className="display-lg max-w-[22ch] text-ink">{title}</h1>
+            <p className="flex items-center gap-1.5 text-[17px] text-ink-2">
+              <Icon name="pin" className="size-[18px] shrink-0 text-spatial" />
+              {where}
+            </p>
+          </div>
+          <div
+            className="reveal flex shrink-0 flex-col gap-1 lg:items-end lg:text-end"
+            style={stagger(1)}
+          >
+            <p className="kpi text-[2.25rem] leading-none text-ink md:text-[2.75rem]">{price}</p>
+            <p className="meta">
+              {property.negotiable
+                ? dict.listing.negotiable
+                : dict.listing.purposes[property.purpose]}
+            </p>
+            {conversion?.converted && conversion.rate && (
+              <p className="caption tabular">
+                ≈ {formatPrice(conversion.converted, conversion.to, locale)} ·{" "}
+                {dict.money.indicative} ({conversion.rate.source},{" "}
+                {formatDate(conversion.rate.effective_at, locale)})
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* The property itself: photography first. */}
+      <div className="page reveal" style={stagger(2)}>
         <Gallery
           media={property.media}
           title={title}
           emptyLabel={dict.listing.noImage}
           labels={{ prev: p.prevPhoto, next: p.nextPhoto }}
           creditsLabel={dict.footer.photoCredits}
+          transitionName="property-photo"
+          stamp={
+            property.is_demo && representative
+              ? `${dict.listing.demo} · ${v.photosRepresentative}`
+              : undefined
+          }
         />
       </div>
 
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12">
-        <div className="flex min-w-0 flex-col">
-          <header className="reveal flex flex-col gap-3 pb-8" style={stagger(1)}>
-            <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="rounded-[var(--radius-control)] bg-fill px-2.5 py-1 font-medium text-ink">
-                {dict.listing.purposes[property.purpose]}
-              </span>
-              {property.verified && (
-                <span className="inline-flex items-center gap-1 rounded-[var(--radius-control)] bg-accent-tint px-2.5 py-1 font-medium text-accent">
-                  <Icon name="check" className="size-3.5" strokeWidth={2.2} />
-                  {dict.listing.verified}
-                </span>
-              )}
-              {property.is_demo && <TrustBadge kind="demo">{dict.listing.demo}</TrustBadge>}
-              <span className="text-ink-3 tabular" dir="ltr">
-                {property.reference_code}
-              </span>
-            </div>
-            <h1 className="display-lg text-ink">{title}</h1>
-            <p className="flex items-center gap-1.5 text-ink-2">
-              <Icon name="pin" className="size-4 shrink-0 text-spatial" />
-              {where}
-            </p>
-            {property.is_demo && <p className="text-sm text-ink-3">{p.demoBanner}</p>}
-            {keyStats.length > 0 && (
-              <dl className="mt-4 flex flex-wrap gap-x-10 gap-y-4">
-                {keyStats.map(([k, v, icon]) => (
-                  <div key={k} className="flex items-center gap-3">
-                    <span className="surface-1 grid size-10 place-items-center rounded-xl text-ink-2">
-                      <Icon name={icon} className="size-5" />
-                    </span>
-                    <div>
-                      <dd className="kpi text-2xl text-ink">{v}</dd>
-                      <dt className="meta mt-1">{k}</dt>
-                    </div>
+      {/* Key facts: the numbers people scan first, as one band. */}
+      {keyStats.length > 0 && (
+        <div className="page">
+          <dl
+            aria-label={p.keyFacts}
+            className="mt-6 grid grid-cols-2 overflow-hidden rounded-[var(--radius-card)] bg-hairline [gap:1px] sm:grid-cols-4"
+          >
+            {[
+              ...keyStats,
+              ...((property.floors
+                ? [[p.floors, String(property.floors), "building"]]
+                : property.year_built
+                  ? [[p.yearBuilt, String(property.year_built), "calendar"]]
+                  : []) as [string, string, IconName][]),
+            ]
+              .slice(0, 4)
+              .map(([k, val, icon]) => (
+                <div key={k} className="flex items-center gap-4 bg-surface px-5 py-5">
+                  <Icon name={icon} className="size-6 shrink-0 text-ink-3" strokeWidth={1.6} />
+                  <div className="min-w-0">
+                    <dd className="kpi truncate text-2xl text-ink">{val}</dd>
+                    <dt className="meta">{k}</dt>
                   </div>
-                ))}
-              </dl>
-            )}
-          </header>
-
-          <Section title={p.facts}>
-            {/* Progressive disclosure: the six most useful facts first. */}
-            <FactGrid facts={shownFacts.slice(0, 6)} />
-            {shownFacts.length > 6 && (
-              <details className="group mt-5">
-                <summary className="chip w-fit cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-                  <span className="group-open:hidden">{p.moreFacts}</span>
-                  <span className="hidden group-open:inline">{p.fewerFacts}</span>
-                  <Icon
-                    name="chevron-down"
-                    className="size-3.5 transition-transform duration-[var(--duration-base)] group-open:rotate-180"
-                  />
-                </summary>
-                <div className="fade-in mt-5">
-                  <FactGrid facts={shownFacts.slice(6)} />
                 </div>
-              </details>
-            )}
+              ))}
+          </dl>
+        </div>
+      )}
+
+      <div className="page mt-4 grid gap-x-14 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="flex min-w-0 flex-col">
+          {/* Provenance: verified vs declared vs demo, stated once, plainly. */}
+          <Section title={v.title} lede={v.lede}>
+            <dl className="grid gap-px overflow-hidden rounded-[var(--radius-card)] bg-hairline sm:grid-cols-2">
+              <Provenance
+                label={v.listing}
+                value={property.verified ? v.listingVerified : v.listingDeclared}
+                tone={property.verified ? "verified" : "declared"}
+              />
+              <Provenance
+                label={v.photos}
+                value={
+                  !property.media.length
+                    ? dict.listing.noImage
+                    : representative
+                      ? v.photosRepresentative
+                      : v.photosLister
+                }
+                tone={representative ? "demo" : "declared"}
+              />
+              <Provenance
+                label={v.location}
+                value={
+                  property.location_privacy === "EXACT"
+                    ? v.locationExact
+                    : property.location_privacy === "HIDDEN"
+                      ? v.locationHidden
+                      : v.locationApprox
+                }
+                tone={property.location_privacy === "EXACT" ? "declared" : "estimate"}
+              />
+              <Provenance
+                label={v.checks}
+                value={
+                  verifications.length
+                    ? verifications
+                        .map(
+                          (c) =>
+                            `${p.checks[c.kind]}: ${c.result === "PASSED" ? p.passed : p.failed}`,
+                        )
+                        .join(" · ")
+                    : v.noChecks
+                }
+                tone={passed.length ? "verified" : "declared"}
+              />
+              {property.is_demo && (
+                <div className="flex items-start gap-3 bg-gold-100 px-5 py-4 sm:col-span-2">
+                  <Icon name="info" className="mt-0.5 size-5 shrink-0 text-gold-700" />
+                  <div>
+                    <dt className="font-medium text-ink">{v.demo}</dt>
+                    <dd className="text-sm text-ink-2">{p.demoBanner}</dd>
+                  </div>
+                </div>
+              )}
+            </dl>
           </Section>
 
           {description && (
             <Section title={p.description}>
-              <p className="max-w-[68ch] leading-8 whitespace-pre-line text-ink">{description}</p>
+              <p className="max-w-[68ch] text-[17px] leading-8 whitespace-pre-line text-ink">
+                {description}
+              </p>
             </Section>
           )}
 
+          <Section title={p.facts}>
+            <FactGrid facts={shownFacts} />
+          </Section>
+
           {property.amenities.length > 0 && (
             <Section title={p.amenities}>
-              <ul className="flex flex-wrap gap-2 text-sm">
+              <ul className="grid grid-cols-2 gap-x-6 gap-y-3 text-[15px] sm:grid-cols-3">
                 {property.amenities.map((code) => (
-                  <li
-                    key={code}
-                    className="inline-flex items-center gap-1.5 rounded-[var(--radius-control)] bg-fill px-3 py-1.5 text-ink"
-                  >
-                    <Icon name="check" className="size-3.5 text-accent" strokeWidth={2.2} />
+                  <li key={code} className="flex items-center gap-2.5 text-ink">
+                    <span className="grid size-6 shrink-0 place-items-center rounded-full bg-accent-tint text-accent">
+                      <Icon name="check" className="size-3.5" strokeWidth={2.4} />
+                    </span>
                     {label(amenities, code)}
                   </li>
                 ))}
@@ -249,11 +365,33 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             </Section>
           )}
 
+          <Section title={p.documents}>
+            {property.ownership_document === "UNKNOWN" ? (
+              <p className="text-ink-2">{p.documentNone}</p>
+            ) : (
+              <div className="flex items-start gap-4 rounded-[var(--radius-card)] bg-surface p-5 shadow-[inset_0_0_0_1px_var(--hairline)]">
+                <span className="grid size-11 shrink-0 place-items-center rounded-[var(--radius-control)] bg-fill text-ink-2">
+                  <Icon name="document" className="size-5" />
+                </span>
+                <div className="flex min-w-0 flex-col gap-1">
+                  <p className="meta">{p.documentDeclared}</p>
+                  <p className="font-medium text-ink">
+                    {dict.listing.ownership[property.ownership_document]}
+                  </p>
+                  <p className={`text-sm ${documentChecked ? "text-accent" : "text-ink-2"}`}>
+                    {documentChecked ? p.documentChecked : p.documentNotChecked}
+                  </p>
+                </div>
+              </div>
+            )}
+          </Section>
+
           <Section title={p.location}>
-            {property.display_location && property.location_privacy !== "HIDDEN" && (
-              <div className="mb-4 flex flex-col gap-3">
+            {property.display_location && property.location_privacy !== "HIDDEN" ? (
+              <div className="flex flex-col gap-4">
                 <MapPreview
                   config={mapConfig}
+                  className="h-72 sm:h-96"
                   points={[
                     {
                       lat: property.display_location.lat,
@@ -263,147 +401,108 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                   ]}
                   label={`${p.location}: ${where}`}
                 />
-                <Link
-                  href={`/map?bbox=${formatBbox(bboxAround(property.display_location.lon, property.display_location.lat, 1.5))}`}
-                  className="press inline-flex h-9 w-fit items-center gap-2 rounded-[var(--radius-control)] px-3.5 text-sm font-medium text-ink ring-1 ring-inset ring-hairline-strong hover:bg-fill"
-                >
-                  <Icon name="map" className="size-4 text-spatial" />
-                  {dict.future.showOnMap}
-                </Link>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-medium text-ink">{where}</p>
+                    {property.street && <p className="text-sm text-ink-2">{property.street}</p>}
+                    {property.location_privacy !== "EXACT" && (
+                      <p className="caption mt-1">{p.approximateNote}</p>
+                    )}
+                  </div>
+                  <Link href={mapHref} className="btn btn-secondary btn-sm">
+                    <Icon name="map" className="size-4 text-spatial" />
+                    {p.openOnMap}
+                  </Link>
+                </div>
               </div>
+            ) : (
+              <p className="text-ink-2">{p.hiddenNote}</p>
             )}
-            <p className="font-medium text-ink">{where}</p>
-            {property.street && <p className="text-sm text-ink-2">{property.street}</p>}
-            {property.address_text && <p className="text-sm text-ink-2">{property.address_text}</p>}
-            {property.location_privacy !== "EXACT" && (
-              <p className="mt-2 text-xs text-ink-3">
-                {property.location_privacy === "HIDDEN" ? p.hiddenNote : p.approximateNote}
-              </p>
-            )}
+            <div className="mt-8">
+              <Nearby propertyId={property.id} dict={dict} locale={locale} />
+            </div>
           </Section>
 
-          <div className="flex flex-col gap-6 border-t border-hairline py-8">
-            {property.status === "APPROVED" && (
-              <Link
-                href={`/vision?property_id=${property.id}`}
-                className="lift surface-1 group flex items-center gap-4 rounded-[var(--radius-card)] px-5 py-4"
-                data-testid="vision-link"
-              >
-                <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent-tint text-accent">
-                  <Icon name="insight" className="size-5" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block font-semibold text-ink">{dict.vision.title}</span>
-                  <span className="text-sm text-ink-2">{dict.vision.subtitle}</span>
-                </span>
-                <Icon
-                  name="arrow"
-                  className="size-5 shrink-0 text-ink-3 transition-transform duration-[var(--duration-base)] group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5"
-                />
-              </Link>
-            )}
-            {property.status === "APPROVED" && (
-              <IntelligencePanel dict={dict} locale={locale} propertyId={property.id} />
-            )}
-            {property.status === "APPROVED" && (
-              <PropertySummary dict={dict} locale={locale} propertyId={property.id} />
-            )}
-            {property.status === "APPROVED" && (
-              <Insights
-                propertyId={property.id}
-                purpose={property.purpose}
-                dict={dict}
-                locale={locale}
-              />
-            )}
-            <Nearby propertyId={property.id} dict={dict} locale={locale} />
-            <Link
-              href={
-                property.district
-                  ? `/market?district_id=${property.district.id}&city_id=${property.city.id}`
-                  : `/market?city_id=${property.city.id}`
-              }
-              className="self-start text-sm font-medium text-accent underline-offset-4 hover:underline"
-              data-testid="area-market-link"
-            >
-              {dict.market.seeArea}:{" "}
-              {(locale === "en" && property.district?.name_en) ||
-                property.district?.name_ar ||
-                (locale === "en" && property.city.name_en) ||
-                property.city.name_ar}
-            </Link>
-          </div>
-
           {history.length > 1 && (
-            <Section title={p.priceHistory}>
-              <ol className="flex flex-col gap-2 text-sm">
-                {history.map((h, i) => (
-                  <li key={i} className="flex justify-between gap-3 tabular">
-                    <span className="text-ink-3">{formatDate(h.changed_at, locale)}</span>
-                    <span className="font-medium text-ink">
-                      {h.price_on_request
-                        ? dict.listing.priceOnRequest
-                        : formatPrice(h.price_amount, h.currency, locale)}
-                    </span>
-                  </li>
-                ))}
-              </ol>
+            <Section title={p.priceHistory} lede={p.priceHistoryNote}>
+              <PriceHistoryChart history={history} locale={locale} />
+            </Section>
+          )}
+
+          {property.status === "APPROVED" && (
+            <Section title={p.intelligence} lede={p.intelligenceLede}>
+              <div className="flex flex-col gap-6">
+                <IntelligencePanel dict={dict} locale={locale} propertyId={property.id} />
+                <PropertySummary dict={dict} locale={locale} propertyId={property.id} />
+                <Insights
+                  propertyId={property.id}
+                  purpose={property.purpose}
+                  dict={dict}
+                  locale={locale}
+                />
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href={
+                      property.district
+                        ? `/market?district_id=${property.district.id}&city_id=${property.city.id}`
+                        : `/market?city_id=${property.city.id}`
+                    }
+                    className="btn btn-secondary btn-sm"
+                    data-testid="area-market-link"
+                  >
+                    <Icon name="chart" className="size-4 text-spatial" />
+                    {dict.market.seeArea}: {areaName}
+                  </Link>
+                  <Link
+                    href={`/vision?property_id=${property.id}`}
+                    className="btn btn-secondary btn-sm"
+                    data-testid="vision-link"
+                  >
+                    <Icon name="insight" className="size-4 text-accent" />
+                    {dict.vision.title}
+                  </Link>
+                </div>
+              </div>
             </Section>
           )}
         </div>
 
-        <aside className="flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start">
-          <div className="surface-focus reveal rounded-[var(--radius-card)] p-6" style={stagger(2)}>
-            <p className="kpi text-[2rem] text-ink">{price}</p>
-            {property.negotiable && (
-              <p className="mt-1 text-sm text-ink-3">{dict.listing.negotiable}</p>
-            )}
-            {conversion?.converted && conversion.rate && (
-              <p className="mt-1 text-sm text-ink-3 tabular">
-                ≈ {formatPrice(conversion.converted, conversion.to, locale)} (
-                {dict.money.indicative}
-                {" — "}
-                {dict.money.indicativeNote} {conversion.rate.source},{" "}
-                {formatDate(conversion.rate.effective_at, locale)})
-              </p>
-            )}
-
-            <div className="mt-5 border-t border-hairline pt-5">
-              <p className="text-xs text-ink-3">{p.by}</p>
-              <p className="font-semibold text-ink">
-                {property.lister.name}
-                {property.lister.kind === "agency" && property.lister.agency_verified && (
-                  <Icon name="check" className="ms-1 inline size-4 text-accent" strokeWidth={2.2} />
-                )}
-              </p>
-              <div className="mt-4 flex flex-col gap-2">
-                {property.lister.phone ? (
-                  <a
-                    href={`tel:${property.lister.phone}`}
-                    dir="ltr"
-                    className="btn btn-primary btn-lg"
-                  >
-                    {p.call} {property.lister.phone}
-                  </a>
-                ) : (
-                  <p className="text-sm text-ink-3">{p.contactHidden}</p>
-                )}
-                {property.lister.whatsapp && (
-                  <a
-                    href={`https://wa.me/${property.lister.whatsapp.replace(/\D/g, "")}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="press inline-flex h-12 items-center justify-center rounded-[var(--radius-control)] px-5 font-medium text-success ring-1 ring-inset ring-success/40 hover:bg-success/10"
-                  >
-                    {p.whatsapp}
-                  </a>
-                )}
-              </div>
+        {/* Contact: always at hand on wide screens; a bar on phones. */}
+        <aside className="flex flex-col gap-4 pt-8 lg:sticky lg:top-[calc(var(--header-h)+1.5rem)] lg:self-start">
+          <div id="contact" className="surface-focus scroll-mt-24 rounded-[var(--radius-card)] p-6">
+            <p className="meta">{p.by}</p>
+            <p className="mt-1 flex items-center gap-1.5 text-lg font-semibold text-ink">
+              {property.lister.name}
+              {property.lister.kind === "agency" && property.lister.agency_verified && (
+                <Icon name="check" className="size-4 text-accent" strokeWidth={2.2} />
+              )}
+            </p>
+            <div className="mt-5 flex flex-col gap-2">
+              {property.lister.phone ? (
+                <a
+                  href={`tel:${property.lister.phone}`}
+                  dir="ltr"
+                  className="btn btn-primary btn-lg"
+                >
+                  {p.call} {property.lister.phone}
+                </a>
+              ) : (
+                <p className="text-sm text-ink-2">{p.contactHidden}</p>
+              )}
+              {property.lister.whatsapp && (
+                <a
+                  href={`https://wa.me/${property.lister.whatsapp.replace(/\D/g, "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary"
+                >
+                  {p.whatsapp}
+                </a>
+              )}
             </div>
-
             {!property.can_edit && property.status === "APPROVED" && (
-              <div className="mt-5 border-t border-hairline pt-5">
-                <h2 className="mb-3 font-semibold text-ink">{dict.inquiry.title}</h2>
+              <div className="mt-6 border-t border-hairline pt-5">
+                <h2 className="title mb-3 text-ink">{dict.inquiry.title}</h2>
                 <InquiryForm
                   dict={dict}
                   propertyId={property.id}
@@ -428,7 +527,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             {property.can_edit && (
               <Link
                 href={`/studio?property_id=${property.id}`}
-                className="press surface-1 inline-flex h-10 items-center rounded-[var(--radius-control)] px-4 text-sm font-medium text-ink"
+                className="btn btn-secondary btn-sm"
                 data-testid="studio-link"
               >
                 {dict.studio.title}
@@ -437,7 +536,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             {property.can_edit && (
               <Link
                 href={`/dashboard/properties/${property.id}`}
-                className="press surface-1 inline-flex h-10 items-center rounded-[var(--radius-control)] px-4 text-sm font-medium text-ink"
+                className="btn btn-secondary btn-sm"
               >
                 {dict.myListings.edit}
               </Link>
@@ -447,34 +546,112 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
           {me && !property.can_edit && property.status === "APPROVED" && (
             <ReportButton dict={dict} targetType="PROPERTY" targetId={property.id} />
           )}
-
-          <section className="rounded-[var(--radius-card)] bg-fill p-5">
-            <h2 className="flex items-center gap-2 text-sm font-semibold text-ink">
-              <Icon
-                name={property.verified ? "check" : "info"}
-                className={`size-4 ${property.verified ? "text-accent" : "text-ink-3"}`}
-              />
-              {p.verification}
-            </h2>
-            <p className="mt-1 text-sm text-ink-2">
-              {property.verified ? p.verifiedText : p.notVerifiedText}
-            </p>
-            {verifications.length > 0 && (
-              <ul className="mt-3 flex flex-col gap-1.5 text-sm">
-                {verifications.map((v) => (
-                  <li key={v.id} className="flex justify-between gap-3">
-                    <span className="text-ink">{p.checks[v.kind]}</span>
-                    <span className={v.result === "PASSED" ? "text-success" : "text-danger"}>
-                      {v.result === "PASSED" ? p.passed : p.failed}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
         </aside>
       </div>
+
+      {/* Phones: price and contact stay within reach above the tab bar. */}
+      <div className="fixed inset-x-0 bottom-[var(--tabbar-h)] z-[var(--z-float)] flex items-center justify-between gap-3 border-t border-hairline bg-canvas/90 px-4 py-3 backdrop-blur-xl md:hidden">
+        <p className="kpi min-w-0 truncate text-xl text-ink">{price}</p>
+        <a href="#contact" className="btn btn-primary shrink-0">
+          {p.contactCta}
+        </a>
+      </div>
     </div>
+  );
+}
+
+type Tone = "verified" | "declared" | "demo" | "estimate";
+
+/** One provenance row: what kind of statement a part of the page is. */
+function Provenance({ label, value, tone }: { label: string; value: string; tone: Tone }) {
+  const dot: Record<Tone, string> = {
+    verified: "bg-accent-fill",
+    declared: "bg-ink-3",
+    demo: "bg-gold-500",
+    estimate: "bg-spatial-fill",
+  };
+  return (
+    <div className="flex items-start gap-3 bg-surface px-5 py-4">
+      <span aria-hidden className={`mt-2 size-2 shrink-0 rounded-full ${dot[tone]}`} />
+      <div className="min-w-0">
+        <dt className="meta">{label}</dt>
+        <dd className="mt-0.5 text-[15px] text-ink">{value}</dd>
+      </div>
+    </div>
+  );
+}
+
+/** Asking price over time (one currency), as a step line with its dates. */
+function PriceHistoryChart({ history, locale }: { history: PricePoint[]; locale: "ar" | "en" }) {
+  const currency = history[history.length - 1]?.currency ?? "IQD";
+  const rows = history
+    .filter((h) => !h.price_on_request && h.price_amount && h.currency === currency)
+    .map((h) => ({
+      t: new Date(h.changed_at).getTime(),
+      v: Number(h.price_amount),
+      at: h.changed_at,
+    }))
+    .filter((r) => Number.isFinite(r.v))
+    .sort((a, b) => a.t - b.t);
+  if (rows.length < 2) return null;
+  const W = 640;
+  const H = 180;
+  const pad = { x: 12, top: 28, bottom: 28 };
+  const t0 = rows[0]!.t;
+  const t1 = Math.max(rows[rows.length - 1]!.t, t0 + 1);
+  const lo = Math.min(...rows.map((r) => r.v));
+  const hi = Math.max(...rows.map((r) => r.v));
+  const span = hi - lo || hi || 1;
+  const x = (t: number) => pad.x + ((t - t0) / (t1 - t0)) * (W - pad.x * 2);
+  const y = (v: number) => pad.top + (1 - (v - lo) / span) * (H - pad.top - pad.bottom);
+  let d = `M ${x(rows[0]!.t)} ${y(rows[0]!.v)}`;
+  for (let i = 1; i < rows.length; i++) {
+    d += ` H ${x(rows[i]!.t)} V ${y(rows[i]!.v)}`;
+  }
+  const last = rows[rows.length - 1]!;
+  return (
+    <figure className="flex flex-col gap-2">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="h-44 w-full overflow-visible text-spatial"
+        role="img"
+        aria-label={rows
+          .map((r) => `${formatDate(r.at, locale)}: ${formatPrice(String(r.v), currency, locale)}`)
+          .join("; ")}
+      >
+        <line
+          x1={pad.x}
+          x2={W - pad.x}
+          y1={H - pad.bottom}
+          y2={H - pad.bottom}
+          className="stroke-hairline"
+        />
+        <path d={d} fill="none" stroke="currentColor" strokeWidth={2} strokeLinejoin="round" />
+        {rows.map((r) => (
+          <circle
+            key={r.t}
+            cx={x(r.t)}
+            cy={y(r.v)}
+            r={3.5}
+            className="fill-canvas"
+            stroke="currentColor"
+            strokeWidth={2}
+          />
+        ))}
+        <text
+          x={x(last.t)}
+          y={y(last.v) - 10}
+          textAnchor="end"
+          className="fill-ink text-[13px] font-semibold"
+        >
+          {formatPrice(String(last.v), currency, locale)}
+        </text>
+      </svg>
+      <figcaption className="caption flex justify-between tabular">
+        <span>{formatDate(rows[0]!.at, locale)}</span>
+        <span>{formatDate(last.at, locale)}</span>
+      </figcaption>
+    </figure>
   );
 }
 
@@ -491,11 +668,14 @@ function FactGrid({ facts }: { facts: [string, string][] }) {
   );
 }
 
-/** A calm page section: heading and content separated by a hairline, no box. */
-function Section({ title, children }: { title: string; children: ReactNode }) {
+/** A calm page section: heading (and an optional lede), no box. */
+function Section({ title, lede, children }: { title: string; lede?: string; children: ReactNode }) {
   return (
-    <section className="border-t border-hairline py-8">
-      <h2 className="mb-4 font-display text-xl font-semibold tracking-tight text-ink">{title}</h2>
+    <section className="border-t border-hairline py-10 first:border-t-0">
+      <div className="mb-5 flex flex-col gap-1">
+        <h2 className="title text-ink">{title}</h2>
+        {lede && <p className="meta">{lede}</p>}
+      </div>
       {children}
     </section>
   );
