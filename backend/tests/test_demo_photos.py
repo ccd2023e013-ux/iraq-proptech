@@ -14,6 +14,9 @@ from app import demo, demo_images
 from app.demo_images import photo_caption, photo_library, pick_photo
 from app.properties.models import Property
 
+# Representative photos are credited to where they were published.
+SOURCES = ("Wikimedia Commons", "Flickr")
+
 FREE = re.compile(r"^(Public domain|CC0|CC BY(-SA)? (2\.0|2\.5|3\.0|4\.0))$")
 DEMO_TYPES = ("HOUSE", "APARTMENT", "VILLA", "LAND", "SHOP", "OFFICE")
 
@@ -24,7 +27,9 @@ def test_every_photo_has_a_free_licence_and_a_full_credit() -> None:
     for photo in library:
         assert FREE.match(photo.licence), photo
         assert photo.author.strip(), photo
-        assert photo.source.startswith("https://commons.wikimedia.org/wiki/File:"), photo
+        assert photo.source.startswith(
+            ("https://commons.wikimedia.org/wiki/File:", "https://www.flickr.com/photos/")
+        ), photo
         if photo.licence.startswith("CC BY"):
             assert photo.licence_url.startswith("https://creativecommons.org/licenses/"), photo
 
@@ -59,5 +64,6 @@ def test_basra_seed_attaches_captioned_photos_only_when_asked(db_session: Sessio
     assert len(rows) == 3
     for p in rows:
         assert len(p.media) == 1
-        assert "صورة تمثيلية" in p.media[0].caption and "Wikimedia Commons" in p.media[0].caption
+        caption = p.media[0].caption
+        assert "صورة تمثيلية" in caption and any(s in caption for s in SOURCES)
         assert "تمثيلية" in p.description_ar and "representative" in p.description_en

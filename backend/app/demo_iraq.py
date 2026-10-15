@@ -514,15 +514,15 @@ def _description(
         f"{type_ar} {purpose_ar} في {d.name_ar} بمدينة {spec.name_ar}، بمساحة {area} م².{rooms_ar}"
         " قريب من الخدمات والطرق الرئيسية.\n\n"
         "تنبيه: هذا إعلان تجريبي (DEMO) لعرض إمكانات المنصة فقط وليس عرضاً حقيقياً. "
-        "الصور تمثيلية (من Wikimedia Commons) وليست صوراً لهذا العقار، "
+        "الصور تمثيلية (من مصادر حرة: Wikimedia Commons وFlickr) وليست صوراً لهذا العقار، "
         "والسعر والمواصفات أرقام افتراضية."
     )
     en = (
         f"{type_en} {purpose_en} in {d.name_en}, {spec.name_en}: {area} m²,{rooms_en}"
         " close to services and main roads.\n\n"
         "Note: DEMO listing for demonstrating the platform only — not a real offer. "
-        "Photos are representative (Wikimedia Commons), not of this property; price and details "
-        "are hypothetical."
+        "Photos are representative (Wikimedia Commons, Flickr), not of this property; "
+        "price and details are hypothetical."
     )
     return ar, en
 

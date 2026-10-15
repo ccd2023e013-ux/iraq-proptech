@@ -16,6 +16,9 @@ from app.storage import get_storage
 from app.users.models import User, UserStatus
 from tests.factories import login
 
+# Representative photos are credited to where they were published.
+SOURCES = ("Wikimedia Commons", "Flickr")
+
 pytestmark = pytest.mark.db
 
 PASSWORD = "Demo-Accounts-Pass-2026"
@@ -52,7 +55,7 @@ def test_seed_covers_seven_cities_and_is_clearly_demo(db_session: Session) -> No
     assert len(media) == 28
     assert all("DEMO" in m.caption for m in media)
     # Photos are representative and credited (author, licence, source) in the caption.
-    assert all("صورة تمثيلية" in m.caption and "Wikimedia Commons" in m.caption for m in media)
+    assert all("صورة تمثيلية" in m.caption and any(s in m.caption for s in SOURCES) for m in media)
     assert all(len(m.caption) <= 200 for m in media)
     assert get_storage().get(media[0].thumbnail_key)[:4] == b"RIFF"  # WebP
     # Agency listings belong to the verified demo agency and its agent.

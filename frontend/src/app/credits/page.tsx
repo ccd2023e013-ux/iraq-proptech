@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Attribution for the representative DEMO photos (Wikimedia Commons): title,
+ * Attribution for the representative DEMO photos (Wikimedia Commons, Flickr): title,
  * author, licence with its link, source page and the changes made — what the
  * CC BY and CC BY-SA licences ask for. The list is a copy of the backend's
  * app/demo_photos/manifest.json (a test keeps the two identical).

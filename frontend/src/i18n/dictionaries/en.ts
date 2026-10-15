@@ -1523,7 +1523,7 @@ const en: Dictionary = {
   credits: {
     title: "Photo credits",
     intro:
-      "DEMO listings use representative photographs of real streets and buildings in Iraq, from Wikimedia Commons under free licences. A photo shows the general type and setting only — never the listed property, which is fictional.",
+      "DEMO listings use representative photographs of real streets and buildings in Iraq, from Wikimedia Commons and Flickr under free licences. A photo shows the general type and setting only — never the listed property, which is fictional.",
     author: "Author",
     licence: "Licence",
     source: "Source",

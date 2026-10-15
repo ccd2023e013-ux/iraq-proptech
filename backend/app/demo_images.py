@@ -1,7 +1,8 @@
 """Images for DEMO listings: representative licensed photos, or illustrations.
 
 Photos: a small library in ``app/demo_photos`` (see its manifest.json), sourced
-from Wikimedia Commons under free licences (public domain, CC0, CC BY, CC BY-SA)
+from Wikimedia Commons and Flickr (found via Openverse) under free licences
+(public domain, CC0, CC BY, CC BY-SA)
 with their author, licence and source page recorded; they were resized and
 re-encoded with all metadata removed. They are *representative*: real streets
 and buildings in Iraq of the listing's general type, never a photograph of the
@@ -24,6 +25,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 from typing import TYPE_CHECKING
+from urllib.parse import urlparse
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -91,10 +93,20 @@ def photo_bytes(photo: DemoPhoto) -> bytes:
     return (PHOTO_DIR / photo.file).read_bytes()
 
 
+def source_name(url: str) -> str:
+    """Where a library photo was published, for its credit line."""
+    host = urlparse(url).netloc.lower()
+    if host.endswith("wikimedia.org"):
+        return "Wikimedia Commons"
+    if host.endswith("flickr.com"):
+        return "Flickr"
+    return host.removeprefix("www.") or "—"
+
+
 def photo_caption(photo: DemoPhoto) -> str:
     """Media caption: representative, DEMO, and the credit (author, licence, source)."""
     head = "صورة تمثيلية وليست لهذا العقار — DEMO · "
-    tail = f" · {photo.licence} · Wikimedia Commons"
+    tail = f" · {photo.licence} · {source_name(photo.source)}"
     room = CAPTION_MAX - len(head) - len(tail)
     author = photo.author if len(photo.author) <= room else photo.author[: room - 1] + "…"
     return f"{head}{author}{tail}"
