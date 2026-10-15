@@ -151,7 +151,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
     ] as [string, string, IconName][]
   ).filter(([, v]) => v !== "");
 
-  const facts: [string, string, IconName][] = [
+  const bandFacts: [string, string, IconName][] = [
     ...keyStats,
     ...((property.floors
       ? [[p.floors, String(property.floors), "building"]]
@@ -287,21 +287,21 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
       </div>
 
       {/* Key facts: the numbers people scan first, as one band. */}
-      {facts.length > 0 && (
+      {bandFacts.length > 0 && (
         <div className="page">
           <dl
             aria-label={p.keyFacts}
             className={`mt-6 grid overflow-hidden rounded-[var(--radius-card)] bg-hairline [gap:1px] ${
-              facts.length < 3
-                ? facts.length === 1
+              bandFacts.length < 3
+                ? bandFacts.length === 1
                   ? "grid-cols-1"
                   : "grid-cols-2"
-                : facts.length === 3
+                : bandFacts.length === 3
                   ? "grid-cols-3"
                   : "grid-cols-2 sm:grid-cols-4"
             }`}
           >
-            {facts.map(([k, val, icon]) => (
+            {bandFacts.map(([k, val, icon]) => (
               <div
                 key={k}
                 className="flex items-center gap-4 bg-surface px-5 py-5 max-sm:flex-col max-sm:items-start max-sm:gap-2 max-sm:px-4"
