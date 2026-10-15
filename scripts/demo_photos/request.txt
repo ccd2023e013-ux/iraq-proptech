@@ -1,1 +1,5 @@
-openverse
+fetch
+VILLA|openverse:f7263027-3730-4629-97af-9abe36a3e6c3
+HOUSE|openverse:6d24d6f4-cd85-4ce7-9a85-b22515c04646
+HOUSE|openverse:01225981-4a7d-4dc5-93c7-4c2de2ccec19
+APARTMENT|openverse:65a449e9-0757-4a59-8ee6-b26dcbff9bc2
