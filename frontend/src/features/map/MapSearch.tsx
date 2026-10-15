@@ -45,7 +45,7 @@ import {
   POI_COLORS,
   PropertyMap,
 } from "./PropertyMap";
-import type { Feature, FeatureCollection } from "geojson";
+import type { Feature, FeatureCollection, Point } from "geojson";
 
 export interface MapSearchProps {
   config: MapConfig;
@@ -179,7 +179,7 @@ export function MapSearch({
         );
         if (hit) {
           selectedApplied.current = wanted;
-          const [lon, lat] = (hit.geometry as { coordinates: [number, number] }).coordinates;
+          const [lon, lat] = (hit.geometry as Point).coordinates as [number, number];
           setSelected((hit.properties ?? {}) as Record<string, unknown>);
           setFocusRequest((r) => ({ id: wanted, lon, lat, n: (r?.n ?? 0) + 1 }));
         }

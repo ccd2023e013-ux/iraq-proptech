@@ -22,14 +22,14 @@ export function ProviderBadge({
 }) {
   const tone =
     provider === "mock"
-      ? "bg-gold-100 text-gold-700"
+      ? "bg-gold-100 text-gold-700 shadow-[inset_0_0_0_1px_var(--gold-line)]"
       : provider === "platform"
-        ? "bg-sand-100 text-sand-700"
-        : "bg-brand-50 text-brand-800";
+        ? "bg-fill text-ink-2"
+        : "bg-accent-tint text-accent";
   return (
     <span
       data-ai-provider={provider}
-      className={`inline-block rounded px-1.5 py-0.5 text-[11px] font-medium ${tone}`}
+      className={`inline-block rounded-[var(--radius-tag)] px-2 py-0.5 text-[12px] leading-5 font-medium ${tone}`}
     >
       {providerLabel(dict, provider, model)}
     </span>
