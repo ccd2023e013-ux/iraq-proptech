@@ -13,6 +13,7 @@ import { ReportButton } from "@/features/admin/ReportButton";
 import { ViewBeacon } from "@/features/analytics/ViewBeacon";
 import { InquiryForm } from "@/features/crm/InquiryForm";
 import { FavoriteButton } from "@/features/properties/FavoriteButton";
+import { type ApartmentMedian, FutureScenarios } from "@/features/properties/FutureScenarios";
 import { Gallery, ShareButton } from "@/features/properties/Gallery";
 import { MapPreview } from "@/features/map/MapPreview";
 import { Nearby } from "@/features/properties/Nearby";
@@ -27,6 +28,7 @@ import { formatBbox } from "@/lib/map/geo";
 import { bboxAround } from "@/lib/map/places";
 import { resolveMapConfig } from "@/lib/map/provider";
 import { stagger } from "@/lib/motion";
+import type { MarketReport } from "@/types/market";
 import type { Property, ReferenceItem } from "@/types/property";
 
 export const dynamic = "force-dynamic";
@@ -149,7 +151,30 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
     ] as [string, string, IconName][]
   ).filter(([, v]) => v !== "");
 
-  const representative = property.media.some((m) => m.caption?.includes("Wikimedia Commons"));
+  // Future scenarios: plots and houses with a known area, priced against the
+  // market report's apartment median for the city (when there is one).
+  const plotM2 = Number(property.land_area_m2 ?? property.area_m2 ?? 0);
+  const scenarioTypes = ["LAND", "HOUSE", "VILLA", "FARM"];
+  const showScenarios = plotM2 >= 60 && scenarioTypes.includes(property.property_type_code);
+  const cityReport = showScenarios
+    ? await serverApiFetch<MarketReport>(
+        `/api/v1/market/report?city_id=${property.city.id}&language=${locale}&include_demo=true`,
+      ).catch(() => null)
+    : null;
+  const aptSeg = cityReport?.segments.find(
+    (seg) =>
+      seg.property_type_code === "APARTMENT" && seg.purpose === "SALE" && seg.median_price_per_m2,
+  );
+  const median: ApartmentMedian | null = aptSeg
+    ? {
+        perM2: Number(aptSeg.median_price_per_m2),
+        currency: aptSeg.currency,
+        listings: aptSeg.listings,
+        demo: !!cityReport?.provenance.includes_demo,
+        area: placeName(property.city, locale) ?? "",
+      }
+    : null;
+  const representative = property.media.some((m) => m.caption?.includes("صورة تمثيلية"));
   const v = p.provenance;
   const passed = verifications.filter((x) => x.result === "PASSED").map((x) => x.kind);
   const documentChecked = passed.includes("DOCUMENT") || passed.includes("OWNERSHIP");
@@ -422,6 +447,19 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
               <Nearby propertyId={property.id} dict={dict} locale={locale} />
             </div>
           </Section>
+
+          {showScenarios && (
+            <Section title={dict.scenarios.title} lede={dict.scenarios.lede}>
+              <FutureScenarios
+                dict={dict}
+                locale={locale}
+                propertyId={property.id}
+                plotM2={plotM2}
+                floorsNow={property.floors}
+                median={median}
+              />
+            </Section>
+          )}
 
           {history.length > 1 && (
             <Section title={p.priceHistory} lede={p.priceHistoryNote}>

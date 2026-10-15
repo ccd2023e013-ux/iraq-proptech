@@ -120,7 +120,7 @@ export function Gallery({
       {current?.caption && (
         <p className="caption flex flex-wrap items-baseline gap-x-2" dir="auto">
           <span>{current.caption}</span>
-          {creditsLabel && current.caption.includes("Wikimedia Commons") && (
+          {creditsLabel && current.caption.includes("صورة تمثيلية") && (
             <Link href="/credits" className="link">
               {creditsLabel}
             </Link>

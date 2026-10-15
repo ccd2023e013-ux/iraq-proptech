@@ -114,7 +114,9 @@ SEARCHES = [
     "Erbil new residential",
 ]
 # Openverse (openverse.org): openly licensed images, mostly from Flickr, with
-# the licence recorded per image. Same free licences only; no API key.
+# the licence recorded per image. Same free licences only; no API key. Anonymous
+# requests must keep page_size <= 20 (larger pages get HTTP 401) and stay
+# under roughly one request per second (else HTTP 429).
 OV_API = "https://api.openverse.org/v1/images/"
 OV_LICENCES = {"by", "by-sa", "cc0", "pdm"}
 OV_SEARCHES = [
@@ -216,7 +218,7 @@ def ov_survey() -> list[dict]:
     found: dict[str, dict] = {}
     for q in OV_SEARCHES:
         query = urllib.parse.urlencode(
-            {"q": q, "license": ",".join(sorted(OV_LICENCES)), "page_size": "40", "mature": "false"}
+            {"q": q, "license": ",".join(sorted(OV_LICENCES)), "page_size": "20", "mature": "false"}
         )
         try:
             data = ov_get(f"{OV_API}?{query}")
@@ -228,7 +230,7 @@ def ov_survey() -> list[dict]:
             c = ov_candidate(r)
             c["source"] = f"openverse: {q}"
             found.setdefault(c["title"], c)
-        time.sleep(1.5)
+        time.sleep(3)  # anonymous use: about one request a second, no larger pages
     log(f"{len(found)} Openverse results")
     return list(found.values())
 
