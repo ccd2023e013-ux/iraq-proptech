@@ -130,5 +130,29 @@
     "changes": "resized to 1600 px and re-encoded; metadata removed",
     "width": 1600,
     "height": 840
+  },
+  {
+    "file": "villa-18.jpg",
+    "kind": "VILLA",
+    "title": "nicehouse",
+    "author": "octal",
+    "licence": "CC BY 2.0",
+    "licence_url": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://www.flickr.com/photos/70594506@N00/1373043102",
+    "changes": "re-encoded; metadata removed (found via Openverse)",
+    "width": 1024,
+    "height": 683
+  },
+  {
+    "file": "house-17.jpg",
+    "kind": "HOUSE",
+    "title": "Baghdad street view",
+    "author": "ainudil",
+    "licence": "CC BY-SA 2.0",
+    "licence_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "source": "https://www.flickr.com/photos/10899234@N00/6525782265",
+    "changes": "re-encoded; metadata removed (found via Openverse)",
+    "width": 1024,
+    "height": 683
   }
 ]

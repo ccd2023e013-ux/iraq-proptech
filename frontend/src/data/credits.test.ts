@@ -17,7 +17,9 @@ describe("demo photo credits", () => {
     for (const c of credits) {
       expect(c.author.trim()).not.toBe("");
       expect(c.licence).toMatch(/^(Public domain|CC0|CC BY(-SA)? \d\.\d)$/);
-      expect(c.source).toMatch(/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/);
+      expect(c.source).toMatch(
+        /^https:\/\/(commons\.wikimedia\.org\/wiki\/File:|www\.flickr\.com\/photos\/)/,
+      );
     }
   });
 });
