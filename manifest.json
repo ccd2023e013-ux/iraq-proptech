@@ -1,0 +1,50 @@
+[
+ {
+  "file": "villa-00.jpg",
+  "kind": "VILLA",
+  "title": "nicehouse",
+  "author": "octal",
+  "licence": "CC BY 2.0",
+  "licence_url": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://www.flickr.com/photos/70594506@N00/1373043102",
+  "changes": "resized to 1600 px and re-encoded; metadata removed",
+  "width": 1024,
+  "height": 683
+ },
+ {
+  "file": "house-01.jpg",
+  "kind": "HOUSE",
+  "title": "Baghdad street view",
+  "author": "ainudil",
+  "licence": "CC BY-SA 2.0",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://www.flickr.com/photos/10899234@N00/6525779031",
+  "changes": "resized to 1600 px and re-encoded; metadata removed",
+  "width": 1024,
+  "height": 683
+ },
+ {
+  "file": "house-02.jpg",
+  "kind": "HOUSE",
+  "title": "Baghdad street view",
+  "author": "ainudil",
+  "licence": "CC BY-SA 2.0",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://www.flickr.com/photos/10899234@N00/6525782265",
+  "changes": "resized to 1600 px and re-encoded; metadata removed",
+  "width": 1024,
+  "height": 683
+ },
+ {
+  "file": "apartment-03.jpg",
+  "kind": "APARTMENT",
+  "title": "Baghdad, street view",
+  "author": "ainudil",
+  "licence": "CC BY-SA 2.0",
+  "licence_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://www.flickr.com/photos/10899234@N00/6525806593",
+  "changes": "resized to 1600 px and re-encoded; metadata removed",
+  "width": 1024,
+  "height": 683
+ }
+]
