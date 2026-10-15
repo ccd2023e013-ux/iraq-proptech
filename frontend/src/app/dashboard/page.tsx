@@ -9,7 +9,7 @@ import { getRequestLocale } from "@/i18n/server";
 import { serverApiFetch } from "@/lib/api/server";
 import { requireUser } from "@/lib/auth/guard";
 import { hasPermission } from "@/lib/auth/routing";
-import { formatDateTime } from "@/lib/format";
+import { formatDateTime } from "@/features/crm/labels";
 import type { Conversation, CrmDashboard } from "@/types/crm";
 import type { PropertyCard } from "@/types/property";
 
