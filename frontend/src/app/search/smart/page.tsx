@@ -100,7 +100,11 @@ export default async function AssistantPage({
     if (filters.purpose === undefined) suggestions.push(s.suggest.sale, s.suggest.rent);
     if (!filters.verified_only) suggestions.push(s.suggest.verified);
     const places = Array.from(
-      new Set(items.map((c) => placeName(c.district ?? null, locale)).filter(Boolean)),
+      new Set(
+        items
+          .map((c) => placeName(c.district ?? null, locale))
+          .filter((name): name is string => !!name),
+      ),
     ).slice(0, 2);
     for (const place of places) suggestions.push(s.suggest.inPlace.replace("{place}", place));
     if (!wantsMarket) suggestions.push(s.suggest.market);
