@@ -24,7 +24,7 @@ export function PageHeader({
 }) {
   return (
     <header
-      className={`flex flex-col gap-5 md:flex-row md:items-end md:justify-between ${size === "lg" ? "pt-10 pb-6 md:pt-16 md:pb-10" : "pt-6 pb-4 md:pt-10 md:pb-6"}`}
+      className={`flex flex-col gap-5 border-b border-hairline md:flex-row md:items-end md:justify-between ${size === "lg" ? "pt-10 pb-6 md:pt-14 md:pb-8" : "pt-6 pb-4 md:pt-10 md:pb-6"}`}
     >
       <div className="flex min-w-0 flex-col gap-3">
         {context && <div className="meta">{context}</div>}

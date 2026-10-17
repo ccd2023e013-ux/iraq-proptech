@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { PropertyCard } from "@/features/properties/PropertyCard";
 import { getDictionary } from "@/i18n";
 import { getRequestLocale } from "@/i18n/server";
+import { distinctCovers } from "@/lib/photos";
 import { serverApiFetch } from "@/lib/api/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import type { PropertyCard as Card, ReferenceItem } from "@/types/property";
@@ -42,6 +43,7 @@ export default async function FavoritesPage() {
           {page.items.map((card) => (
             <li key={card.id}>
               <PropertyCard
+                cover={distinctCovers(page.items).get(card.id) ?? null}
                 card={card}
                 dict={dict}
                 locale={locale}

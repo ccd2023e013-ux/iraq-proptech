@@ -2,12 +2,12 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
-import { Icon, type IconName } from "@/components/ui/Icon";
-import { TrustBadge } from "@/components/ui/TrustBadge";
+import { Icon } from "@/components/ui/Icon";
 import { IntelligentSearch } from "@/features/home/IntelligentSearch";
 import { NearYou } from "@/features/home/NearYou";
 import { RiverMap } from "@/features/home/RiverMap";
 import { MapPreview } from "@/features/map/MapPreview";
+import { ListingRow } from "@/features/properties/ListingRow";
 import { PropertyCard } from "@/features/properties/PropertyCard";
 import { favoriteIds, runSearch } from "@/features/search/data";
 import { getDictionary } from "@/i18n";
@@ -16,22 +16,18 @@ import { serverApiFetch } from "@/lib/api/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { tagLabel } from "@/lib/map/bubbles";
 import { resolveMapConfig } from "@/lib/map/provider";
-import { stagger } from "@/lib/motion";
+import { distinctCovers } from "@/lib/photos";
 import type { MarketCity, MarketSummary } from "@/types/market";
 import type { ReferenceItem } from "@/types/property";
 
 // Rendered per request: listings, counts and locale come from the live API/cookies.
 export const dynamic = "force-dynamic";
 
-const NEXT_MODULES: {
-  key: "future" | "vision" | "studio" | "invest";
-  icon: IconName;
-  href: string | null;
-}[] = [
-  { key: "future", icon: "future", href: "/future" },
-  { key: "vision", icon: "insight", href: "/vision" },
-  { key: "studio", icon: "grid", href: "/studio" },
-  { key: "invest", icon: "market", href: null },
+const NEXT_MODULES: { key: "future" | "vision" | "studio" | "invest"; href: string | null }[] = [
+  { key: "future", href: "/future" },
+  { key: "vision", href: "/vision" },
+  { key: "studio", href: "/studio" },
+  { key: "invest", href: null },
 ];
 
 /** A section's opening: the title and its sentence at the start, actions at the end. */
@@ -47,12 +43,12 @@ function SectionHead({
   actions?: ReactNode;
 }) {
   return (
-    <div className="mb-8 flex flex-col gap-4 md:mb-10 md:flex-row md:items-end md:justify-between">
+    <div className="mb-8 flex flex-col gap-4 border-t border-hairline-strong pt-6 md:mb-10 md:flex-row md:items-end md:justify-between">
       <div className="flex max-w-2xl flex-col gap-2">
         <h2 id={id} className="display-md text-ink">
           {title}
         </h2>
-        {body && <p className="text-lg text-ink-2">{body}</p>}
+        {body && <p className="text-ink-2">{body}</p>}
       </div>
       {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
     </div>
@@ -98,17 +94,18 @@ export default async function HomePage() {
         ]
       : [],
   );
-  // Photographed listings lead; one large, four smaller.
-  // Varied photographs: demo covers come from a small licensed library drawn
-  // by property type, so one listing per type first keeps the same picture
-  // from appearing twice in one composition; the rest follow.
-  const withPhoto = all.filter((c) => c.cover_url);
-  const firstOfType = withPhoto.filter(
-    (c, i) => withPhoto.findIndex((o) => o.property_type_code === c.property_type_code) === i,
+  // The ledger beside the map: the newest listings, each photograph shown
+  // once in this view (lib/photos). The editorial section below leads with
+  // listings whose photograph is distinct.
+  const newest = all.slice(0, 5);
+  const ledgerPhotos = distinctCovers(newest);
+  const photographed = all.filter((c) => c.cover_url);
+  const firstOfType = photographed.filter(
+    (c, i) => photographed.findIndex((o) => o.property_type_code === c.property_type_code) === i,
   );
-  const photographed = [...firstOfType, ...withPhoto.filter((c) => !firstOfType.includes(c))];
-  const lead = photographed[0] ?? all[0];
-  const rest = (photographed.length > 1 ? photographed : all).filter((c) => c !== lead).slice(0, 4);
+  const lead = firstOfType[0] ?? all[0];
+  const rest = (firstOfType.length > 1 ? firstOfType : all).filter((c) => c !== lead).slice(0, 4);
+  const editorialPhotos = distinctCovers([lead, ...rest].filter(Boolean));
   const anyDemo = cities.some((c) => c.includes_demo);
 
   const segment = (type: string, purpose: string) =>
@@ -119,6 +116,23 @@ export default async function HomePage() {
   const flats = segment("APARTMENT", "RENT");
   const n = (v: number) => v.toLocaleString(locale === "ar" ? "ar-IQ-u-nu-latn" : "en-US");
   const counts = Object.fromEntries(cities.map((c) => [c.slug, c.listings]));
+  const total = "total" in basraListings ? basraListings.total : points.length;
+  // Purpose split only when every listing is in hand (no guessing from a page).
+  const split =
+    all.length === total
+      ? {
+          sale: all.filter((c) => c.purpose === "SALE").length,
+          rent: all.filter((c) => c.purpose === "RENT").length,
+        }
+      : null;
+  // Where the plate is centred: the middle of the listings' extent, which is
+  // where the map opens (it fits to the same points).
+  const centre = points.length
+    ? {
+        lat: (Math.min(...points.map((p) => p.lat)) + Math.max(...points.map((p) => p.lat))) / 2,
+        lon: (Math.min(...points.map((p) => p.lon)) + Math.max(...points.map((p) => p.lon))) / 2,
+      }
+    : null;
   const card = (c: (typeof all)[number], compact = false, feature = false) => (
     <PropertyCard
       card={c}
@@ -129,131 +143,120 @@ export default async function HomePage() {
       signedIn={!!me}
       compact={compact}
       feature={feature}
+      cover={editorialPhotos.get(c.id) ?? null}
     />
   );
+  const basraName = basra ? name(basra) : locale === "ar" ? "البصرة" : "Basra";
 
   return (
     <div className="flex flex-col">
-      {/* Hero: Basra itself — the live map of its listings with their asking
-          prices — under the headline and the search. On wide screens the map
-          fills the stage behind; on phones it follows the search. */}
-      <section aria-labelledby="hero-title" className="relative isolate overflow-hidden">
-        <div className="page relative z-10 flex flex-col justify-center gap-7 pt-10 pb-8 md:min-h-[min(82vh,840px)] md:py-20">
-          <div className="flex max-w-[48rem] flex-col gap-7">
-            <h1 id="hero-title" className="reveal display-xl text-ink">
-              {h.heroTitle}
-            </h1>
-            <p className="reveal lede max-w-[36rem]" style={stagger(1)}>
-              {h.heroSubtitle}
-            </p>
-            <div className="reveal max-w-[36rem]" style={stagger(2)}>
-              <IntelligentSearch
-                dict={dict}
-                cities={cities.map((c) => ({ value: c.city_id, label: name(c) }))}
-                types={types
-                  .filter((t) => ["RESIDENTIAL", "LAND", "COMMERCIAL"].includes(t.category))
-                  .map((t) => ({ value: t.code, label: name(t) }))}
-              />
-            </div>
-            {anyDemo && (
-              <p className="reveal caption flex max-w-[36rem] items-start gap-2" style={stagger(3)}>
-                <TrustBadge kind="demo">{dict.listing.demo}</TrustBadge>
-                {dict.footer.demoNotice}
-              </p>
+      {/* The plate. Wide screens: the console (place, count, query, newest)
+          docked at the reading start, the map filling the rest. Phones: the
+          place, then the map, then the console. One map in both layouts. */}
+      <section
+        aria-labelledby="hero-title"
+        className="grid border-b border-hairline [grid-template-areas:'place'_'map'_'console'] lg:h-[clamp(640px,calc(100svh-var(--header-h)),920px)] lg:grid-cols-[minmax(380px,30rem)_minmax(0,1fr)] lg:grid-rows-[auto_minmax(0,1fr)] lg:[grid-template-areas:'place_map'_'console_map']"
+      >
+        <div className="flex flex-col gap-3 bg-console px-[var(--gutter)] pt-8 pb-6 [grid-area:place] lg:border-e lg:border-hairline lg:px-8 lg:pt-10">
+          <h1 id="hero-title" className="place text-ink">
+            {basraName}
+          </h1>
+          <p className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+            <span className="font-display text-lg text-ink-2">{h.plateCountry}</span>
+            {centre && (
+              <span className="caption tabular" dir="ltr">
+                {h.plateCentre
+                  .replace("{lat}", centre.lat.toFixed(2))
+                  .replace("{lon}", centre.lon.toFixed(2))}
+              </span>
             )}
-          </div>
+          </p>
+          {total > 0 ? (
+            <p className="mt-3 text-lg text-ink">
+              <span className="kpi me-1.5 text-2xl">{n(total)}</span>
+              {h.plateCount.replace("{n}", "").trim()}
+              {split && (
+                <span className="text-ink-2">
+                  {locale === "ar" ? "، " : ": "}
+                  {h.plateSplit.replace("{sale}", n(split.sale)).replace("{rent}", n(split.rent))}
+                </span>
+              )}
+              .
+            </p>
+          ) : (
+            <p className="mt-3 text-ink-2">{h.plateEmpty}</p>
+          )}
         </div>
+
         {points.length > 0 && (
-          <div className="relative mx-4 h-[24rem] overflow-hidden rounded-[var(--radius-card)] md:absolute md:inset-0 md:-z-0 md:mx-0 md:h-auto md:rounded-none">
+          <div className="relative h-[46svh] min-h-[300px] border-y border-hairline [grid-area:map] lg:h-auto lg:min-h-0 lg:border-0">
             <MapPreview
               config={mapConfig}
               tags
               intro
-              startInset={0.46}
               className="h-full rounded-none shadow-none"
               label={h.heroMapCaption.replace("{n}", n(points.length))}
               points={points}
             />
-            {/* Legibility: the canvas washes in under the text column only. */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-y-0 start-0 hidden w-[min(68%,960px)] bg-gradient-to-r from-canvas from-40% via-canvas/85 to-transparent md:block rtl:bg-gradient-to-l"
-            />
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 bottom-0 hidden h-28 bg-gradient-to-t from-canvas to-transparent md:block"
-            />
-          </div>
-        )}
-        {points.length > 0 && (
-          <div className="page relative z-10 flex items-center justify-between gap-4 py-4 md:absolute md:inset-x-0 md:bottom-6 md:py-0 md:ps-[max(var(--gutter),50%)]">
-            <span className="meta flex items-center gap-2 text-ink-2">
-              <span aria-hidden className="inline-block size-2 rounded-full bg-spatial-fill" />
-              {h.heroMapCaption.replace("{n}", n(basra?.listings ?? points.length))}
-            </span>
-            <Link href="/map" className="btn btn-secondary btn-sm shrink-0">
+            <Link
+              href="/map"
+              className="btn btn-secondary btn-sm absolute end-3 top-3 z-10 shadow-[var(--shadow-float)] lg:end-4 lg:top-4"
+            >
               <Icon name="map" className="size-4 text-spatial" />
-              {h.openMap}
+              {h.plateFullMap}
             </Link>
           </div>
         )}
-      </section>
 
-      <div className="page flex flex-col gap-24 pt-16 md:gap-32 md:pt-24">
-        {/* Basra first: photographs lead — one large, four smaller. */}
-        {lead && basra && (
-          <section aria-labelledby="basra-heading">
-            <SectionHead
-              id="basra-heading"
-              title={h.basraTitle}
-              body={h.basraBody}
-              actions={
-                <>
-                  <Link href={`/properties?city_id=${basra.city_id}`} className="btn btn-primary">
-                    {h.basraAll}
-                  </Link>
-                  <Link href="/map" className="btn btn-secondary">
-                    {h.basraMap}
-                  </Link>
-                </>
-              }
-            />
-            <div className="grid grid-cols-1 gap-x-6 gap-y-10 lg:grid-cols-12">
-              <div className="lg:col-span-7">{card(lead, false, true)}</div>
-              <ul className="grid grid-cols-1 content-start gap-x-6 gap-y-8 sm:grid-cols-2 lg:col-span-5">
-                {rest.map((c) => (
-                  <li key={c.id}>{card(c, true)}</li>
+        <div className="flex min-h-0 flex-col gap-8 bg-console px-[var(--gutter)] pt-6 pb-8 [grid-area:console] lg:overflow-y-auto lg:border-e lg:border-hairline lg:px-8">
+          <IntelligentSearch
+            dict={dict}
+            defaultCity={basra?.city_id ?? ""}
+            cities={cities.map((c) => ({ value: c.city_id, label: name(c) }))}
+            types={types
+              .filter((t) => ["RESIDENTIAL", "LAND", "COMMERCIAL"].includes(t.category))
+              .map((t) => ({ value: t.code, label: name(t) }))}
+          />
+          {newest.length > 0 && (
+            <div className="flex flex-col">
+              <h2 className="label border-b border-hairline pb-2">{h.plateNewest}</h2>
+              <ul className="flex flex-col divide-y divide-hairline">
+                {newest.map((c) => (
+                  <li key={c.id}>
+                    <ListingRow
+                      card={c}
+                      dict={dict}
+                      locale={locale}
+                      photo={ledgerPhotos.get(c.id) ?? null}
+                      typeName={typeNames.get(c.property_type_code)}
+                    />
+                  </li>
                 ))}
               </ul>
             </div>
-          </section>
-        )}
+          )}
+          {anyDemo && <p className="caption">{dict.footer.demoNotice}</p>}
+        </div>
+      </section>
 
-        {/* Market reading: a band of measured figures, with their provenance. */}
+      <div className="page flex flex-col gap-24 pt-20 md:gap-28 md:pt-24">
+        {/* Asking prices: measurements with their provenance, not a card. */}
         {basraMarket && basraMarket.listings > 0 && (
-          <section
-            aria-labelledby="market-heading"
-            className="grid gap-10 rounded-[var(--radius-card)] bg-surface p-8 shadow-[var(--edge),0_0_0_1px_var(--hairline)] md:p-12 lg:grid-cols-12"
-          >
-            <div className="flex flex-col gap-4 lg:col-span-5">
-              <h2 id="market-heading" className="display-md text-ink">
-                {h.marketTitle}
-              </h2>
-              <p className="text-lg text-ink-2">{h.marketBody}</p>
-              <div className="flex flex-wrap gap-2">
-                <TrustBadge kind="observed">{dict.market.kinds.OBSERVED}</TrustBadge>
-                {basraMarket.includes_demo && (
-                  <TrustBadge kind="demo">{dict.listing.demo}</TrustBadge>
-                )}
-              </div>
-              <Link
-                href={basra ? `/market?city_id=${basra.city_id}` : "/market"}
-                className="link mt-2 w-fit font-medium"
-              >
-                {dict.market.homeLink}
-              </Link>
-            </div>
-            <dl className="grid gap-10 sm:grid-cols-2 lg:col-span-7">
+          <section aria-labelledby="market-heading">
+            <SectionHead
+              id="market-heading"
+              title={h.pricesTitle}
+              body={h.pricesBody}
+              actions={
+                <Link
+                  href={basra ? `/market?city_id=${basra.city_id}` : "/market"}
+                  className="btn btn-secondary"
+                >
+                  {h.pricesMore}
+                </Link>
+              }
+            />
+            <dl className="grid gap-px overflow-hidden bg-hairline sm:grid-cols-3">
               {[
                 {
                   label: h.housesForSale,
@@ -268,16 +271,19 @@ export default async function HomePage() {
                   count: flats?.listings,
                 },
               ].map((stat) => (
-                <div key={stat.label} className="flex flex-col gap-3">
+                <div
+                  key={stat.label}
+                  className="flex flex-col gap-3 bg-canvas py-6 sm:px-8 sm:first:ps-0"
+                >
                   <dt className="flex flex-col">
                     <span className="font-medium text-ink">{stat.label}</span>
                     <span className="meta">{stat.sub}</span>
                   </dt>
-                  <dd className="kpi text-4xl whitespace-nowrap text-ink xl:text-[2.75rem]">
+                  <dd className="kpi text-4xl whitespace-nowrap text-ink xl:text-5xl">
                     {stat.value && Number.isFinite(Number(stat.value)) ? (
                       <AnimatedNumber value={Number(stat.value)} as="price-iqd" locale={locale} />
                     ) : (
-                      <span className="text-2xl font-normal tracking-normal text-ink-3">
+                      <span className="font-sans text-xl font-normal tracking-normal text-ink-3">
                         {h.noData}
                       </span>
                     )}
@@ -287,42 +293,76 @@ export default async function HomePage() {
                   ) : null}
                 </div>
               ))}
+              <div className="flex flex-col gap-3 bg-canvas py-6 sm:px-8">
+                <dt className="flex flex-col">
+                  <span className="font-medium text-ink">{dict.market.headline.listings}</span>
+                  <span className="meta">{basraName}</span>
+                </dt>
+                <dd className="kpi text-4xl text-ink xl:text-5xl">{n(basraMarket.listings)}</dd>
+                {basraMarket.includes_demo && (
+                  <dd className="meta font-medium text-gold-700">{dict.listing.demo}</dd>
+                )}
+              </div>
             </dl>
           </section>
         )}
 
-        {/* The country by its rivers, and the cities we cover. */}
-        {cities.length > 0 && (
-          <section aria-labelledby="explore-heading" className="grid gap-10 lg:grid-cols-12">
-            <div className="lg:col-span-5">
-              <h2 id="explore-heading" className="display-md mb-6 text-ink">
-                {h.exploreTitle}
-              </h2>
-              <RiverMap locale={locale} counts={counts} caption={h.mapCaption} animate={false} />
+        {/* More of Basra: photographs lead, each shown once. */}
+        {lead && basra && (
+          <section aria-labelledby="basra-heading">
+            <SectionHead
+              id="basra-heading"
+              title={h.basraTitle}
+              body={h.basraBody}
+              actions={
+                <Link href={`/properties?city_id=${basra.city_id}`} className="btn btn-primary">
+                  {h.basraAll}
+                </Link>
+              }
+            />
+            <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-12">
+              <div className="lg:col-span-7">{card(lead, false, true)}</div>
+              <ul className="grid grid-cols-1 content-start gap-x-6 gap-y-8 sm:grid-cols-2 lg:col-span-5">
+                {rest.map((c) => (
+                  <li key={c.id}>{card(c, true)}</li>
+                ))}
+              </ul>
             </div>
-            <ul className="flex flex-col self-end lg:col-span-7">
-              {cities.slice(0, 8).map((c) => (
-                <li key={c.city_id} className="border-b border-hairline first:border-t">
-                  <Link
-                    href={`/properties?city_id=${c.city_id}`}
-                    className="group flex items-center justify-between gap-4 py-5"
-                  >
-                    <span className="title text-ink transition-colors group-hover:text-accent">
-                      {name(c)}
-                    </span>
-                    <span className="flex items-center gap-4">
-                      <span className="meta tabular">
-                        {n(c.listings)} {h.listings}
+          </section>
+        )}
+
+        {/* The country by its rivers, and the cities on MAKAN. */}
+        {cities.length > 0 && (
+          <section aria-labelledby="explore-heading">
+            <SectionHead id="explore-heading" title={h.citiesTitle} body={h.citiesBody} />
+            <div className="grid gap-10 lg:grid-cols-12">
+              <div className="lg:col-span-5">
+                <RiverMap locale={locale} counts={counts} caption={h.mapCaption} animate={false} />
+              </div>
+              <ul className="flex flex-col self-start lg:col-span-7">
+                {cities.slice(0, 8).map((c) => (
+                  <li key={c.city_id} className="border-b border-hairline first:border-t">
+                    <Link
+                      href={`/properties?city_id=${c.city_id}`}
+                      className="group flex items-center justify-between gap-4 py-4"
+                    >
+                      <span className="title text-ink transition-colors group-hover:text-accent">
+                        {name(c)}
                       </span>
-                      <Icon
-                        name="chevron"
-                        className="size-4 text-ink-3 transition-transform duration-[var(--duration-base)] group-hover:translate-x-0.5 group-hover:text-ink rtl:group-hover:-translate-x-0.5"
-                      />
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+                      <span className="flex items-center gap-4">
+                        <span className="meta tabular">
+                          {n(c.listings)} {h.listings}
+                        </span>
+                        <Icon
+                          name="chevron"
+                          className="size-4 text-ink-3 transition-transform duration-[var(--duration-base)] group-hover:translate-x-0.5 group-hover:text-ink rtl:rotate-180 rtl:group-hover:-translate-x-0.5"
+                        />
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </section>
         )}
 
@@ -331,25 +371,17 @@ export default async function HomePage() {
         {/* In development: honest previews, no fake data. */}
         <section aria-labelledby="next-heading">
           <SectionHead id="next-heading" title={h.nextTitle} body={h.nextBody} />
-          <ul className="grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="grid gap-px overflow-hidden bg-hairline sm:grid-cols-2 lg:grid-cols-4">
             {NEXT_MODULES.map((m) => (
-              <li key={m.key} className="flex flex-col gap-3">
-                <span
-                  aria-hidden
-                  className="grid size-11 place-items-center rounded-full bg-spatial-tint text-spatial"
-                >
-                  <Icon name={m.icon} className="size-5" />
-                </span>
+              <li key={m.key} className="flex flex-col gap-2 bg-canvas py-5 sm:pe-6">
                 <p className="title text-ink">{h[`${m.key}Title` as const]}</p>
-                <p className="text-ink-2">{h[`${m.key}Body` as const]}</p>
+                <p className="text-[15px] text-ink-2">{h[`${m.key}Body` as const]}</p>
                 {m.href ? (
-                  <Link href={m.href} className="link mt-1 w-fit font-medium">
+                  <Link href={m.href} className="link mt-1 w-fit text-sm font-medium">
                     {h.explore}
                   </Link>
                 ) : (
-                  <span className="mt-1 w-fit rounded-[var(--radius-tag)] bg-fill px-2.5 py-1 text-xs font-medium text-ink-3">
-                    {h.inDevelopment}
-                  </span>
+                  <span className="caption mt-1">{h.inDevelopment}</span>
                 )}
               </li>
             ))}
@@ -357,14 +389,14 @@ export default async function HomePage() {
         </section>
 
         {/* List a property: one closing action. */}
-        <section className="flex flex-col items-start justify-between gap-6 rounded-[var(--radius-card)] bg-accent-tint p-8 md:flex-row md:items-center md:p-12">
+        <section className="flex flex-col items-start justify-between gap-6 border-t border-hairline-strong pt-8 pb-4 md:flex-row md:items-center">
           <div className="flex flex-col gap-2">
             <h2 className="display-md text-ink">{h.listTitle}</h2>
-            <p className="text-lg text-ink-2">{h.listBody}</p>
+            <p className="text-ink-2">{h.listBody}</p>
           </div>
           <Link
             href={me ? "/dashboard/properties/new" : "/register"}
-            className="btn btn-primary btn-lg shrink-0"
+            className="btn btn-secondary btn-lg shrink-0"
           >
             <Icon name="plus" className="size-4" strokeWidth={2} />
             {h.listButton}

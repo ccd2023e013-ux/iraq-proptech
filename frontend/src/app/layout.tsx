@@ -14,10 +14,13 @@ import { getCurrentUser } from "@/lib/auth/session";
 
 // Fonts are self-hosted from npm (@fontsource): builds work offline and no
 // third-party font CDN is contacted at build or run time.
-// MAKAN type: Readex Pro for Arabic; Inter (with optical sizes: the display
-// cut at headline sizes) for English and numerals.
-import "@fontsource-variable/inter/opsz.css";
-import "@fontsource-variable/readex-pro/index.css";
+// MAKAN type (docs/ART-DIRECTION.md): Alexandria for places, titles and
+// figures; IBM Plex Sans Arabic for text and controls. Both draw Arabic and Latin.
+import "@fontsource-variable/alexandria/index.css";
+import "@fontsource/ibm-plex-sans-arabic/400.css";
+import "@fontsource/ibm-plex-sans-arabic/500.css";
+import "@fontsource/ibm-plex-sans-arabic/600.css";
+import "@fontsource/ibm-plex-sans-arabic/700.css";
 import "./globals.css";
 
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -32,7 +35,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f4f5f7" },
+    { media: "(prefers-color-scheme: light)", color: "#f1f2ef" },
     { media: "(prefers-color-scheme: dark)", color: "#0b0f17" },
   ],
 };

@@ -11,6 +11,7 @@ import type { PropertyCard as Card } from "@/types/property";
 import { CompareToggle } from "@/features/compare/CompareControls";
 
 import { FavoriteButton } from "./FavoriteButton";
+import { PlacePlate } from "./PlacePlate";
 
 interface Fact {
   icon: "bed" | "bath" | "area";
@@ -35,6 +36,7 @@ export function PropertyCard({
   signedIn,
   compact = false,
   feature = false,
+  cover,
 }: {
   card: Card;
   dict: Dictionary;
@@ -46,7 +48,11 @@ export function PropertyCard({
   compact?: boolean;
   /** Lead tile in an editorial layout: wider photograph on large screens. */
   feature?: boolean;
+  /** The photograph to show in this view (see lib/photos `distinctCovers`);
+   * null shows a place plate. Defaults to the listing's cover. */
+  cover?: string | null;
 }) {
+  const photo = cover === undefined ? card.cover_url : cover;
   const title = locale === "en" && card.title_en ? card.title_en : card.title_ar;
   const where = [
     placeName(card.neighborhood ?? card.district, locale),
@@ -62,50 +68,41 @@ export function PropertyCard({
   const area = formatArea(card.area_m2, locale);
   if (area) facts.push({ icon: "area", text: area });
 
-  // The photograph is the figure; everything else is type on the page.
-  // Only the save control floats on the image, and DEMO sits on the image's
-  // bottom edge (where trust labels always live).
+  // The photograph (or the place plate) is the figure; everything else is
+  // type. One mark on the image at most: a demo photo says it is
+  // representative. Promoted and demo-without-photo are said in the text.
   return (
-    <article className="group relative flex flex-col gap-4">
+    <article className="group relative flex flex-col gap-3.5">
       <Link
         href={`/properties/${card.id}`}
-        className="absolute inset-0 z-10 rounded-[var(--radius-card)]"
+        className="absolute inset-0 z-10 rounded-[var(--radius-media)]"
         aria-label={title}
       />
       <div
-        className={`relative ${feature ? "aspect-[4/3] lg:aspect-[16/9]" : "aspect-[4/3]"} overflow-hidden rounded-[var(--radius-media)] bg-fill shadow-[inset_0_0_0_1px_var(--hairline)]`}
+        className={`relative ${feature ? "aspect-[4/3] lg:aspect-[16/10]" : "aspect-[4/3]"} overflow-hidden rounded-[var(--radius-media)] bg-fill`}
       >
-        {card.cover_url ? (
+        {photo ? (
           <SafeImage
-            src={card.cover_url}
+            src={photo}
             alt=""
             fallbackLabel={dict.listing.noImage}
-            className="photo size-full object-cover transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:scale-[1.025]"
+            className="photo size-full object-cover transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:scale-[1.02]"
           />
         ) : (
-          <div className="flex size-full flex-col items-center justify-center gap-2 text-sm text-ink-3">
-            <Icon name="home" className="size-6 opacity-70" />
-            {dict.listing.noImage}
-          </div>
+          <PlacePlate
+            type={card.property_type_code}
+            place={placeName(card.neighborhood ?? card.district, locale) || typeName}
+            size={feature ? "lg" : compact ? "sm" : "md"}
+          />
         )}
-        {(card.is_demo || card.is_featured) && (
-          <div className="absolute start-0 bottom-0 flex">
-            {card.is_demo && (
-              <span className="flex items-center gap-1.5 rounded-se-[var(--radius-tag)] bg-gold-500 px-2.5 py-1 text-xs font-semibold text-[#1d1405]">
-                {dict.listing.demo}
-                {card.cover_url && !compact && (
-                  <span className="font-medium opacity-80">{dict.listing.representativePhoto}</span>
-                )}
-              </span>
-            )}
-            {card.is_featured && (
-              <span className="bg-canvas/80 px-2.5 py-1 text-xs font-medium text-ink backdrop-blur-md">
-                {dict.listing.promoted}
-              </span>
-            )}
-          </div>
+        {card.is_demo && photo && (
+          <span className="absolute start-2 bottom-2 rounded-[var(--radius-tag)] bg-[#0b0f17]/78 px-2 py-0.5 text-xs font-medium text-[#ede7dc] backdrop-blur-sm">
+            {compact
+              ? dict.listing.demo
+              : `${dict.listing.demo}${locale === "ar" ? "، " : ", "}${dict.listing.representativePhoto.toLowerCase()}`}
+          </span>
         )}
-        <div className="absolute end-2.5 top-2.5 z-20">
+        <div className="absolute end-2 top-2 z-20">
           <FavoriteButton
             propertyId={card.id}
             initial={!!favorite}
@@ -118,9 +115,11 @@ export function PropertyCard({
           />
         </div>
       </div>
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-1">
         <div className="flex items-baseline justify-between gap-3">
-          <p className={`kpi text-ink ${compact ? "text-xl" : "text-[1.625rem]"}`}>
+          <p
+            className={`kpi text-ink ${compact ? "text-xl" : feature ? "text-[2rem]" : "text-[1.5rem]"}`}
+          >
             {priceLabel(card, dict, locale)}
           </p>
           <span className="meta shrink-0">{dict.listing.purposes[card.purpose]}</span>
@@ -130,18 +129,21 @@ export function PropertyCard({
         >
           {title}
         </h3>
-        {(where || typeName) && (
-          <p className="meta flex min-w-0 items-center gap-1.5">
-            <Icon name="pin" className="size-4 shrink-0 text-spatial" strokeWidth={1.7} />
-            <span className="truncate">{where || typeName}</span>
-          </p>
-        )}
+        <p className="meta flex min-w-0 items-center gap-2">
+          <span className="truncate">{where || typeName}</span>
+          {card.is_demo && !photo && (
+            <span className="shrink-0 font-medium text-gold-700">{dict.listing.demo}</span>
+          )}
+          {card.is_featured && (
+            <span className="shrink-0 font-medium text-ink-2">{dict.listing.promoted}</span>
+          )}
+        </p>
         {!compact && (facts.length > 0 || card.verified) && (
-          <ul className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-2 tabular">
+          <ul className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-2 tabular">
             {typeName && <li>{typeName}</li>}
             {facts.map((f) => (
               <li key={f.icon} className="flex items-center gap-1.5">
-                <Icon name={f.icon} className="size-4 text-ink-3" strokeWidth={1.7} />
+                <Icon name={f.icon} className="size-4 text-ink-3" strokeWidth={1.6} />
                 {f.text}
                 {f.label && <span className="sr-only">{f.label}</span>}
               </li>

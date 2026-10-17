@@ -27,7 +27,6 @@ import { formatArea, formatDate, formatPrice, placeName } from "@/lib/format";
 import { formatBbox } from "@/lib/map/geo";
 import { bboxAround } from "@/lib/map/places";
 import { resolveMapConfig } from "@/lib/map/provider";
-import { stagger } from "@/lib/motion";
 import type { MarketReport } from "@/types/market";
 import type { Property, ReferenceItem } from "@/types/property";
 
@@ -201,8 +200,9 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
     <div data-vt-ready={property.id} className="flex flex-col pb-28 md:pb-12">
       {property.status === "APPROVED" && <ViewBeacon propertyId={property.id} />}
 
-      {/* Title band: where we are, what it is, what it costs. */}
-      <div className="page flex flex-col gap-6 pt-6 pb-6 md:pt-10">
+      {/* The plate: the place set large, then what it is and what it costs.
+          Photography follows at full width; the measurements under it. */}
+      <div className="page flex flex-col gap-6 pt-6 pb-8 md:pt-10">
         {property.status !== "APPROVED" && (
           <Alert tone="info">{dict.listing.statuses[property.status]}</Alert>
         )}
@@ -211,29 +211,33 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             <Icon name="map" className="size-4 text-spatial" />
             {p.backToMap}
           </Link>
-          <Icon name="chevron" className="size-3.5 opacity-60" />
+          <Icon name="chevron" className="size-3.5 opacity-60 rtl:rotate-180" />
           <Link href={`/properties?city_id=${property.city.id}`} className="hover:text-ink">
             {placeName(property.city, locale)}
           </Link>
           {property.district && (
             <>
-              <Icon name="chevron" className="size-3.5 opacity-60" />
+              <Icon name="chevron" className="size-3.5 opacity-60 rtl:rotate-180" />
               <span>{placeName(property.district, locale)}</span>
             </>
           )}
         </nav>
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
-          <div className="reveal flex min-w-0 flex-col gap-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-[var(--radius-tag)] bg-fill px-2.5 py-1 text-[13px] font-medium text-ink">
+        <div className="grid gap-8 lg:grid-cols-12 lg:items-end lg:gap-12">
+          <div className="flex min-w-0 flex-col gap-4 lg:col-span-8">
+            <p className="place text-ink" aria-hidden>
+              {placeName(property.neighborhood ?? property.district, locale) ||
+                placeName(property.city, locale)}
+            </p>
+            <h1 className="display-md max-w-[30ch] text-ink-2">{title}</h1>
+            <p className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[15px] text-ink-2">
+              <span className="font-medium text-ink">
                 {dict.listing.purposes[property.purpose]}
               </span>
-              <span className="rounded-[var(--radius-tag)] bg-fill px-2.5 py-1 text-[13px] text-ink-2">
-                {label(types, property.property_type_code)}
-              </span>
+              <span>{label(types, property.property_type_code)}</span>
+              <span>{where}</span>
               {property.verified && (
-                <span className="inline-flex items-center gap-1 rounded-[var(--radius-tag)] bg-accent-tint px-2.5 py-1 text-[13px] font-medium text-accent">
-                  <Icon name="check" className="size-3.5" strokeWidth={2.2} />
+                <span className="inline-flex items-center gap-1 font-medium text-accent">
+                  <Icon name="check" className="size-4" strokeWidth={2.2} />
                   {dict.listing.verified}
                 </span>
               )}
@@ -241,28 +245,19 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
               <span className="caption tabular" dir="ltr">
                 {property.reference_code}
               </span>
-            </div>
-            <h1 className="display-lg max-w-[22ch] text-ink">{title}</h1>
-            <p className="flex items-center gap-1.5 text-[17px] text-ink-2">
-              <Icon name="pin" className="size-[18px] shrink-0 text-spatial" />
-              {where}
             </p>
           </div>
-          <div
-            className="reveal flex shrink-0 flex-col gap-1 lg:items-end lg:text-end"
-            style={stagger(1)}
-          >
-            <p className="kpi text-[2.25rem] leading-none text-ink md:text-[2.75rem]">{price}</p>
+          <div className="flex flex-col gap-1.5 border-t border-hairline-strong pt-4 lg:col-span-4 lg:border-t-0 lg:border-s lg:ps-8 lg:pt-0">
             <p className="meta">
               {property.negotiable
                 ? dict.listing.negotiable
                 : dict.listing.purposes[property.purpose]}
             </p>
+            <p className="kpi text-[2.5rem] text-ink md:text-[3rem]">{price}</p>
             {conversion?.converted && conversion.rate && (
               <p className="caption tabular">
-                ≈ {formatPrice(conversion.converted, conversion.to, locale)} ·{" "}
-                {dict.money.indicative} ({conversion.rate.source},{" "}
-                {formatDate(conversion.rate.effective_at, locale)})
+                ≈ {formatPrice(conversion.converted, conversion.to, locale)} {dict.money.indicative}{" "}
+                ({conversion.rate.source}, {formatDate(conversion.rate.effective_at, locale)})
               </p>
             )}
           </div>
@@ -270,7 +265,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
       </div>
 
       {/* The property itself: photography first. */}
-      <div className="page reveal" style={stagger(2)}>
+      <div className="page">
         <Gallery
           media={property.media}
           title={title}
@@ -280,18 +275,18 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
           transitionName="property-photo"
           stamp={
             property.is_demo && representative
-              ? `${dict.listing.demo} · ${v.photosRepresentative}`
+              ? `${dict.listing.demo}${locale === "ar" ? "، " : ", "}${v.photosRepresentative.toLowerCase()}`
               : undefined
           }
         />
       </div>
 
-      {/* Key facts: the numbers people scan first, as one band. */}
+      {/* Measurements: the numbers people scan first, ruled, not boxed. */}
       {bandFacts.length > 0 && (
         <div className="page">
           <dl
             aria-label={p.keyFacts}
-            className={`mt-6 grid overflow-hidden rounded-[var(--radius-card)] bg-hairline [gap:1px] ${
+            className={`mt-8 grid border-y border-hairline-strong ${
               bandFacts.length < 3
                 ? bandFacts.length === 1
                   ? "grid-cols-1"
@@ -301,16 +296,13 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                   : "grid-cols-2 sm:grid-cols-4"
             }`}
           >
-            {bandFacts.map(([k, val, icon]) => (
+            {bandFacts.map(([k, val]) => (
               <div
                 key={k}
-                className="flex items-center gap-4 bg-surface px-5 py-5 max-sm:flex-col max-sm:items-start max-sm:gap-2 max-sm:px-4"
+                className="flex flex-col gap-1 border-hairline py-5 not-first:border-s ps-4 first:ps-0 max-sm:[&:nth-child(3)]:border-s-0 max-sm:[&:nth-child(3)]:ps-0 max-sm:[&:nth-child(n+3)]:border-t"
               >
-                <Icon name={icon} className="size-6 shrink-0 text-ink-3" strokeWidth={1.6} />
-                <div className="min-w-0">
-                  <dd className="kpi truncate text-2xl text-ink">{val}</dd>
-                  <dt className="meta">{k}</dt>
-                </div>
+                <dt className="meta">{k}</dt>
+                <dd className="kpi truncate text-[1.75rem] text-ink md:text-[2rem]">{val}</dd>
               </div>
             ))}
           </dl>
@@ -321,7 +313,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
         <div className="flex min-w-0 flex-col">
           {/* Provenance: verified vs declared vs demo, stated once, plainly. */}
           <Section title={v.title} lede={v.lede}>
-            <dl className="grid gap-px overflow-hidden rounded-[var(--radius-card)] bg-hairline sm:grid-cols-2">
+            <dl className="grid gap-px overflow-hidden border-y border-hairline bg-hairline sm:grid-cols-2">
               <Provenance
                 label={v.listing}
                 value={property.verified ? v.listingVerified : v.listingDeclared}
@@ -364,7 +356,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                 tone={passed.length ? "verified" : "declared"}
               />
               {property.is_demo && (
-                <div className="flex items-start gap-3 bg-gold-100 px-5 py-4 sm:col-span-2">
+                <div className="flex items-start gap-3 bg-canvas py-4 sm:col-span-2">
                   <Icon name="info" className="mt-0.5 size-5 shrink-0 text-gold-700" />
                   <div>
                     <dt className="font-medium text-ink">{v.demo}</dt>
@@ -392,9 +384,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
               <ul className="grid grid-cols-2 gap-x-6 gap-y-3 text-[15px] sm:grid-cols-3">
                 {property.amenities.map((code) => (
                   <li key={code} className="flex items-center gap-2.5 text-ink">
-                    <span className="grid size-6 shrink-0 place-items-center rounded-full bg-accent-tint text-accent">
-                      <Icon name="check" className="size-3.5" strokeWidth={2.4} />
-                    </span>
+                    <Icon name="check" className="size-4 shrink-0 text-accent" strokeWidth={2.2} />
                     {label(amenities, code)}
                   </li>
                 ))}
@@ -406,7 +396,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             {property.ownership_document === "UNKNOWN" ? (
               <p className="text-ink-2">{p.documentNone}</p>
             ) : (
-              <div className="flex items-start gap-4 rounded-[var(--radius-card)] bg-surface p-5 shadow-[inset_0_0_0_1px_var(--hairline)]">
+              <div className="flex items-start gap-4 border-y border-hairline py-5">
                 <span className="grid size-11 shrink-0 place-items-center rounded-[var(--radius-control)] bg-fill text-ink-2">
                   <Icon name="document" className="size-5" />
                 </span>
@@ -529,9 +519,9 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
 
         {/* Contact: always at hand on wide screens; a bar on phones. */}
         <aside className="flex flex-col gap-4 pt-8 lg:sticky lg:top-[calc(var(--header-h)+1.5rem)] lg:self-start">
-          <div id="contact" className="surface-focus scroll-mt-24 rounded-[var(--radius-card)] p-6">
+          <div id="contact" className="panel scroll-mt-24 bg-console p-6">
             <p className="meta">{p.by}</p>
-            <p className="mt-1 flex items-center gap-1.5 text-lg font-semibold text-ink">
+            <p className="title mt-1 flex items-center gap-1.5 text-ink">
               {property.lister.name}
               {property.lister.kind === "agency" && property.lister.agency_verified && (
                 <Icon name="check" className="size-4 text-accent" strokeWidth={2.2} />
@@ -631,7 +621,7 @@ function Provenance({ label, value, tone }: { label: string; value: string; tone
     estimate: "bg-spatial-fill",
   };
   return (
-    <div className="flex items-start gap-3 bg-surface px-5 py-4">
+    <div className="flex items-start gap-3 bg-canvas py-4 pe-5">
       <span aria-hidden className={`mt-2 size-2 shrink-0 rounded-full ${dot[tone]}`} />
       <div className="min-w-0">
         <dt className="meta">{label}</dt>

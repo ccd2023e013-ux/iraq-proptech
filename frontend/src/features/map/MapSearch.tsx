@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/Button";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { TrustBadge } from "@/components/ui/TrustBadge";
+import { PlacePlate } from "@/features/properties/PlacePlate";
 import { priceLabel } from "@/features/properties/PropertyCard";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
@@ -33,6 +34,7 @@ import {
   polygonBbox,
 } from "@/lib/map/geo";
 import { PLACE_GROUPS, bboxAround, placesAllowed } from "@/lib/map/places";
+import { distinctCovers } from "@/lib/photos";
 import { canTransition, isPlainClick, navigateWithTransition } from "@/lib/viewTransition";
 import { type MapConfig, parseBbox } from "@/lib/map/provider";
 import { type RawParams, first, toApiQuery, withParam } from "@/lib/search";
@@ -541,6 +543,9 @@ export function MapSearch({
     </div>
   );
 
+  // Each photograph once in the list (lib/photos); repeats become place plates.
+  const rowPhotos = distinctCovers(items);
+
   // Map-first stage: the map fills the space.
   //   start side  — results: a docked rail (wide screens) / a bottom sheet (phones)
   //   end side    — one instrument column (layers, draw, near me, 3D)
@@ -609,7 +614,7 @@ export function MapSearch({
         data-map-rail
         data-sheet={sheet}
         style={{ "--sheet-y": hideSheet ? "110%" : sheetY } as CSSProperties}
-        className="absolute z-[var(--z-float)] flex flex-col overflow-hidden transition-transform duration-[var(--duration-spatial)] ease-[var(--ease-standard)] max-md:inset-x-0 max-md:bottom-0 max-md:h-[90%] max-md:translate-y-[var(--sheet-y)] max-md:rounded-t-[var(--radius-sheet)] max-md:bg-raised/95 max-md:shadow-[0_-12px_40px_-16px_rgb(0_0_0/0.6)] max-md:backdrop-blur-xl md:start-0 md:top-[var(--map-top)] md:bottom-0 md:w-[var(--rail)] md:border-e md:border-hairline md:bg-canvas/95 md:backdrop-blur-xl"
+        className="absolute z-[var(--z-float)] flex flex-col overflow-hidden transition-transform duration-[var(--duration-spatial)] ease-[var(--ease-standard)] max-md:inset-x-0 max-md:bottom-0 max-md:h-[90%] max-md:translate-y-[var(--sheet-y)] max-md:rounded-t-[var(--radius-sheet)] max-md:bg-console max-md:shadow-[0_-12px_40px_-16px_rgb(0_0_0/0.55)] md:start-0 md:top-[var(--map-top)] md:bottom-0 md:w-[var(--rail)] md:border-e md:border-hairline md:bg-console"
       >
         {/* A thin progress line while results update; the map stays usable. */}
         <div
@@ -639,7 +644,7 @@ export function MapSearch({
           <div className="flex items-end justify-between gap-3">
             <div className="flex min-w-0 items-baseline gap-2">
               <h1 className="sr-only">{m.title}</h1>
-              <p className="kpi text-[1.75rem] leading-none text-ink" data-testid="map-total">
+              <p className="kpi text-[2rem] leading-none text-ink" data-testid="map-total">
                 {total}
                 <span className="sr-only"> {m.inView}</span>
               </p>
@@ -777,23 +782,16 @@ export function MapSearch({
                       aria-current={selectedId === card.id ? "true" : undefined}
                       className="flex min-w-0 flex-1 gap-3.5 p-2"
                     >
-                      <span className="relative aspect-[4/3] w-[104px] shrink-0 overflow-hidden rounded-[10px] bg-fill">
-                        {card.cover_url ? (
+                      <span className="relative aspect-[4/3] w-[104px] shrink-0 overflow-hidden rounded-[var(--radius-control)] bg-fill">
+                        {rowPhotos.get(card.id) ? (
                           <SafeImage
-                            src={card.cover_url}
+                            src={rowPhotos.get(card.id)!}
                             alt=""
                             fallbackLabel="—"
                             className="photo size-full object-cover transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:scale-[1.04]"
                           />
                         ) : (
-                          <span className="grid size-full place-items-center text-ink-3">
-                            <Icon name="home" className="size-5 opacity-70" />
-                          </span>
-                        )}
-                        {card.is_demo && (
-                          <span className="absolute start-0 bottom-0 rounded-se-[6px] bg-gold-500 px-1.5 py-px text-[10px] font-semibold text-[#1d1405]">
-                            {dict.listing.demo}
-                          </span>
+                          <PlacePlate type={card.property_type_code} size="sm" />
                         )}
                       </span>
                       <span className="flex min-w-0 flex-col justify-center gap-1">
@@ -809,12 +807,7 @@ export function MapSearch({
                           {title}
                         </span>
                         <span className="caption flex min-w-0 items-center gap-3 text-ink-3">
-                          {where && (
-                            <span className="flex min-w-0 items-center gap-1">
-                              <Icon name="pin" className="size-3.5 shrink-0 text-spatial" />
-                              <span className="truncate">{where}</span>
-                            </span>
-                          )}
+                          {where && <span className="min-w-0 truncate">{where}</span>}
                           {card.bedrooms != null && (
                             <span className="flex shrink-0 items-center gap-1 tabular">
                               <Icon name="bed" className="size-3.5" />
@@ -822,6 +815,11 @@ export function MapSearch({
                             </span>
                           )}
                           {area && <span className="shrink-0 tabular">{area}</span>}
+                          {card.is_demo && (
+                            <span className="shrink-0 font-medium text-gold-700">
+                              {dict.listing.demo}
+                            </span>
+                          )}
                         </span>
                       </span>
                     </a>
@@ -1265,11 +1263,12 @@ function SelectionSheet({
             </span>
           )}
           {demo && (
-            <span className="absolute start-0 bottom-0 flex items-center gap-1.5 rounded-se-[var(--radius-tag)] bg-gold-500 px-2 py-0.5 text-[11px] font-semibold text-[#1d1405]">
+            <span className="absolute start-1.5 bottom-1.5 rounded-[var(--radius-tag)] bg-[#0b0f17]/78 px-1.5 py-0.5 text-[11px] font-medium text-[#ede7dc] backdrop-blur-sm lg:start-2 lg:bottom-2 lg:px-2 lg:text-xs">
               {dict.listing.demo}
               {cover && (
-                <span className="hidden font-medium opacity-80 lg:inline">
-                  {dict.listing.representativePhoto}
+                <span className="hidden lg:inline">
+                  {locale === "ar" ? "، " : ", "}
+                  {dict.listing.representativePhoto.toLowerCase()}
                 </span>
               )}
             </span>
@@ -1280,12 +1279,7 @@ function SelectionSheet({
           <p className="line-clamp-2 text-sm leading-snug text-ink-2 lg:text-[15px] lg:text-ink">
             {title}
           </p>
-          {where && (
-            <p className="meta flex min-w-0 items-center gap-1.5">
-              <Icon name="pin" className="size-4 shrink-0 text-spatial" strokeWidth={1.7} />
-              <span className="truncate">{where}</span>
-            </p>
-          )}
+          {where && <p className="meta truncate">{where}</p>}
           {facts.length > 0 && (
             <ul className="hidden flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-2 tabular lg:mt-1 lg:flex">
               {facts.map((f) => (
@@ -1314,7 +1308,6 @@ function SelectionSheet({
             className="btn btn-primary btn-sm mt-auto w-fit lg:mt-3 lg:h-11 lg:w-full"
           >
             {dict.map.openListing}
-            <Icon name="arrow" className="size-4" />
           </Link>
         </div>
       </article>

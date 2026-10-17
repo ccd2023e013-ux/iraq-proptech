@@ -12,7 +12,7 @@ import { getDictionary, errorMessage } from "@/i18n";
 import { getRequestLocale } from "@/i18n/server";
 import { serverApiFetch } from "@/lib/api/server";
 import { getCurrentUser } from "@/lib/auth/session";
-import { stagger } from "@/lib/motion";
+import { distinctCovers } from "@/lib/photos";
 import { type RawParams, toApiQuery, withParam } from "@/lib/search";
 import type { Place, ReferenceItem } from "@/types/property";
 
@@ -36,6 +36,8 @@ export default async function PropertiesPage({
   const phone = /Mobi|iPhone|Android/i.test((await headers()).get("user-agent") ?? "");
   const typeNames = new Map(types.map((t) => [t.code, locale === "ar" ? t.name_ar : t.name_en]));
   const s = dict.search;
+  // Each demo photograph once per page (lib/photos); repeats become place plates.
+  const covers = distinctCovers("items" in result ? result.items : []);
 
   return (
     <div className="mx-auto grid max-w-[1320px] grid-cols-[minmax(0,1fr)] gap-6 px-4 py-8 sm:px-6 md:py-12 lg:grid-cols-12 lg:gap-8 lg:px-8">
@@ -70,8 +72,9 @@ export default async function PropertiesPage({
           <h1 id="results-heading" className="flex flex-col gap-1">
             <span className="display-lg text-ink">{s.title}</span>
             {"total" in result && (
-              <span className="meta tabular">
-                {result.total} {s.results}
+              <span className="flex items-baseline gap-2 text-ink-2">
+                <span className="kpi text-2xl text-ink">{result.total}</span>
+                {s.results}
               </span>
             )}
           </h1>
@@ -103,9 +106,10 @@ export default async function PropertiesPage({
         ) : (
           <>
             <ul className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
-              {result.items.map((card, i) => (
-                <li key={card.id} className="reveal" style={stagger(i)}>
+              {result.items.map((card) => (
+                <li key={card.id}>
                   <PropertyCard
+                    cover={covers.get(card.id) ?? null}
                     card={card}
                     dict={dict}
                     locale={locale}

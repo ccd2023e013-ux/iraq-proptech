@@ -10,6 +10,7 @@ import { PropertyCard } from "@/features/properties/PropertyCard";
 import { favoriteIds } from "@/features/search/data";
 import { errorMessage, getDictionary } from "@/i18n";
 import { getRequestLocale } from "@/i18n/server";
+import { distinctCovers } from "@/lib/photos";
 import { ApiError } from "@/lib/api/client";
 import { serverApiFetch } from "@/lib/api/server";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -328,6 +329,7 @@ export default async function AssistantPage({
           {items.map((card) => (
             <li key={card.id}>
               <PropertyCard
+                cover={distinctCovers(items).get(card.id) ?? null}
                 card={card}
                 dict={dict}
                 locale={locale}

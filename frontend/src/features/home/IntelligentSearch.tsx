@@ -36,24 +36,29 @@ export function searchDestination(input: {
 }
 
 /**
- * One instrument for both kinds of search: structured (purpose, city, type,
- * keyword) or natural language ("AI search"), which hands off to /search/smart.
+ * The plate's query: one large field, then purpose, place and type, and the
+ * action. "Describe it in your words" hands the sentence to /search/smart
+ * (the MAKAN assistant), which labels how each answer was produced.
+ * Flat: it is docked in the home console, not floated over the map.
  */
 export function IntelligentSearch({
   dict,
   cities,
   types,
+  defaultCity = "",
 }: {
   dict: Dictionary;
   cities: SearchOption[];
   types: SearchOption[];
+  /** The plate's place (e.g. Basra on the home page). */
+  defaultCity?: string;
 }) {
   const h = dict.homeV2;
   const router = useRouter();
   const [ai, setAi] = useState(false);
   const [q, setQ] = useState("");
   const [purpose, setPurpose] = useState<string>("SALE");
-  const [cityId, setCityId] = useState("");
+  const [cityId, setCityId] = useState(defaultCity);
   const [type, setType] = useState("");
 
   function onSubmit(event: FormEvent) {
@@ -61,15 +66,31 @@ export function IntelligentSearch({
     router.push(searchDestination({ ai, q, purpose, cityId, type }));
   }
 
-  const select = "field min-w-0 bg-fill shadow-none";
+  const select = "field h-10 min-w-0 bg-fill text-[15px] shadow-none";
 
   return (
-    <form
-      onSubmit={onSubmit}
-      role="search"
-      className="surface-float flex w-full flex-col gap-2 rounded-[var(--radius-card)] p-2.5"
-    >
-      <div className="flex flex-wrap items-center justify-between gap-2 px-0.5 pb-1">
+    <form onSubmit={onSubmit} role="search" className="flex w-full flex-col gap-3">
+      <div className="flex items-stretch gap-2">
+        <label className="relative block min-w-0 flex-1">
+          <span className="sr-only">{ai ? h.aiPlaceholder : h.searchPlaceholder}</span>
+          <Icon
+            name={ai ? "sparkle" : "search"}
+            className="pointer-events-none absolute start-4 top-1/2 size-5 -translate-y-1/2 text-ink-3"
+          />
+          <input
+            type="search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder={ai ? h.aiPlaceholder : h.searchPlaceholder}
+            className="field h-13 bg-fill ps-12 text-[1.0625rem] shadow-none"
+          />
+        </label>
+        <button type="submit" className="btn btn-primary h-13 shrink-0 px-5">
+          <Icon name="search" className="size-[18px] sm:hidden" strokeWidth={2} />
+          <span className="max-sm:sr-only">{h.search}</span>
+        </button>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
         <div
           role="radiogroup"
           aria-label={dict.property.purpose}
@@ -82,49 +103,18 @@ export function IntelligentSearch({
               role="radio"
               aria-checked={purpose === p}
               onClick={() => setPurpose(p)}
-              className="hover:text-ink"
             >
               {dict.listing.purposes[p]}
             </button>
           ))}
         </div>
-        <label className="flex cursor-pointer items-center gap-2 rounded-[var(--radius-control)] px-3 py-1.5 text-sm font-medium text-ink-2 hover:bg-fill">
-          <input
-            type="checkbox"
-            checked={ai}
-            onChange={(e) => setAi(e.target.checked)}
-            className="peer sr-only"
-          />
-          <span
-            aria-hidden
-            className="relative h-5 w-9 rounded-full bg-fill-strong transition peer-checked:bg-accent-fill peer-focus-visible:ring-2 peer-focus-visible:ring-accent after:absolute after:top-0.5 after:start-0.5 after:size-4 after:rounded-full after:bg-white after:shadow after:transition peer-checked:after:translate-x-4 rtl:peer-checked:after:-translate-x-4"
-          />
-          {h.aiToggle}
-        </label>
-      </div>
-      {/* The question first, large; then the place and type, and the action. */}
-      <label className="relative block">
-        <span className="sr-only">{ai ? h.aiPlaceholder : h.searchPlaceholder}</span>
-        <Icon
-          name={ai ? "insight" : "search"}
-          className="pointer-events-none absolute start-4 top-1/2 size-5 -translate-y-1/2 text-ink-3"
-        />
-        <input
-          type="search"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder={ai ? h.aiPlaceholder : h.searchPlaceholder}
-          className="field h-14 bg-fill ps-12 text-[1.0625rem] shadow-none"
-        />
-      </label>
-      <div className="flex flex-col gap-2 sm:flex-row">
         {!ai && (
-          <div className="grid flex-1 grid-cols-2 gap-2">
+          <>
             <select
               aria-label={h.anyCity}
               value={cityId}
               onChange={(e) => setCityId(e.target.value)}
-              className={select}
+              className={`${select} w-auto flex-1 sm:flex-none`}
             >
               <option value="">{h.anyCity}</option>
               {cities.map((c) => (
@@ -137,7 +127,7 @@ export function IntelligentSearch({
               aria-label={h.anyType}
               value={type}
               onChange={(e) => setType(e.target.value)}
-              className={select}
+              className={`${select} w-auto flex-1 sm:flex-none`}
             >
               <option value="">{h.anyType}</option>
               {types.map((t) => (
@@ -146,13 +136,22 @@ export function IntelligentSearch({
                 </option>
               ))}
             </select>
-          </div>
+          </>
         )}
-        <button type="submit" className={`btn btn-primary h-12 px-6 ${ai ? "flex-1" : ""}`}>
-          <Icon name="search" className="size-[18px]" strokeWidth={2} />
-          {h.search}
-        </button>
       </div>
+      <label className="flex w-fit cursor-pointer items-center gap-2.5 text-sm text-ink-2 hover:text-ink">
+        <input
+          type="checkbox"
+          checked={ai}
+          onChange={(e) => setAi(e.target.checked)}
+          className="peer sr-only"
+        />
+        <span
+          aria-hidden
+          className="relative h-5 w-9 shrink-0 rounded-full bg-fill-strong transition peer-checked:bg-accent-fill peer-focus-visible:ring-2 peer-focus-visible:ring-accent after:absolute after:top-0.5 after:start-0.5 after:size-4 after:rounded-full after:bg-white after:shadow after:transition peer-checked:after:translate-x-4 rtl:peer-checked:after:-translate-x-4"
+        />
+        {h.aiToggle}
+      </label>
     </form>
   );
 }

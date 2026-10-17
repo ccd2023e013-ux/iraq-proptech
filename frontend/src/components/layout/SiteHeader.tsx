@@ -14,31 +14,17 @@ import { ThemeToggle } from "./ThemeToggle";
 import { UserMenu } from "./UserMenu";
 
 /**
- * MAKAN mark: a survey plot (the square) with one fixed point on it (emerald)
- * and the river running beneath (cyan) — "a place, read precisely".
- * Drawn on a 32-unit grid; the frame follows the ink colour of the theme.
+ * MAKAN mark: the survey annotation — a label on a stem over a fixed point,
+ * the same form as a price on the map. The label carries one written line;
+ * the point is emerald. Drawn on a 32-unit grid in the theme's ink.
  */
 export function BrandMark({ className = "size-7" }: { className?: string }) {
   return (
     <svg aria-hidden viewBox="0 0 32 32" className={className}>
-      <rect
-        x="3.25"
-        y="3.25"
-        width="25.5"
-        height="25.5"
-        rx="5"
-        fill="none"
-        className="stroke-ink"
-        strokeWidth="2.5"
-      />
-      <path
-        d="M3.5 22.5c5.5-2.6 9.5-2.6 13.2-.6 3.7 2 7.6 2 11.8-.4"
-        fill="none"
-        className="stroke-spatial-fill"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-      />
-      <circle cx="19.5" cy="12.5" r="3.6" className="fill-accent-fill" />
+      <rect x="4" y="3" width="24" height="15" rx="3" className="fill-ink" />
+      <rect x="9" y="9.25" width="14" height="2.5" rx="1.25" className="fill-canvas" />
+      <rect x="15" y="18" width="2" height="6" className="fill-ink" />
+      <circle cx="16" cy="26.5" r="3.25" className="fill-accent-fill" />
     </svg>
   );
 }
@@ -82,7 +68,7 @@ export function SiteHeader({
             aria-label={dict.nav.home}
           >
             <BrandMark className="size-8" />
-            <span className="font-display text-[21px] leading-none font-semibold tracking-tight whitespace-nowrap text-ink max-[380px]:hidden">
+            <span className="font-display text-[20px] leading-none font-semibold tracking-[-0.01em] whitespace-nowrap text-ink max-[380px]:hidden">
               {locale === "ar" ? "مَكان" : "MAKAN"}
             </span>
           </Link>

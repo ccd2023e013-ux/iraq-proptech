@@ -123,8 +123,8 @@ const INK = "#0b0f17";
 const ACCENT = "#06b6d4"; // spatial cyan for the map intro
 const EMERALD = "#10b981";
 const GOLD = "#e0b45a";
-const DISPLAY = '"Inter Variable", "Readex Pro Variable", system-ui, sans-serif';
-const BODY = '"Inter Variable", "Readex Pro Variable", system-ui, sans-serif';
+const DISPLAY = '"Alexandria Variable", "IBM Plex Sans Arabic", system-ui, sans-serif';
+const BODY = '"IBM Plex Sans Arabic", system-ui, sans-serif';
 
 function font(size: number, weight = 600, family = DISPLAY): string {
   return `${weight} ${Math.round(size)}px ${family}`;

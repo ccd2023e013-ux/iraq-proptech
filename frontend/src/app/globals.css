@@ -1,61 +1,60 @@
 @import "tailwindcss";
 
 /*
- * مَكان | MAKAN — "Night over the Shatt" (docs/DESIGN-DIRECTION.md,
- * docs/REDESIGN-RECOVERY.md §3).
+ * مَكان | MAKAN — "The survey plate" (docs/ART-DIRECTION.md).
  *
- * The agreed brand navy (#0B0F17 canvas, #161E2E raised) with a warm
- * limestone ink: Basra brick and stone against the blue night. Emerald
- * #10B981 = doing (one fill per view) · cyan #06B6D4 = where (maps, places,
- * layers) · date-palm gold = uncertain or illustrative (DEMO, estimates,
- * concepts). Light theme: the same identity inverted — navy ink on limestone.
- * Dark is the default; data-theme="light|dark" forces one, none follows the OS.
+ * Night (default): obsidian #0B0F17 ground, charcoal #161E2E docked consoles,
+ * limestone #EDE7DC ink. Day: limestone plaster ground, white consoles,
+ * obsidian ink. Emerald = doing (the one action, the selection) · river cyan =
+ * where (water, places, layers) · date-palm gold = uncertain (demo, estimate).
+ * data-theme="light|dark" forces a theme; none follows the OS.
  * Logical utilities (ms-/me-/ps-/pe-/start-/end-) keep RTL and LTR mirrored.
  */
 
-/* Light: limestone with navy ink. */
+/* Day plate: limestone plaster ground, white consoles, obsidian ink. */
 :root {
   color-scheme: light;
-  --canvas: #f4f5f7;
+  --canvas: #f1f2ef;
   --surface: #ffffff;
   --surface-raised: #ffffff;
-  --surface-glass: rgb(255 255 255 / 0.8);
-  --fill: #eceef2;
-  --fill-strong: #e0e4ea;
-  --hairline: rgb(11 15 23 / 0.08);
-  --hairline-strong: rgb(11 15 23 / 0.16);
+  --surface-glass: rgb(255 255 255 / 0.86);
+  --fill: #e8e9e5;
+  --fill-strong: #dcded9;
+  --hairline: rgb(11 15 23 / 0.09);
+  --hairline-strong: rgb(11 15 23 / 0.18);
   --ink: #0b0f17;
-  --ink-2: #454e60;
-  --ink-3: #636c7f;
+  --ink-2: #434a56;
+  --ink-3: #60666f;
   --accent: #047857;
   --accent-strong: #065f46;
-  --accent-fill: #059669;
-  --accent-fill-hover: #047857;
+  --accent-fill: #047857;
+  --accent-fill-hover: #065f46;
   --on-accent: #ffffff;
-  --accent-tint: #e3f5ee;
-  --accent-tint-strong: #cbebdd;
-  --accent-line: #86d3b3;
+  --accent-tint: #e1f2ea;
+  --accent-tint-strong: #c7e7d8;
+  --accent-line: #7fcaa9;
   --spatial: #0e7490;
-  --spatial-fill: #0891b2;
-  --spatial-tint: #e0f3f8;
-  --gold: #855e12;
+  --spatial-fill: #0e7490;
+  --spatial-tint: #dfeff2;
+  --gold: #7c5710;
   --gold-fill: #c9a04e;
-  --gold-tint: #f6edd8;
-  --gold-line: #e2cc93;
+  --gold-tint: #f3ead6;
+  --gold-line: #ddc68d;
   --positive: #047857;
-  --caution: #9a6700;
+  --caution: #92610a;
   --critical: #b4372b;
   --edge: inset 0 1px 0 rgb(255 255 255 / 0.9);
   --shadow-soft: 0 1px 2px rgb(11 15 23 / 0.06);
-  --shadow-float: 0 1px 2px rgb(11 15 23 / 0.08), 0 14px 36px -14px rgb(11 15 23 / 0.26);
+  --shadow-float: 0 1px 2px rgb(11 15 23 / 0.1), 0 12px 32px -14px rgb(11 15 23 / 0.3);
   --shadow-focus: 0 2px 6px rgb(11 15 23 / 0.08), 0 22px 52px -20px rgb(11 15 23 / 0.32);
   --shadow-modal: 0 8px 24px rgb(11 15 23 / 0.12), 0 40px 96px -32px rgb(11 15 23 / 0.4);
-  --float-bg: rgb(255 255 255 / 0.84);
-  --float-bg-strong: rgb(255 255 255 / 0.95);
-  --float-ring: rgb(11 15 23 / 0.1);
+  --float-bg: rgb(255 255 255 / 0.9);
+  --float-bg-strong: rgb(255 255 255 / 0.97);
+  --float-ring: rgb(11 15 23 / 0.12);
   --scrim: rgb(11 15 23 / 0.36);
   --canvas-glow: transparent;
   --grid-line: rgb(11 15 23 / 0.05);
+  --console: #ffffff;
 }
 
 /* Dark: brand navy (the default). Same values for the OS preference (no
@@ -66,43 +65,44 @@
     --canvas: #0b0f17;
     --surface: #111826;
     --surface-raised: #161e2e;
-    --surface-glass: rgb(17 24 38 / 0.74);
-    --fill: #1b2436;
-    --fill-strong: #243046;
-    --hairline: rgb(160 176 204 / 0.11);
-    --hairline-strong: rgb(160 176 204 / 0.2);
-    --ink: #f2eee7;
-    --ink-2: #b4bbc8;
-    --ink-3: #848d9e;
+    --surface-glass: rgb(17 24 38 / 0.8);
+    --fill: #1a2333;
+    --fill-strong: #232e42;
+    --hairline: rgb(176 186 204 / 0.11);
+    --hairline-strong: rgb(176 186 204 / 0.21);
+    --ink: #ede7dc;
+    --ink-2: #adb3be;
+    --ink-3: #868e9b;
     --accent: #34d399;
     --accent-strong: #6ee7b7;
     --accent-fill: #10b981;
     --accent-fill-hover: #2bc896;
     --on-accent: #03140d;
-    --accent-tint: #0e2a25;
-    --accent-tint-strong: #123a31;
+    --accent-tint: #0d2722;
+    --accent-tint-strong: #11362e;
     --accent-line: #1d6b55;
-    --spatial: #22d3ee;
-    --spatial-fill: #06b6d4;
-    --spatial-tint: #0a2633;
-    --gold: #e3bc70;
+    --spatial: #38bdd8;
+    --spatial-fill: #38bdd8;
+    --spatial-tint: #0b2531;
+    --gold: #e0bb72;
     --gold-fill: #c9a04e;
-    --gold-tint: #2a2415;
-    --gold-line: #5e4c25;
+    --gold-tint: #262012;
+    --gold-line: #5a4924;
     --positive: #34d399;
     --caution: #f0b44c;
     --critical: #f47c6f;
-    --edge: inset 0 1px 0 rgb(255 255 255 / 0.05);
+    --edge: inset 0 1px 0 rgb(255 255 255 / 0.04);
     --shadow-soft: 0 1px 2px rgb(2 5 12 / 0.5);
     --shadow-float: 0 1px 2px rgb(2 5 12 / 0.5), 0 18px 44px -18px rgb(2 5 12 / 0.9);
     --shadow-focus: 0 2px 8px rgb(2 5 12 / 0.55), 0 28px 64px -24px rgb(2 5 12 / 0.95);
     --shadow-modal: 0 8px 24px rgb(2 5 12 / 0.6), 0 48px 112px -32px rgb(2 5 12 / 0.95);
-    --float-bg: rgb(17 24 38 / 0.76);
-    --float-bg-strong: rgb(17 24 38 / 0.93);
-    --float-ring: rgb(160 176 204 / 0.14);
+    --float-bg: rgb(22 30 46 / 0.9);
+    --float-bg-strong: rgb(22 30 46 / 0.97);
+    --float-ring: rgb(176 186 204 / 0.14);
     --scrim: rgb(5 8 14 / 0.62);
     --canvas-glow: transparent;
-    --grid-line: rgb(160 176 204 / 0.05);
+    --grid-line: rgb(176 186 204 / 0.05);
+    --console: #121a28;
   }
 }
 
@@ -111,50 +111,52 @@
   --canvas: #0b0f17;
   --surface: #111826;
   --surface-raised: #161e2e;
-  --surface-glass: rgb(17 24 38 / 0.74);
-  --fill: #1b2436;
-  --fill-strong: #243046;
-  --hairline: rgb(160 176 204 / 0.11);
-  --hairline-strong: rgb(160 176 204 / 0.2);
-  --ink: #f2eee7;
-  --ink-2: #b4bbc8;
-  --ink-3: #848d9e;
+  --surface-glass: rgb(17 24 38 / 0.8);
+  --fill: #1a2333;
+  --fill-strong: #232e42;
+  --hairline: rgb(176 186 204 / 0.11);
+  --hairline-strong: rgb(176 186 204 / 0.21);
+  --ink: #ede7dc;
+  --ink-2: #adb3be;
+  --ink-3: #868e9b;
   --accent: #34d399;
   --accent-strong: #6ee7b7;
   --accent-fill: #10b981;
   --accent-fill-hover: #2bc896;
   --on-accent: #03140d;
-  --accent-tint: #0e2a25;
-  --accent-tint-strong: #123a31;
+  --accent-tint: #0d2722;
+  --accent-tint-strong: #11362e;
   --accent-line: #1d6b55;
-  --spatial: #22d3ee;
-  --spatial-fill: #06b6d4;
-  --spatial-tint: #0a2633;
-  --gold: #e3bc70;
+  --spatial: #38bdd8;
+  --spatial-fill: #38bdd8;
+  --spatial-tint: #0b2531;
+  --gold: #e0bb72;
   --gold-fill: #c9a04e;
-  --gold-tint: #2a2415;
-  --gold-line: #5e4c25;
+  --gold-tint: #262012;
+  --gold-line: #5a4924;
   --positive: #34d399;
   --caution: #f0b44c;
   --critical: #f47c6f;
-  --edge: inset 0 1px 0 rgb(255 255 255 / 0.05);
+  --edge: inset 0 1px 0 rgb(255 255 255 / 0.04);
   --shadow-soft: 0 1px 2px rgb(2 5 12 / 0.5);
   --shadow-float: 0 1px 2px rgb(2 5 12 / 0.5), 0 18px 44px -18px rgb(2 5 12 / 0.9);
   --shadow-focus: 0 2px 8px rgb(2 5 12 / 0.55), 0 28px 64px -24px rgb(2 5 12 / 0.95);
   --shadow-modal: 0 8px 24px rgb(2 5 12 / 0.6), 0 48px 112px -32px rgb(2 5 12 / 0.95);
-  --float-bg: rgb(17 24 38 / 0.76);
-  --float-bg-strong: rgb(17 24 38 / 0.93);
-  --float-ring: rgb(160 176 204 / 0.14);
+  --float-bg: rgb(22 30 46 / 0.9);
+  --float-bg-strong: rgb(22 30 46 / 0.97);
+  --float-ring: rgb(176 186 204 / 0.14);
   --scrim: rgb(5 8 14 / 0.62);
   --canvas-glow: transparent;
-  --grid-line: rgb(160 176 204 / 0.05);
+  --grid-line: rgb(176 186 204 / 0.05);
+  --console: #121a28;
 }
 
 @theme {
-  /* Inter draws Latin letters and digits; Readex Pro draws Arabic. */
-  --font-sans:
-    "Inter Variable", "Readex Pro Variable", ui-sans-serif, system-ui, Tahoma, sans-serif;
-  --font-display: "Inter Variable", "Readex Pro Variable", ui-sans-serif, system-ui;
+  /* Text: IBM Plex Sans Arabic (Arabic and Latin). Display: Alexandria
+     (Arabic and Latin from one design) for places, titles and figures. */
+  --font-sans: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, Tahoma, sans-serif;
+  --font-display: "Alexandria Variable", "IBM Plex Sans Arabic", ui-sans-serif, system-ui;
+  --color-console: var(--console);
 
   /* Semantic colours (preferred in new code). */
   --color-canvas: var(--canvas);
@@ -214,11 +216,11 @@
 
   /* Shape: soft, continuous, never pill-shaped (round only what is round:
      avatars, dots, switches). Radius grows with the size of the object. */
-  --radius-tag: 5px;
-  --radius-control: 10px;
-  --radius-card: 16px;
-  --radius-media: 14px;
-  --radius-sheet: 24px;
+  --radius-tag: 4px;
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --radius-media: 10px;
+  --radius-sheet: 16px;
   /* Tailwind's scale re-tuned to the same family. */
   --radius-sm: 4px;
   --radius-md: 6px;
@@ -274,7 +276,7 @@
 
 /* ── Layout constants (not colours: no light/dark variants) ───────────────── */
 :root {
-  --header-h: 3.75rem;
+  --header-h: 3.5rem;
   --tabbar-h: calc(3.5rem + env(safe-area-inset-bottom));
   /* Page frame: one content width for the whole product, and its gutter. */
   --page-max: 1280px;
@@ -311,7 +313,7 @@
 }
 @media (min-width: 768px) {
   :root {
-    --header-h: 4.5rem;
+    --header-h: 4rem;
     --tabbar-h: 0px;
     --gutter: 2rem;
   }
@@ -333,10 +335,6 @@ body {
   background: var(--canvas);
   color: var(--ink);
   font-family: var(--font-sans);
-  /* Inter: single-storey a off, open digits; optical sizes follow font size
-     (the display cut at headline sizes). */
-  font-feature-settings: "cv11", "ss01";
-  font-optical-sizing: auto;
   font-size: 1rem;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -358,8 +356,11 @@ p {
   text-wrap: pretty;
 }
 
+.font-display {
+  font-family: var(--font-display);
+}
 :lang(ar) .font-display {
-  line-height: 1.3;
+  line-height: 1.35;
 }
 
 /* Numbers (prices, areas) stay readable and aligned in both directions. */
@@ -377,70 +378,78 @@ p {
   background: var(--accent-tint-strong);
 }
 
-/* ── Type scale ───────────────────────────────────────────────────────────── */
-/* Latin display uses Inter's display optical size (tight, confident); Arabic
-   display is Readex Pro at a lighter weight with generous leading, set ~6%
-   larger so both scripts carry the same visual weight. Sentence case only. */
+/* ── Type scale (docs/ART-DIRECTION.md) ────────────────────────────────────
+   Alexandria carries places, titles and figures; Plex carries reading and
+   controls. Sizes step 1.125 → 1.375 → 1.75 → 2.25 → 3 → 4; Arabic display
+   is set a step looser with taller leading so both scripts weigh the same.
+   Sentence case only; no tracked capitals. */
 .display-xl {
   font-family: var(--font-display);
-  font-size: clamp(2.75rem, 1.3rem + 3.4vw, 4.75rem);
-  line-height: 1.02;
-  letter-spacing: -0.038em;
-  font-weight: 620;
+  font-size: clamp(2.5rem, 1.6rem + 2.6vw, 4rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  font-weight: 600;
 }
 .display-lg {
   font-family: var(--font-display);
-  font-size: clamp(2.25rem, 1.55rem + 2.4vw, 3.625rem);
-  line-height: 1.04;
-  letter-spacing: -0.032em;
-  font-weight: 620;
+  font-size: clamp(2rem, 1.5rem + 1.6vw, 3rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-weight: 600;
 }
 .display-md {
   font-family: var(--font-display);
-  font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem);
-  line-height: 1.1;
-  letter-spacing: -0.024em;
-  font-weight: 620;
+  font-size: clamp(1.5rem, 1.25rem + 0.9vw, 2.25rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  font-weight: 600;
 }
 :lang(ar) :is(.display-xl, .display-lg, .display-md) {
   letter-spacing: 0;
-  font-weight: 520;
+  font-weight: 600;
 }
 :lang(ar) .display-xl {
-  font-size: clamp(2.75rem, 1.5rem + 4.4vw, 5.5rem);
-  line-height: 1.2;
+  line-height: 1.3;
 }
 :lang(ar) .display-lg {
-  font-size: clamp(2.25rem, 1.6rem + 2.4vw, 3.75rem);
-  line-height: 1.28;
+  line-height: 1.35;
 }
 :lang(ar) .display-md {
-  font-size: clamp(1.75rem, 1.45rem + 1.2vw, 2.5rem);
-  line-height: 1.35;
+  line-height: 1.4;
+}
+/* The place name: the headline of a plate (see .place-line). */
+.place {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(2.75rem, 1.4rem + 4vw, 5.5rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+:lang(ar) .place {
+  letter-spacing: 0;
+  line-height: 1.2;
 }
 .title {
   font-family: var(--font-display);
-  font-size: 1.25rem;
+  font-size: 1.375rem;
   line-height: 1.3;
-  font-weight: 600;
-  letter-spacing: -0.012em;
+  font-weight: 560;
+  letter-spacing: -0.01em;
 }
 :lang(ar) .title {
   letter-spacing: 0;
-  font-weight: 540;
-  font-size: 1.3125rem;
   line-height: 1.55;
 }
 /* The paragraph under a page title. */
 .lede {
-  font-size: 1.1875rem;
-  line-height: 1.55;
+  font-size: 1.125rem;
+  line-height: 1.6;
   color: var(--ink-2);
-  max-width: 40rem;
+  max-width: 38rem;
 }
 :lang(ar) .lede {
-  font-size: 1.25rem;
-  line-height: 1.75;
+  font-size: 1.1875rem;
+  line-height: 1.8;
 }
 .meta {
   font-size: 0.875rem;
@@ -459,16 +468,20 @@ p {
   line-height: 1.4;
   color: var(--ink-2);
 }
+/* A measurement: prices, areas, counts. */
 .kpi {
-  font-family: "Inter Variable", var(--font-display);
+  font-family: var(--font-display);
   font-variant-numeric: tabular-nums;
-  font-weight: 620;
-  letter-spacing: -0.035em;
-  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+:lang(ar) .kpi {
+  letter-spacing: 0;
 }
 /* Photographs: one quiet grade so a set of different sources reads as one. */
 .photo {
-  filter: saturate(0.92) contrast(1.04) brightness(0.98);
+  filter: saturate(0.9) contrast(1.04) brightness(0.98);
 }
 /* Page frame: the shared width and gutter. */
 .page {
@@ -984,37 +997,38 @@ p {
   }
 }
 
-/* ── Map price tags (HTML markers, see PropertyMap and MapPreview) ──────────
-   The price is the marker. On the night chart tags are limestone on navy (the
-   brightest thing on the map after the river); on the limestone plate they are
-   white with a drawn edge. A short tail points at the listing's dot. Selected
-   = emerald and lifted; a cyan "+N" counts listings close by without a tag.
-   MapLibre positions .map-tag-anchor; the button inside animates, so arrival
-   and departure never fight the marker's own transform. */
+/* ── Map price tags: survey annotations (HTML markers; PropertyMap, MapPreview)
+   The price is the marker: a flat label set in the display face, standing on
+   a hairline stem over the listing's point (the stem spans the 8 px rise).
+   Night: limestone label on the dark chart; day: white with a drawn edge.
+   "+N" is a count tab at the label's top end: listings close by without a
+   label of their own. Selected = emerald, lifted. MapLibre positions
+   .map-tag-anchor; the label inside animates, so arrival and departure never
+   fight the marker's own transform. */
 :root {
   --tag-bg: #ffffff;
-  --tag-ink: var(--ink);
-  --tag-edge: rgb(11 15 23 / 0.14);
-  --tag-shadow: 0 1px 2px rgb(11 15 23 / 0.12), 0 6px 14px -6px rgb(11 15 23 / 0.28);
-  --tag-more-bg: #d4ecf3;
-  --tag-more-ink: #0d5568;
+  --tag-ink: #0b0f17;
+  --tag-edge: rgb(11 15 23 / 0.22);
+  --tag-shadow: 0 1px 1px rgb(11 15 23 / 0.1), 0 6px 14px -8px rgb(11 15 23 / 0.35);
+  --tag-more-bg: #0b0f17;
+  --tag-more-ink: #ede7dc;
 }
 :root[data-theme="dark"] {
-  --tag-bg: #efe9de;
+  --tag-bg: #ede7dc;
   --tag-ink: #0b0f17;
-  --tag-edge: rgb(0 0 0 / 0.35);
-  --tag-shadow: 0 1px 0 rgb(255 255 255 / 0.5) inset, 0 8px 18px -8px rgb(0 0 0 / 0.8);
-  --tag-more-bg: #123e4b;
-  --tag-more-ink: #a5e8f5;
+  --tag-edge: rgb(0 0 0 / 0.45);
+  --tag-shadow: 0 8px 18px -8px rgb(0 0 0 / 0.85);
+  --tag-more-bg: #38bdd8;
+  --tag-more-ink: #04141b;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --tag-bg: #efe9de;
+    --tag-bg: #ede7dc;
     --tag-ink: #0b0f17;
-    --tag-edge: rgb(0 0 0 / 0.35);
-    --tag-shadow: 0 1px 0 rgb(255 255 255 / 0.5) inset, 0 8px 18px -8px rgb(0 0 0 / 0.8);
-    --tag-more-bg: #123e4b;
-    --tag-more-ink: #a5e8f5;
+    --tag-edge: rgb(0 0 0 / 0.45);
+    --tag-shadow: 0 8px 18px -8px rgb(0 0 0 / 0.85);
+    --tag-more-bg: #38bdd8;
+    --tag-more-ink: #04141b;
   }
 }
 .map-tag-anchor {
@@ -1026,14 +1040,14 @@ p {
   position: relative;
   display: inline-flex;
   align-items: center;
-  height: 28px;
-  padding: 0 10px;
-  border-radius: 9px;
+  height: 26px;
+  padding: 0 9px;
+  border-radius: var(--radius-tag);
   background: var(--tag-bg);
   color: var(--tag-ink);
-  font: 650 13px/1 var(--font-sans);
+  font: 600 12.5px/1 var(--font-display);
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.005em;
+  letter-spacing: -0.01em;
   white-space: nowrap;
   cursor: pointer;
   box-shadow:
@@ -1049,40 +1063,37 @@ p {
   animation: tag-in var(--duration-spatial) var(--ease-spring) backwards;
 }
 :lang(ar) .map-tag {
-  font-size: 12.5px;
-  font-weight: 600;
+  letter-spacing: 0;
 }
-/* The tail: a small triangle in the tag's own colour. */
+/* The stem: a hairline from the label down to the point. */
 .map-tag::after {
   content: "";
   position: absolute;
   inset-inline-start: 50%;
-  bottom: -5px;
-  width: 0;
-  height: 0;
-  margin-inline-start: -5px;
-  border-inline: 5px solid transparent;
-  border-top: 6px solid var(--tag-bg);
-  filter: drop-shadow(0 1px 0 var(--tag-edge));
-  transition: border-color var(--duration-quick) var(--ease-standard);
+  top: 100%;
+  width: 1.5px;
+  height: 8px;
+  margin-inline-start: -0.75px;
+  background: var(--tag-bg);
+  box-shadow: 0 0 0 0.5px var(--tag-edge);
+  transition: background-color var(--duration-quick) var(--ease-standard);
 }
-/* "+N": listings close by that have no tag of their own. */
 .map-tag-more:empty {
   display: none;
 }
 .map-tag-more {
   position: absolute;
-  top: -7px;
-  inset-inline-end: -7px;
+  top: -8px;
+  inset-inline-end: -6px;
   min-width: 18px;
-  height: 18px;
+  height: 16px;
   padding: 0 4px;
   display: grid;
   place-items: center;
-  border-radius: 999px;
+  border-radius: 3px;
   background: var(--tag-more-bg);
   color: var(--tag-more-ink);
-  font: 650 10px/1 var(--font-sans);
+  font: 600 10px/1 var(--font-sans);
   font-variant-numeric: tabular-nums;
   /* "+3" reads the same in Arabic and English. */
   direction: ltr;
@@ -1101,13 +1112,13 @@ p {
 .map-tag[data-state="selected"] {
   background: var(--accent-fill);
   color: var(--on-accent);
-  transform: translateY(-4px) scale(1.1);
+  transform: translateY(-4px) scale(1.08);
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--accent-fill) 70%, black),
     0 12px 26px -10px rgb(0 0 0 / 0.7);
 }
 .map-tag[data-state="selected"]::after {
-  border-top-color: var(--accent-fill);
+  background: var(--accent-fill);
 }
 /* Approximate location: a dashed edge (its ground is a soft disc, not a dot). */
 .map-tag[data-approx] {
@@ -1127,13 +1138,13 @@ p {
 @keyframes tag-in {
   from {
     opacity: 0;
-    transform: translateY(8px) scale(0.86);
+    transform: translateY(6px) scale(0.9);
   }
 }
 @keyframes tag-out {
   to {
     opacity: 0;
-    transform: translateY(4px) scale(0.92);
+    transform: translateY(4px) scale(0.94);
   }
 }
 
@@ -1224,14 +1235,10 @@ p {
     padding: 0.625rem 1rem;
     border-bottom: 1px solid var(--hairline-strong);
     color: var(--ink-3);
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 500;
-    letter-spacing: 0.04em;
     text-align: start;
     white-space: nowrap;
-  }
-  :lang(en) .data-table thead th {
-    text-transform: uppercase;
   }
   .data-table tbody td,
   .data-table tbody th {

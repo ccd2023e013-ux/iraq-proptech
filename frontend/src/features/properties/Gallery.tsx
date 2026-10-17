@@ -75,7 +75,7 @@ export function Gallery({
           tabIndex={images.length > 1 ? 0 : -1}
           onKeyDown={onKey}
           style={transitionName && index === 0 ? { viewTransitionName: transitionName } : undefined}
-          className="group relative overflow-hidden rounded-[var(--radius-card)] bg-fill shadow-[inset_0_0_0_1px_var(--hairline)]"
+          className="group relative overflow-hidden rounded-[var(--radius-media)] bg-fill"
         >
           <SafeImage
             key={current.id}
@@ -86,7 +86,7 @@ export function Gallery({
             className="photo aspect-[4/3] w-full object-cover sm:aspect-[16/9] lg:aspect-[2.25/1]"
           />
           {stamp && (
-            <span className="absolute start-0 bottom-0 rounded-se-[var(--radius-control)] bg-gold-500 px-3 py-1.5 text-[13px] font-semibold text-[#1d1405]">
+            <span className="absolute start-3 bottom-3 rounded-[var(--radius-tag)] bg-[#0b0f17]/78 px-2.5 py-1 text-[13px] font-medium text-[#ede7dc] backdrop-blur-sm">
               {stamp}
             </span>
           )}
@@ -136,7 +136,7 @@ export function Gallery({
                 onClick={() => setIndex(i)}
                 aria-current={i === index}
                 aria-label={`${i + 1} / ${images.length}`}
-                className={`press block overflow-hidden rounded-xl transition-[opacity,box-shadow,translate] duration-[var(--duration-base)] ${
+                className={`press block overflow-hidden rounded-[var(--radius-control)] transition-[opacity,box-shadow,translate] duration-[var(--duration-base)] ${
                   i === index
                     ? "-translate-y-0.5 opacity-100 shadow-[0_0_0_2px_var(--accent-fill)]"
                     : "opacity-70 hover:opacity-100"
@@ -154,7 +154,7 @@ export function Gallery({
         </ul>
       )}
       {videos.map((v) => (
-        <video key={v.id} src={v.url} controls className="w-full rounded-[var(--radius-card)]" />
+        <video key={v.id} src={v.url} controls className="w-full rounded-[var(--radius-media)]" />
       ))}
     </div>
   );
