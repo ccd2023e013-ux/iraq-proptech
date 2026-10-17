@@ -91,6 +91,9 @@ Reduced motion: instant camera, no morph, fades only.
 3. One emerald moment per view.
 4. Say provenance once, in words.
 5. Set numbers as measurements.
-6. No duplicate photograph in one view: a repeated representative photo
-   becomes a place plate (type, district and a map glyph) instead.
+6. No duplicate photograph in one view. Demo listings share a small licensed
+   library, and each listing stores its own copy, so repeats cannot be seen
+   from URLs. Lists are wrapped in a `PhotoSet`: each photo is fingerprinted in
+   the browser once loaded (a 64-bit difference hash) and a repeat, in reading
+   order, shows a place plate (type glyph and district) instead.
 7. Fewer, larger decisions: remove a box before adding one.
