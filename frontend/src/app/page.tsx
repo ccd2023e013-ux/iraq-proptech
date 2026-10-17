@@ -95,8 +95,8 @@ export default async function HomePage() {
       : [],
   );
   // The ledger beside the map: the newest listings. The editorial section
-  // below leads with one listing per property type (varied photographs); the
-  // page's PhotoSet shows each photograph once either way.
+  // below leads with one listing per property type (varied photographs).
+  // Each section is its own PhotoSet: a photo appears once per section.
   const newest = all.slice(0, 5);
   const photographed = all.filter((c) => c.cover_url);
   const firstOfType = photographed.filter(
@@ -147,78 +147,78 @@ export default async function HomePage() {
   const basraName = basra ? name(basra) : locale === "ar" ? "البصرة" : "Basra";
 
   return (
-    <PhotoSet>
-      <div className="flex flex-col">
-        {/* The plate. Wide screens: the console (place, count, query, newest)
+    <div className="flex flex-col">
+      {/* The plate. Wide screens: the console (place, count, query, newest)
           docked at the reading start, the map filling the rest. Phones: the
           place, then the map, then the console. One map in both layouts. */}
-        <section
-          aria-labelledby="hero-title"
-          className="grid grid-cols-[minmax(0,1fr)] border-b border-hairline [grid-template-areas:'place'_'map'_'console'] lg:h-[clamp(640px,calc(100svh-var(--header-h)),920px)] lg:grid-cols-[minmax(380px,30rem)_minmax(0,1fr)] lg:grid-rows-[auto_minmax(0,1fr)] lg:[grid-template-areas:'place_map'_'console_map']"
-        >
-          <div className="flex flex-col gap-3 bg-console px-[var(--gutter)] pt-8 pb-6 [grid-area:place] lg:border-e lg:border-hairline lg:px-8 lg:pt-10">
-            <h1 id="hero-title" className="place text-ink">
-              {basraName}
-            </h1>
-            <p className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-              <span className="font-display text-lg text-ink-2">{h.plateCountry}</span>
-              {centre && (
-                <span className="caption tabular" dir="ltr">
-                  {h.plateCentre
-                    .replace("{lat}", centre.lat.toFixed(2))
-                    .replace("{lon}", centre.lon.toFixed(2))}
+      <section
+        aria-labelledby="hero-title"
+        className="grid grid-cols-[minmax(0,1fr)] border-b border-hairline [grid-template-areas:'place'_'map'_'console'] lg:h-[clamp(640px,calc(100svh-var(--header-h)),920px)] lg:grid-cols-[minmax(380px,30rem)_minmax(0,1fr)] lg:grid-rows-[auto_minmax(0,1fr)] lg:[grid-template-areas:'place_map'_'console_map']"
+      >
+        <div className="flex flex-col gap-3 bg-console px-[var(--gutter)] pt-8 pb-6 [grid-area:place] lg:border-e lg:border-hairline lg:px-8 lg:pt-10">
+          <h1 id="hero-title" className="place text-ink">
+            {basraName}
+          </h1>
+          <p className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+            <span className="font-display text-lg text-ink-2">{h.plateCountry}</span>
+            {centre && (
+              <span className="caption tabular" dir="ltr">
+                {h.plateCentre
+                  .replace("{lat}", centre.lat.toFixed(2))
+                  .replace("{lon}", centre.lon.toFixed(2))}
+              </span>
+            )}
+          </p>
+          {total > 0 ? (
+            <p className="mt-3 text-lg text-ink">
+              <span className="kpi me-1.5 text-2xl">{n(total)}</span>
+              {h.plateCount.replace("{n}", "").trim()}
+              {split && (
+                <span className="text-ink-2">
+                  {locale === "ar" ? "، " : ": "}
+                  {h.plateSplit.replace("{sale}", n(split.sale)).replace("{rent}", n(split.rent))}
                 </span>
               )}
+              .
             </p>
-            {total > 0 ? (
-              <p className="mt-3 text-lg text-ink">
-                <span className="kpi me-1.5 text-2xl">{n(total)}</span>
-                {h.plateCount.replace("{n}", "").trim()}
-                {split && (
-                  <span className="text-ink-2">
-                    {locale === "ar" ? "، " : ": "}
-                    {h.plateSplit.replace("{sale}", n(split.sale)).replace("{rent}", n(split.rent))}
-                  </span>
-                )}
-                .
-              </p>
-            ) : (
-              <p className="mt-3 text-ink-2">{h.plateEmpty}</p>
-            )}
-          </div>
-
-          {points.length > 0 && (
-            <div className="relative h-[46svh] min-h-[300px] border-y border-hairline [grid-area:map] lg:h-auto lg:min-h-0 lg:border-0">
-              <MapPreview
-                config={mapConfig}
-                tags
-                intro
-                className="h-full rounded-none shadow-none"
-                label={h.heroMapCaption.replace("{n}", n(points.length))}
-                points={points}
-              />
-              <Link
-                href="/map"
-                className="btn btn-secondary btn-sm absolute end-3 top-3 z-10 shadow-[var(--shadow-float)] lg:end-4 lg:top-4"
-              >
-                <Icon name="map" className="size-4 text-spatial" />
-                {h.plateFullMap}
-              </Link>
-            </div>
+          ) : (
+            <p className="mt-3 text-ink-2">{h.plateEmpty}</p>
           )}
+        </div>
 
-          <div className="flex min-h-0 flex-col gap-8 bg-console px-[var(--gutter)] pt-6 pb-8 [grid-area:console] lg:overflow-y-auto lg:border-e lg:border-hairline lg:px-8">
-            <IntelligentSearch
-              dict={dict}
-              defaultCity={basra?.city_id ?? ""}
-              cities={cities.map((c) => ({ value: c.city_id, label: name(c) }))}
-              types={types
-                .filter((t) => ["RESIDENTIAL", "LAND", "COMMERCIAL"].includes(t.category))
-                .map((t) => ({ value: t.code, label: name(t) }))}
+        {points.length > 0 && (
+          <div className="relative h-[46svh] min-h-[300px] border-y border-hairline [grid-area:map] lg:h-auto lg:min-h-0 lg:border-0">
+            <MapPreview
+              config={mapConfig}
+              tags
+              intro
+              className="h-full rounded-none shadow-none"
+              label={h.heroMapCaption.replace("{n}", n(points.length))}
+              points={points}
             />
-            {newest.length > 0 && (
-              <div className="flex flex-col">
-                <h2 className="label border-b border-hairline pb-2">{h.plateNewest}</h2>
+            <Link
+              href="/map"
+              className="btn btn-secondary btn-sm absolute end-3 top-3 z-10 shadow-[var(--shadow-float)] lg:end-4 lg:top-4"
+            >
+              <Icon name="map" className="size-4 text-spatial" />
+              <span className="max-lg:sr-only">{h.plateFullMap}</span>
+            </Link>
+          </div>
+        )}
+
+        <div className="flex min-h-0 flex-col gap-8 bg-console px-[var(--gutter)] pt-6 pb-8 [grid-area:console] lg:overflow-y-auto lg:border-e lg:border-hairline lg:px-8">
+          <IntelligentSearch
+            dict={dict}
+            defaultCity={basra?.city_id ?? ""}
+            cities={cities.map((c) => ({ value: c.city_id, label: name(c) }))}
+            types={types
+              .filter((t) => ["RESIDENTIAL", "LAND", "COMMERCIAL"].includes(t.category))
+              .map((t) => ({ value: t.code, label: name(t) }))}
+          />
+          {newest.length > 0 && (
+            <div className="flex flex-col">
+              <h2 className="label border-b border-hairline pb-2">{h.plateNewest}</h2>
+              <PhotoSet>
                 <ul className="flex flex-col divide-y divide-hairline">
                   {newest.map((c, i) => (
                     <li key={c.id}>
@@ -232,182 +232,179 @@ export default async function HomePage() {
                     </li>
                   ))}
                 </ul>
-              </div>
-            )}
-            {anyDemo && <p className="caption">{dict.footer.demoNotice}</p>}
-          </div>
-        </section>
-
-        <div className="page flex flex-col gap-24 pt-20 md:gap-28 md:pt-24">
-          {/* Asking prices: measurements with their provenance, not a card. */}
-          {basraMarket && basraMarket.listings > 0 && (
-            <section aria-labelledby="market-heading">
-              <SectionHead
-                id="market-heading"
-                title={h.pricesTitle}
-                body={h.pricesBody}
-                actions={
-                  <Link
-                    href={basra ? `/market?city_id=${basra.city_id}` : "/market"}
-                    className="btn btn-secondary"
-                  >
-                    {h.pricesMore}
-                  </Link>
-                }
-              />
-              <dl className="grid gap-px overflow-hidden bg-hairline sm:grid-cols-3">
-                {[
-                  {
-                    label: h.housesForSale,
-                    sub: h.medianPerM2,
-                    value: houses?.median_price_per_m2,
-                    count: houses?.listings,
-                  },
-                  {
-                    label: h.apartmentsForRent,
-                    sub: h.medianRent,
-                    value: flats?.median_price,
-                    count: flats?.listings,
-                  },
-                ].map((stat) => (
-                  <div
-                    key={stat.label}
-                    className="flex flex-col gap-3 bg-canvas py-6 sm:px-8 sm:first:ps-0"
-                  >
-                    <dt className="flex flex-col">
-                      <span className="font-medium text-ink">{stat.label}</span>
-                      <span className="meta">{stat.sub}</span>
-                    </dt>
-                    <dd className="kpi text-4xl whitespace-nowrap text-ink xl:text-5xl">
-                      {stat.value && Number.isFinite(Number(stat.value)) ? (
-                        <AnimatedNumber value={Number(stat.value)} as="price-iqd" locale={locale} />
-                      ) : (
-                        <span className="font-sans text-xl font-normal tracking-normal text-ink-3">
-                          {h.noData}
-                        </span>
-                      )}
-                    </dd>
-                    {stat.count ? (
-                      <dd className="meta">{h.basedOn.replace("{n}", n(stat.count))}</dd>
-                    ) : null}
-                  </div>
-                ))}
-                <div className="flex flex-col gap-3 bg-canvas py-6 sm:px-8">
-                  <dt className="flex flex-col">
-                    <span className="font-medium text-ink">{dict.market.headline.listings}</span>
-                    <span className="meta">{basraName}</span>
-                  </dt>
-                  <dd className="kpi text-4xl text-ink xl:text-5xl">{n(basraMarket.listings)}</dd>
-                  {basraMarket.includes_demo && (
-                    <dd className="meta font-medium text-gold-700">{dict.listing.demo}</dd>
-                  )}
-                </div>
-              </dl>
-            </section>
+              </PhotoSet>
+            </div>
           )}
+          {anyDemo && <p className="caption">{dict.footer.demoNotice}</p>}
+        </div>
+      </section>
 
-          {/* More of Basra: photographs lead, each shown once. */}
-          {lead && basra && (
-            <section aria-labelledby="basra-heading">
-              <SectionHead
-                id="basra-heading"
-                title={h.basraTitle}
-                body={h.basraBody}
-                actions={
-                  <Link href={`/properties?city_id=${basra.city_id}`} className="btn btn-primary">
-                    {h.basraAll}
-                  </Link>
-                }
-              />
+      <div className="page flex flex-col gap-24 pt-20 md:gap-28 md:pt-24">
+        {/* Asking prices: measurements with their provenance, not a card. */}
+        {basraMarket && basraMarket.listings > 0 && (
+          <section aria-labelledby="market-heading">
+            <SectionHead
+              id="market-heading"
+              title={h.pricesTitle}
+              body={h.pricesBody}
+              actions={
+                <Link
+                  href={basra ? `/market?city_id=${basra.city_id}` : "/market"}
+                  className="btn btn-secondary"
+                >
+                  {h.pricesMore}
+                </Link>
+              }
+            />
+            <dl className="grid gap-px overflow-hidden bg-hairline sm:grid-cols-3">
+              {[
+                {
+                  label: h.housesForSale,
+                  sub: h.medianPerM2,
+                  value: houses?.median_price_per_m2,
+                  count: houses?.listings,
+                },
+                {
+                  label: h.apartmentsForRent,
+                  sub: h.medianRent,
+                  value: flats?.median_price,
+                  count: flats?.listings,
+                },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className="flex flex-col gap-3 bg-canvas py-6 sm:px-8 sm:first:ps-0"
+                >
+                  <dt className="flex flex-col">
+                    <span className="font-medium text-ink">{stat.label}</span>
+                    <span className="meta">{stat.sub}</span>
+                  </dt>
+                  <dd className="kpi text-4xl whitespace-nowrap text-ink xl:text-5xl">
+                    {stat.value && Number.isFinite(Number(stat.value)) ? (
+                      <AnimatedNumber value={Number(stat.value)} as="price-iqd" locale={locale} />
+                    ) : (
+                      <span className="font-sans text-xl font-normal tracking-normal text-ink-3">
+                        {h.noData}
+                      </span>
+                    )}
+                  </dd>
+                  {stat.count ? (
+                    <dd className="meta">{h.basedOn.replace("{n}", n(stat.count))}</dd>
+                  ) : null}
+                </div>
+              ))}
+              <div className="flex flex-col gap-3 bg-canvas py-6 sm:px-8">
+                <dt className="flex flex-col">
+                  <span className="font-medium text-ink">{dict.market.headline.listings}</span>
+                  <span className="meta">{basraName}</span>
+                </dt>
+                <dd className="kpi text-4xl text-ink xl:text-5xl">{n(basraMarket.listings)}</dd>
+                {basraMarket.includes_demo && (
+                  <dd className="meta font-medium text-gold-700">{dict.listing.demo}</dd>
+                )}
+              </div>
+            </dl>
+          </section>
+        )}
+
+        {/* More of Basra: photographs lead, each shown once. */}
+        {lead && basra && (
+          <section aria-labelledby="basra-heading">
+            <SectionHead
+              id="basra-heading"
+              title={h.basraTitle}
+              body={h.basraBody}
+              actions={
+                <Link href={`/properties?city_id=${basra.city_id}`} className="btn btn-primary">
+                  {h.basraAll}
+                </Link>
+              }
+            />
+            <PhotoSet>
               <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-12">
-                <div className="lg:col-span-7">{card(lead, newest.length, false, true)}</div>
+                <div className="lg:col-span-7">{card(lead, 0, false, true)}</div>
                 <ul className="grid grid-cols-1 content-start gap-x-6 gap-y-8 sm:grid-cols-2 lg:col-span-5">
                   {rest.map((c, i) => (
-                    <li key={c.id}>{card(c, newest.length + 1 + i, true)}</li>
+                    <li key={c.id}>{card(c, 1 + i, true)}</li>
                   ))}
                 </ul>
               </div>
-            </section>
-          )}
+            </PhotoSet>
+          </section>
+        )}
 
-          {/* The country by its rivers, and the cities on MAKAN. */}
-          {cities.length > 0 && (
-            <section aria-labelledby="explore-heading">
-              <SectionHead id="explore-heading" title={h.citiesTitle} body={h.citiesBody} />
-              <div className="grid gap-10 lg:grid-cols-12">
-                <div className="lg:col-span-5">
-                  <RiverMap
-                    locale={locale}
-                    counts={counts}
-                    caption={h.mapCaption}
-                    animate={false}
-                  />
-                </div>
-                <ul className="flex flex-col self-start lg:col-span-7">
-                  {cities.slice(0, 8).map((c) => (
-                    <li key={c.city_id} className="border-b border-hairline first:border-t">
-                      <Link
-                        href={`/properties?city_id=${c.city_id}`}
-                        className="group flex items-center justify-between gap-4 py-4"
-                      >
-                        <span className="title text-ink transition-colors group-hover:text-accent">
-                          {name(c)}
-                        </span>
-                        <span className="flex items-center gap-4">
-                          <span className="meta tabular">
-                            {n(c.listings)} {h.listings}
-                          </span>
-                          <Icon
-                            name="chevron"
-                            className="size-4 text-ink-3 transition-transform duration-[var(--duration-base)] group-hover:translate-x-0.5 group-hover:text-ink rtl:group-hover:-translate-x-0.5"
-                          />
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+        {/* The country by its rivers, and the cities on MAKAN. */}
+        {cities.length > 0 && (
+          <section aria-labelledby="explore-heading">
+            <SectionHead id="explore-heading" title={h.citiesTitle} body={h.citiesBody} />
+            <div className="grid gap-10 lg:grid-cols-12">
+              <div className="lg:col-span-5">
+                <RiverMap locale={locale} counts={counts} caption={h.mapCaption} animate={false} />
               </div>
-            </section>
-          )}
-
-          <NearYou dict={dict} locale={locale} />
-
-          {/* In development: honest previews, no fake data. */}
-          <section aria-labelledby="next-heading">
-            <SectionHead id="next-heading" title={h.nextTitle} body={h.nextBody} />
-            <ul className="grid gap-px overflow-hidden bg-hairline sm:grid-cols-2 lg:grid-cols-4">
-              {NEXT_MODULES.map((m) => (
-                <li key={m.key} className="flex flex-col gap-2 bg-canvas py-5 sm:pe-6">
-                  <p className="title text-ink">{h[`${m.key}Title` as const]}</p>
-                  <p className="text-[15px] text-ink-2">{h[`${m.key}Body` as const]}</p>
-                  {m.href ? (
-                    <Link href={m.href} className="link mt-1 w-fit text-sm font-medium">
-                      {h.explore}
+              <ul className="flex flex-col self-start lg:col-span-7">
+                {cities.slice(0, 8).map((c) => (
+                  <li key={c.city_id} className="border-b border-hairline first:border-t">
+                    <Link
+                      href={`/properties?city_id=${c.city_id}`}
+                      className="group flex items-center justify-between gap-4 py-4"
+                    >
+                      <span className="title text-ink transition-colors group-hover:text-accent">
+                        {name(c)}
+                      </span>
+                      <span className="flex items-center gap-4">
+                        <span className="meta tabular">
+                          {n(c.listings)} {h.listings}
+                        </span>
+                        <Icon
+                          name="chevron"
+                          className="size-4 text-ink-3 transition-transform duration-[var(--duration-base)] group-hover:translate-x-0.5 group-hover:text-ink rtl:group-hover:-translate-x-0.5"
+                        />
+                      </span>
                     </Link>
-                  ) : (
-                    <span className="caption mt-1">{h.inDevelopment}</span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          {/* List a property: one closing action. */}
-          <section className="flex flex-col items-start justify-between gap-6 border-t border-hairline-strong pt-8 pb-4 md:flex-row md:items-center">
-            <div className="flex flex-col gap-2">
-              <h2 className="display-md text-ink">{h.listTitle}</h2>
-              <p className="text-ink-2">{h.listBody}</p>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <Link
-              href={me ? "/dashboard/properties/new" : "/register"}
-              className="btn btn-secondary btn-lg shrink-0"
-            >
-              <Icon name="plus" className="size-4" strokeWidth={2} />
-              {h.listButton}
-            </Link>
           </section>
-        </div>
+        )}
+
+        <NearYou dict={dict} locale={locale} />
+
+        {/* In development: honest previews, no fake data. */}
+        <section aria-labelledby="next-heading">
+          <SectionHead id="next-heading" title={h.nextTitle} body={h.nextBody} />
+          <ul className="grid gap-px overflow-hidden bg-hairline sm:grid-cols-2 lg:grid-cols-4">
+            {NEXT_MODULES.map((m) => (
+              <li key={m.key} className="flex flex-col gap-2 bg-canvas py-5 sm:pe-6">
+                <p className="title text-ink">{h[`${m.key}Title` as const]}</p>
+                <p className="text-[15px] text-ink-2">{h[`${m.key}Body` as const]}</p>
+                {m.href ? (
+                  <Link href={m.href} className="link mt-1 w-fit text-sm font-medium">
+                    {h.explore}
+                  </Link>
+                ) : (
+                  <span className="caption mt-1">{h.inDevelopment}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* List a property: one closing action. */}
+        <section className="flex flex-col items-start justify-between gap-6 border-t border-hairline-strong pt-8 pb-4 md:flex-row md:items-center">
+          <div className="flex flex-col gap-2">
+            <h2 className="display-md text-ink">{h.listTitle}</h2>
+            <p className="text-ink-2">{h.listBody}</p>
+          </div>
+          <Link
+            href={me ? "/dashboard/properties/new" : "/register"}
+            className="btn btn-secondary btn-lg shrink-0"
+          >
+            <Icon name="plus" className="size-4" strokeWidth={2} />
+            {h.listButton}
+          </Link>
+        </section>
       </div>
-    </PhotoSet>
+    </div>
   );
 }

@@ -90,11 +90,11 @@ export function IntelligentSearch({
           <span className="max-sm:sr-only">{h.search}</span>
         </button>
       </div>
-      <div className="grid grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)] items-center gap-2">
+      <div className="grid grid-cols-2 items-center gap-2 sm:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)]">
         <div
           role="radiogroup"
           aria-label={dict.property.purpose}
-          className={`seg transition-opacity duration-[var(--duration-base)] ${ai ? "pointer-events-none opacity-40" : ""}`}
+          className={`seg col-span-2 w-fit transition-opacity duration-[var(--duration-base)] sm:col-span-1 ${ai ? "pointer-events-none opacity-40" : ""}`}
         >
           {PURPOSES.map((p) => (
             <button

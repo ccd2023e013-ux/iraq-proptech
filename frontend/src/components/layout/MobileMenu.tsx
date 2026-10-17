@@ -21,7 +21,7 @@ export function MobileMenu({
     if (ref.current) ref.current.open = false;
   }, [pathname]);
   return (
-    <details ref={ref} className="relative lg:hidden">
+    <details ref={ref} className="group relative lg:hidden">
       <summary
         aria-label={label}
         className="icon-btn size-9 cursor-pointer list-none [&::-webkit-details-marker]:hidden"
@@ -41,7 +41,7 @@ export function MobileMenu({
       {/* A sheet under the header: large ruled links, thumb-sized. */}
       <nav
         aria-label={label}
-        className="fade-in fixed inset-x-0 top-[var(--header-h)] z-40 flex flex-col border-b border-hairline bg-canvas px-4 pb-4 shadow-[var(--shadow-float)]"
+        className="fade-in fixed inset-x-0 top-[var(--header-h)] z-40 hidden flex-col border-b border-hairline bg-console px-4 pb-4 shadow-[var(--shadow-float)] group-open:flex"
       >
         {links.map((l) => (
           <Link
