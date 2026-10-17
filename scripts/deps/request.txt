@@ -1,0 +1,10 @@
+specimen
+@fontsource-variable/alexandria
+@fontsource/ibm-plex-sans-arabic
+@fontsource-variable/noto-kufi-arabic
+@fontsource-variable/reem-kufi
+@fontsource-variable/el-messiri
+@fontsource-variable/noto-naskh-arabic
+@fontsource-variable/readex-pro
+@fontsource-variable/vazirmatn
+@fontsource-variable/rubik

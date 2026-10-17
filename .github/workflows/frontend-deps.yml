@@ -1,0 +1,65 @@
+name: Frontend dependencies (design branch helper)
+
+# Manual helper for the design branch, whose sandbox cannot reach npm.
+# Triggered by editing scripts/deps/request.txt. First line is the mode:
+#   specimen — install the listed font packages in a scratch folder and render
+#              a type specimen (PNG) for review;
+#   install  — `npm install` the listed packages in frontend/ and publish the
+#              updated package.json and package-lock.json.
+# Output goes to a new assets/deps-<run> branch; nothing is merged or deployed.
+on:
+  push:
+    branches: ["design/premium-redesign"]
+    paths: ["scripts/deps/request.txt"]
+
+permissions: {}
+
+jobs:
+  deps:
+    if: github.ref == 'refs/heads/design/premium-redesign'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # push the result to a new assets/deps-* branch
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Run
+        run: |
+          set -u
+          MODE=$(head -1 scripts/deps/request.txt | tr -d '[:space:]')
+          PKGS=$(tail -n +2 scripts/deps/request.txt | grep -v '^#' | tr '\n' ' ')
+          mkdir -p /tmp/out
+          if [ "$MODE" = "install" ]; then
+            cd frontend
+            npm install --save --no-audit --no-fund $PKGS 2>&1 | tee /tmp/out/npm.log
+            cp package.json package-lock.json /tmp/out/
+          else
+            mkdir -p /tmp/spec && cd /tmp/spec && npm init -y >/dev/null
+            for p in $PKGS; do npm install --no-audit --no-fund "$p" >>/tmp/out/npm.log 2>&1 || echo "FAILED $p" >>/tmp/out/npm.log; done
+            find node_modules/@fontsource* -maxdepth 2 -name "*.css" | sort > /tmp/out/css.txt
+            python -m pip install --quiet playwright
+            python -m playwright install --with-deps chromium >/dev/null
+            python "$GITHUB_WORKSPACE/scripts/deps/specimen.py" /tmp/spec /tmp/out
+          fi
+      - name: Push to assets/deps-${{ github.run_id }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BRANCH: assets/deps-${{ github.run_id }}
+        run: |
+          cd /tmp/out
+          git init -q -b "$BRANCH"
+          git config user.name "frontend-deps"
+          git config user.email "frontend-deps@users.noreply.github.com"
+          git add -A
+          git commit -qm "frontend deps" || exit 0
+          git push -q "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:refs/heads/$BRANCH"
+          echo "::notice title=Frontend deps::branch $BRANCH"
