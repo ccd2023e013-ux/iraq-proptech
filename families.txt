@@ -1,0 +1,9 @@
+IBM Plex Sans Arabic ibm-plex-sans-arabic
+Alexandria Variable alexandria
+El Messiri Variable el-messiri
+Noto Kufi Arabic Variable noto-kufi-arabic
+Noto Naskh Arabic Variable noto-naskh-arabic
+Readex Pro Variable readex-pro
+Reem Kufi Variable reem-kufi
+Rubik Variable rubik
+Vazirmatn Variable vazirmatn
