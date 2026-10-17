@@ -123,8 +123,10 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
         <PageHeader
           title={
             <>
-              {t.title}
-              <span className="block text-spatial">{scopeName}</span>
+              <span className="mb-2 block font-sans text-base font-medium tracking-normal text-ink-2">
+                {t.title}
+              </span>
+              <span className="place block">{scopeName}</span>
             </>
           }
           lede={t.subtitle}
@@ -169,9 +171,9 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
           }
         />
         {/* How to read: every number on this page carries one of these labels. */}
-        <details className="group max-w-3xl rounded-[var(--radius-card)] bg-gold-100 px-5 py-4 shadow-[inset_0_0_0_1px_var(--gold-line)]">
+        <details className="group max-w-3xl border-y border-hairline py-3">
           <summary className="flex cursor-pointer list-none items-center gap-2 font-medium text-ink [&::-webkit-details-marker]:hidden">
-            <Icon name="info" className="size-4 text-gold-700" />
+            <Icon name="info" className="size-4 text-ink-3" />
             {t.readGuide}
             <Icon
               name="chevron-down"
@@ -217,17 +219,17 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
             ) : (
               <div className="lg:col-span-7" />
             )}
-            <dl className="grid grid-cols-2 gap-px self-start overflow-hidden rounded-[var(--radius-card)] bg-hairline lg:col-span-5">
+            <dl className="grid grid-cols-2 gap-px self-start overflow-hidden border-y border-hairline-strong bg-hairline lg:col-span-5">
               {[
                 [t.headline.listings, num(p.sample_listings, locale)],
                 [t.headline.period, `${date(p.observation_from)} – ${date(p.observation_to)}`],
                 [t.headline.demoShare, `${num(Math.round(p.demo_share * 100), locale)}%`],
                 [t.headline.confidence, t.confidence[p.confidence]],
               ].map(([k, val], i) => (
-                <div key={k} className="flex flex-col gap-1 bg-surface p-5">
+                <div key={k} className="flex flex-col gap-1 bg-canvas py-4 odd:pe-4 even:ps-4">
                   <dt className="meta">{k}</dt>
                   <dd
-                    className={`text-ink ${i === 0 ? "kpi text-3xl" : "text-[15px] font-medium"}`}
+                    className={`text-ink ${i === 0 ? "kpi text-4xl" : "text-[15px] font-medium"}`}
                   >
                     {val}
                   </dd>
@@ -439,11 +441,11 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
           <h2 id="market-gaps" className="display-md text-ink">
             {t.unavailableTitle}
           </h2>
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid gap-x-8 sm:grid-cols-2 lg:grid-cols-3">
             {report.unavailable.map((u) => (
               <li
                 key={u.metric}
-                className="flex flex-col gap-1 rounded-[var(--radius-control)] bg-fill/60 p-4 text-sm"
+                className="flex flex-col gap-1 border-t border-hairline py-3 text-sm"
               >
                 <span className="font-medium text-ink">
                   {(t.metrics as Record<string, string>)[u.metric] ?? u.metric}
@@ -464,7 +466,7 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
       {p && (
         <section
           aria-labelledby="market-provenance"
-          className="flex flex-col gap-5 rounded-[var(--radius-card)] bg-surface p-6 shadow-[inset_0_0_0_1px_var(--hairline)] md:p-8"
+          className="flex flex-col gap-5 border-t border-hairline-strong pt-6"
           data-testid="market-provenance"
         >
           <h2 id="market-provenance" className="title text-ink">
@@ -561,7 +563,7 @@ function RangeChart({
                 <span aria-hidden className="absolute inset-x-0 top-[70%] h-px bg-hairline" />
                 <span
                   aria-hidden
-                  className="absolute top-[70%] h-2.5 -translate-y-1/2 rounded-[4px] bg-spatial-fill/45"
+                  className="absolute top-[70%] h-2.5 -translate-y-1/2 rounded-[3px] bg-ink/18"
                   style={{
                     insetInlineStart: pct(r.low),
                     width: `calc(${pct(r.high)} - ${pct(r.low)})`,
@@ -570,7 +572,7 @@ function RangeChart({
                 {r.mid !== null && (
                   <span
                     aria-hidden
-                    className="absolute top-[70%] size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-spatial-fill shadow-[0_0_0_2px_var(--canvas)] rtl:translate-x-1/2"
+                    className="absolute top-[70%] size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink shadow-[0_0_0_2px_var(--canvas)] rtl:translate-x-1/2"
                     style={{ insetInlineStart: pct(r.mid) }}
                   />
                 )}

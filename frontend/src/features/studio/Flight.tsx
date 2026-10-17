@@ -108,6 +108,15 @@ export function Flight({
       mapRef.current = map;
       map.addControl(new maplibre.NavigationControl({ visualizePitch: true }), "top-right");
       const m = map;
+      // Diagnostics for review runs: "ready" once every tile in view has been
+      // drawn (the first idle), and the last map error, if any.
+      const el = container.current;
+      m.once("idle", () => {
+        el.dataset.ready = "1";
+      });
+      m.on("error", (event) => {
+        el.dataset.error = String(event.error?.message ?? "error").slice(0, 160);
+      });
       m.on("style.load", () => {
         const vector = Object.entries(m.getStyle().sources).find(
           ([, s]) => s.type === "vector",

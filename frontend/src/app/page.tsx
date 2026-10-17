@@ -105,7 +105,9 @@ export default async function HomePage() {
   );
   const lead = firstOfType[0] ?? all[0];
   const rest = (firstOfType.length > 1 ? firstOfType : all).filter((c) => c !== lead).slice(0, 4);
-  const editorialPhotos = distinctCovers([lead, ...rest].filter(Boolean));
+  const editorialPhotos = distinctCovers(
+    [lead, ...rest].filter((c): c is NonNullable<typeof c> => !!c),
+  );
   const anyDemo = cities.some((c) => c.includes_demo);
 
   const segment = (type: string, purpose: string) =>

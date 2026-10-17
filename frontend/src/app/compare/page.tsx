@@ -217,13 +217,13 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
                       </span>
                     )}
                     {p.is_demo && (
-                      <span className="absolute start-0 bottom-0 rounded-se-[var(--radius-tag)] bg-gold-500 px-2 py-0.5 text-[11px] font-semibold text-[#1d1405]">
+                      <span className="absolute start-2 bottom-2 rounded-[var(--radius-tag)] bg-[#0b0f17]/78 px-1.5 py-0.5 text-[11px] font-medium text-[#ede7dc] backdrop-blur-sm">
                         {dict.listing.demo}
                       </span>
                     )}
                   </Link>
                   <div className="flex flex-col gap-1">
-                    <p className="kpi text-xl text-ink">
+                    <p className="kpi text-2xl text-ink">
                       {p.price_on_request
                         ? dict.listing.priceOnRequest
                         : formatPrice(p.price_amount, p.currency, locale)}
@@ -332,20 +332,17 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
 
       {analysis && (
         <section
-          className="flex flex-col gap-4 rounded-[var(--radius-card)] bg-surface p-6 shadow-[inset_0_0_0_1px_var(--hairline)] md:p-8"
+          className="flex flex-col gap-4 border-t border-hairline-strong pt-6"
           data-testid="ai-compare"
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="title flex items-center gap-2 text-ink">
-              <Icon name="sparkle" className="size-5 text-accent" />
-              {dict.ai.compareAnalysis}
-            </h2>
+            <h2 className="title text-ink">{dict.ai.compareAnalysis}</h2>
             <ProviderBadge dict={dict} provider={analysis.provider} model={analysis.model} />
           </div>
           {!analysis.result.prices_comparable && (
             <p className="text-ink-2">{dict.ai.notComparable}</p>
           )}
-          <ul className="grid gap-3 md:grid-cols-2">
+          <ul className="grid gap-x-10 md:grid-cols-2">
             {analysis.result.properties.map((row) => {
               const p = data.items.find((i) => i.id === row.id);
               if (!p) return null;
@@ -355,10 +352,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
                 analysis.result.highlights.most_bedrooms === row.id && dict.ai.mostBedrooms,
               ].filter(Boolean);
               return (
-                <li
-                  key={row.id}
-                  className="flex flex-col gap-1.5 rounded-[var(--radius-control)] bg-fill/60 p-4"
-                >
+                <li key={row.id} className="flex flex-col gap-1.5 border-t border-hairline py-4">
                   <p className="line-clamp-1 font-medium text-ink">{title(p)}</p>
                   <p className="tabular text-ink-2">
                     {dict.ai.pricePerM2}:{" "}
@@ -375,10 +369,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
                   {tags.length > 0 && (
                     <p className="flex flex-wrap gap-1.5">
                       {tags.map((t) => (
-                        <span
-                          key={String(t)}
-                          className="rounded-[var(--radius-tag)] bg-accent-tint px-2 py-0.5 text-[12px] font-medium text-accent"
-                        >
+                        <span key={String(t)} className="text-[13px] font-medium text-accent">
                           {t}
                         </span>
                       ))}

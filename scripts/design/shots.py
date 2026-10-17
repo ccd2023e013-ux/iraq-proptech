@@ -134,6 +134,11 @@ def settle(page: Page, path: str) -> None:
         ):
             break
         page.wait_for_timeout(500)
+    flight = page.locator("[data-testid=flight-map]")
+    for _ in range(60):  # the drone-flight map: until every tile in view is drawn (30 s)
+        if flight.count() == 0 or flight.first.get_attribute("data-ready") == "1":
+            break
+        page.wait_for_timeout(500)
     for _ in range(12):  # a preview with an arrival move: until it has landed
         if previews.count() == 0 or all(
             previews.nth(i).get_attribute("data-phase") in (None, "settled")
@@ -216,9 +221,39 @@ def shoot(page: Page, name: str, path: str, tag: str) -> None:
         previews_ready = [pv.nth(i).get_attribute("data-ready") for i in range(pv.count())]
     except Exception:
         pass
+    flight_map = None
+    try:
+        if page.locator("[data-testid=flight-map]").count():
+            # Is the basemap actually drawn? Luminance spread of the map canvas
+            # (a blank canvas has almost none), plus the map's own signals.
+            flight_map = page.evaluate(
+                """() => {
+                  const box = document.querySelector('[data-testid=flight-map]');
+                  const gl = box.querySelector('canvas');
+                  const out = { ready: box.dataset.ready || null, error: box.dataset.error || null };
+                  if (!gl) return out;
+                  const c = document.createElement('canvas');
+                  c.width = 160; c.height = 100;
+                  const ctx = c.getContext('2d');
+                  ctx.drawImage(gl, 0, 0, 160, 100);
+                  const d = ctx.getImageData(0, 0, 160, 100).data;
+                  let sum = 0, sq = 0, n = 0;
+                  for (let i = 0; i < d.length; i += 4) {
+                    const l = 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
+                    sum += l; sq += l * l; n++;
+                  }
+                  const mean = sum / n;
+                  out.luminance_mean = Math.round(mean);
+                  out.luminance_sd = Math.round(Math.sqrt(sq / n - mean * mean) * 10) / 10;
+                  return out;
+                }"""
+            )
+    except Exception as exc:
+        flight_map = {"error": f"probe failed: {type(exc).__name__}"}
     REPORT.append(
         {
             "shot": f"{tag}--{name}",
+            "flight_map": flight_map,
             "map_previews_ready": previews_ready,
             "broken_images": broken_images,
             "path": path,
