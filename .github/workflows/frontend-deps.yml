@@ -39,7 +39,11 @@ jobs:
           mkdir -p /tmp/out
           if [ "$MODE" = "install" ]; then
             cd frontend
-            npm install --save --no-audit --no-fund $PKGS 2>&1 | tee /tmp/out/npm.log
+            # Lines starting with "-" are removed; the others are installed.
+            ADD=$(echo $PKGS | tr ' ' '\n' | grep -v '^-' | tr '\n' ' ')
+            DEL=$(echo $PKGS | tr ' ' '\n' | grep '^-' | sed 's/^-//' | tr '\n' ' ')
+            if [ -n "$DEL" ]; then npm uninstall --no-audit --no-fund $DEL 2>&1 | tee /tmp/out/npm.log; fi
+            if [ -n "$ADD" ]; then npm install --save --no-audit --no-fund $ADD 2>&1 | tee -a /tmp/out/npm.log; fi
             cp package.json package-lock.json /tmp/out/
           else
             mkdir -p /tmp/spec && cd /tmp/spec && npm init -y >/dev/null
