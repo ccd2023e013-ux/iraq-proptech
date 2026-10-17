@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Alert } from "@/components/ui/Alert";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Icon } from "@/components/ui/Icon";
+import { PhotoSet } from "@/features/properties/PhotoSet";
 import { PropertyCard } from "@/features/properties/PropertyCard";
 import { favoriteIds, runSearch } from "@/features/search/data";
 import { SaveSearchButton } from "@/features/search/SaveSearchButton";
@@ -12,7 +13,6 @@ import { getDictionary, errorMessage } from "@/i18n";
 import { getRequestLocale } from "@/i18n/server";
 import { serverApiFetch } from "@/lib/api/server";
 import { getCurrentUser } from "@/lib/auth/session";
-import { distinctCovers } from "@/lib/photos";
 import { type RawParams, toApiQuery, withParam } from "@/lib/search";
 import type { Place, ReferenceItem } from "@/types/property";
 
@@ -36,8 +36,6 @@ export default async function PropertiesPage({
   const phone = /Mobi|iPhone|Android/i.test((await headers()).get("user-agent") ?? "");
   const typeNames = new Map(types.map((t) => [t.code, locale === "ar" ? t.name_ar : t.name_en]));
   const s = dict.search;
-  // Each demo photograph once per page (lib/photos); repeats become place plates.
-  const covers = distinctCovers("items" in result ? result.items : []);
 
   return (
     <div className="mx-auto grid max-w-[1320px] grid-cols-[minmax(0,1fr)] gap-6 px-4 py-8 sm:px-6 md:py-12 lg:grid-cols-12 lg:gap-8 lg:px-8">
@@ -105,21 +103,23 @@ export default async function PropertiesPage({
           <EmptyState title={s.noResults} glyph="search" />
         ) : (
           <>
-            <ul className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
-              {result.items.map((card) => (
-                <li key={card.id}>
-                  <PropertyCard
-                    cover={covers.get(card.id) ?? null}
-                    card={card}
-                    dict={dict}
-                    locale={locale}
-                    typeName={typeNames.get(card.property_type_code)}
-                    favorite={favorites.has(card.id)}
-                    signedIn={!!me}
-                  />
-                </li>
-              ))}
-            </ul>
+            <PhotoSet>
+              <ul className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
+                {result.items.map((card, i) => (
+                  <li key={card.id}>
+                    <PropertyCard
+                      photoIndex={i}
+                      card={card}
+                      dict={dict}
+                      locale={locale}
+                      typeName={typeNames.get(card.property_type_code)}
+                      favorite={favorites.has(card.id)}
+                      signedIn={!!me}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </PhotoSet>
             <Pagination
               page={result.page}
               pages={Math.ceil(result.total / result.page_size)}

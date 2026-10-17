@@ -90,7 +90,7 @@ export function IntelligentSearch({
           <span className="max-sm:sr-only">{h.search}</span>
         </button>
       </div>
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="grid grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)] items-center gap-2">
         <div
           role="radiogroup"
           aria-label={dict.property.purpose}
@@ -114,7 +114,7 @@ export function IntelligentSearch({
               aria-label={h.anyCity}
               value={cityId}
               onChange={(e) => setCityId(e.target.value)}
-              className={`${select} w-auto flex-1 sm:flex-none`}
+              className={select}
             >
               <option value="">{h.anyCity}</option>
               {cities.map((c) => (
@@ -127,7 +127,7 @@ export function IntelligentSearch({
               aria-label={h.anyType}
               value={type}
               onChange={(e) => setType(e.target.value)}
-              className={`${select} w-auto flex-1 sm:flex-none`}
+              className={select}
             >
               <option value="">{h.anyType}</option>
               {types.map((t) => (

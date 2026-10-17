@@ -1,11 +1,11 @@
 import Link from "next/link";
 
-import { SafeImage } from "@/components/ui/SafeImage";
 import type { Dictionary } from "@/i18n";
 import type { Locale } from "@/i18n/config";
 import { placeName } from "@/lib/format";
 import type { PropertyCard as Card } from "@/types/property";
 
+import { SetPhoto } from "./PhotoSet";
 import { PlacePlate } from "./PlacePlate";
 import { priceLabel } from "./PropertyCard";
 
@@ -17,14 +17,14 @@ export function ListingRow({
   card,
   dict,
   locale,
-  photo,
+  photoIndex,
   typeName,
 }: {
   card: Card;
   dict: Dictionary;
   locale: Locale;
-  /** This view's photo for the listing (null: place plate). */
-  photo: string | null;
+  /** Reading order inside a <PhotoSet> (repeated demo photos become plates). */
+  photoIndex?: number;
   typeName?: string;
 }) {
   const title = locale === "en" && card.title_en ? card.title_en : card.title_ar;
@@ -36,11 +36,12 @@ export function ListingRow({
       className="group flex items-center gap-4 py-3 transition-colors"
     >
       <span className="relative size-16 shrink-0 overflow-hidden rounded-[var(--radius-control)] bg-fill">
-        {photo ? (
-          <SafeImage src={photo} alt="" fallbackLabel="" className="photo size-full object-cover" />
-        ) : (
-          <PlacePlate type={card.property_type_code} size="sm" />
-        )}
+        <SetPhoto
+          src={card.cover_url}
+          index={photoIndex}
+          className="photo"
+          plate={<PlacePlate type={card.property_type_code} size="sm" />}
+        />
       </span>
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="flex items-baseline justify-between gap-3">

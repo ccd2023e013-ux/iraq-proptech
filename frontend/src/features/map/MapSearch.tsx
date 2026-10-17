@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/Button";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { TrustBadge } from "@/components/ui/TrustBadge";
+import { PhotoSet, SetPhoto } from "@/features/properties/PhotoSet";
 import { PlacePlate } from "@/features/properties/PlacePlate";
 import { priceLabel } from "@/features/properties/PropertyCard";
 import type { Dictionary } from "@/i18n";
@@ -34,7 +35,6 @@ import {
   polygonBbox,
 } from "@/lib/map/geo";
 import { PLACE_GROUPS, bboxAround, placesAllowed } from "@/lib/map/places";
-import { distinctCovers } from "@/lib/photos";
 import { canTransition, isPlainClick, navigateWithTransition } from "@/lib/viewTransition";
 import { type MapConfig, parseBbox } from "@/lib/map/provider";
 import { type RawParams, first, toApiQuery, withParam } from "@/lib/search";
@@ -543,9 +543,6 @@ export function MapSearch({
     </div>
   );
 
-  // Each photograph once in the list (lib/photos); repeats become place plates.
-  const rowPhotos = distinctCovers(items);
-
   // Map-first stage: the map fills the space.
   //   start side  — results: a docked rail (wide screens) / a bottom sheet (phones)
   //   end side    — one instrument column (layers, draw, near me, 3D)
@@ -755,91 +752,92 @@ export function MapSearch({
               <p className="max-w-[18rem] text-[15px] leading-relaxed text-ink-2">{m.noneInView}</p>
             </div>
           )}
-          <ul className="flex flex-col gap-0.5 py-2">
-            {items.map((card) => {
-              const title = locale === "en" && card.title_en ? card.title_en : card.title_ar;
-              const active = highlightId === card.id || selectedId === card.id;
-              const area = formatArea(card.area_m2, locale);
-              const where = [placeName(card.district ?? null, locale), placeName(card.city, locale)]
-                .filter(Boolean)
-                .join("، ");
-              return (
-                <li key={card.id}>
-                  <div
-                    data-active={active || undefined}
-                    className="group relative mx-2 flex items-center gap-1 rounded-[var(--radius-control)] transition-colors duration-[var(--duration-quick)] hover:bg-fill/70 data-[active]:bg-accent-tint/60"
-                  >
-                    <span
-                      aria-hidden
-                      className="absolute inset-y-3 -start-2 w-[3px] origin-center scale-y-0 rounded-full bg-accent-fill transition-transform duration-[var(--duration-base)] ease-[var(--ease-standard)] group-data-[active]:scale-y-100"
-                    />
-                    <a
-                      href={`/properties/${card.id}`}
-                      onMouseEnter={() => setHighlightId(card.id)}
-                      onMouseLeave={() => setHighlightId(null)}
-                      onFocus={() => setHighlightId(card.id)}
-                      onBlur={() => setHighlightId(null)}
-                      aria-current={selectedId === card.id ? "true" : undefined}
-                      className="flex min-w-0 flex-1 gap-3.5 p-2"
+          <PhotoSet key={items.map((c) => c.id).join()}>
+            <ul className="flex flex-col gap-0.5 py-2">
+              {items.map((card, i) => {
+                const title = locale === "en" && card.title_en ? card.title_en : card.title_ar;
+                const active = highlightId === card.id || selectedId === card.id;
+                const area = formatArea(card.area_m2, locale);
+                const where = [
+                  placeName(card.district ?? null, locale),
+                  placeName(card.city, locale),
+                ]
+                  .filter(Boolean)
+                  .join("، ");
+                return (
+                  <li key={card.id}>
+                    <div
+                      data-active={active || undefined}
+                      className="group relative mx-2 flex items-center gap-1 rounded-[var(--radius-control)] transition-colors duration-[var(--duration-quick)] hover:bg-fill/70 data-[active]:bg-accent-tint/60"
                     >
-                      <span className="relative aspect-[4/3] w-[104px] shrink-0 overflow-hidden rounded-[var(--radius-control)] bg-fill">
-                        {rowPhotos.get(card.id) ? (
-                          <SafeImage
-                            src={rowPhotos.get(card.id)!}
-                            alt=""
-                            fallbackLabel="—"
-                            className="photo size-full object-cover transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:scale-[1.04]"
-                          />
-                        ) : (
-                          <PlacePlate type={card.property_type_code} size="sm" />
-                        )}
-                      </span>
-                      <span className="flex min-w-0 flex-col justify-center gap-1">
-                        <span className="flex min-w-0 items-baseline gap-2">
-                          <span className="kpi truncate text-[17px] text-ink">
-                            {priceLabel(card, dict, locale)}
-                          </span>
-                          <span className="caption shrink-0">
-                            {dict.listing.purposes[card.purpose]}
-                          </span>
-                        </span>
-                        <span className="truncate text-[13.5px] text-ink-2 group-hover:text-ink">
-                          {title}
-                        </span>
-                        <span className="caption flex min-w-0 items-center gap-3 text-ink-3">
-                          {where && <span className="min-w-0 truncate">{where}</span>}
-                          {card.bedrooms != null && (
-                            <span className="flex shrink-0 items-center gap-1 tabular">
-                              <Icon name="bed" className="size-3.5" />
-                              {card.bedrooms}
-                            </span>
-                          )}
-                          {area && <span className="shrink-0 tabular">{area}</span>}
-                          {card.is_demo && (
-                            <span className="shrink-0 font-medium text-gold-700">
-                              {dict.listing.demo}
-                            </span>
-                          )}
-                        </span>
-                      </span>
-                    </a>
-                    {card.display_location && (
-                      <button
-                        type="button"
-                        onClick={() => showOnMap(card)}
-                        aria-label={`${m.showOnMap}: ${title}`}
-                        data-testid="show-on-map"
-                        title={m.showOnMap}
-                        className="icon-btn me-1 size-9 shrink-0 text-ink-3 opacity-60 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                      <span
+                        aria-hidden
+                        className="absolute inset-y-3 -start-2 w-[3px] origin-center scale-y-0 rounded-full bg-accent-fill transition-transform duration-[var(--duration-base)] ease-[var(--ease-standard)] group-data-[active]:scale-y-100"
+                      />
+                      <a
+                        href={`/properties/${card.id}`}
+                        onMouseEnter={() => setHighlightId(card.id)}
+                        onMouseLeave={() => setHighlightId(null)}
+                        onFocus={() => setHighlightId(card.id)}
+                        onBlur={() => setHighlightId(null)}
+                        aria-current={selectedId === card.id ? "true" : undefined}
+                        className="flex min-w-0 flex-1 gap-3.5 p-2"
                       >
-                        <Icon name="locate" className="size-[18px] text-spatial" />
-                      </button>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+                        <span className="relative aspect-[4/3] w-[104px] shrink-0 overflow-hidden rounded-[var(--radius-control)] bg-fill">
+                          <SetPhoto
+                            src={card.cover_url}
+                            index={i}
+                            className="photo transition-transform duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-hover:scale-[1.04]"
+                            plate={<PlacePlate type={card.property_type_code} size="sm" />}
+                          />
+                        </span>
+                        <span className="flex min-w-0 flex-col justify-center gap-1">
+                          <span className="flex min-w-0 items-baseline gap-2">
+                            <span className="kpi truncate text-[17px] text-ink">
+                              {priceLabel(card, dict, locale)}
+                            </span>
+                            <span className="caption shrink-0">
+                              {dict.listing.purposes[card.purpose]}
+                            </span>
+                          </span>
+                          <span className="truncate text-[13.5px] text-ink-2 group-hover:text-ink">
+                            {title}
+                          </span>
+                          <span className="caption flex min-w-0 items-center gap-3 text-ink-3">
+                            {where && <span className="min-w-0 truncate">{where}</span>}
+                            {card.bedrooms != null && (
+                              <span className="flex shrink-0 items-center gap-1 tabular">
+                                <Icon name="bed" className="size-3.5" />
+                                {card.bedrooms}
+                              </span>
+                            )}
+                            {area && <span className="shrink-0 tabular">{area}</span>}
+                            {card.is_demo && (
+                              <span className="shrink-0 font-medium text-gold-700">
+                                {dict.listing.demo}
+                              </span>
+                            )}
+                          </span>
+                        </span>
+                      </a>
+                      {card.display_location && (
+                        <button
+                          type="button"
+                          onClick={() => showOnMap(card)}
+                          aria-label={`${m.showOnMap}: ${title}`}
+                          data-testid="show-on-map"
+                          title={m.showOnMap}
+                          className="icon-btn me-1 size-9 shrink-0 text-ink-3 opacity-60 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                        >
+                          <Icon name="locate" className="size-[18px] text-spatial" />
+                        </button>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </PhotoSet>
           {total > items.length && (
             <a
               href={`/properties?${toApiQuery(params)}`}

@@ -194,6 +194,25 @@ def shoot(page: Page, name: str, path: str, tag: str) -> None:
             "() => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth,"
             " window.innerWidth)"
         ) - page.viewport_size["width"]
+        culprits = None
+        if overflow and overflow > 1:
+            # The outermost elements that stick out of the viewport (either side).
+            culprits = page.evaluate(
+                """() => {
+                  const vw = document.documentElement.clientWidth;
+                  const out = [];
+                  for (const el of document.body.querySelectorAll('*')) {
+                    const r = el.getBoundingClientRect();
+                    if (!r.width || (r.right <= vw + 1 && r.left >= -1)) continue;
+                    if (el.parentElement && (() => { const p = el.parentElement.getBoundingClientRect();
+                      return p.right > vw + 1 || p.left < -1; })()) continue;
+                    const cls = (el.getAttribute('class') || '').split(/\\s+/).slice(0, 6).join('.');
+                    out.push(`${el.tagName.toLowerCase()}.${cls} [${Math.round(r.left)}..${Math.round(r.right)}] ${(el.textContent || '').trim().slice(0, 40)}`);
+                    if (out.length >= 5) break;
+                  }
+                  return out;
+                }"""
+            )
         height = page.evaluate("() => document.documentElement.scrollHeight")
         file = OUT / f"{tag}--{name}.jpg"
         clip_h = min(height, MAX_H) if FULL else page.viewport_size["height"]
@@ -260,6 +279,7 @@ def shoot(page: Page, name: str, path: str, tag: str) -> None:
             "status": status,
             "seconds": round(time.monotonic() - t0, 1),
             "overflow_px": overflow,
+            "overflow_culprits": culprits if overflow and overflow > 1 else None,
             "console_errors": errors[:8],
             "failed_requests": failed[:8],
         }

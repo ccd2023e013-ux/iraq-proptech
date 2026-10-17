@@ -2,10 +2,10 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { redirect } from "next/navigation";
 
+import { PhotoSet } from "@/features/properties/PhotoSet";
 import { PropertyCard } from "@/features/properties/PropertyCard";
 import { getDictionary } from "@/i18n";
 import { getRequestLocale } from "@/i18n/server";
-import { distinctCovers } from "@/lib/photos";
 import { serverApiFetch } from "@/lib/api/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import type { PropertyCard as Card, ReferenceItem } from "@/types/property";
@@ -39,21 +39,23 @@ export default async function FavoritesPage() {
           secondary={{ href: "/map", label: dict.nav.map }}
         />
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {page.items.map((card) => (
-            <li key={card.id}>
-              <PropertyCard
-                cover={distinctCovers(page.items).get(card.id) ?? null}
-                card={card}
-                dict={dict}
-                locale={locale}
-                typeName={typeNames.get(card.property_type_code)}
-                favorite
-                signedIn
-              />
-            </li>
-          ))}
-        </ul>
+        <PhotoSet>
+          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {page.items.map((card, i) => (
+              <li key={card.id}>
+                <PropertyCard
+                  photoIndex={i}
+                  card={card}
+                  dict={dict}
+                  locale={locale}
+                  typeName={typeNames.get(card.property_type_code)}
+                  favorite
+                  signedIn
+                />
+              </li>
+            ))}
+          </ul>
+        </PhotoSet>
       )}
     </div>
   );

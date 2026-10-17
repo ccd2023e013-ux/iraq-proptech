@@ -1,30 +1,26 @@
 import { describe, expect, it } from "vitest";
 
-import { distinctCovers, typeGlyph } from "./photos";
+import { PhotoRegistry } from "@/features/properties/PhotoSet";
 
-const item = (id: string, type: string, demo = true, cover: string | null = `/m/${id}`) => ({
-  id,
-  cover_url: cover,
-  is_demo: demo,
-  property_type_code: type,
+import { typeGlyph } from "./photos";
+
+describe("photo set", () => {
+  it("shows a photo once, in reading order, and waits for earlier ones", () => {
+    const r = new PhotoRegistry();
+    r.set(1, "aaa");
+    expect(r.decide(1, "aaa")).toBe("wait"); // slot 0 not known yet
+    r.set(0, "aaa");
+    expect(r.decide(0, "aaa")).toBe("show");
+    expect(r.decide(1, "aaa")).toBe("repeat");
+    r.set(2, null); // no photo
+    r.set(3, "bbb");
+    expect(r.decide(3, "bbb")).toBe("show");
+    expect(r.decide(4, undefined)).toBe("wait"); // still loading
+    expect(r.decide(4, null)).toBe("show"); // unreadable: treated as unique
+  });
 });
 
-describe("distinct covers", () => {
-  it("shows the first demo photo of each type and plates the rest", () => {
-    const covers = distinctCovers([
-      item("a", "HOUSE"),
-      item("b", "HOUSE"),
-      item("c", "VILLA"),
-      item("d", "HOUSE", false),
-      item("e", "LAND", true, null),
-    ]);
-    expect(covers.get("a")).toBe("/m/a");
-    expect(covers.get("b")).toBeNull();
-    expect(covers.get("c")).toBe("/m/c");
-    expect(covers.get("d")).toBe("/m/d"); // real listings keep their own photos
-    expect(covers.get("e")).toBeNull();
-  });
-
+describe("type glyph", () => {
   it("chooses a glyph by property type", () => {
     expect(typeGlyph("APARTMENT")).toBe("building");
     expect(typeGlyph("LAND")).toBe("area");

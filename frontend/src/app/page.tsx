@@ -8,6 +8,7 @@ import { NearYou } from "@/features/home/NearYou";
 import { RiverMap } from "@/features/home/RiverMap";
 import { MapPreview } from "@/features/map/MapPreview";
 import { ListingRow } from "@/features/properties/ListingRow";
+import { PhotoSet } from "@/features/properties/PhotoSet";
 import { PropertyCard } from "@/features/properties/PropertyCard";
 import { favoriteIds, runSearch } from "@/features/search/data";
 import { getDictionary } from "@/i18n";
@@ -16,7 +17,6 @@ import { serverApiFetch } from "@/lib/api/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { tagLabel } from "@/lib/map/bubbles";
 import { resolveMapConfig } from "@/lib/map/provider";
-import { distinctCovers } from "@/lib/photos";
 import type { MarketCity, MarketSummary } from "@/types/market";
 import type { ReferenceItem } from "@/types/property";
 
@@ -98,14 +98,12 @@ export default async function HomePage() {
   // once in this view (lib/photos). The editorial section below leads with
   // listings whose photograph is distinct.
   const newest = all.slice(0, 5);
-  const ledgerPhotos = distinctCovers(newest);
   const photographed = all.filter((c) => c.cover_url);
   const firstOfType = photographed.filter(
     (c, i) => photographed.findIndex((o) => o.property_type_code === c.property_type_code) === i,
   );
   const lead = firstOfType[0] ?? all[0];
   const rest = (firstOfType.length > 1 ? firstOfType : all).filter((c) => c !== lead).slice(0, 4);
-  const editorialPhotos = distinctCovers(
     [lead, ...rest].filter((c): c is NonNullable<typeof c> => !!c),
   );
   const anyDemo = cities.some((c) => c.includes_demo);
@@ -135,7 +133,7 @@ export default async function HomePage() {
         lon: (Math.min(...points.map((p) => p.lon)) + Math.max(...points.map((p) => p.lon))) / 2,
       }
     : null;
-  const card = (c: (typeof all)[number], compact = false, feature = false) => (
+  const card = (c: (typeof all)[number], index: number, compact = false, feature = false) => (
     <PropertyCard
       card={c}
       dict={dict}
@@ -145,19 +143,20 @@ export default async function HomePage() {
       signedIn={!!me}
       compact={compact}
       feature={feature}
-      cover={editorialPhotos.get(c.id) ?? null}
+      photoIndex={index}
     />
   );
   const basraName = basra ? name(basra) : locale === "ar" ? "البصرة" : "Basra";
 
   return (
+    <PhotoSet>
     <div className="flex flex-col">
       {/* The plate. Wide screens: the console (place, count, query, newest)
           docked at the reading start, the map filling the rest. Phones: the
           place, then the map, then the console. One map in both layouts. */}
       <section
         aria-labelledby="hero-title"
-        className="grid border-b border-hairline [grid-template-areas:'place'_'map'_'console'] lg:h-[clamp(640px,calc(100svh-var(--header-h)),920px)] lg:grid-cols-[minmax(380px,30rem)_minmax(0,1fr)] lg:grid-rows-[auto_minmax(0,1fr)] lg:[grid-template-areas:'place_map'_'console_map']"
+        className="grid grid-cols-[minmax(0,1fr)] border-b border-hairline [grid-template-areas:'place'_'map'_'console'] lg:h-[clamp(640px,calc(100svh-var(--header-h)),920px)] lg:grid-cols-[minmax(380px,30rem)_minmax(0,1fr)] lg:grid-rows-[auto_minmax(0,1fr)] lg:[grid-template-areas:'place_map'_'console_map']"
       >
         <div className="flex flex-col gap-3 bg-console px-[var(--gutter)] pt-8 pb-6 [grid-area:place] lg:border-e lg:border-hairline lg:px-8 lg:pt-10">
           <h1 id="hero-title" className="place text-ink">
@@ -223,13 +222,13 @@ export default async function HomePage() {
             <div className="flex flex-col">
               <h2 className="label border-b border-hairline pb-2">{h.plateNewest}</h2>
               <ul className="flex flex-col divide-y divide-hairline">
-                {newest.map((c) => (
+                {newest.map((c, i) => (
                   <li key={c.id}>
                     <ListingRow
                       card={c}
                       dict={dict}
                       locale={locale}
-                      photo={ledgerPhotos.get(c.id) ?? null}
+                      photoIndex={i}
                       typeName={typeNames.get(c.property_type_code)}
                     />
                   </li>
@@ -323,10 +322,10 @@ export default async function HomePage() {
               }
             />
             <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-12">
-              <div className="lg:col-span-7">{card(lead, false, true)}</div>
+              <div className="lg:col-span-7">{card(lead, newest.length, false, true)}</div>
               <ul className="grid grid-cols-1 content-start gap-x-6 gap-y-8 sm:grid-cols-2 lg:col-span-5">
-                {rest.map((c) => (
-                  <li key={c.id}>{card(c, true)}</li>
+                {rest.map((c, i) => (
+                  <li key={c.id}>{card(c, newest.length + 1 + i, true)}</li>
                 ))}
               </ul>
             </div>
@@ -406,5 +405,6 @@ export default async function HomePage() {
         </section>
       </div>
     </div>
+    </PhotoSet>
   );
 }

@@ -76,12 +76,13 @@ export const NIGHT: Plate = {
   glow: "#22d3ee",
   waterway: "#0e3848",
   aeroway: "#151e30",
-  // Streets are neutral slate a step above the land: structure, not wireframe.
-  roadMinor: "#1a212d",
-  roadTertiary: "#1f2633",
-  roadSecondary: "#252d3b",
-  roadPrimary: "#2c3545",
-  roadMotorway: "#3a4355",
+  // Streets are neutral slate a clear step above the land (readable when
+  // zoomed in, e.g. the drone flight): structure, not wireframe.
+  roadMinor: "#222b3b",
+  roadTertiary: "#283243",
+  roadSecondary: "#2e384a",
+  roadPrimary: "#364153",
+  roadMotorway: "#444e62",
   casingMinor: null,
   casingMajor: null,
   casingMotorway: null,
