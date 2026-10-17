@@ -330,7 +330,7 @@ export function Flight({
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div className="relative overflow-hidden rounded-[var(--radius-card)] bg-fill shadow-[inset_0_0_0_1px_var(--hairline)]">
+      <div className="relative overflow-hidden rounded-[var(--radius-media)] bg-fill">
         <div ref={container} className="aspect-[16/10] w-full" data-testid="flight-map" />
         {mode === "construction" && stage && (
           <p className="surface-float absolute start-4 top-4 rounded-[var(--radius-control)] px-3 py-1.5 text-sm font-medium text-ink">

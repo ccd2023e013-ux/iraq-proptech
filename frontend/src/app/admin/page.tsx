@@ -75,7 +75,7 @@ export default async function AdminOverview() {
               <li key={label}>
                 <Link
                   href={href}
-                  className="group flex items-center justify-between gap-3 rounded-[var(--radius-card)] bg-danger/8 p-5 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--critical)_30%,transparent)] hover:bg-danger/12"
+                  className="group flex items-center justify-between gap-3 border-s-2 border-danger bg-canvas py-4 ps-4 pe-2 transition-colors hover:bg-fill/60"
                 >
                   <span className="flex flex-col gap-1">
                     <span className="kpi text-3xl text-danger">{n}</span>
@@ -121,9 +121,9 @@ export default async function AdminOverview() {
         <h2 id="admin-platform" className="title text-ink">
           {a.platform}
         </h2>
-        <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-[var(--radius-card)] bg-hairline sm:grid-cols-3 xl:grid-cols-6">
+        <dl className="grid grid-cols-2 gap-px overflow-hidden border-y border-hairline-strong bg-hairline sm:grid-cols-3 xl:grid-cols-6">
           {platform.map(([label, value]) => (
-            <div key={label} className="flex flex-col gap-1 bg-surface p-5">
+            <div key={label} className="flex flex-col gap-1 bg-canvas px-4 py-4">
               <dt className="meta">{label}</dt>
               <dd className="kpi text-2xl text-ink">{value}</dd>
             </div>

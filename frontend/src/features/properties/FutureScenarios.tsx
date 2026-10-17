@@ -105,8 +105,8 @@ export function FutureScenarios({
         ))}
       </div>
 
-      <div className="grid gap-px overflow-hidden rounded-[var(--radius-card)] bg-hairline md:grid-cols-3">
-        <section className="flex flex-col gap-3 bg-surface p-5">
+      <div className="grid gap-px overflow-hidden border-y border-hairline-strong bg-hairline md:grid-cols-3">
+        <section className="flex flex-col gap-3 bg-canvas py-5 md:px-5 md:first:ps-0">
           <p className="flex items-center gap-2">
             <TrustBadge kind="fact">{t.facts}</TrustBadge>
           </p>
@@ -122,7 +122,7 @@ export function FutureScenarios({
           </dl>
         </section>
 
-        <section className="flex flex-col gap-4 bg-surface p-5">
+        <section className="flex flex-col gap-4 bg-canvas py-5 md:px-5">
           <p>
             <TrustBadge kind="estimate">{t.assumptions}</TrustBadge>
           </p>
@@ -144,7 +144,7 @@ export function FutureScenarios({
           )}
         </section>
 
-        <section className="flex flex-col gap-3 bg-surface p-5">
+        <section className="flex flex-col gap-3 bg-canvas py-5 md:px-5 md:first:ps-0">
           <p>
             <TrustBadge kind="simulation">{t.projection}</TrustBadge>
           </p>

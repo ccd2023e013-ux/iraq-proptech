@@ -61,9 +61,9 @@ export default async function CrmPage() {
         </nav>
       </div>
 
-      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-[var(--radius-card)] bg-hairline sm:grid-cols-3 lg:grid-cols-6">
+      <dl className="grid grid-cols-2 gap-px overflow-hidden border-y border-hairline-strong bg-hairline sm:grid-cols-3 lg:grid-cols-6">
         {stats.map(([label, value, tone]) => (
-          <div key={label} className="flex flex-col gap-1 bg-surface p-4">
+          <div key={label} className="flex flex-col gap-1 bg-canvas px-4 py-4">
             <dt className="meta">{label}</dt>
             <dd className={`kpi text-2xl ${tone || "text-ink"}`}>{value}</dd>
           </div>

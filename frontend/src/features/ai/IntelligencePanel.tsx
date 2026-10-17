@@ -139,7 +139,7 @@ export function IntelligencePanel({
   return (
     <section
       aria-labelledby="intel-heading"
-      className="surface-1 rounded-[var(--radius-card)] p-6"
+      className="border-y border-hairline py-6"
       data-testid="intelligence"
     >
       <div className="flex items-start gap-3.5">

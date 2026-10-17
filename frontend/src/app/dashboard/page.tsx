@@ -175,7 +175,7 @@ export default async function DashboardPage() {
             {d.attention}
           </h2>
           {rows.length === 0 ? (
-            <div className="flex items-start gap-4 rounded-[var(--radius-card)] bg-accent-tint/50 p-6">
+            <div className="flex items-start gap-4 border-y border-hairline py-6">
               <span className="grid size-10 shrink-0 place-items-center rounded-full bg-accent-fill text-on-accent">
                 <Icon name="check" className="size-5" strokeWidth={2.2} />
               </span>
@@ -185,12 +185,12 @@ export default async function DashboardPage() {
               </div>
             </div>
           ) : (
-            <ul className="flex flex-col overflow-hidden rounded-[var(--radius-card)] bg-surface shadow-[inset_0_0_0_1px_var(--hairline)]">
+            <ul className="flex flex-col divide-y divide-hairline border-y border-hairline-strong">
               {rows.map((r) => (
-                <li key={r.label} className="border-t border-hairline first:border-t-0">
+                <li key={r.label}>
                   <Link
                     href={r.href}
-                    className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-fill/60"
+                    className="group flex items-center gap-4 py-4 pe-2 transition-colors hover:bg-fill/60"
                   >
                     <span
                       className={`grid size-10 shrink-0 place-items-center rounded-full ${r.urgent ? "bg-danger/12 text-danger" : "bg-fill text-ink-2"}`}

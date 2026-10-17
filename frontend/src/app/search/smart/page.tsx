@@ -121,10 +121,6 @@ export default async function AssistantPage({
   return (
     <div className="page flex flex-col gap-8 pt-8 pb-16 md:pt-12">
       <header className="mx-auto flex w-full max-w-3xl flex-col gap-3">
-        <span className="inline-flex w-fit items-center gap-1.5 rounded-[var(--radius-tag)] bg-accent-tint px-2.5 py-1 text-[13px] font-medium text-accent">
-          <Icon name="sparkle" className="size-4" />
-          {a.badge}
-        </span>
         <h1 className="display-lg text-ink">{s.title}</h1>
         <p className="lede">{s.lede}</p>
       </header>
@@ -134,27 +130,23 @@ export default async function AssistantPage({
         {turns.length > 1 && (
           <ol className="flex flex-col gap-2" aria-label={s.earlier}>
             {turns.slice(0, -1).map((t, i) => (
-              <li key={i} className="flex justify-end">
-                <p className="max-w-[80%] rounded-[var(--radius-card)] rounded-ee-md bg-fill px-4 py-2.5 text-[15px] text-ink-2">
-                  {t}
-                </p>
+              <li key={i}>
+                <p className="border-s-2 border-hairline-strong ps-4 text-[15px] text-ink-3">{t}</p>
               </li>
             ))}
           </ol>
         )}
         {turns.length > 0 && (
-          <div className="flex justify-end">
-            <p className="max-w-[80%] rounded-[var(--radius-card)] rounded-ee-md bg-ink px-4 py-2.5 text-[15px] text-canvas">
-              {turns[turns.length - 1]}
-            </p>
-          </div>
+          <p className="border-s-2 border-accent-fill ps-4 font-display text-2xl leading-snug text-ink">
+            {turns[turns.length - 1]}
+          </p>
         )}
 
         {error && <Alert tone="error">{errorMessage(dict, error)}</Alert>}
 
         {data && (
           <article
-            className="flex flex-col gap-5 rounded-[var(--radius-card)] bg-surface p-5 shadow-[inset_0_0_0_1px_var(--hairline)] md:p-7"
+            className="flex flex-col gap-5 border-t border-hairline-strong pt-6"
             data-testid="assistant-reply"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -282,7 +274,7 @@ export default async function AssistantPage({
           method="get"
           action="/search/smart"
           role="search"
-          className="surface-float flex items-center gap-2 rounded-[var(--radius-card)] p-2 ps-4 focus-within:shadow-[var(--edge),0_0_0_2px_var(--accent),var(--shadow-float)]"
+          className="flex items-center gap-2 rounded-[var(--radius-control)] bg-console p-2 ps-4 shadow-[inset_0_0_0_1px_var(--hairline-strong)] transition-shadow focus-within:shadow-[inset_0_0_0_1px_var(--accent),0_0_0_3px_color-mix(in_srgb,var(--accent-fill)_22%,transparent)]"
         >
           {turns.map((t, i) => (
             <input key={i} type="hidden" name="q" value={t} />

@@ -357,7 +357,7 @@ export default async function HomePage() {
                         </span>
                         <Icon
                           name="chevron"
-                          className="size-4 text-ink-3 transition-transform duration-[var(--duration-base)] group-hover:translate-x-0.5 group-hover:text-ink rtl:rotate-180 rtl:group-hover:-translate-x-0.5"
+                          className="size-4 text-ink-3 transition-transform duration-[var(--duration-base)] group-hover:translate-x-0.5 group-hover:text-ink rtl:group-hover:-translate-x-0.5"
                         />
                       </span>
                     </Link>

@@ -211,13 +211,13 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             <Icon name="map" className="size-4 text-spatial" />
             {p.backToMap}
           </Link>
-          <Icon name="chevron" className="size-3.5 opacity-60 rtl:rotate-180" />
+          <Icon name="chevron" className="size-3.5 opacity-60" />
           <Link href={`/properties?city_id=${property.city.id}`} className="hover:text-ink">
             {placeName(property.city, locale)}
           </Link>
           {property.district && (
             <>
-              <Icon name="chevron" className="size-3.5 opacity-60 rtl:rotate-180" />
+              <Icon name="chevron" className="size-3.5 opacity-60" />
               <span>{placeName(property.district, locale)}</span>
             </>
           )}
